@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
 /* Layout: phone-first single column app shell — sticky header, scrolling view, fixed bottom tab bar, full-screen sheets that slide up. Centered 560px column on desktop. */
 :root{
@@ -324,6 +325,8 @@ window.FIREBASE_CONFIG = {
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
 /* ---------- helpers ---------- */
@@ -768,12 +771,53 @@ function expenseRow(e){
 /* ---------- maps ---------- */
 const MAPS={};
 const isDark=()=>darkNow();
+/* Google-Maps-style vector map: OpenFreeMap data (no key), recoloured for light and dark, English labels */
+const MAP_PAL={
+  light:{land:"#F5F3EF",land2:"#EEEBE5",water:"#A6D2F4",park:"#CBEAC2",wood:"#BFE2B5",sand:"#F3EBD1",building:"#E6E2DC",bOutline:"#D8D3CC",road:"#FFFFFF",casing:"#D6D9DE",major:"#FFFFFF",majorCase:"#C3C7CD",hwy:"#FAD27E",hwyCase:"#E2A93F",rail:"#C8CCD2",boundary:"#A3A7AE",text:"#4A4F55",textStrong:"#1F2328",halo:"#FFFFFF",waterText:"#3E77AE",poi:"#5F6368"},
+  dark:{land:"#1E2530",land2:"#222A35",water:"#0E1A2A",park:"#1C312D",wood:"#1A2E29",sand:"#29291F",building:"#28303B",bOutline:"#313A46",road:"#3A4350",casing:"#1E2631",major:"#4A5463",majorCase:"#27303C",hwy:"#7E6B48",hwyCase:"#3A3225",rail:"#3A4250",boundary:"#5A6270",text:"#9AA4B2",textStrong:"#E4E8ED",halo:"#121820",waterText:"#5D82AB",poi:"#8C96A3"}};
+let _baseStyle=null;const _styles={};
+const glOK=()=>{try{if(!window.maplibregl||!L.maplibreGL)return false;const c=document.createElement("canvas");return!!(c.getContext("webgl2")||c.getContext("webgl"))}catch{return false}};
+function styleFor(dark){
+  const k=dark?"dark":"light";if(_styles[k])return _styles[k];
+  _baseStyle=_baseStyle||fetch("https://tiles.openfreemap.org/styles/liberty").then(r=>{if(!r.ok)throw new Error("style "+r.status);return r.json()});
+  return _styles[k]=_baseStyle.then(base=>{
+    const st=JSON.parse(JSON.stringify(base)),c=MAP_PAL[k],EN=["coalesce",["get","name:en"],["get","name_en"],["get","name"]];
+    for(const ly of st.layers){const id=ly.id.toLowerCase(),t=ly.type,p=ly.paint=ly.paint||{};
+      if(t==="background"){p["background-color"]=c.land;continue}
+      if(t==="fill"||t==="fill-extrusion"){const key=t==="fill"?"fill-color":"fill-extrusion-color";delete p["fill-pattern"];
+        if(/water|ocean|lake|river|bay/.test(id))p[key]=c.water;
+        else if(/park|grass|garden|golf|pitch|cemetery|meadow|recreation/.test(id))p[key]=c.park;
+        else if(/wood|forest|scrub|wetland/.test(id))p[key]=c.wood;
+        else if(/sand|beach|desert|bare|rock/.test(id))p[key]=c.sand;
+        else if(/build/.test(id)){p[key]=c.building;if(t==="fill")p["fill-outline-color"]=c.bOutline;else p["fill-extrusion-opacity"]=.55}
+        else p[key]=c.land2;
+        continue}
+      if(t==="line"){
+        if(/water|river|stream|canal|ditch/.test(id))p["line-color"]=c.water;
+        else if(/boundary|admin/.test(id))p["line-color"]=c.boundary;
+        else if(/rail|transit|subway/.test(id))p["line-color"]=c.rail;
+        else if(/road|highway|bridge|tunnel|street|path|track|link/.test(id)){
+          const cas=/casing|outline/.test(id),hw=/motorway|trunk/.test(id),mj=/primary|secondary|major/.test(id);
+          if(/path|track|pedestrian|steps|cycle|foot/.test(id))p["line-color"]=c.casing;
+          else p["line-color"]=cas?(hw?c.hwyCase:mj?c.majorCase:c.casing):(hw?c.hwy:mj?c.major:c.road)}
+        else if(/aeroway/.test(id))p["line-color"]=c.land2;
+        continue}
+      if(t==="symbol"){const lay=ly.layout||{};
+        if(lay["text-field"]&&JSON.stringify(lay["text-field"]).includes("name"))lay["text-field"]=EN;
+        if(lay["text-field"]){p["text-color"]=/water|ocean|sea|lake|bay/.test(id)?c.waterText:/place|city|country|state|town|capital/.test(id)?c.textStrong:/poi/.test(id)?c.poi:c.text;p["text-halo-color"]=c.halo;p["text-halo-width"]=1.4;p["text-halo-blur"]=.2}}
+    }
+    return st;
+  });
+}
+function rasterTiles(m,el){L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(m);el.classList.toggle("dark-tiles",isDark())}
 function baseMap(el,opts={}){
   if(!window.L){el.innerHTML='<div class="empty" style="height:100%;display:grid;place-items:center">Map couldn\'t load. Check your connection.</div>';return null}
   const m=L.map(el,{zoomControl:true,attributionControl:true,...opts});
   m.attributionControl.setPrefix(false);
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(m);
-  el.classList.toggle("dark-tiles",isDark());
+  m.on("unload",()=>m._dead=true);
+  if(glOK())styleFor(isDark()).then(st=>{if(m._dead)return;try{L.maplibreGL({style:st,attributionControl:false}).addTo(m)}catch(e){console.error(e);rasterTiles(m,el)}}).catch(e=>{console.error(e);if(!m._dead)rasterTiles(m,el)});
+  else rasterTiles(m,el);
+  m.attributionControl.addAttribution('<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>');
   m.setView([25.15,55.25],10);
   return m;
 }
