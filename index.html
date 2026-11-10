@@ -285,8 +285,14 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .plan-msg{display:flex;flex-direction:column;gap:4px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:10px 12px;max-width:100%;min-width:200px;color:var(--fg)}
 .plan-msg .k{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
 .reels{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;margin-inline:-2px;scrollbar-width:none}
-.reel-card{flex:none;width:min(320px,82vw);scroll-snap-align:start;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
-.reel-card iframe{width:100%;height:560px;border:0;display:block;background:#fff}
+.reel-card{flex:none;width:min(240px,64vw);scroll-snap-align:start;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.reel-frame{position:relative;aspect-ratio:4/5;overflow:hidden;background:#000}
+.reel-frame.tk,.reel-frame.yt{aspect-ratio:9/16}
+.reel-frame iframe{position:absolute;left:0;top:0;width:100%;height:100%;border:0;pointer-events:none;background:#000}
+.reel-frame.ig iframe{top:-54px;height:calc(100% + 360px)}
+.reel-frame.tk iframe{height:calc(100% + 220px)}
+.reel-hit{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-end;padding:8px;background:linear-gradient(180deg,transparent 65%,rgba(0,0,0,.55));text-decoration:none}
+.reel-badge{background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:4px 9px;backdrop-filter:blur(4px)}
 .reel-card .rf{display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px}
 .board{columns:2;column-gap:8px}
 .board>*{break-inside:avoid;margin:0 0 8px;display:block;width:100%;border-radius:12px;overflow:hidden;position:relative}
@@ -354,6 +360,17 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .stepper{display:inline-flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .stepper button{border:0;background:var(--surface2);width:40px;height:40px;font-size:18px}
 .stepper b{min-width:40px;text-align:center}
+.fpin{position:relative;width:46px;height:46px}
+.fpin .av{width:46px;height:46px;font-size:22px;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35)}
+.fpin.me .av{border-color:var(--accent)}
+.fpin.old .av{filter:grayscale(.8);opacity:.75}
+.fpin::after{content:"";position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);border:7px solid transparent;border-top-color:#fff;border-bottom:0}
+.fpin.me::after{border-top-color:var(--accent)}
+.fpin .pulse{position:absolute;inset:-8px;border-radius:50%;background:var(--accent);opacity:.25;animation:pulse 2s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.6);opacity:.35}100%{transform:scale(1.4);opacity:0}}
+@media (prefers-reduced-motion:reduce){.fpin .pulse{animation:none}}
+.share-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--surface);border:1px solid var(--line);margin-bottom:10px}
+.dist{font-family:var(--f-display);font-weight:800;font-size:18px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .auth{max-width:440px;margin:0 auto;padding-block:8px 40px}
 .auth-hero{padding:28px 4px 22px}
 .auth-logo{font-family:var(--f-display);font-weight:800;font-size:46px;letter-spacing:-.03em;line-height:1}
@@ -597,6 +614,7 @@ const Demo={
     Object.assign(D.members[2],{bio:"Organiser of nothing. Shows up to everything.",vibe:"🏎️ Yas weekend",birthday:"09-02",song:"Blinding Lights",spot:"Yas Marina",likes:["F1","shawarma","FIFA"],stickers:["🏎️","🔥","🎮"]});
     Object.assign(D.members[3],{bio:"Will take 200 photos of the same sunset",vibe:"📸 golden hour",birthday:"12-21",song:"Espresso",spot:"Alserkal Avenue",likes:["film cams","matcha","thrifting"],stickers:["🍉","📸","🎀","💫"]});
     Object.assign(D.members[0],{bio:"",likes:[],stickers:[]});
+    Object.assign(D.members[1],{shareLoc:true,loc:{lat:25.0805,lng:55.1403,at:now()-6e5}});Object.assign(D.members[2],{shareLoc:true,locMode:"approx",loc:{lat:24.47,lng:54.37,at:now()-36e5*2}});
     const y=add(-1),y2=add(-2),td=TODAY();
     D.moments=[
       {id:"mo1",by:"m-sara",at:now()-36e5*2,day:td,src:ph("🌅","#F29A4A","#B5307A"),caption:"Sunset run at Kite Beach (example)",reacts:{"m-omar":"🔥","m-lina":"😍"}},
@@ -678,7 +696,7 @@ function applyTheme(){
 }
 function saveSet(){ls.set("yg-settings",SET);applyTheme();Object.values(MAPS).forEach(x=>x.map?.remove());for(const k in MAPS)delete MAPS[k];render();for(const st of stack)paintSheet(st)}
 applyTheme();matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{applyTheme();render()});
-const UI={tab:(t=>t==="map"?"plans":t)(ls.get("yg-tab","plans")),planFilter:"active",calMonth:null,calDay:TODAY(),mapFilter:"upcoming",moneyPlan:"",authTab:"signup"};
+const UI={mapMode:"plans",tab:(t=>t==="map"?"plans":t)(ls.get("yg-tab","plans")),planFilter:"active",calMonth:null,calDay:TODAY(),mapFilter:"upcoming",moneyPlan:"",authTab:"signup"};
 const stack=[];
 let pending=false;
 function schedule(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;render()})}
@@ -701,7 +719,7 @@ function render(){
   renderTabs();
   keepInputs(v,()=>{v.innerHTML=banners()+(VIEWS[UI.tab]||VIEWS.plans)()});
   afterView();
-  $("#fab").hidden=!(UI.tab==="plans"&&meDoc);
+  $("#fab").hidden=!(UI.tab==="plans"&&meDoc&&UI.planFilter!=="map");
   for(const s of stack)if(SHEETS[s.kind].live)paintSheet(s);
 }
 const STANDALONE=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
@@ -766,7 +784,8 @@ VIEWS.plans=()=>{
   return`<div class="view-title"><h1>Plans</h1>${voting?`<span class="pill vote">${voting} need${voting>1?"":"s"} your vote</span>`:""}</div>
   ${all.filter(p=>p.final&&p.final.date<=TODAY()&&p.final.date>=ymd(new Date(Date.now()-2*864e5))&&p.status!=="done").map(p=>`<button class="shoot" data-act="openAlbum" data-id="${esc(p.id)}" style="width:100%;border:0;text-align:left;margin-bottom:12px"><span class="big"><b>${p.final.date===TODAY()?"It's plan day! 🎉":"How was it? 📸"}</b><span style="opacity:.9;font-size:13px">Add your pics to ${esc(p.title)}</span></span><span class="cam">📷</span></button>`).join("")}
   <div class="seg" style="margin-bottom:14px"><button data-act="planFilter" data-k="active" aria-pressed="${f==="active"}">Coming up</button><button data-act="planFilter" data-k="past" aria-pressed="${f==="past"}">Memories</button><button data-act="planFilter" data-k="map" aria-pressed="${f==="map"}">🗺️ Map</button></div>
-  ${f==="map"?`<div id="mapSlot"></div><div id="mapList" class="list" style="gap:8px;margin-top:12px"></div>`:`<div class="list">${list.length?list.map(planCard).join(""):`<div class="empty"><h3>${f==="active"?"No plans yet":"No memories yet"}</h3>${f==="active"?"Tap <b>+ Make plan</b> to suggest somewhere to go. Add dates, the guys vote, and it lands on everyone's calendar.":"Plans move here after their date. Add photos and split the bill from the plan page."}</div>`}</div>`}`;
+  ${f==="map"?`<div class="chips" style="margin-bottom:10px"><button class="chip" data-act="mapMode" data-k="plans" aria-pressed="${UI.mapMode!=="friends"}">📍 Plans</button><button class="chip" data-act="mapMode" data-k="friends" aria-pressed="${UI.mapMode==="friends"}">👯 Friend map</button></div>
+  ${UI.mapMode==="friends"?shareCard():""}<div id="mapSlot"></div><div id="mapList" class="list" style="gap:8px;margin-top:12px"></div>`:`<div class="list">${list.length?list.map(planCard).join(""):`<div class="empty"><h3>${f==="active"?"No plans yet":"No memories yet"}</h3>${f==="active"?"Tap <b>+ Make plan</b> to suggest somewhere to go. Add dates, the guys vote, and it lands on everyone's calendar.":"Plans move here after their date. Add photos and split the bill from the plan page."}</div>`}</div>`}`;
 };
 function planCard(p){
   const cov=coverOf(p),g=goingOf(p.id),st=planStatus(p);
@@ -922,11 +941,47 @@ function miniMap(s,key,el,stops,color){
   const r=routeFor(stops),sig=JSON.stringify(stops)+(r?"r":"");
   setTimeout(()=>{mm.map.invalidateSize();if(mm.sig!==sig){const refit=mm.sig?.split("]")[0]!==sig.split("]")[0];mm.sig=sig;const pts=drawStops(mm.layer,stops,color,(mk,x)=>mk.bindPopup(esc(x.name||"Pin")));if(refit||!mm.fitted){fit(mm.map,pts);mm.fitted=true}}},60);
 }
+/* ---------- friend map ---------- */
+let MYPOS=null,locWatch=null,lastLocWrite=0,lastLocPos=null;
+const locFresh=l=>l&&now()-l.at<12*36e5;
+function fmtKm(k){return k<1?`${Math.round(k*1000/10)*10} m`:k<10?`${k.toFixed(1)} km`:`${Math.round(k)} km`}
+function shareCard(){const m=mem(ME),on=!!m?.shareLoc;
+  return`<div class="share-card"><span style="font-size:26px">${on?"📡":"👻"}</span><span style="flex:1;min-width:0"><b>${on?"Sharing your location":"Your location is hidden"}</b><br><span class="meta">${on?(m.locMode==="approx"?"Approximate (about 1 km)":"Exact")+" · updates while the app is open":"Friends can't see where you are"}</span></span>
+    <label class="toggle" style="padding:0;border:0;background:none;min-height:0"><input type="checkbox" id="shareLoc" ${on?"checked":""} aria-label="Share my location"></label></div>
+    ${on?`<div class="chips" style="margin:-2px 0 10px"><button class="chip" data-act="locMode" data-k="exact" aria-pressed="${m.locMode!=="approx"}">🎯 Exact</button><button class="chip" data-act="locMode" data-k="approx" aria-pressed="${m.locMode==="approx"}">🌫️ Approximate</button></div>`:""}`}
+function friendIcon(u,me,old){const m=mem(u);return L.divIcon({className:"",html:`<div class="fpin ${me?"me":""} ${old?"old":""}">${me?'<span class="pulse"></span>':""}${avatar(u)}</div>`,iconSize:[46,53],iconAnchor:[23,53],popupAnchor:[0,-50]})}
+function drawFriends(map,layer){
+  const list=$("#mapList");
+  if(!MYPOS&&navigator.geolocation&&!drawFriends.asked){drawFriends.asked=1;navigator.geolocation.getCurrentPosition(p=>{MYPOS={lat:p.coords.latitude,lng:p.coords.longitude};schedule()},()=>{},{enableHighAccuracy:false,timeout:10000,maximumAge:3e5})}
+  const me=MYPOS||(locFresh(mem(ME)?.loc)?mem(ME).loc:null);
+  const people=D.members.filter(m=>m.id!==ME&&m.shareLoc&&m.loc).map(m=>({m,d:me?hav(me,m.loc):null,old:!locFresh(m.loc)})).sort((a,b)=>(a.old-b.old)||((a.d??1e9)-(b.d??1e9)));
+  const pts=[];
+  if(map){layer.clearLayers();setTimeout(()=>map.invalidateSize(),30);
+    if(me){L.marker([me.lat,me.lng],{icon:friendIcon(ME,true),zIndexOffset:1000}).addTo(layer).bindPopup("<b>You</b>");pts.push(me)}
+    for(const x of people){L.marker([x.m.loc.lat,x.m.loc.lng],{icon:friendIcon(x.m.id,false,x.old)}).addTo(layer).bindPopup(`<b>${esc(x.m.nick)}</b><br>${x.d!=null?fmtKm(x.d)+" away · ":""}${ago(x.m.loc.at)}<br><a href="#" data-act="dm" data-id="${esc(x.m.id)}">Message</a>`);if(!x.old)pts.push(x.m.loc)}
+    const sig="f"+pts.length;if(MAPS.main.sig!==sig){MAPS.main.sig=sig;pts.length?fit(map,pts):map.setView([25.15,55.25],10)}}
+  if(list)list.innerHTML=people.length?people.map(x=>{const e=x.d!=null?legEst(me,x.m.loc):null;return`<button class="item" data-act="focusFriend" data-id="${esc(x.m.id)}" style="width:100%;text-align:left">${avatar(x.m.id,"sm")}<span class="grow"><span class="t">${esc(x.m.nick)}</span><br><span class="meta">${x.old?"Last seen ":""}${ago(x.m.loc.at)}${x.m.locMode==="approx"?" · approx":""}${e?` · ~${fMin(e.min)} drive`:""}</span></span><span class="dist">${x.d!=null?fmtKm(x.d):"—"}</span></button>`}).join("")
+    :`<div class="empty"><h3>No one's sharing yet</h3>When friends switch on location sharing here, they show up on the map with how far away they are.</div>`;
+}
+function writeLoc(pos){
+  const m=mem(ME);if(!m?.shareLoc)return;const approx=m.locMode==="approx";
+  const p={lat:+pos.lat.toFixed(approx?2:4),lng:+pos.lng.toFixed(approx?2:4)};
+  const moved=!lastLocPos||hav(lastLocPos,p)>0.15;if(!moved&&now()-lastLocWrite<4*6e4)return;
+  lastLocWrite=now();lastLocPos=p;Store.upd("members",ME,{loc:{...p,at:now()}});
+}
+function syncLocWatch(){
+  const want=!!mem(ME)?.shareLoc&&!document.hidden&&navigator.geolocation&&(MODE==="live"||MODE==="demo");
+  if(want&&locWatch==null)locWatch=navigator.geolocation.watchPosition(p=>{MYPOS={lat:p.coords.latitude,lng:p.coords.longitude};writeLoc(MYPOS);if(UI.tab==="plans"&&UI.planFilter==="map"&&UI.mapMode==="friends")schedule()},e=>{if(e.code===1){toast("Location is blocked. Allow it for Yalla Guys in your phone settings.")}},{enableHighAccuracy:true,maximumAge:6e4,timeout:20000});
+  if(!want&&locWatch!=null){navigator.geolocation.clearWatch(locWatch);locWatch=null}
+}
+document.addEventListener("visibilitychange",syncLocWatch);
 function afterView(){
+  try{syncLocWatch()}catch{}
   if(UI.tab!=="plans"||UI.planFilter!=="map")return;
   const slot=$("#mapSlot");if(!slot)return;
   if(!MAPS.main){const el=document.createElement("div");el.className="map-full";MAPS.main={el};slot.appendChild(el);MAPS.main.map=baseMap(el);MAPS.main.layer=MAPS.main.map&&L.layerGroup().addTo(MAPS.main.map)}else slot.appendChild(MAPS.main.el);
   const{map,layer}=MAPS.main;
+  if(UI.mapMode==="friends")return drawFriends(map,layer);
   const ps=visiblePlans().filter(p=>(p.stops||[]).some(s=>s.lat!=null));
   if(map){setTimeout(()=>map.invalidateSize(),30);layer.clearLayers();const all=[];
     ps.forEach(p=>{const sub=L.layerGroup().addTo(layer);all.push(...drawStops(sub,p.stops,hue(p.id),(mk,s)=>mk.bindPopup(`<b>${esc(p.emoji||"")} ${esc(p.title)}</b><br>${esc(s.name||"")}<br><a href="#" data-act="openPlan" data-id="${esc(p.id)}">Open plan</a>`)))});
@@ -1160,7 +1215,7 @@ SHEETS.plan={live:true,
         <button class="btn block" data-act="openBoard" data-id="${esc(p.id)}" style="margin-top:6px;min-height:50px;justify-content:space-between"><span>🎨 Mood board</span><span class="meta">${ideas.length} item${ideas.length===1?"":"s"} ›</span></button></div>
       ${reels.length?`<div class="sec" style="margin-top:12px"><div class="between"><h2>Reels</h2><button class="btn sm" data-act="addMedia" data-id="${esc(p.id)}" data-ph="idea" data-tab="link">+ Add</button></div>
         ${reelsHtml(reels)}
-        <div class="hint">Private accounts won't show here. Tap Open to watch in the app.</div></div>`:""}`,body:`
+        <div class="hint">Tap a video to watch it in the app. Private accounts won't show.</div></div>`:""}`,body:`
       ${albumOpen(p)?albumHtml(p,mems,tile):""}
       <div class="sec" style="margin-top:12px"><h2>When</h2>${when}${p.final&&!albumOpen(p)?`<div class="hint">📸 The plan album opens on ${esc(fDate(p.final.date,{weekday:"long",day:"numeric",month:"short"}))}. Everyone can add their pics from the day.</div>`:""}</div>
       ${(p.invited||[]).length?`<div class="sec"><div class="between"><h2>Invited</h2><button class="btn sm" data-act="invite" data-id="${esc(p.id)}">+ Invite</button></div><div class="row">${p.invited.map(u=>`<span class="row" style="gap:4px">${avatar(u,"xs")}<span style="font-size:13px">${esc(nick(u))}</span></span>`).join("")}</div>${p.chatId&&D.chats.find(c=>c.id===p.chatId)?`<div class="hint">From group chat: ${esc(D.chats.find(c=>c.id===p.chatId).name||"")}</div>`:""}</div>`:`<div class="sec"><div class="between"><h2>Invited</h2><button class="btn sm" data-act="invite" data-id="${esc(p.id)}">Only some people?</button></div><div class="hint" style="margin:0">Whole crew</div></div>`}
@@ -1193,7 +1248,9 @@ SHEETS.plan={live:true,
 };
 const hostOf=u=>{try{return new URL(u).hostname.replace(/^www\./,"")}catch{return"Link"}};
 
-function reelsHtml(reels){return`<div class="reels">${reels.map(m=>`<div class="reel-card"><iframe src="${esc(embedUrl(m.url))}" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture; clipboard-write" allowfullscreen title="Reel"></iframe><div class="rf">${avatar(m.by,"xs")}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(m.caption||nick(m.by))}</span><a class="btn sm" href="${esc(m.url)}" target="_blank" rel="noopener">Open</a>${m.by===ME?`<button class="x" data-act="delItem" data-id="${esc(m.id)}" data-confirm="🗑️?" aria-label="Remove">✕</button>`:""}</div></div>`).join("")}</div>`}
+function reelsHtml(reels){return`<div class="reels">${reels.map(m=>{const u=embedUrl(m.url),ty=/instagram/.test(u)?"ig":/tiktok/.test(u)?"tk":"yt",app={ig:"Instagram",tk:"TikTok",yt:"YouTube"}[ty];
+  return`<div class="reel-card"><div class="reel-frame ${ty}"><iframe src="${esc(u)}" loading="lazy" scrolling="no" tabindex="-1" title="${app} video"></iframe><a class="reel-hit" href="${esc(m.url)}" target="_blank" rel="noopener" aria-label="Open in ${app}"><span class="reel-badge">${app} ↗</span></a></div>
+    <div class="rf">${avatar(m.by,"xs")}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(m.caption||nick(m.by))}</span>${m.by===ME?`<button class="x" data-act="delItem" data-id="${esc(m.id)}" data-confirm="🗑️?" aria-label="Remove">✕</button>`:""}</div></div>`}).join("")}</div>`}
 const isReel=m=>(m.kind==="reel"||m.kind==="link")&&!!embedUrl(m.url);
 SHEETS.board={live:true,
   render(s){const p=planById(s.args.id);if(!p)return{title:"Mood board",body:""};
@@ -1728,6 +1785,9 @@ const ACT={
     navigator.geolocation.getCurrentPosition(pos=>setLoc(s,{name:"My location",lat:+pos.coords.latitude.toFixed(5),lng:+pos.coords.longitude.toFixed(5)}),()=>toast("Allow location for Yalla Guys, or search instead."),{enableHighAccuracy:true,timeout:12000})},
   locPick(d){const s=topS(),r=s.state.res[+d.i];if(r)setLoc(s,{name:r.name,lat:r.lat,lng:r.lng})},
   locPin(){openSheet("pick",{forLoc:true})},
+  mapMode(d){UI.mapMode=d.k;if(MAPS.main)MAPS.main.sig="";render()},
+  async locMode(d){await Store.upd("members",ME,{locMode:d.k});lastLocPos=null;lastLocWrite=0;if(MYPOS)setTimeout(()=>writeLoc(MYPOS),300);toast(d.k==="approx"?"Friends see roughly where you are":"Friends see exactly where you are")},
+  focusFriend(d){const m=mem(d.id);if(m?.loc&&MAPS.main?.map){MAPS.main.map.setView([m.loc.lat,m.loc.lng],15);window.scrollTo({top:0,behavior:"smooth"})}},
   openBoard(d){openSheet("board",{id:d.id})},
   openAlbum(d){openSheet("plan",{id:d.id});setTimeout(()=>{$("#album",topS()?.el)?.scrollIntoView({behavior:"smooth"})},150)},
   addMedia(d){openSheet("media",{id:d.id,ph:d.ph,tab:d.tab})},
@@ -1814,6 +1874,10 @@ document.addEventListener("input",ev=>{
 });
 document.addEventListener("change",ev=>{
   const el=ev.target;if(el.id==="moneyPlan"){UI.moneyPlan=el.value;render()}
+  if(el.id==="shareLoc"){(async()=>{if(el.checked){if(!navigator.geolocation){el.checked=false;return toast("Location isn't available on this phone.")}
+      navigator.geolocation.getCurrentPosition(async p=>{MYPOS={lat:p.coords.latitude,lng:p.coords.longitude};await Store.upd("members",ME,{shareLoc:true,locMode:mem(ME)?.locMode||"exact"});lastLocPos=null;lastLocWrite=0;setTimeout(()=>{writeLoc(MYPOS);syncLocWatch()},300);toast("📡 Sharing your location with the crew")},
+        ()=>{el.checked=false;toast("Allow location for Yalla Guys to share it.")},{enableHighAccuracy:true,timeout:15000})}
+    else{await Store.upd("members",ME,{shareLoc:false,loc:MODE==="demo"?DEL:firebase.firestore.FieldValue.delete()});syncLocWatch();toast("👻 Location hidden")}})()}
   if(el.id?.startsWith("ridePartial-")){const pid=el.dataset.pid,r=myRsvp(pid);if(r?.ride)saveRsvp(pid,{ride:{...r.ride,partial:el.checked}})}
   if(["nMsgs","nPlans","nMoments"].includes(el.id)){SET[el.id]=el.checked;ls.set("yg-settings",SET)}
   if(el.id==="actAs"){ls.set("yg-actas",el.value);ME=el.value;while(stack.length)closeSheet();render();toast(ME==="me-demo"?"Back to being you":"Now testing as "+(mem(ME)?.nick||"a friend"))}
