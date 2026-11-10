@@ -517,7 +517,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.15";
+const APP_VERSION="2026-11-10.16";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -889,8 +889,8 @@ VIEWS.plans=()=>{
   return`<div class="view-title"><h1>Plans</h1>${voting?`<span class="pill vote">${voting} need${voting>1?"":"s"} your vote</span>`:""}</div>
   ${all.filter(p=>p.final&&p.final.date<=TODAY()&&p.final.date>=ymd(new Date(Date.now()-2*864e5))&&p.status!=="done").map(p=>`<button class="shoot" data-act="openAlbum" data-id="${esc(p.id)}" style="width:100%;border:0;text-align:left;margin-bottom:12px"><span class="big"><b>${p.final.date===TODAY()?"It's plan day! 🎉":"How was it? 📸"}</b><span style="opacity:.9;font-size:13px">Add your pics to ${esc(p.title)}</span></span><span class="cam">📷</span></button>`).join("")}
   <div class="pchips">${[["active","Coming up"],["past","📸 Memories"],["wish","✨ Wishlist"],["map","🗺️ Map"],["offers","🏷️ Offers"]].map(([k,l])=>`<button class="chip" data-act="planFilter" data-k="${k}" aria-pressed="${f===k}">${l}</button>`).join("")}</div>
-  ${f==="wish"?wishHtml():f==="offers"?offersHtml():f==="map"?`<div class="chips" style="margin-bottom:10px"><button class="chip" data-act="mapMode" data-k="plans" aria-pressed="${UI.mapMode!=="friends"}">📍 Plans</button><button class="chip" data-act="mapMode" data-k="friends" aria-pressed="${UI.mapMode==="friends"}">👯 Friend map</button></div>
-  ${UI.mapMode==="friends"?shareCard():""}<div id="mapSlot"></div><div id="mapList" class="list" style="gap:8px;margin-top:12px"></div>`:`<div class="list">${list.length?list.map(planCard).join(""):`<div class="empty"><h3>${f==="active"?"No plans yet":"No memories yet"}</h3>${f==="active"?"Tap <b>+ Make plan</b> to suggest somewhere to go. Add dates, the guys vote, and it lands on everyone's calendar.":"Plans move here after their date. Add photos and split the bill from the plan page."}</div>`}</div>`}`;
+  ${f==="wish"?wishHtml():f==="offers"?offersHtml():f==="map"?`<div class="chips" style="margin-bottom:10px"><button class="chip" data-act="mapMode" data-k="plans" aria-pressed="${UI.mapMode==="plans"}">📍 Upcoming</button><button class="chip" data-act="mapMode" data-k="past" aria-pressed="${UI.mapMode==="past"}">🕰️ Been there</button><button class="chip" data-act="mapMode" data-k="friends" aria-pressed="${UI.mapMode==="friends"}">👯 Friend map</button></div>
+  ${UI.mapMode==="friends"?shareCard():UI.mapMode==="past"?pastFilterHtml():""}<div id="mapSlot"></div><div id="mapList" class="list" style="gap:8px;margin-top:12px"></div>`:`<div class="list">${list.length?list.map(planCard).join(""):`<div class="empty"><h3>${f==="active"?"No plans yet":"No memories yet"}</h3>${f==="active"?"Tap <b>+ Make plan</b> to suggest somewhere to go. Add dates, the guys vote, and it lands on everyone's calendar.":"Plans move here after their date. Add photos and split the bill from the plan page."}</div>`}</div>`}`;
 };
 function planCard(p){
   const cov=coverOf(p),g=goingOf(p.id),st=planStatus(p);
@@ -1125,6 +1125,14 @@ function syncLocWatch(){
   if(!want&&locWatch!=null){navigator.geolocation.clearWatch(locWatch);locWatch=null}
 }
 document.addEventListener("visibilitychange",syncLocWatch);
+/* ---------- "Been there" map filters ---------- */
+function pastPlans(){return visiblePlans().filter(p=>["past","done"].includes(planStatus(p))&&p.final&&(p.stops||[]).some(s=>s.lat!=null))}
+function pastMatch(p){const f=p.final;if(!f)return false;if(UI.pastDay)return covers(f,UI.pastDay);if(UI.pastMonth)return dayList(f.date,endOf(f)).some(d=>d.startsWith(UI.pastMonth));return true}
+function pastFilterHtml(){
+  const months=[...new Set(pastPlans().flatMap(p=>dayList(p.final.date,endOf(p.final)).map(d=>d.slice(0,7))))].sort().reverse();
+  return`<div class="pchips" style="margin-bottom:8px"><button class="chip" data-act="pastMonth" data-k="" aria-pressed="${!UI.pastMonth&&!UI.pastDay}">All time</button>${months.map(m=>`<button class="chip" data-act="pastMonth" data-k="${m}" aria-pressed="${UI.pastMonth===m&&!UI.pastDay}">${pd(m+"-01").toLocaleDateString("en-GB",{month:"short",year:"numeric"})}</button>`).join("")}</div>
+  <div class="row" style="flex-wrap:nowrap;margin-bottom:10px"><label class="f" style="flex:1;flex-direction:row;align-items:center;gap:8px">📅 Day<input class="inp" type="date" id="pastDay" value="${esc(UI.pastDay||"")}" style="flex:1"></label>${UI.pastDay?`<button class="btn sm" data-act="pastDayClear">Clear</button>`:""}</div>`;
+}
 function afterView(){
   try{syncLocWatch()}catch{}
   if(UI.tab!=="plans"||UI.planFilter!=="map")return;
@@ -1132,11 +1140,12 @@ function afterView(){
   if(!MAPS.main){const el=document.createElement("div");el.className="map-full";MAPS.main={el};slot.appendChild(el);MAPS.main.map=baseMap(el);MAPS.main.layer=MAPS.main.map&&L.layerGroup().addTo(MAPS.main.map)}else slot.appendChild(MAPS.main.el);
   const{map,layer}=MAPS.main;
   if(UI.mapMode==="friends")return drawFriends(map,layer);
-  const ps=visiblePlans().filter(p=>(p.stops||[]).some(s=>s.lat!=null));
+  const isDone=p=>["past","done"].includes(planStatus(p));
+  const ps=visiblePlans().filter(p=>(p.stops||[]).some(s=>s.lat!=null)).filter(p=>UI.mapMode==="past"?isDone(p)&&pastMatch(p):!isDone(p));
   if(map){setTimeout(()=>map.invalidateSize(),30);layer.clearLayers();const all=[];
     ps.forEach(p=>{const sub=L.layerGroup().addTo(layer);all.push(...drawStops(sub,p.stops,hue(p.id),(mk,s)=>mk.bindPopup(`<b>${esc(p.emoji||"")} ${esc(p.title)}</b><br>${esc(s.name||"")}<br><a href="#" data-act="openPlan" data-id="${esc(p.id)}">Open plan</a>`)))});
-    const sig=ps.map(p=>p.id).join();if(MAPS.main.sig!==sig){MAPS.main.sig=sig;fit(map,all)}}
-  $("#mapList").innerHTML=ps.length?ps.map(p=>{const r=routeFor(p.stops);return`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}"><span class="stripe" style="background:${hue(p.id)}"></span><span style="flex:1;min-width:0"><b>${esc(p.emoji||"")} ${esc(p.title)}</b><br><span class="meta">${p.stops.map(s=>esc(s.name||"Pin")).join(" → ")}${r?` · ${r.km.toFixed(0)} km · ${fMin(r.min)}`:""}</span></span>${statusPill(p)}</button>`}).join(""):`<div class="empty">No places pinned yet. Add stops when you make a plan.</div>`;
+    const sig=UI.mapMode+"|"+ps.map(p=>p.id).join();if(MAPS.main.sig!==sig){MAPS.main.sig=sig;fit(map,all)}}
+  $("#mapList").innerHTML=ps.length?ps.map(p=>{const r=routeFor(p.stops);return`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}"><span class="stripe" style="background:${hue(p.id)}"></span><span style="flex:1;min-width:0"><b>${esc(p.emoji||"")} ${esc(p.title)}</b><br><span class="meta">${p.stops.map(s=>esc(s.name||"Pin")).join(" → ")}${r?` · ${r.km.toFixed(0)} km · ${fMin(r.min)}`:""}</span></span>${statusPill(p)}</button>`}).join(""):`<div class="empty">${UI.mapMode==="past"?(UI.pastMonth||UI.pastDay?"No places you've been to in this period.":"Places from finished plans show up here."):"No upcoming places yet. Add stops when you make a plan."}</div>`;
 }
 
 /* ---------- sheets ---------- */
@@ -2225,6 +2234,8 @@ const ACT={
   locPick(d){const s=topS(),r=s.state.res[+d.i];if(r)setLoc(s,{name:r.name,lat:r.lat,lng:r.lng})},
   locPin(){openSheet("pick",{forLoc:true})},
   mapMode(d){UI.mapMode=d.k;if(MAPS.main)MAPS.main.sig="";render()},
+  pastMonth(d){UI.pastMonth=d.k;UI.pastDay="";if(MAPS.main)MAPS.main.sig="";render()},
+  pastDayClear(){UI.pastDay="";if(MAPS.main)MAPS.main.sig="";render()},
   async locMode(d){await Store.upd("members",ME,{locMode:d.k});lastLocPos=null;lastLocWrite=0;if(MYPOS)setTimeout(()=>writeLoc(MYPOS),300);toast(d.k==="approx"?"Friends see roughly where you are":"Friends see exactly where you are")},
   focusFriend(d){const m=mem(d.id);if(m?.loc&&MAPS.main?.map){MAPS.main.map.setView([m.loc.lat,m.loc.lng],15);window.scrollTo({top:0,behavior:"smooth"})}},
   openBusy(d){openSheet("busyView",{id:d.id})},
@@ -2416,6 +2427,7 @@ document.addEventListener("input",ev=>{
 document.addEventListener("change",ev=>{
   const el=ev.target;if(el.id==="moneyPlan"){UI.moneyPlan=el.value;render()}
   if(el.dataset.wish){Store.upd("wishes",el.dataset.wish,{done:el.checked})}
+  if(el.id==="pastDay"){UI.pastDay=el.value;if(el.value)UI.pastMonth=el.value.slice(0,7);if(MAPS.main)MAPS.main.sig="";render()}
   if(el.id==="edPast"){const s=topS();if(s?.kind==="edit"){s.state.past=el.checked;paintSheet(s)}}
   if(el.id==="shareLoc"){(async()=>{if(el.checked){if(!navigator.geolocation){el.checked=false;return toast("Location isn't available on this phone.")}
       navigator.geolocation.getCurrentPosition(async p=>{MYPOS={lat:p.coords.latitude,lng:p.coords.longitude};await Store.upd("members",ME,{shareLoc:true,locMode:mem(ME)?.locMode||"exact"});lastLocPos=null;lastLocWrite=0;setTimeout(()=>{writeLoc(MYPOS);syncLocWatch()},300);toast("📡 Sharing your location with the crew")},
