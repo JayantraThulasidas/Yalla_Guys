@@ -530,7 +530,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.17";
+const APP_VERSION="2026-11-10.18";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -795,7 +795,9 @@ const momentsBy=u=>D.moments.filter(m=>m.by===u).sort((a,b)=>b.at-a.at);
 const postedToday=u=>D.moments.some(m=>m.by===u&&m.day===TODAY());
 function streakOf(u){const days=new Set(momentsBy(u).map(m=>m.day));let d=new Date();if(!days.has(ymd(d)))d.setDate(d.getDate()-1);let n=0;while(days.has(ymd(d))){n++;d.setDate(d.getDate()-1)}return n}
 const mySaved=()=>mem(ME)?.saved||[];
-const myChats=()=>D.chats.filter(c=>(c.members||[]).includes(ME)).sort((a,b)=>lastAt(b)-lastAt(a));
+const archivedIds=()=>mem(ME)?.archivedChats||[];
+const allMyChats=()=>D.chats.filter(c=>(c.members||[]).includes(ME)).sort((a,b)=>lastAt(b)-lastAt(a));
+const myChats=()=>allMyChats().filter(c=>!archivedIds().includes(c.id));
 const chatMsgs=cid=>D.msgs.filter(m=>m.chatId===cid).sort((a,b)=>a.at-b.at);
 const lastAt=c=>{const m=chatMsgs(c.id);return m.length?m[m.length-1].at:c.at};
 const unread=c=>{const seen=ls.get("yg-seen",{})[c.id]||0;return chatMsgs(c.id).filter(m=>m.at>seen&&m.by!==ME).length};
@@ -923,14 +925,14 @@ VIEWS.cal=()=>{
   const start=new Date(y,mo-1,1-startDow);const cells=[];
   for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);cells.push(d)}
   const rows=cells[35].getMonth()!==mo-1?35:42;
-  const mode=UI.calMode||"all",sel=(UI.calPeople||[]).filter(u=>mem(u));
+  const mode=UI.calMode==="friends"?"friends":"me",sel=(UI.calPeople||[]).filter(u=>mem(u));
   const dayInfo=ds=>mode==="me"?{bday:bdaysOn(ds).some(m=>m.id===ME),plan:visiblePlans().some(p=>covers(p.final,ds)&&goingWith(p,ME)),poll:visiblePlans().some(p=>!p.final&&(p.by===ME||(myRsvp(p.id)?.slots||[]).length)&&(p.slots||[]).some(s=>covers(s,ds))),me:D.busy.some(b=>b.uid===ME&&b.date===ds),oth:false}
     :{bday:bdaysOn(ds).length,plan:visiblePlans().some(p=>covers(p.final,ds)),poll:visiblePlans().some(p=>!p.final&&(p.slots||[]).some(s=>covers(s,ds))),me:D.busy.some(b=>b.uid===ME&&b.date===ds),oth:D.busy.some(b=>b.uid!==ME&&b.date===ds)};
   const grid=cells.slice(0,rows).map(d=>{const ds=ymd(d);if(mode==="friends")return friendDayCell(d,ds,mo,sel);const i=dayInfo(ds);return`<button class="day ${d.getMonth()!==mo-1?"out":""} ${ds===TODAY()?"today":""}" data-act="calDay" data-d="${ds}" aria-pressed="${UI.calDay===ds}" aria-label="${fDate(ds,{weekday:"long",day:"numeric",month:"long"})}"><span class="dn">${d.getDate()}</span><span class="dots">${i.bday?'<i class="dot-bday"></i>':""}${i.plan?'<i class="dot-plan"></i>':""}${i.poll?'<i class="dot-poll"></i>':""}${i.me?'<i class="dot-me"></i>':""}${i.oth?'<i class="dot-oth"></i>':""}</span></button>`}).join("");
   const nb=nextBday();
   return`<div class="view-title"><h1>Calendar</h1><button class="btn sm pri" data-act="newBusy" data-d="${UI.calDay}">Block my time</button></div>
-  <div class="seg" style="margin-bottom:10px">${[["all","👥 Everyone"],["me","🙋 Just me"],["friends","🔎 Friends"]].map(([k,l])=>`<button data-act="calMode" data-k="${k}" aria-pressed="${mode===k}">${l}</button>`).join("")}</div>
-  ${mode==="friends"?`<div class="people-row" style="margin-bottom:12px">${D.members.map(m=>`<button class="prof-btn fpick" data-act="calPerson" data-id="${esc(m.id)}" aria-pressed="${sel.includes(m.id)}">${avatar(m.id,"","width:48px;height:48px;font-size:22px")}<span>${esc(m.id===ME?"You":m.nick)}</span></button>`).join("")}</div>
+  <div class="seg" style="margin-bottom:10px">${[["me","🙋 Just me"],["friends","👥 Friends"]].map(([k,l])=>`<button data-act="calMode" data-k="${k}" aria-pressed="${mode===k}">${l}</button>`).join("")}</div>
+  ${mode==="friends"?`<div class="between" style="margin-bottom:6px"><span class="meta">${sel.length} of ${D.members.length} selected</span><span class="row" style="gap:6px"><button class="btn sm" data-act="calAll">${sel.length===D.members.length?"Clear":"Select all"}</button></span></div><div class="people-row" style="margin-bottom:12px">${D.members.map(m=>`<button class="prof-btn fpick" data-act="calPerson" data-id="${esc(m.id)}" aria-pressed="${sel.includes(m.id)}">${avatar(m.id,"","width:48px;height:48px;font-size:22px")}<span>${esc(m.id===ME?"You":m.nick)}</span></button>`).join("")}</div>
     <div class="hint" style="margin:-4px 0 10px">${sel.length?sel.length===1?"Showing "+esc(nick(sel[0]))+"'s busy times.":`Comparing ${sel.length} people. Darker days are busier. Pick a day to see when you're all free.`:"Tap people above to see their busy times, or pick several to find a time that works for everyone."}</div>`:""}
   ${nb?`<button class="item" data-act="calDay" data-d="${nb.date}" style="width:100%;text-align:left;margin-bottom:12px">${avatar(nb.m.id,"sm")}<span class="grow"><span class="t">🎂 ${nb.days===0?`It's ${esc(nb.m.id===ME?"your":nb.m.nick+"'s")} birthday today!`:`${esc(nb.m.id===ME?"Your":nb.m.nick+"'s")} birthday`}</span><br><span class="meta">${nb.days===0?"Go say happy birthday 🎉":nb.days===1?"Tomorrow · "+fDate(nb.date):`In ${nb.days} days · ${fDate(nb.date)}`}</span></span></button>`:""}
   <div class="cal"><div class="cal-h"><button class="back" data-act="calNav" data-n="-1" aria-label="Previous month">${ICON.back}</button><h2>${first.toLocaleDateString("en-GB",{month:"long",year:"numeric"})}</h2><button class="back" data-act="calNav" data-n="1" aria-label="Next month" style="transform:scaleX(-1)">${ICON.back}</button></div>
@@ -1014,11 +1016,16 @@ VIEWS.moments=()=>{
   <div class="shoot"><div class="big"><b>${done?"Another moment?":"Today's moment"}</b><span style="opacity:.9;font-size:13px">${done?"Share what you're up to right now.":"Snap what you're doing right now. The guys' moments unlock once you post."}</span><br><button class="btn sm" data-act="momentGallery" style="margin-top:8px;background:rgba(255,255,255,.18);color:inherit;border-color:transparent">Pick from photos</button></div><button class="cam" data-act="momentShot" aria-label="Take a photo">📸</button></div>
   <div class="list" style="margin-top:14px">${days.length?days.map(d=>`<div class="daylabel">${d===TODAY()?"Today":fDate(d,{weekday:"long",day:"numeric",month:"short"})}</div>${byDay[d].map(m=>momentCard(m)).join("")}`).join(""):`<div class="empty"><h3>No moments yet</h3>Be the first: tap 📸 and share what you're doing right now.</div>`}</div>`;
 };
+function chatRow(c){const ms=chatMsgs(c.id),l=ms[ms.length-1],u=unread(c);return`<button class="chat-row" data-act="openChat" data-id="${esc(c.id)}">${chatIcon(c,1)}<span class="grow"><span class="between"><b>${esc(chatName(c))}</b><span class="meta">${ago(lastAt(c))}</span></span><span class="between"><span class="last">${l?esc((l.by===ME?"You":nick(l.by))+": "+msgLabel(l)):esc((c.members||[]).length+" people")}</span>${u?`<span class="pill bad">${u}</span>`:""}</span></span></button>`}
 VIEWS.chat=()=>{
-  const cs=myChats();
+  const arch=UI.chatArchived,cs=arch?allMyChats().filter(c=>archivedIds().includes(c.id)):myChats(),na=allMyChats().filter(c=>archivedIds().includes(c.id)).length;
+  if(arch)return`<div class="view-title"><h1>Archived</h1><button class="btn sm" data-act="chatArchView" data-k="">‹ Chats</button></div>
+    <div class="hint" style="margin:-4px 0 10px">Archived chats stay here until you unarchive them. You still get their messages.</div>
+    <div class="list" style="gap:8px">${cs.length?cs.map(chatRow).join(""):`<div class="empty">No archived chats.</div>`}</div>`;
   return`<div class="view-title"><h1>Chats</h1><button class="btn sm pri" data-act="newChat">New group</button></div>
   <div class="people-row">${D.members.filter(m=>m.id!==ME).map(m=>`<button class="prof-btn" data-act="dm" data-id="${esc(m.id)}" style="flex-direction:column;gap:4px;font-size:11px;font-weight:600;width:60px;flex:none">${avatar(m.id,"","width:52px;height:52px;font-size:24px")}<span style="max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(m.nick||"")}</span></button>`).join("")}</div>
-  <div class="list" style="gap:8px">${cs.length?cs.map(c=>{const ms=chatMsgs(c.id),l=ms[ms.length-1],u=unread(c);return`<button class="chat-row" data-act="openChat" data-id="${esc(c.id)}">${chatIcon(c,1)}<span class="grow"><span class="between"><b>${esc(chatName(c))}</b><span class="meta">${ago(lastAt(c))}</span></span><span class="between"><span class="last">${l?esc((l.by===ME?"You":nick(l.by))+": "+msgLabel(l)):esc((c.members||[]).length+" people")}</span>${u?`<span class="pill bad">${u}</span>`:""}</span></span></button>`}).join(""):`<div class="empty"><h3>No chats yet</h3>Start a group with some of the guys, or open a plan and tap <b>Plan chat</b>.</div>`}</div>`;
+  ${na?`<button class="chat-row" data-act="chatArchView" data-k="1" style="margin-bottom:8px"><span class="gav">📦</span><span class="grow"><b>Archived</b><br><span class="last">${na} chat${na>1?"s":""}</span></span><span class="meta">›</span></button>`:""}
+  <div class="list" style="gap:8px">${cs.length?cs.map(chatRow).join(""):`<div class="empty"><h3>No chats yet</h3>Start a group with some of the guys, or open a plan and tap <b>Plan chat</b>.</div>`}</div>`;
 };
 /* ---------- person-to-person balances: mutual debts cancel out; oldest dues clear first ---------- */
 function pairLedger(a,b){
@@ -1168,9 +1175,10 @@ document.addEventListener("visibilitychange",syncLocWatch);
 function pastPlans(){return visiblePlans().filter(p=>["past","done"].includes(planStatus(p))&&p.final&&(p.stops||[]).some(s=>s.lat!=null))}
 function pastMatch(p){const f=p.final;if(!f)return false;if(UI.pastDay)return covers(f,UI.pastDay);if(UI.pastMonth)return dayList(f.date,endOf(f)).some(d=>d.startsWith(UI.pastMonth));return true}
 function pastFilterHtml(){
-  const months=[...new Set(pastPlans().flatMap(p=>dayList(p.final.date,endOf(p.final)).map(d=>d.slice(0,7))))].sort().reverse();
-  return`<div class="pchips" style="margin-bottom:8px"><button class="chip" data-act="pastMonth" data-k="" aria-pressed="${!UI.pastMonth&&!UI.pastDay}">All time</button>${months.map(m=>`<button class="chip" data-act="pastMonth" data-k="${m}" aria-pressed="${UI.pastMonth===m&&!UI.pastDay}">${pd(m+"-01").toLocaleDateString("en-GB",{month:"short",year:"numeric"})}</button>`).join("")}</div>
-  <div class="row" style="flex-wrap:nowrap;margin-bottom:10px"><label class="f" style="flex:1;flex-direction:row;align-items:center;gap:8px">📅 Day<input class="inp" type="date" id="pastDay" value="${esc(UI.pastDay||"")}" style="flex:1"></label>${UI.pastDay?`<button class="btn sm" data-act="pastDayClear">Clear</button>`:""}</div>`;
+  const days=[...new Set(pastPlans().flatMap(p=>dayList(p.final.date,endOf(p.final))))].sort().reverse(),months=[...new Set(days.map(d=>d.slice(0,7)))];
+  const inMonth=UI.pastMonth?days.filter(d=>d.startsWith(UI.pastMonth)):[];
+  return`<div class="grid2" style="margin-bottom:10px"><label class="f">Month<select class="inp" id="pastMonthSel"><option value="">All time</option>${months.map(m=>`<option value="${m}" ${UI.pastMonth===m?"selected":""}>${pd(m+"-01").toLocaleDateString("en-GB",{month:"short",year:"numeric"})}</option>`).join("")}</select></label>
+    <label class="f">Day<select class="inp" id="pastDaySel" ${UI.pastMonth?"":"disabled"}><option value="">${UI.pastMonth?"Whole month":"Pick a month first"}</option>${inMonth.map(d=>`<option value="${d}" ${UI.pastDay===d?"selected":""}>${fDate(d,{weekday:"short",day:"numeric",month:"short"})}</option>`).join("")}</select></label></div>`;
 }
 function afterView(){
   try{syncLocWatch()}catch{}
@@ -1966,7 +1974,7 @@ SHEETS.chat={live:true,
       const me=m.by===ME;if(m.deleted){html+=`<div class="msg ${me?"me":""}">${me||c.dm?"":`<span class="who">${esc(nick(m.by))}</span>`}<div class="bub deleted">🚫 ${me?"You deleted this message":"This message was deleted"}</div></div>`;return}
       html+=`<div class="msg ${me?"me":""}"${me&&m.kind!=="plan"?` data-act="msgMenu" data-chat="${esc(c.id)}" data-id="${esc(m.id)}"`:""}>${me||c.dm?"":`<span class="who">${esc(nick(m.by))}</span>`}${m.kind==="plan"&&planById(m.planId)?(pl=>`<button class="plan-msg" data-act="openPlan" data-id="${esc(pl.id)}"><span class="k">📌 New plan</span><b style="font-size:16px">${esc(pl.emoji||"")} ${esc(pl.title)}</b><span class="meta">${pl.final?esc(fDate(pl.final.date)+" · "+fRange(pl.final.start,pl.final.end)):`${(pl.slots||[]).length} dates to vote on`} · tap to open</span></button>`)(planById(m.planId)):`${m.kind?`<div class="bub mediab">${mediaHtml("msgs",m)}${m.text?`<div>${linkify(m.text)}</div>`:""}</div>`:`<div class="bub">${linkify(m.text)}</div>`}`}${m.edited?`<span class="edited">edited</span>`:""}</div>`});
     const plan=c.planId?planById(c.planId):null;
-    return{title:c.dm?`<button class="prof-btn" data-act="person" data-id="${esc(chatOther(c))}">${avatar(chatOther(c),"sm")} ${esc(chatName(c))}</button>`:`${esc(c.emoji||"💬")} ${esc(c.name)}`,right:`<button class="btn sm" data-act="newPlanInChat" data-id="${esc(c.id)}">+ Plan</button>`,body:`${plan?`<button class="ev" data-act="openPlan" data-id="${esc(plan.id)}" style="margin-bottom:10px"><span class="stripe" style="background:${hue(plan.id)}"></span><span style="flex:1">Plan: <b>${esc(plan.title)}</b></span>${statusPill(plan)}</button>`:""}<div class="msgs">${html||'<div class="empty">Say hi 👋</div>'}</div>`,
+    return{title:c.dm?`<button class="prof-btn" data-act="person" data-id="${esc(chatOther(c))}">${avatar(chatOther(c),"sm")} ${esc(chatName(c))}</button>`:`${esc(c.emoji||"💬")} ${esc(c.name)}`,right:`<button class="btn sm" data-act="newPlanInChat" data-id="${esc(c.id)}">+ Plan</button><button class="btn sm" data-act="chatMenu" data-id="${esc(c.id)}" aria-label="Chat options">⋯</button>`,body:`${plan?`<button class="ev" data-act="openPlan" data-id="${esc(plan.id)}" style="margin-bottom:10px"><span class="stripe" style="background:${hue(plan.id)}"></span><span style="flex:1">Plan: <b>${esc(plan.title)}</b></span>${statusPill(plan)}</button>`:""}<div class="msgs">${html||'<div class="empty">Say hi 👋</div>'}</div>`,
       foot:`${attachBtns("chat",s.args.id)}<textarea class="compose" id="chatIn-${esc(s.args.id)}" rows="1" placeholder="Message" enterkeyhint="send"></textarea><button class="send" data-act="send" data-id="${esc(s.args.id)}" aria-label="Send">${ICON.send}</button>`}},
   after(s,first){markSeen(s.args.id);const b=$(".sheet-b",s.el);const n=chatMsgs(s.args.id).length;if(first||n!==s.n){b.scrollTop=b.scrollHeight}s.n=n;renderTabs()}
 };
@@ -2144,6 +2152,10 @@ async function camDeliver(ctx,id,shot,caption){
     else{const ref=await storeMedia(shot.blob,p=>toast(`Uploading video… ${Math.round(p*100)}%`));await postItem(ctx,id,{kind:"video",...ref,poster:shot.poster,dur:Math.round(shot.dur)})}
     toast("Sent ✓")}catch(e){console.error(e);toast("Couldn't send that. Try again.")}
 }
+SHEETS.chatMenu={render(s){const c=D.chats.find(x=>x.id===s.args.id),arch=archivedIds().includes(s.args.id);return{title:esc(c?chatName(c):"Chat"),body:`<div class="form">
+  <button class="btn block" data-act="chatArchive" data-id="${esc(s.args.id)}">📦 ${arch?"Unarchive chat":"Archive chat"}</button>
+  <div class="hint" style="margin:0">${arch?"Moves it back to your chat list.":"Hides it from your chat list. Only for you; others still see it."}</div>
+  <div class="hint">Tip: tap any message you sent to edit or delete it.</div></div>`}}};
 SHEETS.player={
   render(){return{title:`<span style="color:#fff">Video</span>`,body:`<div id="pl" style="display:grid;place-items:center;min-height:50dvh"><div class="spin"></div></div>`}},
   after(s,first){if(!first)return;const it=itemByKey(s.args.key);if(!it)return;
@@ -2282,12 +2294,17 @@ const ACT={
   pastDayClear(){UI.pastDay="";if(MAPS.main)MAPS.main.sig="";render()},
   async locMode(d){await Store.upd("members",ME,{locMode:d.k});lastLocPos=null;lastLocWrite=0;if(MYPOS)setTimeout(()=>writeLoc(MYPOS),300);toast(d.k==="approx"?"Friends see roughly where you are":"Friends see exactly where you are")},
   focusFriend(d){const m=mem(d.id);if(m?.loc&&MAPS.main?.map){MAPS.main.map.setView([m.loc.lat,m.loc.lng],15);window.scrollTo({top:0,behavior:"smooth"})}},
-  calMode(d){UI.calMode=d.k;if(d.k==="friends"&&!(UI.calPeople||[]).length)UI.calPeople=[ME];render()},
+  calMode(d){UI.calMode=d.k;if(d.k==="friends"&&!(UI.calPeople||[]).length)UI.calPeople=D.members.map(m=>m.id);render()},
+  calAll(){UI.calPeople=(UI.calPeople||[]).length===D.members.length?[]:D.members.map(m=>m.id);render()},
   calPerson(d){const a=UI.calPeople||[],i=a.indexOf(d.id);if(i>=0)a.splice(i,1);else a.push(d.id);UI.calPeople=a;render()},
   planFromFree(d){openSheet("edit",{pre:{invited:[...new Set([ME,...(UI.calPeople||[])])]}});setTimeout(()=>{const s=topS();const di=$("#edD",s.el),si=$("#edS",s.el);if(di)di.value=d.d;if(si)si.value=d.s},80)},
   bzRem(d){const s=topS(),a=s.state.rem||(s.state.rem=[60]),m=+d.m,i=a.indexOf(m);if(i>=0)a.splice(i,1);else a.push(m);paintSheet(s)},
   busyRem(d){const all=ls.get("yg-remind-busy",{}),a=all[d.id]||[],m=+d.m,i=a.indexOf(m);if(i>=0)a.splice(i,1);else a.push(m);all[d.id]=a;ls.set("yg-remind-busy",all);paintSheet(topS());if(!SET.notifyOn)toast("Turn on notifications in ⚙️ Settings, or add it to your phone calendar")},
   busyIcs(d){const b=D.busy.find(x=>x.id===d.id);if(!b)return;const p=busyAsPlan(b),txt=icsFor(p,busyRemind(b.id).length?busyRemind(b.id):[60]);const a=document.createElement("a");a.href=/iPhone|iPad/i.test(navigator.userAgent)?"data:text/calendar;charset=utf-8,"+encodeURIComponent(txt):URL.createObjectURL(new Blob([txt],{type:"text/calendar"}));a.download=(p.title.replace(/[^\w]+/g,"-")||"plan")+".ics";document.body.appendChild(a);a.click();a.remove()},
+  chatMenu(d){openSheet("chatMenu",{id:d.id})},
+  chatArchView(d){UI.chatArchived=!!d.k;render()},
+  async chatArchive(d){const a=[...archivedIds()],i=a.indexOf(d.id),on=i<0;if(on)a.push(d.id);else a.splice(i,1);await Store.upd("members",ME,{archivedChats:a});
+    while(stack.length)closeSheet();UI.tab="chat";UI.chatArchived=false;render();toast(on?"Chat archived 📦":"Chat moved back to your list")},
   openBusy(d){openSheet("busyView",{id:d.id})},
   bzAttPhoto(d){const s=topS();pickPhotos(async fs=>{for(const f of fs){const src=await storePhoto(f);if(!src)continue;const m={kind:"photo",src};if(d.id)await Store.add("mine",{...m,busyId:d.id,at:now()});else{s.state.att.push(m);paintSheet(s)}}},"#filePick")},
   bzAttLink(d){openSheet("linkAdd",{busyId:d.id})},
@@ -2478,7 +2495,8 @@ document.addEventListener("input",ev=>{
 document.addEventListener("change",ev=>{
   const el=ev.target;if(el.id==="moneyPlan"){UI.moneyPlan=el.value;render()}
   if(el.dataset.wish){Store.upd("wishes",el.dataset.wish,{done:el.checked})}
-  if(el.id==="pastDay"){UI.pastDay=el.value;if(el.value)UI.pastMonth=el.value.slice(0,7);if(MAPS.main)MAPS.main.sig="";render()}
+  if(el.id==="pastMonthSel"){UI.pastMonth=el.value;UI.pastDay="";if(MAPS.main)MAPS.main.sig="";render()}
+  if(el.id==="pastDaySel"){UI.pastDay=el.value;if(MAPS.main)MAPS.main.sig="";render()}
   if(el.id==="edPast"){const s=topS();if(s?.kind==="edit"){s.state.past=el.checked;paintSheet(s)}}
   if(el.id==="shareLoc"){(async()=>{if(el.checked){if(!navigator.geolocation){el.checked=false;return toast("Location isn't available on this phone.")}
       navigator.geolocation.getCurrentPosition(async p=>{MYPOS={lat:p.coords.latitude,lng:p.coords.longitude};await Store.upd("members",ME,{shareLoc:true,locMode:mem(ME)?.locMode||"exact"});lastLocPos=null;lastLocWrite=0;setTimeout(()=>{writeLoc(MYPOS);syncLocWatch()},300);toast("📡 Sharing your location with the crew")},
