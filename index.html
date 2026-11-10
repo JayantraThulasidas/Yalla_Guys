@@ -1,0 +1,1215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<title>Yalla Guys</title>
+<meta name="theme-color" content="#0B7A75">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Yalla Guys">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%230B7A75'/%3E%3Ctext x='50' y='70' font-size='58' text-anchor='middle' font-family='Arial' font-weight='900' fill='white'%3EY%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+/* Layout: phone-first single column app shell — sticky header, scrolling view, fixed bottom tab bar, full-screen sheets that slide up. Centered 560px column on desktop. */
+:root{
+  --bg:#EEF1F4;--surface:#FFFFFF;--surface2:#E4E8ED;--fg:#111820;--muted:#5C6774;--line:#D5DBE2;
+  --accent:#0B7A75;--accent-fg:#FFFFFF;--accent-soft:#D3EEEC;--sun:#C9661A;--sun-soft:#FBE6D2;
+  --danger:#C2372F;--danger-soft:#F8DEDC;--ok:#2F8F4E;--warn:#A86A12;--warn-soft:#F7EACF;
+  --land:#E9E2D0;--land-line:#C9BFA6;--sea:#CFE3EA;--shadow:0 6px 24px rgba(17,24,32,.12);
+  --f-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --f-body:"Inter",-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+  --r:14px;--tabh:64px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1318;--surface:#161D24;--surface2:#1F2830;--fg:#E9EEF2;--muted:#93A0AD;--line:#2A343E;
+  --accent:#3CC0B7;--accent-fg:#04201E;--accent-soft:#12332F;--sun:#F29A4A;--sun-soft:#3A2716;
+  --danger:#F06A60;--danger-soft:#3A1A18;--ok:#5CC27E;--warn:#E0A84A;--warn-soft:#3A2C12;
+  --land:#26302B;--land-line:#3C4A42;--sea:#0F1D24;--shadow:0 6px 24px rgba(0,0,0,.45);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1318;--surface:#161D24;--surface2:#1F2830;--fg:#E9EEF2;--muted:#93A0AD;--line:#2A343E;
+  --accent:#3CC0B7;--accent-fg:#04201E;--accent-soft:#12332F;--sun:#F29A4A;--sun-soft:#3A2716;
+  --danger:#F06A60;--danger-soft:#3A1A18;--ok:#5CC27E;--warn:#E0A84A;--warn-soft:#3A2C12;
+  --land:#26302B;--land-line:#3C4A42;--sea:#0F1D24;--shadow:0 6px 24px rgba(0,0,0,.45);color-scheme:dark}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{margin:0}
+img{max-width:100%}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overscroll-behavior-y:none}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;touch-action:manipulation}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+.app{max-width:560px;margin:0 auto;min-height:100%;padding-bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 24px)}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:0;z-index:20;background:var(--bg);display:flex;align-items:center;gap:12px;padding-top:calc(env(safe-area-inset-top,0px) + 12px);padding-bottom:10px}
+.brand{font-family:var(--f-display);font-weight:800;font-size:24px;letter-spacing:-.02em;flex:1;min-width:0}
+.brand span{color:var(--accent);margin-left:2px}
+.me-btn{border:0;background:var(--surface);border-radius:999px;padding:4px 12px 4px 4px;display:flex;align-items:center;gap:8px;box-shadow:0 1px 0 var(--line);font-weight:600;font-size:14px;min-height:40px}
+.av{width:32px;height:32px;border-radius:50%;display:inline-grid;place-items:center;font-size:16px;flex:none;color:#fff;font-weight:700}
+.av.sm{width:26px;height:26px;font-size:13px}
+.av.xs{width:22px;height:22px;font-size:11px}
+.stack{display:flex}.stack .av{margin-left:-7px;border:2px solid var(--surface)}.stack .av:first-child{margin-left:0}
+.banner{margin-block:4px 10px;padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:var(--fg);font-size:13px}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);height:var(--tabh)}
+nav.tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:var(--muted);position:relative}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button[aria-current="true"]{color:var(--accent)}
+.badge{position:absolute;top:8px;left:calc(50% + 6px);background:var(--danger);color:#fff;border-radius:999px;font-size:10px;min-width:17px;height:17px;display:grid;place-items:center;padding:0 4px}
+.view-title{display:flex;align-items:end;justify-content:space-between;gap:10px;margin-block:6px 12px}
+.view-title h1{font-size:30px;font-weight:800}
+.seg{display:flex;background:var(--surface2);border-radius:12px;padding:3px;gap:2px}
+.seg button{flex:1;border:0;background:none;border-radius:9px;padding:8px 10px;font-weight:600;font-size:13px;color:var(--muted);min-height:36px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.list{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border-radius:var(--r);overflow:hidden;border:1px solid var(--line)}
+.pcard{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:18px;overflow:hidden;padding:0}
+.pcard .cover{height:118px;background-size:cover;background-position:center;position:relative;display:flex;align-items:flex-end;padding:10px 12px}
+.pcard .cover .emo{font-size:40px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2))}
+.pcard .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px}
+.pcard h3{font-size:19px;font-weight:700}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.meta{color:var(--muted);font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.pill.vote{background:var(--sun-soft);color:var(--sun)}
+.pill.set{background:var(--accent-soft);color:var(--accent)}
+.pill.done{background:var(--surface2);color:var(--muted)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--danger-soft);color:var(--danger)}
+.fab{position:fixed;z-index:25;right:max(16px,calc((100vw - 560px)/2 + 16px),env(safe-area-inset-right,0px));bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 16px);border:0;background:var(--accent);color:var(--accent-fg);font-weight:700;font-size:16px;border-radius:999px;padding:0 20px;height:54px;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px}
+.fab b{font-size:24px;line-height:1;font-weight:500}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 14px;font-weight:600;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;font-size:14px}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.sun{background:var(--sun);color:#fff;border-color:var(--sun)}
+.btn.ghost{background:none;border-color:transparent;color:var(--accent)}
+.btn.danger{color:var(--danger)}
+.btn.sm{min-height:34px;padding:6px 10px;font-size:13px;border-radius:10px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5}
+.empty{padding:28px 18px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:var(--r)}
+.empty h3{color:var(--fg);font-size:18px;margin-bottom:6px}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
+.inp{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 12px;font-size:16px;min-height:46px;color:var(--fg)}
+textarea.inp{min-height:84px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px}
+.grid2>*,.grid3>*{min-width:0}
+.form{display:flex;flex-direction:column;gap:14px}
+.sec{display:flex;flex-direction:column;gap:10px;padding-block:16px;border-top:1px solid var(--line)}
+.sec:first-child{border-top:0}
+.sec h2{font-size:18px;font-weight:700}
+.sec .hint{font-size:12px;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;min-height:36px;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.emo-pick{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.emo-pick button{flex:none;width:46px;height:46px;font-size:24px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.emo-pick button[aria-pressed="true"]{border:2px solid var(--accent);background:var(--accent-soft)}
+.item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.item .grow{flex:1;min-width:0}
+.item .t{font-weight:600;overflow-wrap:anywhere}
+.x{border:0;background:none;color:var(--muted);width:36px;height:36px;border-radius:50%;font-size:18px;flex:none}
+.num{font-variant-numeric:tabular-nums}
+/* sheets */
+#sheets .sheet{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(24px);opacity:.4}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){#sheets .sheet{animation:none}}
+.sheet-h{flex:none;display:flex;align-items:center;gap:8px;padding-top:calc(env(safe-area-inset-top,0px) + 8px);padding-bottom:8px;border-bottom:1px solid var(--line);background:var(--bg)}
+.sheet-h .in{max-width:560px;margin:0 auto;width:100%;display:flex;align-items:center;gap:8px}
+.sheet-h h2{flex:1;font-size:18px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.back{border:0;background:var(--surface);width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none}
+.sheet-b{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.sheet-b .in{max-width:560px;margin:0 auto;padding-block:12px calc(env(safe-area-inset-bottom,0px) + 32px)}
+.sheet-f{flex:none;border-top:1px solid var(--line);background:var(--surface);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px);padding-top:10px}
+.sheet-f .in{max-width:560px;margin:0 auto;display:flex;gap:8px;align-items:flex-end}
+/* plan detail */
+.hero{border-radius:18px;min-height:150px;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:14px;position:relative;overflow:hidden}
+.hero .emo{font-size:52px;line-height:1}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.35))}
+.hero .emo{position:relative;z-index:1}
+.when{display:flex;gap:12px;align-items:center;padding:14px;border-radius:14px;background:var(--accent-soft)}
+.when .d{font-family:var(--f-display);font-weight:800;font-size:22px;color:var(--accent);line-height:1.1}
+.cal-ic{flex:none;width:54px;border-radius:10px;overflow:hidden;background:var(--surface);text-align:center;border:1px solid var(--line)}
+.cal-ic .m{background:var(--sun);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 0}
+.cal-ic .dd{font-family:var(--f-display);font-size:24px;font-weight:800;padding:2px 0 4px}
+.slot{padding:12px;border-radius:14px;background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.slot.mine{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.bar{height:6px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--sun);border-radius:99px}
+.vote-btn{border:2px solid var(--line);background:var(--surface);border-radius:10px;width:44px;height:44px;flex:none;font-size:20px;display:grid;place-items:center}
+.vote-btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.media-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.media-grid>*{aspect-ratio:1;border-radius:10px;overflow:hidden;border:0;padding:0;background:var(--surface2);position:relative;min-width:0}
+.media-grid img{width:100%;height:100%;object-fit:cover;display:block}
+.reel{display:flex;flex-direction:column;justify-content:space-between;padding:8px;text-align:left;color:#fff;background:linear-gradient(160deg,#833AB4,#E1306C 55%,#F77737);text-decoration:none;font-size:12px;font-weight:600}
+.reel.lnk{background:linear-gradient(160deg,#0B7A75,#13506F)}
+.reel .play{font-size:22px}
+.reel .cap{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.add-tile{display:grid;place-items:center;color:var(--accent);font-weight:700;font-size:13px;border:2px dashed var(--line)!important;background:var(--surface)!important}
+.mini-map,.map-full{border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--sea)}
+.mini-map{height:220px}
+.leg{display:flex;gap:10px;align-items:flex-start}
+.leg .n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px}
+.leg .eta{font-size:12px;color:var(--muted);padding:4px 0 6px 36px;border-left:2px dotted var(--line);margin-left:12px;padding-left:22px}
+.note{padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;display:flex;gap:10px}
+.note p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.danger-zone{display:flex;gap:8px;flex-wrap:wrap}
+/* calendar */
+.cal{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:10px}
+.cal-h{display:flex;align-items:center;justify-content:space-between;padding:2px 2px 8px}
+.cal-h h2{font-size:20px;font-weight:800}
+.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-g .dow{font-size:11px;font-weight:700;color:var(--muted);text-align:center;padding:4px 0;letter-spacing:.06em}
+.day{border:0;background:none;border-radius:10px;aspect-ratio:1/1.05;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:6px;gap:3px;font-weight:600;font-variant-numeric:tabular-nums;min-width:0}
+.day.out{color:var(--muted);opacity:.45}
+.day.today .dn{background:var(--sun);color:#fff}
+.day .dn{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:14px}
+.day[aria-pressed="true"]{background:var(--accent-soft)}
+.dots{display:flex;gap:2px;height:6px}
+.dots i{width:6px;height:6px;border-radius:50%}
+.dot-plan{background:var(--accent)}.dot-poll{border:1.5px solid var(--sun);box-sizing:border-box}.dot-me{background:var(--fg)}.dot-oth{background:var(--muted);opacity:.6}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:8px 4px 2px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.ev{display:flex;gap:10px;padding:10px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--line);align-items:center;text-align:left;width:100%}
+.ev .tm{flex:none;width:66px;font-size:12px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.ev .stripe{width:4px;align-self:stretch;border-radius:4px;flex:none}
+.ev.busy .stripe{background:repeating-linear-gradient(45deg,var(--muted) 0 3px,transparent 3px 6px)}
+/* map */
+.map-full{height:calc(100dvh - 260px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));min-height:300px}
+.leaflet-container{background:var(--sea);font-family:var(--f-body)}
+.pin{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.pin b{transform:rotate(45deg);color:#fff;font-size:13px;font-weight:800}
+.pin-new{background:var(--danger)}
+.plabel{background:none;border:0;box-shadow:none;color:var(--muted);font-size:10px;font-weight:600;white-space:nowrap}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface);color:var(--fg)}
+.leaflet-popup-content{margin:10px 12px;font-size:13px}
+.leaflet-bar a{background:var(--surface)!important;color:var(--fg)!important;border-color:var(--line)!important;width:36px!important;height:36px!important;line-height:36px!important}
+.sugg{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.sugg button{border:0;background:none;text-align:left;padding:11px 12px;border-top:1px solid var(--line);min-height:44px}
+.sugg button:first-child{border-top:0}
+/* chat */
+.chat-row{display:flex;gap:12px;align-items:center;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;width:100%;text-align:left}
+.chat-row .grow{flex:1;min-width:0}
+.chat-row .last{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gav{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:22px;flex:none;background:var(--accent-soft)}
+.msgs{display:flex;flex-direction:column;gap:4px}
+.msg{max-width:80%;display:flex;flex-direction:column;gap:2px}
+.msg .bub{padding:8px 12px;border-radius:18px;background:var(--surface);border:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.msg.me .bub{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.msg .who{font-size:11px;color:var(--muted);font-weight:600;padding:0 6px}
+.daysep{align-self:center;font-size:11px;font-weight:700;color:var(--muted);padding:10px 0 4px;letter-spacing:.06em;text-transform:uppercase}
+.compose{flex:1;border:1px solid var(--line);border-radius:22px;padding:10px 14px;font-size:16px;min-height:44px;max-height:120px;background:var(--bg);resize:none}
+.send{flex:none;width:44px;height:44px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center}
+/* money */
+.money-hero{padding:18px;border-radius:18px;background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+.money-hero .big{font-family:var(--f-display);font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.pos{color:var(--ok)}.neg{color:var(--danger)}
+.amt{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.check{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface);min-height:46px}
+.check input{width:20px;height:20px;accent-color:var(--accent)}
+.lightbox{background:#000!important}
+.lightbox .sheet-h{background:#000;border-color:#222;color:#fff}
+.lightbox .sheet-b img{width:100%;max-height:72dvh;object-fit:contain;display:block}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 80px);z-index:90;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
+.loading{display:grid;place-items:center;min-height:60vh;color:var(--muted);text-align:center;gap:6px}
+.spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.vis-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
+html{overscroll-behavior:none}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
+.install{display:flex;gap:12px;align-items:flex-start;margin-block:4px 12px;padding:12px 14px;border-radius:14px;background:var(--accent-soft);font-size:13px}
+.install img{width:44px;height:44px;border-radius:11px;flex:none}
+.install b{font-size:14px}
+.av{overflow:hidden}.av img{width:100%;height:100%;object-fit:cover;display:block}
+.prof-hero{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:10px 0 4px;position:relative}
+.prof-hero .av{width:108px;height:108px;font-size:54px;box-shadow:0 0 0 4px var(--bg),0 0 0 7px var(--accent)}
+.prof-hero h1{font-size:28px;font-weight:800}
+.vibe{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:14px;font-weight:600}
+.stickers{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;font-size:26px;line-height:1}
+.stickers span{display:inline-block;transform:rotate(var(--r,0deg))}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.stat b{display:block;font-family:var(--f-display);font-size:24px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.facts{display:grid;gap:8px}
+.fact{display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.fact .k{font-size:12px;color:var(--muted);font-weight:600}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{background:var(--sun-soft);color:var(--sun);border-radius:999px;padding:4px 10px;font-size:13px;font-weight:700}
+.shoot{display:flex;gap:10px;align-items:center;padding:14px;border-radius:18px;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 55%,#13506F));color:var(--accent-fg)}
+.shoot .big{flex:1;min-width:0}
+.shoot b{font-family:var(--f-display);font-size:20px;display:block}
+.shoot .cam{width:64px;height:64px;border-radius:50%;border:4px solid var(--accent-fg);background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:26px;flex:none;color:var(--accent-fg)}
+.moment{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.moment .mh{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.moment .ph{position:relative;aspect-ratio:3/4;background:var(--surface2);overflow:hidden}
+.moment .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.moment .ph.locked img{filter:blur(22px) saturate(1.2);transform:scale(1.15)}
+.moment .lock{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#fff;font-weight:700;padding:20px;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.moment .cap{padding:10px 12px 0;overflow-wrap:anywhere}
+.reacts{display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px 12px;align-items:center}
+.rx{border:1px solid var(--line);background:var(--bg);border-radius:999px;min-height:36px;padding:0 10px;font-size:16px;display:inline-flex;align-items:center;gap:4px}
+.rx[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.rx small{font-size:12px;font-weight:700}
+.streak{display:inline-flex;align-items:center;gap:4px;background:var(--sun-soft);color:var(--sun);border-radius:999px;padding:4px 10px;font-weight:800;font-size:13px}
+.daylabel{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:8px 2px 0}
+.people-row{display:flex;gap:12px;overflow-x:auto;margin-bottom:12px;padding-bottom:4px;scrollbar-width:none}
+.prof-btn{border:0;background:none;padding:0;display:inline-flex;align-items:center;gap:8px;color:inherit;text-align:left}
+.auth{max-width:440px;margin:0 auto;padding-block:8px 40px}
+.auth-hero{padding:28px 4px 22px}
+.auth-logo{font-family:var(--f-display);font-weight:800;font-size:46px;letter-spacing:-.03em;line-height:1}
+.auth-logo span{color:var(--accent);margin-left:6px}
+.auth-hero p{color:var(--muted);margin:10px 0 0;font-size:16px;max-width:34ch}
+.leaflet-control-attribution{font-size:9px!important;background:color-mix(in srgb,var(--surface) 80%,transparent)!important;color:var(--muted)!important}
+.leaflet-control-attribution a{color:var(--muted)!important}
+input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top wrap">
+    <div class="brand">Yalla<span>Guys</span></div>
+    <button class="me-btn" data-act="person" data-id="" id="meBtn" hidden></button>
+  </header>
+  <main id="view" class="wrap"><div class="loading"><div class="spin"></div><div>Loading…</div></div></main>
+</div>
+<button class="fab" id="fab" data-act="newPlan" hidden><b>+</b> Make plan</button>
+<nav class="tabs" aria-label="Sections" hidden><div class="in" id="tabs"></div></nav>
+<div id="sheets"></div>
+<div id="toast" hidden></div>
+<input type="file" id="filePick" accept="image/*" multiple class="vis-hidden" tabindex="-1" aria-hidden="true">
+<input type="file" id="camPick" accept="image/*" capture="environment" class="vis-hidden" tabindex="-1" aria-hidden="true">
+<input type="file" id="onePick" accept="image/*" class="vis-hidden" tabindex="-1" aria-hidden="true">
+
+<!-- =====================================================================
+  STEP 1 OF SETUP: paste your Firebase web config here (see SETUP.md).
+  Leave apiKey empty to run in demo mode on one phone.
+====================================================================== -->
+<script>
+window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCT8cnaLTytFhAb9RrGhTL49ehYW2kSRtM",
+  authDomain: "yallaguys812.firebaseapp.com",
+  projectId: "yallaguys812",
+  storageBucket: "yallaguys812.firebasestorage.app",
+  messagingSenderId: "897715124522",
+  appId: "1:897715124522:web:ccfd1869d9fd1ad1c84653"
+};
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const rid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-5);
+const now=()=>Date.now();
+const pad=n=>String(n).padStart(2,"0");
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const TODAY=()=>ymd(new Date());
+const pd=s=>new Date(s+"T00:00:00");
+const fDate=(s,o={weekday:"short",day:"numeric",month:"short"})=>s?pd(s).toLocaleDateString("en-GB",o):"";
+const fTime=t=>{if(!t)return"";let[h,m]=t.split(":").map(Number);const ap=h>=12?"pm":"am";h=h%12||12;return m?`${h}:${pad(m)}${ap}`:`${h}${ap}`};
+const fRange=(s,e)=>s?(e?`${fTime(s)}–${fTime(e)}`:fTime(s)):"All day";
+const toMin=t=>{if(!t)return 0;const[h,m]=t.split(":").map(Number);return h*60+m};
+const span=(s,e)=>{if(!s)return[0,1440];const a=toMin(s);let b=e?toMin(e):a+120;if(b<=a)b+=1440;return[a,b]};
+const overlap=(a,b)=>a[0]<b[1]&&b[0]<a[1];
+const dhs=n=>"Dhs "+(Math.round((+n||0)*100)/100).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const ago=t=>{const s=(now()-t)/1000;if(s<60)return"now";if(s<3600)return Math.floor(s/60)+"m";if(s<86400)return Math.floor(s/3600)+"h";return new Date(t).toLocaleDateString("en-GB",{day:"numeric",month:"short"})};
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2800)}
+const PLAN_HUES=["#0B7A75","#C9661A","#6D4FC2","#C2372F","#2F6FB5","#7A8B1E","#B5307A"];
+const hue=id=>{let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))>>>0;return PLAN_HUES[h%PLAN_HUES.length]};
+const MEMBER_COLORS=["#0B7A75","#C9661A","#6D4FC2","#C2372F","#2F6FB5","#5E7A12","#B5307A","#8A5A2B"];
+const EMOJIS=["😎","🦁","🐪","🦅","🌴","🔥","⚡️","🌙","🍉","🏄","🎧","🦊","🐬","🌵","🍩","👑"];
+const PLAN_EMOJIS=["🏖️","🏜️","🍽️","☕️","🎢","🏔️","🎤","🛥️","🎳","🏕️","⛳️","🛍️","🎬","🥙","🎉","🚗"];
+const ICON={
+ plans:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.6 6.3L21 9l-5 4.4L17.5 20 12 16.6 6.5 20 8 13.4 3 9l6.4-.7z"/></svg>',
+ cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>',
+ map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/></svg>',
+ chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+ moments:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+ money:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v5M18 9.5v5"/></svg>',
+ back:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+ send:'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5l18-8.5L3 3.5v6.6l12 1.9-12 1.9z"/></svg>',
+};
+
+/* ---------- places, search, links, routes ---------- */
+const PLACES=[
+["Burj Khalifa",25.1972,55.2744,"downtown dubai"],["The Dubai Mall",25.1985,55.2796,"downtown"],["Dubai Fountain",25.1955,55.2750,"downtown"],["Souk Al Bahar",25.1940,55.2760,"downtown"],["Dubai Opera",25.1956,55.2717,"downtown"],
+["Business Bay",25.1860,55.2650,""],["Dubai Water Canal",25.1880,55.2470,"canal"],["City Walk",25.2075,55.2625,"al wasl"],["BoxPark",25.1868,55.2537,"al wasl"],["Coca-Cola Arena",25.2040,55.2660,"city walk concert"],
+["La Mer",25.2285,55.2530,"jumeirah beach"],["Kite Beach",25.1580,55.1980,"umm suqeim"],["Sunset Beach",25.1440,55.1890,"umm suqeim"],["Jumeirah Public Beach",25.2180,55.2500,"beach"],["Burj Al Arab",25.1412,55.1853,""],
+["Souk Madinat Jumeirah",25.1330,55.1850,"madinat"],["Dubai Marina Walk",25.0805,55.1403,"marina"],["Dubai Marina Mall",25.0760,55.1410,"marina"],["JBR The Walk",25.0780,55.1339,"jbr beach"],["Ain Dubai, Bluewaters",25.0790,55.1210,"bluewaters wheel"],
+["Skydive Dubai",25.0920,55.1390,"palm dropzone"],["Atlantis The Palm",25.1304,55.1171,"palm jumeirah"],["Aquaventure Waterpark",25.1330,55.1190,"palm atlantis"],["The Pointe, Palm",25.1455,55.1300,"palm jumeirah"],["Nakheel Mall / The View",25.1130,55.1390,"palm"],
+["Mall of the Emirates / Ski Dubai",25.1181,55.2006,"moe ski"],["Dubai Hills Mall",25.1020,55.2390,"dubai hills"],["Dubai Hills Park",25.1060,55.2480,"dubai hills"],["Alserkal Avenue",25.1430,55.2260,"al quoz art"],["Safa Park",25.1880,55.2380,""],
+["Zabeel Park",25.2310,55.2960,""],["Dubai Frame",25.2355,55.3003,"zabeel"],["Museum of the Future",25.2195,55.2820,"sheikh zayed road"],["DIFC Gate Village",25.2120,55.2810,"difc"],["Dubai World Trade Centre",25.2250,55.2860,"dwtc"],
+["Al Fahidi Historical District",25.2633,55.2972,"bastakiya bur dubai"],["Al Seef",25.2620,55.3020,"creek bur dubai"],["Gold Souk",25.2700,55.2960,"deira"],["Spice Souk",25.2690,55.2980,"deira"],["Dubai Creek Harbour",25.2050,55.3470,"creek"],
+["Dubai Festival City Mall",25.2220,55.3530,"festival city"],["Ras Al Khor Flamingo Hide",25.1870,55.3300,"flamingo"],["Global Village",25.0700,55.3050,""],["IMG Worlds of Adventure",25.0810,55.3180,"img"],["Dubai Miracle Garden",25.0600,55.2440,"butterfly"],
+["Dubai Autodrome",25.0490,55.2390,"motor city karting"],["Dubai Parks and Resorts / Legoland",24.9200,55.0070,"motiongate"],["Expo City Dubai",24.9640,55.1510,"expo"],["Al Qudra Lakes",24.8370,55.3720,"desert camping"],["Love Lake",24.8480,55.3820,"al qudra"],
+["Dubai Safari Park",25.1760,55.4140,"zoo"],["Mushrif Park",25.2180,55.4430,""],["Mirdif City Centre",25.2160,55.4080,"mirdif"],["Deira City Centre",25.2520,55.3330,"deira"],["DXB Airport",25.2528,55.3644,"dubai airport terminal"],
+["Al Mamzar Beach Park",25.3010,55.3480,"mamzar"],["JLT",25.0700,55.1440,"jumeirah lakes towers"],["JVC",25.0590,55.2090,"jumeirah village circle"],["Hatta Dam",24.8130,56.1260,"hatta kayak"],["Hatta Wadi Hub",24.8000,56.1170,"hatta"],
+["Big Red Dune",24.8600,55.6650,"desert dune bashing"],["Louvre Abu Dhabi",24.5337,54.3982,"saadiyat"],["Sheikh Zayed Grand Mosque",24.4129,54.4750,"abu dhabi mosque"],["Abu Dhabi Corniche",24.4780,54.3360,""],["Saadiyat Beach",24.5450,54.4330,"abu dhabi"],
+["Ferrari World",24.4838,54.6074,"yas island"],["Yas Waterworld",24.4880,54.5990,"yas"],["Warner Bros. World",24.4910,54.5960,"yas"],["Yas Mall",24.4890,54.6080,"yas"],["Yas Marina Circuit",24.4672,54.6031,"f1 yas"],
+["Qasr Al Watan",24.4620,54.3050,"abu dhabi palace"],["Emirates Palace",24.4610,54.3170,"abu dhabi"],["Mangrove National Park",24.4440,54.4190,"abu dhabi kayak"],["Jebel Hafeet",24.0580,55.7760,"al ain mountain"],["Al Ain Zoo",24.1760,55.7420,"al ain"],
+["Moreeb Dune, Liwa",23.1450,53.7790,"liwa desert"],["Al Majaz Waterfront",25.3260,55.3830,"sharjah"],["Al Noor Island",25.3335,55.3895,"sharjah"],["Al Qasba",25.3280,55.3770,"sharjah"],["Mleiha Desert",25.1220,55.8780,"sharjah camping"],
+["Khor Fakkan Beach",25.3400,56.3560,"sharjah east coast"],["Ajman Corniche",25.4120,55.4440,"ajman beach"],["Jebel Jais",25.9440,56.1650,"rak zipline mountain"],["Al Marjan Island",25.6820,55.7400,"rak"],["Snoopy Island",25.4880,56.3640,"fujairah snorkel"],
+["Fujairah Corniche",25.1290,56.3420,"fujairah"],["Dibba",25.6190,56.2730,"fujairah musandam"]
+].map(([name,lat,lng,tags])=>({name,lat,lng,tags}));
+function localSearch(q){
+  const t=q.toLowerCase().split(/\s+/).filter(Boolean);if(!t.length)return[];
+  return PLACES.filter(p=>{const h=(p.name+" "+p.tags).toLowerCase();return t.every(w=>h.includes(w))}).sort((a,b)=>(b.name.toLowerCase().startsWith(t[0])?1:0)-(a.name.toLowerCase().startsWith(t[0])?1:0)).slice(0,5).map(p=>({...p,sub:"Popular spot"}));
+}
+let searchSeq=0;
+async function onlineSearch(q){
+  const seq=++searchSeq;
+  const r=await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=7&lang=en&lat=25.2&lon=55.3`);
+  const j=await r.json();if(seq!==searchSeq)return null;
+  return(j.features||[]).map(f=>{const p=f.properties||{},[lng,lat]=f.geometry.coordinates;return{name:p.name||p.street||q,lat:+lat.toFixed(5),lng:+lng.toFixed(5),sub:[p.street&&p.housenumber?p.housenumber+" "+p.street:p.street,p.district||p.locality,p.city||p.county,p.country].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).slice(0,3).join(", ")}}).filter(x=>x.name);
+}
+function parseLoc(text){
+  const s=String(text||"").trim();if(!s)return null;
+  let m=s.match(/@(-?\d{1,2}\.\d+),\s*(-?\d{1,3}\.\d+)/)||s.match(/!3d(-?\d{1,2}\.\d+)!4d(-?\d{1,3}\.\d+)/)||s.match(/[?&](?:q|query|ll|destination|center|daddr|sll)=(-?\d{1,2}\.\d+)(?:,|%2C)\s*(-?\d{1,3}\.\d+)/i)||s.match(/^(-?\d{1,2}\.\d{2,})\s*,\s*(-?\d{1,3}\.\d{2,})$/);
+  if(!m)return null;
+  return{lat:+(+m[1]).toFixed(5),lng:+(+m[2]).toFixed(5),name:nameFromLink(s)};
+}
+function nameFromLink(s){
+  const dec=x=>{try{return decodeURIComponent(x.replace(/\+/g," "))}catch{return x}};
+  let m=s.match(/\/(?:place|search)\/([^/@?]+)/);if(m&&!/^-?\d/.test(m[1]))return dec(m[1]);
+  m=s.match(/[?&](?:q|query|name)=([^&]+)/i);if(m){const v=dec(m[1]);if(!/^-?\d{1,2}\.\d+,/.test(v))return v}
+  return"";
+}
+function hav(a,b){const R=6371,t=x=>x*Math.PI/180,dl=t(b.lat-a.lat),dg=t(b.lng-a.lng);const h=Math.sin(dl/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function legEst(a,b){const km=hav(a,b)*1.3;const sp=km<12?32:km<50?65:95;return{km,min:Math.max(3,Math.round(km/sp*60+(km<12?6:4)))}}
+const fMin=m=>m<60?`${m} min`:`${Math.floor(m/60)}h ${pad(m%60)}m`;
+function gmapsUrl(stops){
+  const p=stops.filter(s=>s.lat!=null);
+  if(!p.length)return stops[0]?.link||"";
+  const ll=s=>`${s.lat},${s.lng}`;
+  if(p.length===1)return`https://www.google.com/maps/search/?api=1&query=${ll(p[0])}`;
+  const w=p.slice(1,-1).map(ll).join("|");
+  return`https://www.google.com/maps/dir/?api=1&origin=${ll(p[0])}&destination=${ll(p[p.length-1])}${w?"&waypoints="+encodeURIComponent(w):""}&travelmode=driving`;
+}
+const ROUTES=new Map(ls.get("yg-routes",[]));
+function routeFor(stops){
+  const pts=(stops||[]).filter(s=>s.lat!=null);if(pts.length<2)return null;
+  const sig=pts.map(p=>(+p.lat).toFixed(5)+","+(+p.lng).toFixed(5)).join(";");const c=ROUTES.get(sig);
+  if(c&&c!=="pending")return c==="fail"?null:c;
+  if(!c&&navigator.onLine!==false){ROUTES.set(sig,"pending");
+    fetch(`https://router.project-osrm.org/route/v1/driving/${pts.map(p=>p.lng+","+p.lat).join(";")}?overview=simplified&geometries=geojson`).then(r=>r.json()).then(j=>{
+      if(j.code!=="Ok"||!j.routes?.[0])throw 0;const r=j.routes[0];
+      ROUTES.set(sig,{km:r.distance/1000,min:Math.round(r.duration/60),legs:r.legs.map(l=>({km:l.distance/1000,min:Math.round(l.duration/60)})),coords:r.geometry.coordinates.map(([a,b])=>[+b.toFixed(5),+a.toFixed(5)])});
+      ls.set("yg-routes",[...ROUTES].filter(([,v])=>typeof v==="object").slice(-40));schedule();
+    }).catch(()=>{ROUTES.set(sig,"fail");schedule()});
+  }
+  return null;
+}
+
+/* ---------- store: Firebase (shared) or demo (this device) ---------- */
+const COLS=["members","plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments"];
+const D={chats:[],msgs:[],priv:{labels:{}}};COLS.forEach(c=>D[c]=[]);
+let ME=null,MODE="loading",FS=null,AUTH=null,JOIN_ERR="";
+const unsubs=[];const msgSubs=new Map();const msgData=new Map();
+const configured=()=>!!(window.FIREBASE_CONFIG&&FIREBASE_CONFIG.apiKey&&FIREBASE_CONFIG.projectId&&window.firebase);
+const Store={
+  ready:false,
+  init(){
+    if(!configured()){Demo.start();return}
+    try{firebase.initializeApp(FIREBASE_CONFIG);FS=firebase.firestore();AUTH=firebase.auth()}catch(e){console.error(e);Demo.start();return}
+    FS.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+    AUTH.onAuthStateChanged(async u=>{
+      Store.stop();
+      if(!u){ME=null;MODE="auth";render();return}
+      ME=u.uid;MODE="loading";render();
+      let md=null;try{md=await FS.doc("members/"+u.uid).get()}catch(e){}
+      if(md&&md.exists)Store.live();else{MODE="join";render()}
+    });
+  },
+  stop(){unsubs.splice(0).forEach(f=>f());msgSubs.forEach(f=>f());msgSubs.clear();msgData.clear();COLS.forEach(c=>D[c]=[]);D.chats=[];D.msgs=[];D.priv={labels:{}};Store.ready=false},
+  live(){
+    MODE="live";const seen=new Set();
+    const done=c=>{seen.add(c);if(seen.size>=COLS.length+1)Store.ready=true;schedule()};
+    const fail=e=>{console.error(e);toast(e.code==="permission-denied"?"You don't have access. Check your crew code.":"Sync paused. Check your connection.")};
+    COLS.forEach(c=>unsubs.push(FS.collection(c).onSnapshot(s=>{D[c]=s.docs.map(d=>({id:d.id,...d.data()}));done(c)},fail)));
+    unsubs.push(FS.collection("chats").where("members","array-contains",ME).onSnapshot(s=>{D.chats=s.docs.map(d=>({id:d.id,...d.data()}));Store.syncMsgSubs();done("chats")},fail));
+    unsubs.push(FS.doc("priv/"+ME).onSnapshot(s=>{D.priv=s.exists?{labels:{},...s.data()}:{labels:{}};schedule()},()=>{}));
+    render();
+  },
+  syncMsgSubs(){
+    const ids=new Set(D.chats.map(c=>c.id));
+    for(const[id,f]of msgSubs)if(!ids.has(id)){f();msgSubs.delete(id);msgData.delete(id)}
+    for(const id of ids)if(!msgSubs.has(id))msgSubs.set(id,FS.collection(`chats/${id}/msgs`).orderBy("at","desc").limit(300).onSnapshot(s=>{msgData.set(id,s.docs.map(d=>({id:d.id,chatId:id,...d.data()})));D.msgs=[...msgData.values()].flat();schedule()},()=>{}));
+  },
+  path(c,id,obj){return c==="msgs"?`chats/${obj.chatId}/msgs/${id}`:`${c}/${id}`},
+  async add(c,obj){const id=obj.id||rid();delete obj.id;await Store.set(c,id,obj);return id},
+  async set(c,id,obj){if(MODE==="demo")return Demo.set(c,id,obj);try{await FS.doc(Store.path(c,id,obj)).set(obj)}catch(e){Store.err(e)}},
+  async upd(c,id,patch){if(MODE==="demo")return Demo.upd(c,id,patch);try{await FS.doc(`${c}/${id}`).update(patch)}catch(e){Store.err(e)}},
+  async del(c,id){if(MODE==="demo")return Demo.del(c,id);try{await FS.doc(`${c}/${id}`).delete()}catch(e){Store.err(e)}},
+  async setLabel(busyId,label){if(MODE==="demo")return;try{await FS.doc("priv/"+ME).set({labels:{[busyId]:label}},{merge:true})}catch(e){}},
+  async joinChat(cid){if(MODE==="demo"){const c=D.chats.find(x=>x.id===cid);if(c&&!c.members.includes(ME))Demo.upd("chats",cid,{members:[...c.members,ME]});return true}
+    try{const snap=await FS.doc("chats/"+cid).get();if(!snap.exists)return false;if(!(snap.data().members||[]).includes(ME))await FS.doc("chats/"+cid).update({members:firebase.firestore.FieldValue.arrayUnion(ME)});return true}catch(e){return false}},
+  err(e){console.error(e);if(e?.code==="permission-denied")toast("Not allowed. Are you in the crew?");else if(e?.code==="resource-exhausted")toast("Free storage limit reached. Delete some photos.");else toast("Couldn't save. Check your connection and try again.")}
+};
+const DEL={__del:true};
+const Demo={
+  key:"yallaguys-demo-v1",
+  start(){MODE="demo";ME=ls.get("yg-actas","me-demo");Store.ready=true;const s=ls.get(Demo.key,null);if(s&&s.members){[...COLS,"chats","msgs"].forEach(c=>D[c]=s[c]||[])}else Demo.seed();schedule()},
+  save(){const o={};[...COLS,"chats","msgs"].forEach(c=>o[c]=D[c]);ls.set(Demo.key,o)},
+  set(c,id,obj){D[c]=D[c].filter(d=>d.id!==id).concat([{id,...obj}]);Demo.save();schedule()},
+  upd(c,id,p){D[c]=D[c].map(d=>{if(d.id!==id)return d;const n=JSON.parse(JSON.stringify(d));for(const[k,v]of Object.entries(p)){const ks=k.split(".");let o=n;for(const x of ks.slice(0,-1))o=o[x]=o[x]||{};if(v===DEL)delete o[ks.at(-1)];else o[ks.at(-1)]=v}return n});Demo.save();schedule()},
+  del(c,id){D[c]=D[c].filter(d=>d.id!==id);Demo.save();schedule()},
+  seed(){
+    const t=new Date(),add=n=>{const d=new Date(t);d.setDate(d.getDate()+n);return ymd(d)};
+    const sat=(()=>{const d=new Date(t);d.setDate(d.getDate()+((6-d.getDay()+7)%7||7));return d})();
+    const satS=ymd(sat),sunS=ymd(new Date(sat.getTime()+864e5)),nextSat=ymd(new Date(sat.getTime()+7*864e5));
+    D.members=[{id:"me-demo",nick:"Me (demo)",emoji:"😎",color:MEMBER_COLORS[0],joined:1},{id:"m-sara",nick:"Sara (example)",emoji:"🌴",color:MEMBER_COLORS[2],joined:2},{id:"m-omar",nick:"Omar (example)",emoji:"🦅",color:MEMBER_COLORS[1],joined:3},{id:"m-lina",nick:"Lina (example)",emoji:"🍉",color:MEMBER_COLORS[6],joined:4}];
+    D.plans=[
+      {id:"p1",title:"Hatta day trip",emoji:"🏔️",desc:"Kayak at the dam, lunch at the heritage village, sunset drive back. Example plan, edit or delete it.",by:"m-sara",at:now()-864e5*2,status:"poll",
+       stops:[{name:"Dubai Marina Walk",lat:25.0805,lng:55.1403},{name:"Hatta Dam",lat:24.8130,lng:56.1260}],
+       slots:[{id:"s1",date:satS,start:"07:00",end:"18:00"},{id:"s2",date:sunS,start:"08:00",end:"19:00"},{id:"s3",date:nextSat,start:"07:00",end:"18:00"}],
+       est:[{label:"Kayak rental",amount:60},{label:"Fuel (split)",amount:35},{label:"Lunch",amount:70}],final:null},
+      {id:"p2",title:"Karak & Kite Beach",emoji:"☕️",desc:"Chill evening, bring a speaker. Example plan.",by:"me-demo",at:now()-864e5,status:"set",
+       stops:[{name:"Kite Beach",lat:25.1580,lng:55.1980},{name:"La Mer",lat:25.2285,lng:55.2530}],slots:[{id:"s1",date:add(3),start:"19:30",end:"23:00"}],
+       est:[{label:"Food",amount:45}],final:{date:add(3),start:"19:30",end:"23:00"}}];
+    D.rsvps=[{id:"p1__m-sara",planId:"p1",uid:"m-sara",going:"in",slots:["s1","s3"]},{id:"p1__m-omar",planId:"p1",uid:"m-omar",going:"maybe",slots:["s1"]},{id:"p1__m-lina",planId:"p1",uid:"m-lina",going:"in",slots:["s2","s3"]},
+      {id:"p2__me-demo",planId:"p2",uid:"me-demo",going:"in",slots:["s1"]},{id:"p2__m-sara",planId:"p2",uid:"m-sara",going:"in",slots:["s1"]}];
+    D.media=[{id:"md1",planId:"p1",by:"m-omar",at:now()-864e5,kind:"reel",url:"https://www.instagram.com/reel/example/",caption:"Hatta kayak spot we saw (example link)",phase:"idea"}];
+    D.notes=[{id:"n1",planId:"p1",by:"m-lina",at:now()-36e5*20,text:"Bring sunscreen and cash for the kayak place."}];
+    D.busy=[{id:"b1",uid:"m-omar",date:satS,start:"10:00",end:"14:00",label:""},{id:"b2",uid:"me-demo",date:add(1),start:"18:00",end:"20:00",label:"Gym"}];
+    D.expenses=[{id:"e1",planId:"p2",title:"Karak & chips (example)",amount:84,paidBy:"m-sara",split:["me-demo","m-sara","m-omar","m-lina"],at:now()-36e5*5,by:"m-sara"}];
+    const ph=(e,a,b)=>dummyPhoto(e,a,b);
+    Object.assign(D.members[1],{bio:"Beach > mall. Always down for karak 🧋",vibe:"🌊 beach mode",birthday:"03-14",song:"Ya Lili – Balti",spot:"Kite Beach",likes:["karak","sunsets","padel"],stickers:["🌸","🧋","🌴","✨"]});
+    Object.assign(D.members[2],{bio:"Organiser of nothing. Shows up to everything.",vibe:"🏎️ Yas weekend",birthday:"09-02",song:"Blinding Lights",spot:"Yas Marina",likes:["F1","shawarma","FIFA"],stickers:["🏎️","🔥","🎮"]});
+    Object.assign(D.members[3],{bio:"Will take 200 photos of the same sunset",vibe:"📸 golden hour",birthday:"12-21",song:"Espresso",spot:"Alserkal Avenue",likes:["film cams","matcha","thrifting"],stickers:["🍉","📸","🎀","💫"]});
+    Object.assign(D.members[0],{bio:"",likes:[],stickers:[]});
+    const y=add(-1),y2=add(-2),td=TODAY();
+    D.moments=[
+      {id:"mo1",by:"m-sara",at:now()-36e5*2,day:td,src:ph("🌅","#F29A4A","#B5307A"),caption:"Sunset run at Kite Beach (example)",reacts:{"m-omar":"🔥","m-lina":"😍"}},
+      {id:"mo2",by:"m-lina",at:now()-36e5*5,day:td,src:ph("🧋","#6D4FC2","#2F6FB5"),caption:"Third matcha today, no regrets (example)",reacts:{"m-sara":"😂"}},
+      {id:"mo3",by:"m-omar",at:now()-864e5-36e5*3,day:y,src:ph("🏎️","#C2372F","#111820"),caption:"Yas circuit day (example)",reacts:{"m-sara":"😮","me-demo":"🔥"}},
+      {id:"mo4",by:"me-demo",at:now()-864e5-36e5*6,day:y,src:ph("🌴","#0B7A75","#7A8B1E"),caption:"Example moment from you",reacts:{"m-lina":"❤️"}},
+      {id:"mo5",by:"me-demo",at:now()-864e5*2,day:y2,src:ph("🍽️","#C9661A","#6D4FC2"),caption:"Shawarma o'clock",reacts:{}}];
+    D.mcomments=[{id:"mc1",momentId:"mo1",by:"m-omar",text:"Invite next time 😤",at:now()-36e5},{id:"mc2",momentId:"mo3",by:"m-lina",text:"Who won??",at:now()-864e5}];
+    D.chats=[{id:"c1",name:"The Guys",emoji:"🔥",members:["me-demo","m-sara","m-omar","m-lina"],by:"me-demo",at:now()-864e5*3}];
+    D.chats.push({id:"dm1",name:"",dm:true,members:["me-demo","m-lina"],by:"m-lina",at:now()-864e5,planId:""});
+    D.msgs=[{id:"d1",chatId:"dm1",by:"m-lina",text:"Are you coming Saturday? 👀",at:now()-36e5*6},{id:"g1",chatId:"c1",by:"m-sara",text:"Vote on the Hatta dates pls!",at:now()-36e5*3},{id:"g2",chatId:"c1",by:"m-omar",text:"Saturday morning I'm busy till 2 😭",at:now()-36e5*2}];
+    Demo.save();
+  }
+};
+
+/* ---------- derived ---------- */
+const mem=id=>D.members.find(m=>m.id===id);
+const nick=id=>id===ME?"You":(mem(id)?.nick||"Someone");
+const avatar=(id,cls="",style="")=>{const m=mem(id);return`<span class="av ${cls}" style="background:${esc(m?.color||"#7A8794")};${style}" title="${esc(nick(id))}">${m?.photo?`<img src="${esc(m.photo)}" alt="">`:esc(m?.emoji||"🙂")}</span>`};
+function dummyPhoto(e,a,b){try{const c=document.createElement("canvas");c.width=480;c.height=640;const x=c.getContext("2d");const g=x.createLinearGradient(0,0,480,640);g.addColorStop(0,a);g.addColorStop(1,b);x.fillStyle=g;x.fillRect(0,0,480,640);
+  for(let i=0;i<14;i++){x.fillStyle=`rgba(255,255,255,${.04+Math.random()*.08})`;x.beginPath();x.arc(Math.random()*480,Math.random()*640,20+Math.random()*90,0,7);x.fill()}
+  x.font="200px serif";x.textAlign="center";x.textBaseline="middle";x.fillText(e,240,320);return c.toDataURL("image/jpeg",.7)}catch{return""}}
+const avStack=(ids,cls="sm",max=5)=>`<span class="stack">${ids.slice(0,max).map(i=>avatar(i,cls)).join("")}${ids.length>max?`<span class="av ${cls}" style="background:var(--surface2);color:var(--fg)">+${ids.length-max}</span>`:""}</span>`;
+const planById=id=>D.plans.find(p=>p.id===id);
+const rsvpsOf=pid=>D.rsvps.filter(r=>r.planId===pid);
+const myRsvp=pid=>D.rsvps.find(r=>r.planId===pid&&r.uid===ME);
+const goingOf=pid=>rsvpsOf(pid).filter(r=>r.going==="in").map(r=>r.uid);
+const mediaOf=pid=>D.media.filter(m=>m.planId===pid).sort((a,b)=>a.at-b.at);
+const coverOf=p=>mediaOf(p.id).find(m=>m.kind==="photo")?.src;
+const myLabel=b=>D.priv.labels?.[b.id]||b.label||"";
+const planStatus=p=>{if(p.status==="done")return"done";if(p.final){return p.final.date<TODAY()?"past":"set"}return"poll"};
+const statusPill=p=>({poll:'<span class="pill vote">Voting</span>',set:'<span class="pill set">Locked in</span>',past:'<span class="pill done">Happened</span>',done:'<span class="pill done">Done</span>'})[planStatus(p)];
+function conflictsFor(date,start,end,excludePlan){
+  const sp=span(start,end),out=new Map();
+  for(const b of D.busy)if(b.date===date&&overlap(sp,span(b.start,b.end)))out.set(b.uid,b.uid===ME&&myLabel(b)?myLabel(b):"busy");
+  for(const p of D.plans){if(p.id===excludePlan||!p.final||p.final.date!==date)continue;if(!overlap(sp,span(p.final.start,p.final.end)))continue;for(const u of goingOf(p.id))if(!out.has(u))out.set(u,"at "+p.title)}
+  return[...out].map(([uid,why])=>({uid,why}));
+}
+function balances(){
+  const bal={};D.members.forEach(m=>bal[m.id]=0);
+  for(const e of D.expenses){const sp=(e.split||[]).filter(Boolean);if(!sp.length)continue;const sh=(+e.amount||0)/sp.length;bal[e.paidBy]=(bal[e.paidBy]||0)+(+e.amount||0);sp.forEach(u=>bal[u]=(bal[u]||0)-sh)}
+  for(const s of D.settles){bal[s.from]=(bal[s.from]||0)+(+s.amount||0);bal[s.to]=(bal[s.to]||0)-(+s.amount||0)}
+  return bal;
+}
+function settlePlan(bal){
+  const cr=[],db=[];for(const[u,v]of Object.entries(bal)){if(v>0.009)cr.push([u,v]);else if(v<-0.009)db.push([u,-v])}
+  cr.sort((a,b)=>b[1]-a[1]);db.sort((a,b)=>b[1]-a[1]);const out=[];let i=0,j=0;
+  while(i<db.length&&j<cr.length){const a=Math.min(db[i][1],cr[j][1]);out.push({from:db[i][0],to:cr[j][0],amount:Math.round(a*100)/100});db[i][1]-=a;cr[j][1]-=a;if(db[i][1]<0.01)i++;if(cr[j][1]<0.01)j++}
+  return out;
+}
+const chatOther=c=>c.dm?(c.members||[]).find(u=>u!==ME)||ME:null;
+const chatName=c=>c.dm?nick(chatOther(c)):(c.name||"Chat");
+const chatIcon=(c,big)=>c.dm?avatar(chatOther(c),"",big?"width:46px;height:46px;font-size:22px":""):`<span class="gav">${esc(c.emoji||"💬")}</span>`;
+const momentsBy=u=>D.moments.filter(m=>m.by===u).sort((a,b)=>b.at-a.at);
+const postedToday=u=>D.moments.some(m=>m.by===u&&m.day===TODAY());
+function streakOf(u){const days=new Set(momentsBy(u).map(m=>m.day));let d=new Date();if(!days.has(ymd(d)))d.setDate(d.getDate()-1);let n=0;while(days.has(ymd(d))){n++;d.setDate(d.getDate()-1)}return n}
+const mySaved=()=>mem(ME)?.saved||[];
+const myChats=()=>D.chats.filter(c=>(c.members||[]).includes(ME)).sort((a,b)=>lastAt(b)-lastAt(a));
+const chatMsgs=cid=>D.msgs.filter(m=>m.chatId===cid).sort((a,b)=>a.at-b.at);
+const lastAt=c=>{const m=chatMsgs(c.id);return m.length?m[m.length-1].at:c.at};
+const unread=c=>{const seen=ls.get("yg-seen",{})[c.id]||0;return chatMsgs(c.id).filter(m=>m.at>seen&&m.by!==ME).length};
+const markSeen=cid=>{const s=ls.get("yg-seen",{});s[cid]=now();ls.set("yg-seen",s)};
+
+/* ---------- app state + render ---------- */
+const UI={tab:(t=>t==="map"?"plans":t)(ls.get("yg-tab","plans")),planFilter:"active",calMonth:null,calDay:TODAY(),mapFilter:"upcoming",moneyPlan:"",authTab:"signup"};
+const stack=[];
+let pending=false;
+function schedule(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;render()})}
+function keepInputs(root,fn){
+  const vals={};$$("input[id],textarea[id],select[id]",root).forEach(el=>{vals[el.id]=el.type==="checkbox"?el.checked:el.value});
+  const f=document.activeElement,fid=f&&root.contains(f)?f.id:null,sel=fid&&f.selectionStart!=null?[f.selectionStart,f.selectionEnd]:null;
+  fn();
+  for(const[id,v]of Object.entries(vals)){const el=root.querySelector("#"+CSS.escape(id));if(el&&el.type!=="file"){if(el.type==="checkbox")el.checked=v;else el.value=v}}
+  if(fid){const el=root.querySelector("#"+CSS.escape(fid));if(el){el.focus({preventScroll:true});if(sel)try{el.setSelectionRange(...sel)}catch{}}}
+}
+function render(){
+  const inApp=MODE==="live"||MODE==="demo";
+  $("nav.tabs").hidden=!inApp;$("#meBtn").hidden=true;$("#fab").hidden=true;
+  const v=$("#view");
+  if(MODE==="loading"){v.innerHTML=`<div class="loading"><div class="spin"></div><div>Loading your crew…</div></div>`;return}
+  if(MODE==="auth"){keepInputs(v,()=>{v.innerHTML=authView()});return}
+  if(MODE==="join"){keepInputs(v,()=>{v.innerHTML=joinView()});return}
+  const meDoc=mem(ME);
+  const mb=$("#meBtn");mb.hidden=!meDoc;mb.dataset.id=ME;if(meDoc)mb.innerHTML=`${avatar(ME)}<span>${esc(meDoc.nick)}</span>`;
+  renderTabs();
+  keepInputs(v,()=>{v.innerHTML=banners()+(VIEWS[UI.tab]||VIEWS.plans)()});
+  afterView();
+  $("#fab").hidden=!(UI.tab==="plans"&&meDoc);
+  for(const s of stack)if(SHEETS[s.kind].live)paintSheet(s);
+}
+const STANDALONE=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+function installCard(){
+  if(STANDALONE||ls.get("yg-install-hide",false))return"";
+  const ios=/iPhone|iPad|iPod/i.test(navigator.userAgent);
+  return`<div class="install"><img src="apple-touch-icon.png" alt=""><div style="flex:1;min-width:0"><b>Put Yalla Guys on your home screen</b><br>${ios?"In Safari tap <b>Share</b> (square with arrow) → <b>Add to Home Screen</b>.":"In Chrome tap <b>⋮</b> → <b>Add to Home screen</b> (or <b>Install app</b>)."} It then opens full screen with no browser bars.</div><button class="x" data-act="hideInstall" aria-label="Dismiss">✕</button></div>`;
+}
+function banners(){
+  return installCard()+(MODE==="demo"?`<div class="banner"><b>Demo mode.</b> Changes stay on this phone and the people shown are examples. Add your Firebase settings to the file to share it with the guys (see the setup steps).</div>`:"");
+}
+function renderTabs(){
+  const tabs=[["plans","Plans"],["moments","Moments"],["cal","Calendar"],["chat","Chats"],["money","Money"]];
+  const un=myChats().reduce((n,c)=>n+unread(c),0);
+  $("#tabs").innerHTML=tabs.map(([k,l])=>`<button data-act="tab" data-k="${k}" aria-current="${UI.tab===k}">${ICON[k]}<span>${l}</span>${k==="chat"&&un?`<span class="badge">${un>9?"9+":un}</span>`:""}</button>`).join("");
+}
+
+/* ---------- auth + join ---------- */
+function authView(){
+  const su=UI.authTab==="signup";
+  return`<div class="auth"><div class="auth-hero"><div class="auth-logo">Yalla<span>Guys</span></div><p>Plans, polls, maps and splitting the bill. For the crew only.</p></div>
+  <div class="seg" style="margin-bottom:16px"><button data-act="authTab" data-k="signup" aria-pressed="${su}">Create account</button><button data-act="authTab" data-k="login" aria-pressed="${!su}">Log in</button></div>
+  <form class="form" id="authForm" novalidate>
+    <label class="f">Email<input class="inp" id="auEmail" type="email" autocomplete="email" inputmode="email" required></label>
+    <label class="f">Password${su?" (6+ characters)":""}<input class="inp" id="auPass" type="password" autocomplete="${su?"new-password":"current-password"}" minlength="6" required></label>
+    <button class="btn pri block" id="auBtn" type="submit" style="min-height:52px">${su?"Create account":"Log in"}</button>
+    ${su?"":`<button class="btn ghost" type="button" data-act="forgot">Forgot password?</button>`}
+    <p class="meta" id="auErr" role="alert" style="margin:0;color:var(--danger)"></p>
+  </form></div>`;
+}
+function joinView(){
+  const st=UI.join||(UI.join={emoji:EMOJIS[Math.floor(Math.random()*EMOJIS.length)],color:MEMBER_COLORS[Math.floor(Math.random()*MEMBER_COLORS.length)]});
+  return`<div class="auth"><div class="auth-hero"><div class="auth-logo">Yalla<span>Guys</span></div><p>Almost in. Set up your profile and enter the crew code you got from whoever invited you.</p></div>
+  <div class="form">
+    <div style="display:grid;place-items:center"><span class="av" style="width:84px;height:84px;font-size:42px;background:${st.color}">${st.emoji}</span></div>
+    <label class="f">Name the guys will see<input class="inp" id="jnNick" maxlength="24" placeholder="e.g. Jay" autocomplete="nickname"></label>
+    <div class="f">Avatar<div class="emo-pick">${EMOJIS.map(e=>`<button data-act="jnEmoji" data-v="${e}" aria-pressed="${st.emoji===e}">${e}</button>`).join("")}</div></div>
+    <div class="f">Colour<div class="row">${MEMBER_COLORS.map(c=>`<button data-act="jnColor" data-v="${c}" aria-label="Colour" style="width:40px;height:40px;border-radius:50%;border:${st.color===c?"3px solid var(--fg)":"2px solid var(--line)"};background:${c}"></button>`).join("")}</div></div>
+    <label class="f">Crew code<input class="inp" id="jnCode" autocapitalize="off" autocomplete="off" placeholder="Ask the group"></label>
+    <button class="btn pri block" data-act="jnSave" style="min-height:52px">Join the crew</button>
+    <p class="meta" role="alert" style="margin:0;color:var(--danger)">${esc(JOIN_ERR)}</p>
+    <button class="btn ghost" data-act="logout">Log out</button>
+  </div></div>`;
+}
+const authMsg=e=>({"auth/email-already-in-use":"That email already has an account. Tap Log in.","auth/invalid-email":"That email doesn't look right.","auth/weak-password":"Use at least 6 characters.","auth/wrong-password":"Wrong email or password.","auth/invalid-credential":"Wrong email or password.","auth/user-not-found":"No account with that email. Tap Create account.","auth/too-many-requests":"Too many tries. Wait a minute and try again.","auth/network-request-failed":"No connection. Check your internet."})[e?.code]||"Something went wrong. Try again.";
+document.addEventListener("submit",async ev=>{
+  if(ev.target.id!=="authForm")return;ev.preventDefault();
+  const em=val("auEmail"),pw=$("#auPass").value,err=$("#auErr"),btn=$("#auBtn");err.textContent="";
+  if(!em||!pw)return err.textContent="Enter your email and password.";
+  btn.disabled=true;
+  try{if(UI.authTab==="signup")await AUTH.createUserWithEmailAndPassword(em,pw);else await AUTH.signInWithEmailAndPassword(em,pw)}
+  catch(e){err.textContent=authMsg(e);btn.disabled=false}
+});
+
+/* ---------- views ---------- */
+const VIEWS={};
+VIEWS.plans=()=>{
+  const all=[...D.plans],f=UI.planFilter;
+  let list=all.filter(p=>{const s=planStatus(p);return f==="active"?(s==="poll"||s==="set"):(s==="past"||s==="done")});
+  list.sort((a,b)=>{const da=a.final?.date||a.slots?.[0]?.date||"9",db=b.final?.date||b.slots?.[0]?.date||"9";return f==="active"?da.localeCompare(db):db.localeCompare(da)});
+  const voting=all.filter(p=>planStatus(p)==="poll"&&!(myRsvp(p.id)?.slots||[]).length).length;
+  return`<div class="view-title"><h1>Plans</h1>${voting?`<span class="pill vote">${voting} need${voting>1?"":"s"} your vote</span>`:""}</div>
+  <div class="seg" style="margin-bottom:14px"><button data-act="planFilter" data-k="active" aria-pressed="${f==="active"}">Coming up</button><button data-act="planFilter" data-k="past" aria-pressed="${f==="past"}">Done</button><button data-act="planFilter" data-k="map" aria-pressed="${f==="map"}">🗺️ Map</button></div>
+  ${f==="map"?`<div id="mapSlot"></div><div id="mapList" class="list" style="gap:8px;margin-top:12px"></div>`:`<div class="list">${list.length?list.map(planCard).join(""):`<div class="empty"><h3>${f==="active"?"No plans yet":"No memories yet"}</h3>${f==="active"?"Tap <b>+ Make plan</b> to suggest somewhere to go. Add dates, the guys vote, and it lands on everyone's calendar.":"Plans move here after their date. Add photos and split the bill from the plan page."}</div>`}</div>`}`;
+};
+function planCard(p){
+  const cov=coverOf(p),g=goingOf(p.id),st=planStatus(p);
+  const estTot=(p.est||[]).reduce((s,e)=>s+(+e.amount||0),0);
+  const when=p.final?`${fDate(p.final.date)} · ${fRange(p.final.start,p.final.end)}`:`${(p.slots||[]).length} date${(p.slots||[]).length===1?"":"s"} proposed`;
+  const bg=cov?`background-image:url('${esc(cov)}')`:`background:linear-gradient(135deg,${hue(p.id)},color-mix(in srgb,${hue(p.id)} 55%,#000))`;
+  return`<button class="pcard" data-act="openPlan" data-id="${esc(p.id)}">
+    <div class="cover" style="${bg}"><span class="emo">${esc(p.emoji||"📍")}</span></div>
+    <div class="body"><div class="between"><h3>${esc(p.title)}</h3>${statusPill(p)}</div>
+    <div class="meta">${esc(when)}${(p.stops||[]).length?` · ${p.stops.length} stop${p.stops.length>1?"s":""}`:""}${estTot?` · ~${dhs(estTot)} pp`:""}</div>
+    <div class="between"><div class="row">${g.length?avStack(g)+`<span class="meta">${g.length} going</span>`:`<span class="meta">No one in yet</span>`}</div>${st==="poll"&&!(myRsvp(p.id)?.slots||[]).length?'<span class="pill vote">Vote</span>':""}</div></div></button>`;
+}
+VIEWS.cal=()=>{
+  const m=UI.calMonth||TODAY().slice(0,7);UI.calMonth=m;
+  const[y,mo]=m.split("-").map(Number);const first=new Date(y,mo-1,1);const startDow=(first.getDay()+6)%7;
+  const start=new Date(y,mo-1,1-startDow);const cells=[];
+  for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);cells.push(d)}
+  const rows=cells[35].getMonth()!==mo-1?35:42;
+  const dayInfo=ds=>({plan:D.plans.some(p=>p.final?.date===ds),poll:D.plans.some(p=>!p.final&&(p.slots||[]).some(s=>s.date===ds)),me:D.busy.some(b=>b.uid===ME&&b.date===ds),oth:D.busy.some(b=>b.uid!==ME&&b.date===ds)});
+  const grid=cells.slice(0,rows).map(d=>{const ds=ymd(d),i=dayInfo(ds);return`<button class="day ${d.getMonth()!==mo-1?"out":""} ${ds===TODAY()?"today":""}" data-act="calDay" data-d="${ds}" aria-pressed="${UI.calDay===ds}" aria-label="${fDate(ds,{weekday:"long",day:"numeric",month:"long"})}"><span class="dn">${d.getDate()}</span><span class="dots">${i.plan?'<i class="dot-plan"></i>':""}${i.poll?'<i class="dot-poll"></i>':""}${i.me?'<i class="dot-me"></i>':""}${i.oth?'<i class="dot-oth"></i>':""}</span></button>`}).join("");
+  return`<div class="view-title"><h1>Calendar</h1><button class="btn sm pri" data-act="newBusy" data-d="${UI.calDay}">Block my time</button></div>
+  <div class="cal"><div class="cal-h"><button class="back" data-act="calNav" data-n="-1" aria-label="Previous month">${ICON.back}</button><h2>${first.toLocaleDateString("en-GB",{month:"long",year:"numeric"})}</h2><button class="back" data-act="calNav" data-n="1" aria-label="Next month" style="transform:scaleX(-1)">${ICON.back}</button></div>
+  <div class="cal-g">${["MON","TUE","WED","THU","FRI","SAT","SUN"].map(d=>`<div class="dow">${d}</div>`).join("")}${grid}</div>
+  <div class="legend"><span><i class="dot-plan"></i>Plan</span><span><i class="dot-poll"></i>Proposed date</span><span><i class="dot-me"></i>You're busy</span><span><i class="dot-oth"></i>Friend busy</span></div></div>
+  <div class="sec" style="border:0;padding-top:18px"><h2>${fDate(UI.calDay,{weekday:"long",day:"numeric",month:"long"})}</h2>${agenda(UI.calDay)}</div>`;
+};
+function agenda(ds){
+  const items=[];
+  for(const p of D.plans){
+    if(p.final?.date===ds){const g=goingOf(p.id);const cf=conflictsFor(ds,p.final.start,p.final.end,p.id).filter(c=>g.includes(c.uid));
+      items.push({s:p.final.start||"00:00",h:`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}"><span class="stripe" style="background:${hue(p.id)}"></span><span class="tm">${fRange(p.final.start,p.final.end)}</span><span style="flex:1;min-width:0"><b>${esc(p.emoji||"")} ${esc(p.title)}</b><br><span class="meta">${g.length} going${myRsvp(p.id)?.going==="in"?" · you're in":""}</span>${cf.length?`<br><span class="pill warn">Clash: ${cf.map(c=>esc(nick(c.uid))).join(", ")}</span>`:""}</span></button>`})}
+    else if(!p.final)for(const s of p.slots||[])if(s.date===ds){const v=rsvpsOf(p.id).filter(r=>(r.slots||[]).includes(s.id)).length;
+      items.push({s:s.start||"00:00",h:`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}" style="border-style:dashed"><span class="stripe" style="background:var(--sun)"></span><span class="tm">${fRange(s.start,s.end)}</span><span style="flex:1;min-width:0"><b>Proposed: ${esc(p.title)}</b><br><span class="meta">${v} vote${v===1?"":"s"} · tap to vote</span></span></button>`})}
+  }
+  for(const b of D.busy.filter(b=>b.date===ds)){const mine=b.uid===ME,lab=mine?myLabel(b):"";
+    items.push({s:b.start||"00:00",h:`<div class="ev busy"><span class="stripe"></span><span class="tm">${fRange(b.start,b.end)}</span><span style="flex:1;min-width:0">${avatar(b.uid,"xs")} <b>${esc(nick(b.uid))}</b> ${mine?`· ${esc(lab||"Busy")}${lab?'<span class="meta"> (others see "Busy")</span>':""}`:"· Busy"}</span>${mine?`<button class="x" data-act="delBusy" data-id="${esc(b.id)}" aria-label="Remove">✕</button>`:""}</div>`})}
+  items.sort((a,b)=>a.s.localeCompare(b.s));
+  return items.length?`<div class="list" style="gap:8px">${items.map(i=>i.h).join("")}</div>`:`<div class="empty">Nothing on this day. Tap <b>Block my time</b> to mark yourself busy, so the guys see the clash before voting.</div>`;
+}
+VIEWS.map=()=>`<div class="view-title"><h1>Map</h1><div class="seg"><button data-act="mapFilter" data-k="upcoming" aria-pressed="${UI.mapFilter==="upcoming"}">Coming up</button><button data-act="mapFilter" data-k="all" aria-pressed="${UI.mapFilter==="all"}">All</button></div></div>
+  <div id="mapSlot"></div><div id="mapList" class="list" style="gap:8px;margin-top:12px"></div>`;
+const REACTS=["❤️","😂","😍","🔥","😮","😭"];
+function momentCard(x,full){
+  const me=x.by===ME,locked=!me&&x.day===TODAY()&&!postedToday(ME),saved=mySaved().includes(x.id);
+  const rx=Object.entries(x.reacts||{}),counts={};rx.forEach(([u,e])=>counts[e]=(counts[e]||0)+1);const mine=(x.reacts||{})[ME];
+  const nc=D.mcomments.filter(c=>c.momentId===x.id).length;
+  return`<article class="moment"><div class="mh"><button class="prof-btn" data-act="person" data-id="${esc(x.by)}">${avatar(x.by,"sm")}<span><b>${esc(nick(x.by))}</b><br><span class="meta">${new Date(x.at).toLocaleTimeString("en-GB",{hour:"numeric",minute:"2-digit"})}${x.day!==TODAY()?" · "+fDate(x.day):""}</span></span></button><span style="flex:1"></span>
+    <button class="x" data-act="saveMoment" data-id="${esc(x.id)}" aria-label="${saved?"Remove from memories":"Save to memories"}" aria-pressed="${saved}" style="${saved?"color:var(--sun)":""}">${saved?"🔖":"📑"}</button>${me?`<button class="x" data-act="delMoment" data-id="${esc(x.id)}" data-confirm="🗑️?" aria-label="Delete">✕</button>`:""}</div>
+    <div class="ph ${locked?"locked":""}"${locked||full?"":` data-act="openMoment" data-id="${esc(x.id)}" role="button" tabindex="0"`}><img src="${esc(x.src)}" alt="${esc(x.caption||"Moment")}" loading="lazy">${locked?`<div class="lock">🔒<br>Post your moment today to see ${esc(nick(x.by))}'s</div>`:""}</div>
+    ${x.caption&&!locked?`<div class="cap">${esc(x.caption)}</div>`:""}
+    ${locked?"":`<div class="reacts">${REACTS.map(e=>`<button class="rx" data-act="react" data-id="${esc(x.id)}" data-e="${e}" aria-pressed="${mine===e}">${e}${counts[e]?`<small>${counts[e]}</small>`:""}</button>`).join("")}${full?"":`<button class="rx" data-act="openMoment" data-id="${esc(x.id)}">💬<small>${nc||""}</small></button>`}</div>`}</article>`;
+}
+VIEWS.moments=()=>{
+  const st=streakOf(ME),done=postedToday(ME);
+  const byDay={};[...D.moments].sort((a,b)=>b.at-a.at).forEach(m=>(byDay[m.day]=byDay[m.day]||[]).push(m));
+  const days=Object.keys(byDay).sort().reverse().slice(0,14);
+  return`<div class="view-title"><h1>Moments</h1>${st?`<span class="streak">🔥 ${st} day${st>1?"s":""}</span>`:""}</div>
+  ${done?`<div class="banner" style="background:var(--accent-soft)">✅ You posted today. Post more if something fun happens.</div>`:""}
+  <div class="shoot"><div class="big"><b>${done?"Another moment?":"Today's moment"}</b><span style="opacity:.9;font-size:13px">${done?"Share what you're up to right now.":"Snap what you're doing right now. The guys' moments unlock once you post."}</span><br><button class="btn sm" data-act="momentGallery" style="margin-top:8px;background:rgba(255,255,255,.18);color:inherit;border-color:transparent">Pick from photos</button></div><button class="cam" data-act="momentShot" aria-label="Take a photo">📸</button></div>
+  <div class="list" style="margin-top:14px">${days.length?days.map(d=>`<div class="daylabel">${d===TODAY()?"Today":fDate(d,{weekday:"long",day:"numeric",month:"short"})}</div>${byDay[d].map(m=>momentCard(m)).join("")}`).join(""):`<div class="empty"><h3>No moments yet</h3>Be the first: tap 📸 and share what you're doing right now.</div>`}</div>`;
+};
+VIEWS.chat=()=>{
+  const cs=myChats();
+  return`<div class="view-title"><h1>Chats</h1><button class="btn sm pri" data-act="newChat">New group</button></div>
+  <div class="people-row">${D.members.filter(m=>m.id!==ME).map(m=>`<button class="prof-btn" data-act="dm" data-id="${esc(m.id)}" style="flex-direction:column;gap:4px;font-size:11px;font-weight:600;width:60px;flex:none">${avatar(m.id,"","width:52px;height:52px;font-size:24px")}<span style="max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(m.nick||"")}</span></button>`).join("")}</div>
+  <div class="list" style="gap:8px">${cs.length?cs.map(c=>{const ms=chatMsgs(c.id),l=ms[ms.length-1],u=unread(c);return`<button class="chat-row" data-act="openChat" data-id="${esc(c.id)}">${chatIcon(c,1)}<span class="grow"><span class="between"><b>${esc(chatName(c))}</b><span class="meta">${ago(lastAt(c))}</span></span><span class="between"><span class="last">${l?esc((l.by===ME?"You":nick(l.by))+": "+l.text):esc((c.members||[]).length+" people")}</span>${u?`<span class="pill bad">${u}</span>`:""}</span></span></button>`}).join(""):`<div class="empty"><h3>No chats yet</h3>Start a group with some of the guys, or open a plan and tap <b>Plan chat</b>.</div>`}</div>`;
+};
+VIEWS.money=()=>{
+  const bal=balances(),mine=bal[ME]||0,plan=settlePlan(bal);
+  const ex=D.expenses.filter(e=>!UI.moneyPlan||e.planId===UI.moneyPlan).sort((a,b)=>b.at-a.at);
+  const plansWithEx=D.plans.filter(p=>D.expenses.some(e=>e.planId===p.id));
+  return`<div class="view-title"><h1>Money</h1><button class="btn sm pri" data-act="newExpense">Add expense</button></div>
+  <div class="money-hero"><span class="meta">${mine>0.009?"You're owed":mine<-0.009?"You owe":"You're all square"}</span><span class="big ${mine>0.009?"pos":mine<-0.009?"neg":""}">${dhs(Math.abs(mine))}</span><span class="meta">Across ${D.expenses.length} expense${D.expenses.length===1?"":"s"} · ${dhs(D.expenses.reduce((s,e)=>s+(+e.amount||0),0))} spent together</span></div>
+  <div class="sec"><h2>Settle up</h2>${plan.length?`<div class="list" style="gap:8px">${plan.map(s=>`<div class="item">${avatar(s.from,"sm")}<span class="grow"><span class="t">${esc(nick(s.from))} → ${esc(nick(s.to))}</span><br><span class="amt">${dhs(s.amount)}</span></span><button class="btn sm" data-act="settle" data-from="${esc(s.from)}" data-to="${esc(s.to)}" data-amt="${s.amount}">Mark paid</button></div>`).join("")}</div>`:`<div class="meta">Nobody owes anything right now.</div>`}</div>
+  <div class="sec"><div class="between"><h2>Expenses</h2><select class="inp" id="moneyPlan" style="width:auto;min-height:38px;padding:6px 10px;font-size:16px;max-width:55%"><option value="">All plans</option>${plansWithEx.map(p=>`<option value="${esc(p.id)}" ${UI.moneyPlan===p.id?"selected":""}>${esc(p.title)}</option>`).join("")}</select></div>
+  ${ex.length?`<div class="list" style="gap:8px">${ex.map(expenseRow).join("")}</div>`:`<div class="empty">No expenses yet. Add the bill after a hangout and Yalla Guys works out who owes whom, in Dhs.</div>`}</div>
+  ${D.settles.length?`<div class="sec"><h2>Payments</h2><div class="list" style="gap:8px">${[...D.settles].sort((a,b)=>b.at-a.at).slice(0,20).map(s=>`<div class="item"><span class="grow"><span class="t">${esc(nick(s.from))} paid ${esc(nick(s.to))}</span><br><span class="meta">${ago(s.at)}</span></span><span class="amt pos">${dhs(s.amount)}</span><button class="x" data-act="delSettle" data-id="${esc(s.id)}" data-confirm="Undo?" aria-label="Undo payment">✕</button></div>`).join("")}</div></div>`:""}`;
+};
+function expenseRow(e){
+  const p=planById(e.planId),sp=(e.split||[]),share=sp.length?(+e.amount||0)/sp.length:0;
+  const me=sp.includes(ME)?(e.paidBy===ME?`you get back ${dhs((+e.amount||0)-share)}`:`your share ${dhs(share)}`):(e.paidBy===ME?`you get back ${dhs(+e.amount||0)}`:"not in this one");
+  return`<button class="item" data-act="editExpense" data-id="${esc(e.id)}" style="text-align:left;width:100%">${avatar(e.paidBy,"sm")}<span class="grow"><span class="t">${esc(e.title)}</span><br><span class="meta">${esc(nick(e.paidBy))} paid · split ${sp.length} ways${p?` · ${esc(p.title)}`:""} · ${esc(me)}</span></span><span class="amt">${dhs(e.amount)}</span></button>`;
+}
+
+/* ---------- maps ---------- */
+const MAPS={};
+const isDark=()=>matchMedia("(prefers-color-scheme: dark)").matches;
+function baseMap(el,opts={}){
+  if(!window.L){el.innerHTML='<div class="empty" style="height:100%;display:grid;place-items:center">Map couldn\'t load. Check your connection.</div>';return null}
+  const m=L.map(el,{zoomControl:true,attributionControl:true,...opts});
+  m.attributionControl.setPrefix(false);
+  L.tileLayer(isDark()?"https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png":"https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{maxZoom:19,subdomains:"abcd",attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'}).addTo(m);
+  m.setView([25.15,55.25],10);
+  return m;
+}
+const pinIcon=(n,color)=>L.divIcon({className:"",html:`<div class="pin" style="background:${color}"><b>${n}</b></div>`,iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-28]});
+function drawStops(layer,stops,color,onTap){
+  layer.clearLayers();const pts=(stops||[]).filter(s=>s.lat!=null);
+  pts.forEach((s,i)=>{const mk=L.marker([s.lat,s.lng],{icon:pinIcon(pts.length>1?i+1:"•",color)}).addTo(layer);if(onTap)onTap(mk,s,i)});
+  if(pts.length>1){const r=routeFor(stops);
+    if(r)L.polyline(r.coords,{color,weight:5,opacity:.9}).addTo(layer);else L.polyline(pts.map(s=>[s.lat,s.lng]),{color,weight:4,opacity:.7,dashArray:"8 7"}).addTo(layer)}
+  return pts;
+}
+function fit(m,pts){if(!pts.length)return;if(pts.length===1)m.setView([pts[0].lat,pts[0].lng],14);else m.fitBounds(pts.map(p=>[p.lat,p.lng]),{padding:[36,36],maxZoom:15})}
+function miniMap(s,key,el,stops,color){
+  if(!el)return;s.mms=s.mms||{};let mm=s.mms[key];
+  if(!mm){const box=document.createElement("div");box.style.height="100%";el.appendChild(box);const map=baseMap(box,{scrollWheelZoom:false});mm=s.mms[key]={box,map,layer:map&&L.layerGroup().addTo(map)}}
+  else el.appendChild(mm.box);
+  if(!mm.map)return;
+  const r=routeFor(stops),sig=JSON.stringify(stops)+(r?"r":"");
+  setTimeout(()=>{mm.map.invalidateSize();if(mm.sig!==sig){const refit=mm.sig?.split("]")[0]!==sig.split("]")[0];mm.sig=sig;const pts=drawStops(mm.layer,stops,color,(mk,x)=>mk.bindPopup(esc(x.name||"Pin")));if(refit||!mm.fitted){fit(mm.map,pts);mm.fitted=true}}},60);
+}
+function afterView(){
+  if(UI.tab!=="plans"||UI.planFilter!=="map")return;
+  const slot=$("#mapSlot");if(!slot)return;
+  if(!MAPS.main){const el=document.createElement("div");el.className="map-full";MAPS.main={el};slot.appendChild(el);MAPS.main.map=baseMap(el);MAPS.main.layer=MAPS.main.map&&L.layerGroup().addTo(MAPS.main.map)}else slot.appendChild(MAPS.main.el);
+  const{map,layer}=MAPS.main;
+  const ps=D.plans.filter(p=>(p.stops||[]).some(s=>s.lat!=null));
+  if(map){setTimeout(()=>map.invalidateSize(),30);layer.clearLayers();const all=[];
+    ps.forEach(p=>{const sub=L.layerGroup().addTo(layer);all.push(...drawStops(sub,p.stops,hue(p.id),(mk,s)=>mk.bindPopup(`<b>${esc(p.emoji||"")} ${esc(p.title)}</b><br>${esc(s.name||"")}<br><a href="#" data-act="openPlan" data-id="${esc(p.id)}">Open plan</a>`)))});
+    const sig=ps.map(p=>p.id).join();if(MAPS.main.sig!==sig){MAPS.main.sig=sig;fit(map,all)}}
+  $("#mapList").innerHTML=ps.length?ps.map(p=>{const r=routeFor(p.stops);return`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}"><span class="stripe" style="background:${hue(p.id)}"></span><span style="flex:1;min-width:0"><b>${esc(p.emoji||"")} ${esc(p.title)}</b><br><span class="meta">${p.stops.map(s=>esc(s.name||"Pin")).join(" → ")}${r?` · ${r.km.toFixed(0)} km · ${fMin(r.min)}`:""}</span></span>${statusPill(p)}</button>`}).join(""):`<div class="empty">No places pinned yet. Add stops when you make a plan.</div>`;
+}
+
+/* ---------- sheets ---------- */
+const SHEETS={};
+let pushed=0,ignorePop=0;
+function openSheet(kind,args={}){
+  const el=document.createElement("div");el.className="sheet"+(kind==="photo"?" lightbox":"");el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");
+  el.innerHTML=`<div class="sheet-h wrap"><div class="in"></div></div><div class="sheet-b wrap"><div class="in"></div></div><div class="sheet-f wrap" hidden><div class="in"></div></div>`;
+  const s={kind,args,el,state:SHEETS[kind].init?SHEETS[kind].init(args):{},parts:{}};stack.push(s);$("#sheets").appendChild(el);
+  paintSheet(s,true);document.body.style.overflow="hidden";
+  try{history.pushState({yg:stack.length},"");pushed++}catch{}
+  return s;
+}
+function closeSheet(viaPop){
+  const s=stack.pop();if(!s)return;s.el.remove();Object.values(s.mms||{}).forEach(m=>m.map?.remove());SHEETS[s.kind].destroy?.(s);
+  if(!stack.length)document.body.style.overflow="";
+  if(!viaPop&&pushed>0){pushed--;ignorePop++;try{history.back()}catch{ignorePop--}}
+  schedule();
+}
+window.addEventListener("popstate",()=>{if(ignorePop>0){ignorePop--;return}if(pushed>0)pushed--;if(stack.length)closeSheet(true)});
+function paintSheet(s,first){
+  const S=SHEETS[s.kind];const h=S.render(s);
+  const parts={h:`<button class="back" data-act="close" aria-label="Back">${ICON.back}</button><h2>${h.title}</h2>${h.right||""}`,b:h.body,f:h.foot||""};
+  const els={h:$(".sheet-h .in",s.el),b:$(".sheet-b .in",s.el),f:$(".sheet-f .in",s.el)};
+  $(".sheet-f",s.el).hidden=!parts.f;
+  const ae=document.activeElement;const typing=ae&&s.el.contains(ae)&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName);
+  for(const k of["h","b","f"]){
+    if(!first&&s.parts[k]===parts[k])continue;
+    if(!first&&typing&&els[k].contains(ae)){s.dirty=true;continue}
+    if(first)els[k].innerHTML=parts[k];else keepInputs(els[k],()=>{els[k].innerHTML=parts[k]});
+    s.parts[k]=parts[k];
+  }
+  S.after?.(s,first);
+}
+document.addEventListener("focusout",()=>setTimeout(()=>{for(const s of stack)if(s.dirty&&!s.el.contains(document.activeElement)){s.dirty=false;paintSheet(s)}},50));
+const topS=()=>stack[stack.length-1];
+
+/* profile */
+const STICKERS=["🌸","✨","💫","🎀","🧋","🍓","🌴","🌊","🔥","🫶","🐱","🐶","🦋","🌙","⭐️","🍉","🎧","📸","🏎️","⚽️","🎮","🍩","🌵","👑"];
+SHEETS.profile={
+  init(){const m=mem(ME)||{};return{emoji:m.emoji||EMOJIS[0],color:m.color||MEMBER_COLORS[0],photo:m.photo||"",stickers:[...(m.stickers||[])]}},
+  render(s){const m=mem(ME)||{},st=s.state;const email=AUTH?.currentUser?.email;
+    return{title:"Edit profile",body:`<div class="form">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px"><button class="prof-btn" data-act="pfPhoto" aria-label="Change profile photo"><span class="av" style="width:104px;height:104px;font-size:50px;background:${st.color}">${st.photo?`<img src="${esc(st.photo)}" alt="">`:st.emoji}</span></button>
+      <div class="row"><button class="btn sm" data-act="pfPhoto">📷 ${st.photo?"Change photo":"Add photo"}</button>${st.photo?`<button class="btn sm danger" data-act="pfPhotoDel">Remove</button>`:""}</div></div>
+    <label class="f">Name the guys see<input class="inp" id="pfNick" maxlength="24" value="${esc(m.nick||"")}"></label>
+    <label class="f">Bio<textarea class="inp" id="pfBio" maxlength="160" placeholder="A line about you">${esc(m.bio||"")}</textarea></label>
+    <label class="f">Current vibe<input class="inp" id="pfVibe" maxlength="32" value="${esc(m.vibe||"")}" placeholder="e.g. 🌊 beach mode, 📚 exam szn"></label>
+    <div class="grid2"><label class="f">Birthday<input class="inp" id="pfBday" type="date" value="${m.birthday?"2000-"+esc(m.birthday):""}"></label><label class="f">Fav spot<input class="inp" id="pfSpot" maxlength="40" value="${esc(m.spot||"")}" placeholder="e.g. Kite Beach"></label></div>
+    <label class="f">Song on repeat<input class="inp" id="pfSong" maxlength="60" value="${esc(m.song||"")}" placeholder="Song – Artist"></label>
+    <label class="f">Things you love (separate with commas)<input class="inp" id="pfLikes" maxlength="120" value="${esc((m.likes||[]).join(", "))}" placeholder="karak, padel, sunsets"></label>
+    <div class="f">Stickers for your profile (up to 8)<div class="chips">${STICKERS.map(e=>`<button class="chip" style="font-size:20px;padding:4px 10px" data-act="pfSticker" data-v="${e}" aria-pressed="${st.stickers.includes(e)}">${e}</button>`).join("")}</div></div>
+    <div class="f">Avatar emoji (shown when there's no photo)<div class="emo-pick">${EMOJIS.map(e=>`<button data-act="pfEmoji" data-v="${e}" aria-pressed="${st.emoji===e}">${e}</button>`).join("")}</div></div>
+    <div class="f">Colour<div class="row">${MEMBER_COLORS.map(c=>`<button data-act="pfColor" data-v="${c}" aria-label="Colour" style="width:40px;height:40px;border-radius:50%;border:${st.color===c?"3px solid var(--fg)":"2px solid var(--line)"};background:${c}"></button>`).join("")}</div></div>
+    ${email?`<p class="meta" style="margin:0">Signed in as ${esc(email)}</p><button class="btn danger" data-act="logout">Log out</button>`:""}
+    </div>`,foot:`<button class="btn pri block" data-act="pfSave">Save</button>`}}
+};
+SHEETS.postMoment={
+  render(s){return{title:"New moment",body:`<div class="form"><div class="moment"><div class="ph"><img src="${esc(s.args.src)}" alt="Preview"></div></div>
+    <label class="f">Caption (optional)<input class="inp" id="moCap" maxlength="140" placeholder="What's happening?"></label></div>`,foot:`<button class="btn pri block" data-act="postMoment" id="moBtn">Share with the guys</button>`}}
+};
+SHEETS.moment={live:true,
+  render(s){const x=D.moments.find(m=>m.id===s.args.id);if(!x)return{title:"Moment",body:`<div class="empty">This moment was deleted.</div>`};
+    const cs=D.mcomments.filter(c=>c.momentId===x.id).sort((a,b)=>a.at-b.at);
+    const who=Object.entries(x.reacts||{});
+    return{title:`${esc(nick(x.by))} · ${esc(x.day===TODAY()?"Today":fDate(x.day))}`,body:`${momentCard(x,true)}
+      ${who.length?`<div class="row" style="margin-top:10px">${who.map(([u,e])=>`<span class="row" style="gap:4px">${avatar(u,"xs")}<span style="font-size:13px">${e}</span></span>`).join("")}</div>`:""}
+      <div class="sec"><h2>Comments</h2>${cs.map(c=>`<div class="note">${avatar(c.by,"xs")}<div style="flex:1;min-width:0"><div class="meta"><b style="color:var(--fg)">${esc(nick(c.by))}</b> · ${ago(c.at)}</div><p>${esc(c.text)}</p></div>${c.by===ME?`<button class="x" data-act="delComment" data-id="${esc(c.id)}" aria-label="Delete comment">✕</button>`:""}</div>`).join("")||`<div class="meta">No comments yet.</div>`}</div>`,
+      foot:`<textarea class="compose" id="mcIn-${esc(x.id)}" rows="1" placeholder="Add a comment"></textarea><button class="send" data-act="addComment" data-id="${esc(x.id)}" aria-label="Post comment">${ICON.send}</button>`}}
+};
+/* person profile */
+SHEETS.person={live:true,
+  render(s){const id=s.args.id,m=mem(id);if(!m)return{title:"Profile",body:`<div class="empty">This person isn't in the crew.</div>`};const me=id===ME;
+    const mine=momentsBy(id),saved=me?D.moments.filter(x=>mySaved().includes(x.id)).sort((a,b)=>b.at-a.at):[];
+    const plansIn=D.rsvps.filter(r=>r.uid===id&&r.going==="in").length;
+    const bd=m.birthday?pd("2000-"+m.birthday).toLocaleDateString("en-GB",{day:"numeric",month:"long"}):"";
+    const grid=list=>`<div class="media-grid">${list.map(x=>`<button data-act="openMoment" data-id="${esc(x.id)}" aria-label="Moment from ${esc(fDate(x.day))}"><img src="${esc(x.src)}" alt="" loading="lazy"><span style="position:absolute;left:6px;bottom:5px;color:#fff;font-size:11px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.6)">${esc(fDate(x.day,{day:"numeric",month:"short"}))}</span></button>`).join("")}</div>`;
+    const facts=[["🎂","Birthday",bd],["📍","Fav spot",m.spot],["🎵","On repeat",m.song]].filter(f=>f[2]);
+    return{title:me?"My profile":esc(m.nick),right:me?`<button class="btn sm" data-act="profile">Edit</button>`:"",body:`
+      <div class="prof-hero">${(m.stickers||[]).length?`<div class="stickers">${m.stickers.map((e,i)=>`<span style="--r:${(i%2?1:-1)*(6+i*3)}deg">${e}</span>`).join("")}</div>`:""}
+        ${avatar(id)}<h1>${esc(m.nick)}</h1>${m.vibe?`<span class="vibe">${esc(m.vibe)}</span>`:""}${m.bio?`<p style="margin:0;max-width:34ch;color:var(--muted)">${esc(m.bio)}</p>`:me?`<button class="btn sm ghost" data-act="profile">+ Add a bio, photo and cute stuff</button>`:""}
+        ${me?"":`<button class="btn pri" data-act="dm" data-id="${esc(id)}" style="margin-top:4px">💬 Message</button>`}</div>
+      <div class="stats" style="margin-top:14px"><div class="stat"><b>${streakOf(id)}🔥</b><span>day streak</span></div><div class="stat"><b>${mine.length}</b><span>moments</span></div><div class="stat"><b>${plansIn}</b><span>plans joined</span></div></div>
+      ${facts.length||(m.likes||[]).length?`<div class="sec" style="border:0"><div class="facts">${facts.map(f=>`<div class="fact"><span style="font-size:22px">${f[0]}</span><span><span class="k">${f[1]}</span><br><b>${esc(f[2])}</b></span></div>`).join("")}</div>${(m.likes||[]).length?`<div class="tags">${m.likes.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`:""}</div>`:""}
+      <div class="sec"><h2>${me?"My moments":"Moments"}</h2>${mine.length?grid(mine):`<div class="meta">No moments yet.</div>`}</div>
+      ${me?`<div class="sec"><h2>Saved memories</h2>${saved.length?grid(saved):`<div class="meta">Tap 🔖 on anyone's moment to keep it here.</div>`}</div>`:""}
+      ${me&&MODE==="demo"?`<div class="sec"><h2>Test as a dummy friend</h2><p class="hint" style="margin:0">Switch who you are to see the app from a friend's side: vote, react, reply to DMs. Demo only.</p><select class="inp" id="actAs">${D.members.map(x=>`<option value="${esc(x.id)}" ${x.id===ME?"selected":""}>${esc(x.nick)}</option>`).join("")}</select><button class="btn" data-act="addDummy">+ Add another dummy friend</button><button class="btn danger" data-act="resetDemo" data-confirm="Tap again to wipe demo data">Reset demo data</button></div>`:""}`}}
+};
+/* plan detail */
+SHEETS.plan={live:true,
+  render(s){
+    const p=planById(s.args.id);if(!p)return{title:"Plan removed",body:`<div class="empty">This plan was deleted.</div>`};
+    const cov=coverOf(p),g=goingOf(p.id),rs=rsvpsOf(p.id),mine=myRsvp(p.id),st=planStatus(p);
+    const bg=cov?`background-image:url('${esc(cov)}')`:`background:linear-gradient(135deg,${hue(p.id)},color-mix(in srgb,${hue(p.id)} 50%,#000))`;
+    const estTot=(p.est||[]).reduce((t,e)=>t+(+e.amount||0),0);
+    const ex=D.expenses.filter(e=>e.planId===p.id),exTot=ex.reduce((t,e)=>t+(+e.amount||0),0);
+    const media=mediaOf(p.id),ideas=media.filter(m=>m.phase!=="memory"),mems=media.filter(m=>m.phase==="memory");
+    const notes=D.notes.filter(n=>n.planId===p.id).sort((a,b)=>a.at-b.at);
+    let when="";
+    if(p.final){const d=pd(p.final.date);const cf=conflictsFor(p.final.date,p.final.start,p.final.end,p.id).filter(c=>g.includes(c.uid)||c.uid===ME);
+      when=`<div class="when"><div class="cal-ic"><div class="m">${d.toLocaleDateString("en-GB",{month:"short"})}</div><div class="dd">${d.getDate()}</div></div><div style="flex:1;min-width:0"><div class="d">${fDate(p.final.date,{weekday:"long"})}</div><div>${fRange(p.final.start,p.final.end)} · on everyone's calendar</div>${cf.length?`<div style="margin-top:6px">${cf.map(c=>`<span class="pill warn">${esc(nick(c.uid))} ${esc(c.why)}</span>`).join(" ")}</div>`:""}</div></div>
+      <div class="row"><button class="btn sm" data-act="reopen" data-id="${esc(p.id)}">Change date (reopen poll)</button></div>`;
+    }else{
+      const slots=[...(p.slots||[])].sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+      const max=Math.max(1,...slots.map(sl=>rs.filter(r=>(r.slots||[]).includes(sl.id)).length));
+      when=`<p class="hint" style="margin:0">Tick every time that works for you. Clashes come from people's calendars.</p>${slots.map(sl=>{
+        const voters=rs.filter(r=>(r.slots||[]).includes(sl.id)).map(r=>r.uid),on=voters.includes(ME),cf=conflictsFor(sl.date,sl.start,sl.end,p.id),past=sl.date<TODAY();
+        return`<div class="slot ${on?"mine":""}"><div class="between"><div style="min-width:0"><b>${fDate(sl.date)}</b> · ${fRange(sl.start,sl.end)}${past?' <span class="pill done">past</span>':""}<div class="meta">${voters.length} vote${voters.length===1?"":"s"}${sl.by?` · suggested by ${esc(nick(sl.by))}`:""}</div></div><button class="vote-btn" data-act="vote" data-id="${esc(p.id)}" data-slot="${esc(sl.id)}" aria-pressed="${on}" aria-label="I can make this time">${on?"✓":""}</button></div>
+        <div class="bar"><i style="width:${voters.length/max*100}%"></i></div>
+        <div class="between"><div class="row">${voters.length?avStack(voters,"xs",8):""}${cf.map(c=>`<span class="pill warn">${esc(nick(c.uid))} busy</span>`).join("")}</div><button class="btn sm ghost" data-act="lock" data-id="${esc(p.id)}" data-slot="${esc(sl.id)}">Lock in</button></div></div>`}).join("")||`<div class="meta">No dates suggested yet.</div>`}
+      <details><summary class="btn sm" style="list-style:none;display:inline-flex">+ Suggest a time</summary><div class="grid3" style="margin-top:10px"><input class="inp" type="date" id="slD" min="${TODAY()}" aria-label="Date"><input class="inp" type="time" id="slS" aria-label="Start"><input class="inp" type="time" id="slE" aria-label="End"></div><button class="btn pri block" style="margin-top:8px" data-act="addSlot" data-id="${esc(p.id)}">Add this time</button></details>`;
+    }
+    const stops=p.stops||[],pts=stops.filter(x=>x.lat!=null),route=routeFor(stops);
+    let legs="",tk=0,tm=0,li=0;
+    stops.forEach((x,i)=>{const nx=stops[i+1];let eta="";if(nx&&x.lat!=null&&nx.lat!=null){const l=route?route.legs[li]:legEst(x,nx);li++;if(l){tk+=l.km;tm+=l.min;eta=`<div class="eta">${route?"":"~"}${l.km.toFixed(1)} km · ${route?"":"about "}${fMin(l.min)} drive</div>`}}
+      legs+=`<div class="leg"><span class="n" style="background:${hue(p.id)}">${i+1}</span><div style="flex:1;min-width:0;padding-top:2px"><b>${esc(x.name||"Dropped pin")}</b>${x.addr?`<div class="meta">${esc(x.addr)}</div>`:""}${x.link?` <a class="meta" href="${esc(x.link)}" target="_blank" rel="noopener">original link</a>`:""}</div></div>${eta}`});
+    const rsvpBtns=[["in","I'm in"],["maybe","Maybe"],["out","Can't"]].map(([k,l])=>`<button data-act="rsvp" data-id="${esc(p.id)}" data-k="${k}" aria-pressed="${mine?.going===k}">${l}</button>`).join("");
+    const grp=k=>rs.filter(r=>r.going===k).map(r=>r.uid);
+    const tile=m=>m.kind==="photo"?`<button data-act="viewPhoto" data-id="${esc(m.id)}" aria-label="Photo by ${esc(nick(m.by))}"><img src="${esc(m.src)}" alt="${esc(m.caption||"Photo")}" loading="lazy"></button>`:`<a class="reel ${m.kind==="reel"?"":"lnk"}" href="${esc(m.url)}" target="_blank" rel="noopener"><span class="play">${m.kind==="reel"?"▶":"🔗"}</span><span class="cap">${esc(m.caption||hostOf(m.url))}</span><span style="opacity:.85">${m.kind==="reel"?"Reel":"Link"} · ${esc(nick(m.by))}</span></a>`;
+    const addT=ph=>`<button class="add-tile" data-act="addMedia" data-id="${esc(p.id)}" data-ph="${ph}">+ Add</button>`;
+    return{title:esc(p.title),right:`<button class="btn sm" data-act="editPlan" data-id="${esc(p.id)}">Edit</button>`,body:`
+      <div class="hero" style="${bg}"><span class="emo">${esc(p.emoji||"📍")}</span></div>
+      <div style="padding-top:12px;display:flex;flex-direction:column;gap:6px"><div class="row">${statusPill(p)}<span class="meta">by ${esc(nick(p.by))} · ${ago(p.at)}</span></div>${p.desc?`<p style="margin:0;white-space:pre-wrap;overflow-wrap:anywhere">${esc(p.desc)}</p>`:""}</div>
+      <div class="sec" style="margin-top:12px"><h2>When</h2>${when}</div>
+      <div class="sec"><h2>Who's going</h2><div class="seg">${rsvpBtns}</div>
+        ${[["in","Going"],["maybe","Maybe"],["out","Can't make it"]].map(([k,l])=>{const u=grp(k);return u.length?`<div class="row"><span class="meta" style="width:92px">${l} (${u.length})</span>${u.map(x=>`<span class="row" style="gap:4px">${avatar(x,"xs")}<span style="font-size:13px">${esc(nick(x))}</span></span>`).join("")}</div>`:""}).join("")}
+        <button class="btn" data-act="planChat" data-id="${esc(p.id)}">💬 Plan chat</button></div>
+      <div class="sec"><div class="between"><h2>Route</h2>${pts.length?`<a class="btn sm" href="${esc(gmapsUrl(stops))}" target="_blank" rel="noopener">Open in Google Maps</a>`:""}</div>
+        ${stops.length?`${pts.length?`<div class="mini-map" id="mm-plan"></div>`:""}<div>${legs}</div>${pts.length>1?`<div class="item"><span class="grow"><b>Total drive</b><br><span class="meta">${route?"Road route without traffic. Google Maps shows live traffic.":"Rough estimate while the road route loads"}</span></span><span class="amt">${route?"":"~"}${tk.toFixed(0)} km · ${fMin(tm)}</span></div>`:""}`:`<div class="meta">No places yet. Tap Edit to add stops.</div>`}</div>
+      <div class="sec"><h2>Ideas & inspo</h2><p class="hint" style="margin:0">Reels, TikToks, menus, photos of the spot. Anyone can add.</p><div class="media-grid">${ideas.map(tile).join("")}${addT("idea")}</div></div>
+      ${st!=="poll"?`<div class="sec"><h2>Memories</h2><div class="media-grid">${mems.map(tile).join("")}${addT("memory")}</div></div>`:""}
+      <div class="sec"><h2>Costs</h2>
+        ${(p.est||[]).length?`<div class="list" style="gap:6px">${p.est.map(e=>`<div class="between"><span>${esc(e.label)}</span><span class="amt">${dhs(e.amount)}</span></div>`).join("")}<div class="between" style="border-top:1px solid var(--line);padding-top:6px"><b>Estimated per person</b><span class="amt" style="color:var(--sun)">${dhs(estTot)}</span></div></div>`:`<div class="meta">No estimates yet. Add them with Edit.</div>`}
+        <div class="between" style="margin-top:6px"><b>Actual spend</b><span class="amt">${dhs(exTot)}</span></div>
+        ${ex.length?`<div class="list" style="gap:6px">${ex.map(expenseRow).join("")}</div>`:""}
+        <button class="btn" data-act="newExpense" data-plan="${esc(p.id)}">+ Add a bill to split</button></div>
+      <div class="sec"><h2>Notes</h2>${notes.map(n=>`<div class="note">${avatar(n.by,"xs")}<div style="flex:1;min-width:0"><div class="meta"><b style="color:var(--fg)">${esc(nick(n.by))}</b> · ${ago(n.at)}</div><p>${esc(n.text)}</p></div>${n.by===ME?`<button class="x" data-act="delNote" data-id="${esc(n.id)}" aria-label="Delete note">✕</button>`:""}</div>`).join("")}
+        <div class="row" style="flex-wrap:nowrap;align-items:flex-end"><textarea class="compose" id="noteIn-${esc(p.id)}" rows="1" placeholder="Add a note: what to bring, dress code…"></textarea><button class="send" data-act="addNote" data-id="${esc(p.id)}" aria-label="Add note">${ICON.send}</button></div></div>
+      <div class="sec"><div class="danger-zone">${st!=="done"?`<button class="btn sm" data-act="markDone" data-id="${esc(p.id)}">Mark as done</button>`:`<button class="btn sm" data-act="unDone" data-id="${esc(p.id)}">Move back to upcoming</button>`}<button class="btn sm danger" data-act="delPlan" data-id="${esc(p.id)}" data-confirm="Tap again to delete">Delete plan</button></div></div>`};
+  },
+  after(s){const p=planById(s.args.id);if(p)miniMap(s,"plan",$("#mm-plan",s.el),p.stops||[],hue(p.id))}
+};
+const hostOf=u=>{try{return new URL(u).hostname.replace(/^www\./,"")}catch{return"Link"}};
+
+/* plan editor */
+SHEETS.edit={
+  init(a){const p=a.id?planById(a.id):null;const cp=x=>JSON.parse(JSON.stringify(x||[]));return{emoji:p?.emoji||PLAN_EMOJIS[0],stops:cp(p?.stops),slots:cp(p?.slots),est:cp(p?.est),files:[],q:"",res:[],msg:"",loading:false}},
+  render(s){const p=s.args.id?planById(s.args.id):null,st=s.state,hasPts=st.stops.some(x=>x.lat!=null);
+    return{title:p?"Edit plan":"Make a plan",body:`<div class="form">
+      <div class="emo-pick">${PLAN_EMOJIS.map(e=>`<button data-act="edEmoji" data-v="${e}" aria-pressed="${st.emoji===e}">${e}</button>`).join("")}</div>
+      <label class="f">What's the plan?<input class="inp" id="edTitle" maxlength="60" value="${esc(p?.title||"")}" placeholder="e.g. Desert camping at Al Qudra"></label>
+      <label class="f">Details<textarea class="inp" id="edDesc" placeholder="Vibe, what to bring, dress code, who's driving…">${esc(p?.desc||"")}</textarea></label>
+      <div class="sec"><h2>Places</h2><p class="hint" style="margin:0">Search any place or paste a Google Maps, Apple Maps or Waze link; it pins itself. Add more than one stop for a route with drive times.</p>
+        ${hasPts?`<div class="mini-map" id="mm-edit" style="height:180px"></div>`:""}
+        ${st.stops.map((x,i)=>`<div class="item"><span class="leg"><span class="n" style="background:var(--accent)">${i+1}</span></span><span class="grow"><span class="t">${esc(x.name||"Dropped pin")}</span>${x.addr?`<br><span class="meta">${esc(x.addr)}</span>`:""}</span>${i>0?`<button class="x" data-act="stopUp" data-i="${i}" aria-label="Move up">↑</button>`:""}<button class="x" data-act="stopDel" data-i="${i}" aria-label="Remove stop">✕</button></div>`).join("")}
+        <input class="inp" id="edQ" type="search" enterkeyhint="search" placeholder="🔎 Search a place or paste a maps link" autocomplete="off" autocorrect="off">
+        <div id="edSugg">${edSugg(st)}</div>
+        <button class="btn" data-act="stopPick">🗺️ Drop a pin on the map instead</button></div>
+      <div class="sec"><h2>Suggested dates</h2><p class="hint" style="margin:0">Add one or more options; the guys vote. Lock in the winner from the plan page.</p>
+        ${st.slots.map((x,i)=>`<div class="item"><span class="grow"><span class="t">${fDate(x.date)}</span> · ${fRange(x.start,x.end)}${(()=>{const c=conflictsFor(x.date,x.start,x.end,s.args.id);return c.length?`<br>${c.map(k=>`<span class="pill warn">${esc(nick(k.uid))} busy</span>`).join(" ")}`:""})()}</span><button class="x" data-act="slotDel" data-i="${i}" aria-label="Remove date">✕</button></div>`).join("")}
+        <div class="grid3"><input class="inp" type="date" id="edD" min="${TODAY()}" aria-label="Date"><input class="inp" type="time" id="edS" aria-label="Start time"><input class="inp" type="time" id="edE" aria-label="End time"></div>
+        <button class="btn" data-act="slotAdd">+ Add this date</button></div>
+      <div class="sec"><h2>Potential costs (Dhs per person)</h2>
+        ${st.est.map((x,i)=>`<div class="item"><span class="grow t">${esc(x.label)}</span><span class="amt">${dhs(x.amount)}</span><button class="x" data-act="estDel" data-i="${i}" aria-label="Remove cost">✕</button></div>`).join("")}
+        <div class="grid2"><input class="inp" id="edEL" placeholder="e.g. Tickets"><input class="inp" id="edEA" type="number" inputmode="decimal" min="0" step="0.5" placeholder="Dhs"></div>
+        <button class="btn" data-act="estAdd">+ Add cost</button></div>
+      ${p?"":`<div class="sec"><h2>Inspo</h2><label class="f">Instagram reel, TikTok or any link<input class="inp" id="edLink" type="url" inputmode="url" placeholder="https://www.instagram.com/reel/…"></label>
+        <button class="btn" data-act="edPhotos">📷 Add photos${st.files.length?` (${st.files.length} picked)`:""}</button></div>`}
+      </div>`,foot:`<button class="btn pri block" data-act="edSave" id="edSaveBtn">${p?"Save changes":"Post plan"}</button>`}},
+  after(s){miniMap(s,"edit",$("#mm-edit",s.el),s.state.stops,"#0B7A75")}
+};
+function edSugg(st){
+  let h="";
+  if(st.msg)h+=`<div class="banner" style="margin:0 0 8px">${st.msg}</div>`;
+  if(st.loading)h+=`<div class="meta" style="padding:6px 2px">Searching…</div>`;
+  if(st.res.length)h+=`<div class="sugg">${st.res.map((x,i)=>`<button data-act="pickRes" data-i="${i}"><b>${esc(x.name)}</b>${x.sub?`<br><span class="meta">${esc(x.sub)}</span>`:""}</button>`).join("")}</div>`;
+  return h;
+}
+function paintSugg(s){const b=$("#edSugg",s.el);if(b)b.innerHTML=edSugg(s.state)}
+function addStop(s,stop,msg){
+  s.state.stops.push(stop);s.state.res=[];s.state.msg=msg||"";s.state.loading=false;
+  const q=$("#edQ",s.el);if(q)q.value="";q?.blur();
+  paintSheet(s);toast("📍 Pinned "+(stop.name||"spot"));
+}
+let searchTimer=null;
+async function runSearch(s,q,auto){
+  s.state.loading=true;paintSugg(s);
+  let res=localSearch(q);
+  try{const on=await onlineSearch(q);if(on===null)return;const seen=new Set(res.map(r=>r.name.toLowerCase()));res=res.concat(on.filter(r=>!seen.has(r.name.toLowerCase())))}catch{if(!res.length)s.state.msg="Search needs internet. You can still drop a pin on the map."}
+  s.state.loading=false;
+  if(auto){if(res.length){const[first,...rest]=res;addStop(s,{name:first.name,lat:first.lat,lng:first.lng,addr:first.sub||"",link:auto.link||""},rest.length?"Wrong spot? Remove it and pick one below.":"");s.state.res=rest.slice(0,5);paintSugg(s)}else{s.state.msg=`Couldn't find “${esc(q)}”. Try another name or drop a pin.`;s.state.res=[];paintSugg(s)}return}
+  s.state.res=res.slice(0,8);if(!res.length&&!s.state.msg)s.state.msg="No matches. Try a different spelling, or drop a pin.";paintSugg(s);
+}
+function handleQuery(s,raw){
+  const text=raw.trim();s.state.msg="";s.state.res=[];clearTimeout(searchTimer);
+  if(!text){s.state.loading=false;paintSugg(s);return}
+  const url=(text.match(/https?:\/\/\S+/)||[])[0];
+  if(url||/^-?\d{1,2}\.\d+\s*,\s*-?\d{1,3}\.\d+$/.test(text)){
+    const p=parseLoc(text);
+    if(p){addStop(s,{name:p.name||text.replace(url||"","").trim()||"Pinned spot",lat:p.lat,lng:p.lng,link:url||""});return}
+    if(/instagram\.com|tiktok\.com|youtu/i.test(url)){s.state.msg="That's a post link, not a location. Add it under <b>Inspo</b> instead, and type the place name here.";paintSugg(s);return}
+    const name=nameFromLink(url)||text.replace(url,"").replace(/\s+/g," ").trim();
+    if(name){runSearch(s,name.slice(0,80),{link:url});return}
+    s.state.msg=/goo\.gl|maps\.app/i.test(url)?"Short Google Maps links hide the location. Type the place name instead, or open the link in your browser and copy the long address from the top bar.":"That link has no location in it. Type the place name instead.";
+    paintSugg(s);return;
+  }
+  if(text.length<2){paintSugg(s);return}
+  s.state.res=localSearch(text);paintSugg(s);
+  searchTimer=setTimeout(()=>runSearch(s,text),450);
+}
+/* map pin picker */
+SHEETS.pick={
+  init(){return{pt:null}},
+  render(s){return{title:"Drop a pin",body:`<p class="meta" style="margin:0 0 8px">Zoom in and tap exactly where you're going.</p><div class="mini-map" id="pickMap" style="height:56dvh"></div>
+    <label class="f" style="margin-top:12px">Name this place<input class="inp" id="pickName" placeholder="e.g. Sara's place"></label>`,foot:`<button class="btn pri block" data-act="pickSave">Use this spot</button>`}},
+  after(s,first){if(!first)return;const map=baseMap($("#pickMap",s.el));s.map=map;if(!map)return;setTimeout(()=>map.invalidateSize(),60);
+    const ed=stack.find(x=>x.kind==="edit");const prev=(ed?.state.stops||[]).filter(x=>x.lat!=null);if(prev.length)fit(map,prev);
+    map.on("click",e=>{s.state.pt={lat:+e.latlng.lat.toFixed(5),lng:+e.latlng.lng.toFixed(5)};if(s.mk)s.mk.setLatLng(e.latlng);else s.mk=L.marker(e.latlng,{icon:L.divIcon({className:"",html:'<div class="pin pin-new"><b>+</b></div>',iconSize:[30,30],iconAnchor:[15,30]})}).addTo(map)})},
+  destroy(s){s.map?.remove()}
+};
+/* add media */
+SHEETS.media={
+  render(s){return{title:s.args.ph==="memory"?"Add memories":"Add inspo",body:`<div class="form">
+    <button class="btn pri block" data-act="mediaPhotos" style="min-height:56px">📷 Upload photos</button>
+    <div class="sec"><h2>Or share a link</h2><label class="f">Instagram reel, TikTok, menu or website<input class="inp" id="mdUrl" type="url" inputmode="url" placeholder="Paste the link from Share → Copy link"></label>
+    <label class="f">Caption (optional)<input class="inp" id="mdCap" maxlength="120" placeholder="Why this one?"></label>
+    <button class="btn block" data-act="mediaLink">Add link</button></div></div>`}}
+};
+/* photo viewer */
+SHEETS.photo={live:true,
+  render(s){const m=D.media.find(x=>x.id===s.args.id);if(!m)return{title:"",body:'<p style="color:#fff">Photo removed.</p>'};
+    return{title:`<span style="color:#fff">${esc(nick(m.by))} · ${ago(m.at)}</span>`,body:`<img src="${esc(m.src)}" alt="${esc(m.caption||"Photo")}">${m.caption?`<p style="color:#fff">${esc(m.caption)}</p>`:""}
+      <div class="row" style="margin-top:12px"><button class="btn sm" data-act="setCover" data-id="${esc(m.id)}">Use as cover</button>${m.by===ME?`<button class="btn sm danger" data-act="delMedia" data-id="${esc(m.id)}" data-confirm="Tap again to delete">Delete</button>`:""}</div>`}}
+};
+/* busy */
+SHEETS.busy={
+  render(s){return{title:"Block my time",body:`<div class="form">
+    <p class="meta" style="margin:0">The guys see you as <b>Busy</b> at this time, and plan polls flag the clash. What it is stays private to you.</p>
+    <label class="f">Date<input class="inp" type="date" id="bzD" value="${esc(s.args.d||TODAY())}"></label>
+    <div class="grid2"><label class="f">From<input class="inp" type="time" id="bzS" value="09:00"></label><label class="f">To<input class="inp" type="time" id="bzE" value="17:00"></label></div>
+    <label class="check"><input type="checkbox" id="bzAll"> All day</label>
+    <label class="f">What is it? (only you see this)<input class="inp" id="bzL" placeholder="e.g. Work shift, dentist, family dinner"></label>
+    <label class="f">Repeat weekly<select class="inp" id="bzR"><option value="1">Just once</option><option value="4">Every week for 4 weeks</option><option value="8">Every week for 8 weeks</option><option value="12">Every week for 12 weeks</option></select></label>
+    </div>`,foot:`<button class="btn pri block" data-act="bzSave">Save</button>`}}
+};
+/* expense */
+SHEETS.expense={
+  init(a){const e=a.id?D.expenses.find(x=>x.id===a.id):null;const plan=e?.planId||a.plan||"";const going=plan?goingOf(plan):[];
+    return{split:e?[...e.split]:(going.length?[...new Set([...going,ME])]:D.members.map(m=>m.id)),paidBy:e?.paidBy||ME,plan}},
+  render(s){const e=s.args.id?D.expenses.find(x=>x.id===s.args.id):null,st=s.state;
+    return{title:e?"Edit expense":"Add expense",body:`<div class="form">
+      <label class="f">What was it?<input class="inp" id="exT" value="${esc(e?.title||"")}" placeholder="e.g. Dinner at Al Mallah"></label>
+      <label class="f">Total amount (Dhs)<input class="inp" id="exA" type="number" inputmode="decimal" min="0" step="0.01" value="${e?esc(e.amount):""}" placeholder="0.00"></label>
+      <label class="f">Paid by<select class="inp" id="exP">${D.members.map(m=>`<option value="${esc(m.id)}" ${st.paidBy===m.id?"selected":""}>${esc(nick(m.id))}</option>`).join("")}</select></label>
+      <label class="f">For plan<select class="inp" id="exPl"><option value="">No plan</option>${D.plans.map(p=>`<option value="${esc(p.id)}" ${st.plan===p.id?"selected":""}>${esc(p.title)}</option>`).join("")}</select></label>
+      <div class="f"><div class="between">Split equally between<button class="btn sm ghost" data-act="exAll">Everyone</button></div>
+      ${D.members.map(m=>`<label class="check"><input type="checkbox" id="exS-${esc(m.id)}" data-uid="${esc(m.id)}" ${st.split.includes(m.id)?"checked":""}>${avatar(m.id,"xs")}<span style="color:var(--fg)">${esc(nick(m.id))}</span></label>`).join("")}</div>
+      ${e?`<button class="btn danger" data-act="exDel" data-confirm="Tap again to delete">Delete expense</button>`:""}
+      </div>`,foot:`<button class="btn pri block" data-act="exSave">${e?"Save":"Add expense"}</button>`}}
+};
+/* new chat */
+SHEETS.newChat={
+  init(){return{emoji:"💬"}},
+  render(s){return{title:"New group chat",body:`<div class="form">
+    <div class="emo-pick">${["💬","🔥","🌴","🏖️","🍽️","⚽️","🎮","🎉","🚗","👑"].map(e=>`<button data-act="ncEmoji" data-v="${e}" aria-pressed="${s.state.emoji===e}">${e}</button>`).join("")}</div>
+    <label class="f">Group name<input class="inp" id="ncN" maxlength="40" placeholder="e.g. Brunch squad"></label>
+    <div class="f">Who's in it? Only they can read it.
+    ${D.members.filter(m=>m.id!==ME).map(m=>`<label class="check"><input type="checkbox" id="ncM-${esc(m.id)}" data-uid="${esc(m.id)}">${avatar(m.id,"xs")}<span style="color:var(--fg)">${esc(nick(m.id))}</span></label>`).join("")||'<span class="meta">Nobody else has joined yet. Send the guys the link and crew code first.</span>'}</div>
+    </div>`,foot:`<button class="btn pri block" data-act="ncSave">Create chat</button>`}}
+};
+/* chat */
+SHEETS.chat={live:true,
+  render(s){const c=D.chats.find(x=>x.id===s.args.id);if(!c)return{title:"Chat",body:`<div class="loading"><div class="spin"></div></div>`};
+    const ms=chatMsgs(c.id).slice(-300);let last="",html="";
+    ms.forEach(m=>{const d=ymd(new Date(m.at));if(d!==last){html+=`<div class="daysep">${d===TODAY()?"Today":fDate(d)}</div>`;last=d}
+      const me=m.by===ME;html+=`<div class="msg ${me?"me":""}">${me||c.dm?"":`<span class="who">${esc(nick(m.by))}</span>`}<div class="bub">${linkify(m.text)}</div></div>`});
+    const plan=c.planId?planById(c.planId):null;
+    return{title:c.dm?`<button class="prof-btn" data-act="person" data-id="${esc(chatOther(c))}">${avatar(chatOther(c),"sm")} ${esc(chatName(c))}</button>`:`${esc(c.emoji||"💬")} ${esc(c.name)}`,right:c.dm?"":avStack(c.members||[],"xs",4),body:`${plan?`<button class="ev" data-act="openPlan" data-id="${esc(plan.id)}" style="margin-bottom:10px"><span class="stripe" style="background:${hue(plan.id)}"></span><span style="flex:1">Plan: <b>${esc(plan.title)}</b></span>${statusPill(plan)}</button>`:""}<div class="msgs">${html||'<div class="empty">Say hi 👋</div>'}</div>`,
+      foot:`<textarea class="compose" id="chatIn-${esc(s.args.id)}" rows="1" placeholder="Message" enterkeyhint="send"></textarea><button class="send" data-act="send" data-id="${esc(s.args.id)}" aria-label="Send">${ICON.send}</button>`}},
+  after(s,first){markSeen(s.args.id);const b=$(".sheet-b",s.el);const n=chatMsgs(s.args.id).length;if(first||n!==s.n){b.scrollTop=b.scrollHeight}s.n=n;renderTabs()}
+};
+const linkify=t=>esc(t).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">$1</a>');
+
+/* ---------- photos (stored compressed inside the database) ---------- */
+function loadImg(file){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(file)})}
+function compress(img,max,q){const s=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement("canvas");c.width=Math.round(img.naturalWidth*s);c.height=Math.round(img.naturalHeight*s);c.getContext("2d").drawImage(img,0,0,c.width,c.height);return new Promise(r=>c.toBlob(r,"image/jpeg",q))}
+const toDataURL=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)});
+async function storePhoto(file){const img=await loadImg(file);for(const[mx,q]of[[1280,.72],[1000,.66],[800,.6],[600,.55]]){const b=await compress(img,mx,q);if(b&&b.size<260000)return toDataURL(b)}return null}
+async function addPhotos(planId,files,phase){
+  if(!files.length)return;toast(`Uploading ${files.length} photo${files.length>1?"s":""}…`);let ok=0;
+  for(const f of files){try{const src=await storePhoto(f);if(src){await Store.add("media",{planId,by:ME,at:now(),kind:"photo",src,caption:"",phase});ok++}}catch{}}
+  toast(ok===files.length?`Added ${ok} photo${ok>1?"s":""}`:`Added ${ok} of ${files.length}. Some photos couldn't be read.`);
+}
+let pickCb=null;
+$("#filePick").addEventListener("change",e=>{const fs=[...e.target.files];e.target.value="";if(pickCb)pickCb(fs);pickCb=null});
+function pickPhotos(cb,el="#filePick"){pickCb=cb;$(el).click()}
+["#camPick","#onePick"].forEach(s=>$(s).addEventListener("change",e=>{const fs=[...e.target.files];e.target.value="";if(pickCb)pickCb(fs);pickCb=null}));
+async function squarePhoto(file,size){const img=await loadImg(file);const m=Math.min(img.naturalWidth,img.naturalHeight);const c=document.createElement("canvas");c.width=c.height=size;c.getContext("2d").drawImage(img,(img.naturalWidth-m)/2,(img.naturalHeight-m)/2,m,m,0,0,size,size);return toDataURL(await new Promise(r=>c.toBlob(r,"image/jpeg",.8)))}
+const linkKind=u=>/instagram\.com\/(reel|reels|p|tv)\//i.test(u)||/tiktok\.com|youtube\.com\/shorts|youtu\.be/i.test(u)?"reel":"link";
+const validUrl=u=>{try{return/^https?:$/.test(new URL(u).protocol)}catch{return false}};
+
+/* ---------- actions ---------- */
+const val=id=>($("#"+CSS.escape(id))?.value||"").trim();
+const ACT={
+  _:0,
+  hideInstall(){ls.set("yg-install-hide",true);render()},
+  tab(d){UI.tab=d.k;ls.set("yg-tab",d.k);window.scrollTo(0,0);render()},
+  close(){closeSheet()},
+  authTab(d){UI.authTab=d.k;render()},
+  async forgot(){const em=val("auEmail");const err=$("#auErr");if(!em)return err.textContent="Type your email above first.";try{await AUTH.sendPasswordResetEmail(em);toast("Reset link sent. Check your email.")}catch(e){err.textContent=authMsg(e)}},
+  async logout(){while(stack.length)closeSheet();if(AUTH)await AUTH.signOut();else toast("Demo mode has no account.")},
+  jnEmoji(d){UI.join.emoji=d.v;render()},
+  jnColor(d){UI.join.color=d.v;render()},
+  async jnSave(){const n=val("jnNick"),code=val("jnCode");if(!n){JOIN_ERR="Add your name.";return render()}if(!code){JOIN_ERR="Enter the crew code.";return render()}
+    try{await FS.doc("members/"+ME).set({nick:n.slice(0,24),emoji:UI.join.emoji,color:UI.join.color,joined:now(),code});JOIN_ERR="";Store.live();toast("Welcome to the crew!")}
+    catch(e){JOIN_ERR=e?.code==="permission-denied"?"That crew code is wrong. Check it with the group.":"Couldn't join. Check your connection.";render()}},
+  profile(){openSheet("profile")},
+  person(d){openSheet("person",{id:d.id})},
+  pfPhoto(){const s=topS();pickPhotos(async fs=>{if(!fs[0])return;try{s.state.photo=await squarePhoto(fs[0],320);paintSheet(s)}catch{toast("Couldn't read that photo. Try another.")}},"#onePick")},
+  pfPhotoDel(){const s=topS();s.state.photo="";paintSheet(s)},
+  pfSticker(d){const s=topS(),a=s.state.stickers,i=a.indexOf(d.v);if(i>=0)a.splice(i,1);else if(a.length<8)a.push(d.v);else return toast("Max 8 stickers.");paintSheet(s)},
+  momentShot(){pickPhotos(fs=>ACT._momentFile(fs[0]),"#camPick")},
+  momentGallery(){pickPhotos(fs=>ACT._momentFile(fs[0]),"#onePick")},
+  async _momentFile(f){if(!f)return;try{const src=await storePhoto(f);if(!src)return toast("Couldn't read that photo.");openSheet("postMoment",{src})}catch{toast("Couldn't read that photo. Try another.")}},
+  async postMoment(){const s=topS();$("#moBtn",s.el).disabled=true;await Store.add("moments",{by:ME,at:now(),day:TODAY(),src:s.args.src,caption:val("moCap"),reacts:{}});closeSheet();UI.tab="moments";render();toast("Posted! Today's moments are unlocked 🔓")},
+  async react(d){const x=D.moments.find(m=>m.id===d.id);if(!x)return;const cur=(x.reacts||{})[ME];await Store.upd("moments",d.id,{["reacts."+ME]:cur===d.e?(MODE==="demo"?DEL:firebase.firestore.FieldValue.delete()):d.e})},
+  openMoment(d){openSheet("moment",{id:d.id})},
+  async addComment(d){const el=$("#mcIn-"+CSS.escape(d.id));const t=(el?.value||"").trim();if(!t)return;el.value="";el.style.height="";await Store.add("mcomments",{momentId:d.id,by:ME,text:t.slice(0,500),at:now()})},
+  async delComment(d){await Store.del("mcomments",d.id)},
+  async saveMoment(d){const on=mySaved().includes(d.id);if(MODE==="demo")await Store.upd("members",ME,{saved:on?mySaved().filter(x=>x!==d.id):[...mySaved(),d.id]});else await Store.upd("members",ME,{saved:on?firebase.firestore.FieldValue.arrayRemove(d.id):firebase.firestore.FieldValue.arrayUnion(d.id)});toast(on?"Removed from memories":"Saved to your memories 🔖")},
+  async delMoment(d){await Store.del("moments",d.id);for(const c of D.mcomments.filter(c=>c.momentId===d.id))await Store.del("mcomments",c.id);if(topS()?.kind==="moment")closeSheet();toast("Moment deleted")},
+  async dm(d){if(d.id===ME)return;let c=D.chats.find(x=>x.dm&&(x.members||[]).length===2&&x.members.includes(ME)&&x.members.includes(d.id));
+    const id=c?c.id:await Store.add("chats",{name:"",dm:true,members:[ME,d.id],by:ME,at:now(),planId:""});UI.tab="chat";render();openSheet("chat",{id})},
+  addDummy(){const names=["Zayed","Maya","Rashid","Noor","Ali","Hana","Khalid","Rania"];const n=names.find(x=>!D.members.some(m=>m.nick.startsWith(x)))||"Friend "+D.members.length;
+    const id="m-"+rid();Store.set("members",id,{nick:n+" (test)",emoji:EMOJIS[Math.floor(Math.random()*EMOJIS.length)],color:MEMBER_COLORS[D.members.length%MEMBER_COLORS.length],joined:now(),bio:"Test friend",likes:[],stickers:[]});toast(`Added ${n} (test)`)},
+  resetDemo(){try{localStorage.removeItem(Demo.key);localStorage.removeItem("yg-actas")}catch{}location.reload()},
+  pfEmoji(d){topS().state.emoji=d.v;paintSheet(topS())},
+  pfColor(d){topS().state.color=d.v;paintSheet(topS())},
+  async pfSave(){const n=val("pfNick");if(!n)return toast("Add a name first.");const s=topS(),bd=val("pfBday");
+    await Store.upd("members",ME,{nick:n.slice(0,24),emoji:s.state.emoji,color:s.state.color,photo:s.state.photo||"",bio:val("pfBio"),vibe:val("pfVibe"),birthday:bd?bd.slice(5):"",spot:val("pfSpot"),song:val("pfSong"),likes:val("pfLikes").split(",").map(x=>x.trim()).filter(Boolean).slice(0,10),stickers:s.state.stickers});closeSheet();toast("Profile saved")},
+  planFilter(d){UI.planFilter=d.k;render()},
+  newPlan(){openSheet("edit",{})},
+  openPlan(d,el,ev){ev?.preventDefault();openSheet("plan",{id:d.id})},
+  editPlan(d){openSheet("edit",{id:d.id})},
+  edEmoji(d){topS().state.emoji=d.v;paintSheet(topS())},
+  pickRes(d){const s=topS(),r=s.state.res[+d.i];if(r)addStop(s,{name:r.name,lat:r.lat,lng:r.lng,addr:r.sub||""})},
+  stopPick(){openSheet("pick",{})},
+  pickSave(){const s=topS();if(!s.state.pt)return toast("Tap the map to drop a pin first.");const ed=stack.find(x=>x.kind==="edit");const stop={name:val("pickName")||"Dropped pin",...s.state.pt};closeSheet();if(ed)setTimeout(()=>addStop(ed,stop),0)},
+  stopUp(d){const a=topS().state.stops,i=+d.i;[a[i-1],a[i]]=[a[i],a[i-1]];paintSheet(topS())},
+  stopDel(d){topS().state.stops.splice(+d.i,1);paintSheet(topS())},
+  slotAdd(){const s=topS(),date=val("edD");if(!date)return toast("Pick a date first.");s.state.slots.push({id:rid(),date,start:val("edS"),end:val("edE"),by:ME});paintSheet(s);["edD","edS","edE"].forEach(i=>$("#"+i,s.el).value="")},
+  slotDel(d){topS().state.slots.splice(+d.i,1);paintSheet(topS())},
+  estAdd(){const s=topS(),l=val("edEL"),a=parseFloat(val("edEA"));if(!l||!(a>=0))return toast("Add a label and an amount in Dhs.");s.state.est.push({label:l,amount:Math.round(a*100)/100});paintSheet(s);["edEL","edEA"].forEach(i=>$("#"+i,s.el).value="")},
+  estDel(d){topS().state.est.splice(+d.i,1);paintSheet(topS())},
+  edPhotos(){const s=topS();pickPhotos(fs=>{s.state.files.push(...fs);paintSheet(s)})},
+  async edSave(){
+    const s=topS(),st=s.state,title=val("edTitle");if(!title)return toast("Give the plan a name.");
+    const pend=val("edD");if(pend&&!st.slots.some(x=>x.date===pend))st.slots.push({id:rid(),date:pend,start:val("edS"),end:val("edE"),by:ME});
+    const link=val("edLink");if(link&&!validUrl(link))return toast("That link doesn't look right. Paste the full https:// address.");
+    $("#edSaveBtn",s.el).disabled=true;
+    const base={title,emoji:st.emoji,desc:val("edDesc"),stops:st.stops,slots:st.slots,est:st.est};
+    if(s.args.id){await Store.upd("plans",s.args.id,base);closeSheet();toast("Plan updated");return}
+    const id=rid();await Store.set("plans",id,{...base,by:ME,at:now(),status:"poll",final:null,chatId:""});
+    await Store.set("rsvps",id+"__"+ME,{planId:id,uid:ME,going:"in",slots:st.slots.map(x=>x.id),at:now()});
+    if(link)await Store.add("media",{planId:id,by:ME,at:now(),kind:linkKind(link),url:link,caption:"",phase:"idea"});
+    const files=st.files;closeSheet();toast("Plan posted! Tell the guys to vote.");openSheet("plan",{id});if(files.length)addPhotos(id,files,"idea");
+  },
+  async vote(d){const r=myRsvp(d.id);const sl=new Set(r?.slots||[]);sl.has(d.slot)?sl.delete(d.slot):sl.add(d.slot);await Store.set("rsvps",d.id+"__"+ME,{planId:d.id,uid:ME,going:r?.going||(sl.size?"in":"maybe"),slots:[...sl],at:now()})},
+  async rsvp(d){const r=myRsvp(d.id);await Store.set("rsvps",d.id+"__"+ME,{planId:d.id,uid:ME,going:d.k,slots:r?.slots||[],at:now()})},
+  async lock(d){const p=planById(d.id),sl=(p.slots||[]).find(x=>x.id===d.slot);if(!sl)return;await Store.upd("plans",d.id,{final:{date:sl.date,start:sl.start||"",end:sl.end||""},status:"set"});if(p.chatId&&D.chats.some(c=>c.id===p.chatId))await Store.add("msgs",{chatId:p.chatId,by:ME,text:`📅 Locked in: ${fDate(sl.date)} ${fRange(sl.start,sl.end)}`,at:now()});toast("Locked in. It's on everyone's calendar now.")},
+  async reopen(d){await Store.upd("plans",d.id,{final:null,status:"poll"});toast("Poll reopened")},
+  async addSlot(d){const s=topS(),date=val("slD");if(!date)return toast("Pick a date first.");const p=planById(d.id);await Store.upd("plans",d.id,{slots:[...(p.slots||[]),{id:rid(),date,start:val("slS"),end:val("slE"),by:ME}]});["slD","slS","slE"].forEach(i=>{const e=$("#"+i,s.el);if(e)e.value=""})},
+  async markDone(d){await Store.upd("plans",d.id,{status:"done"});toast("Moved to Memories. Add your photos!")},
+  async unDone(d){await Store.upd("plans",d.id,{status:planById(d.id)?.final?"set":"poll"})},
+  async delPlan(d){await Store.del("plans",d.id);for(const c of["rsvps","media","notes"])for(const x of D[c].filter(x=>x.planId===d.id))await Store.del(c,x.id);closeSheet();toast("Plan deleted")},
+  addMedia(d){openSheet("media",{id:d.id,ph:d.ph})},
+  mediaPhotos(){const s=topS();pickPhotos(fs=>{if(!fs.length)return;closeSheet();addPhotos(s.args.id,fs,s.args.ph)})},
+  async mediaLink(){const s=topS(),u=val("mdUrl");if(!validUrl(u))return toast("Paste a full link that starts with https://");await Store.add("media",{planId:s.args.id,by:ME,at:now(),kind:linkKind(u),url:u,caption:val("mdCap"),phase:s.args.ph});closeSheet();toast("Added")},
+  viewPhoto(d){openSheet("photo",{id:d.id})},
+  async setCover(d){const m=D.media.find(x=>x.id===d.id);if(!m)return;const earliest=Math.min(...mediaOf(m.planId).map(x=>x.at));await Store.upd("media",m.id,{at:earliest-1});toast("Cover updated")},
+  async delMedia(d){await Store.del("media",d.id);closeSheet();toast("Photo deleted")},
+  async addNote(d){const el=$("#noteIn-"+CSS.escape(d.id));const t=(el?.value||"").trim();if(!t)return;el.value="";await Store.add("notes",{planId:d.id,by:ME,at:now(),text:t.slice(0,1000)})},
+  async delNote(d){await Store.del("notes",d.id)},
+  async planChat(d){const p=planById(d.id);let cid=p.chatId||"";
+    if(cid&&!(await Store.joinChat(cid)))cid="";
+    if(!cid){const ids=[...new Set([p.by,ME,...rsvpsOf(d.id).filter(r=>r.going!=="out").map(r=>r.uid)])];cid=await Store.add("chats",{name:p.title,emoji:p.emoji||"💬",members:ids,by:ME,at:now(),planId:d.id});await Store.upd("plans",d.id,{chatId:cid})}
+    openSheet("chat",{id:cid})},
+  calNav(d){const[y,m]=UI.calMonth.split("-").map(Number);const n=new Date(y,m-1+(+d.n),1);UI.calMonth=`${n.getFullYear()}-${pad(n.getMonth()+1)}`;render()},
+  calDay(d){UI.calDay=d.d;if(d.d.slice(0,7)!==UI.calMonth)UI.calMonth=d.d.slice(0,7);render()},
+  newBusy(d){openSheet("busy",{d:d.d})},
+  async bzSave(){const date=val("bzD");if(!date)return toast("Pick a date.");const all=$("#bzAll").checked;const s=all?"":val("bzS"),e=all?"":val("bzE");const n=+val("bzR")||1;const label=val("bzL");
+    for(let i=0;i<n;i++){const d=pd(date);d.setDate(d.getDate()+7*i);const id=await Store.add("busy",{uid:ME,date:ymd(d),start:s,end:e,label:MODE==="demo"?label:"",at:now()});if(label&&MODE!=="demo")await Store.setLabel(id,label)}
+    closeSheet();toast(n>1?`Blocked ${n} weeks`:"Time blocked")},
+  async delBusy(d){await Store.del("busy",d.id)},
+  mapFilter(d){UI.mapFilter=d.k;render()},
+  newChat(){openSheet("newChat")},
+  ncEmoji(d){topS().state.emoji=d.v;paintSheet(topS())},
+  async ncSave(){const s=topS(),n=val("ncN");const ids=$$("input[data-uid]",s.el).filter(x=>x.checked).map(x=>x.dataset.uid);if(!n)return toast("Name the group.");if(!ids.length)return toast("Pick at least one friend.");const id=await Store.add("chats",{name:n,emoji:s.state.emoji,members:[ME,...ids],by:ME,at:now(),planId:""});closeSheet();openSheet("chat",{id})},
+  openChat(d){openSheet("chat",{id:d.id})},
+  async send(d){const el=$("#chatIn-"+CSS.escape(d.id));const t=(el?.value||"").trim();if(!t)return;el.value="";el.style.height="";await Store.add("msgs",{chatId:d.id,by:ME,text:t.slice(0,2000),at:now()})},
+  newExpense(d){openSheet("expense",{plan:d.plan||""})},
+  editExpense(d){openSheet("expense",{id:d.id})},
+  exAll(){$$("input[data-uid]",topS().el).forEach(x=>x.checked=true)},
+  async exSave(){const s=topS(),t=val("exT"),a=parseFloat(val("exA"));if(!t)return toast("What was it for?");if(!(a>0))return toast("Enter the total in Dhs.");const split=$$("input[data-uid]",s.el).filter(x=>x.checked).map(x=>x.dataset.uid);if(!split.length)return toast("Pick who's splitting it.");
+    const o={title:t,amount:Math.round(a*100)/100,paidBy:val("exP"),planId:val("exPl"),split};
+    if(s.args.id)await Store.upd("expenses",s.args.id,o);else await Store.add("expenses",{...o,at:now(),by:ME});closeSheet();toast(`Saved · ${dhs(o.amount/split.length)} each`)},
+  async exDel(){const s=topS();await Store.del("expenses",s.args.id);closeSheet();toast("Expense deleted")},
+  async settle(d){await Store.add("settles",{from:d.from,to:d.to,amount:+d.amt,at:now(),by:ME});toast(`Recorded ${dhs(+d.amt)} payment`)},
+  async delSettle(d){await Store.del("settles",d.id)},
+};
+document.addEventListener("click",ev=>{
+  const el=ev.target.closest("[data-act]");if(!el)return;const fn=ACT[el.dataset.act];if(!fn)return;
+  if(el.dataset.confirm){if(!el._armed){el._armed=true;const o=el.innerHTML;el.textContent=el.dataset.confirm;setTimeout(()=>{el._armed=false;if(el.isConnected)el.innerHTML=o},3000);return}}
+  if(el.tagName==="A"&&el.getAttribute("href")==="#")ev.preventDefault();
+  const r=fn(el.dataset,el,ev);if(r&&r.catch)r.catch(e=>{console.error(e);toast("Something went wrong. Try again.")});
+});
+document.addEventListener("input",ev=>{
+  const el=ev.target;
+  if(el.id==="edQ"){const s=stack.find(x=>x.kind==="edit");if(s)handleQuery(s,el.value)}
+  if(el.classList.contains("compose")){el.style.height="";el.style.height=Math.min(el.scrollHeight,120)+"px"}
+});
+document.addEventListener("change",ev=>{
+  const el=ev.target;if(el.id==="moneyPlan"){UI.moneyPlan=el.value;render()}
+  if(el.id==="actAs"){ls.set("yg-actas",el.value);ME=el.value;while(stack.length)closeSheet();render();toast(ME==="me-demo"?"Back to being you":"Now testing as "+(mem(ME)?.nick||"a friend"))}
+  if(el.id==="exPl"){const s=topS();s.state.plan=el.value}
+  if(el.id==="bzAll"){["bzS","bzE"].forEach(i=>$("#"+i).disabled=el.checked)}
+});
+document.addEventListener("keydown",ev=>{
+  const el=ev.target;
+  if(ev.key==="Enter"&&!ev.shiftKey&&el.id?.startsWith("chatIn-")&&!/Android|iPhone|iPad/i.test(navigator.userAgent)){ev.preventDefault();ACT.send({id:el.id.slice(7)})}
+  if(ev.key==="Enter"&&el.id==="edQ"){ev.preventDefault();const s=stack.find(x=>x.kind==="edit");if(s&&el.value.trim()){clearTimeout(searchTimer);runSearch(s,el.value.trim())}}
+  if(ev.key==="Escape"&&stack.length)closeSheet();
+});
+Store.init();
+if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+</script>
+</body>
+</html>
