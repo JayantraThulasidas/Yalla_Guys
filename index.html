@@ -282,6 +282,7 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .auth-logo{font-family:var(--f-display);font-weight:800;font-size:46px;letter-spacing:-.03em;line-height:1}
 .auth-logo span{color:var(--accent);margin-left:6px}
 .auth-hero p{color:var(--muted);margin:10px 0 0;font-size:16px;max-width:34ch}
+.dark-tiles .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9) saturate(.7)}
 .leaflet-control-attribution{font-size:9px!important;background:color-mix(in srgb,var(--surface) 80%,transparent)!important;color:var(--muted)!important}
 .leaflet-control-attribution a{color:var(--muted)!important}
 input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none}
@@ -771,7 +772,8 @@ function baseMap(el,opts={}){
   if(!window.L){el.innerHTML='<div class="empty" style="height:100%;display:grid;place-items:center">Map couldn\'t load. Check your connection.</div>';return null}
   const m=L.map(el,{zoomControl:true,attributionControl:true,...opts});
   m.attributionControl.setPrefix(false);
-  L.tileLayer(isDark()?"https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png":"https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{maxZoom:19,subdomains:"abcd",attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'}).addTo(m);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(m);
+  el.classList.toggle("dark-tiles",isDark());
   m.setView([25.15,55.25],10);
   return m;
 }
