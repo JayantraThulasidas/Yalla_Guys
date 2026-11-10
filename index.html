@@ -444,6 +444,15 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 @keyframes popIn{from{opacity:0;transform:translate(-50%,-50%) rotate(var(--r)) scale(.3)}to{opacity:1;transform:translate(-50%,-50%) rotate(var(--r)) scale(1)}}
 @media (prefers-reduced-motion:reduce){.halo>span:not(.av){animation:none}}
 .dot-bday{background:#FF7AB8}
+.mosaic{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:110px;grid-auto-flow:dense;gap:6px}
+.mosaic .mt{position:relative;border-radius:12px;overflow:hidden;background:var(--surface2);border:0;padding:0}
+.mosaic .mt.big{grid-column:span 2;grid-row:span 2}
+.mosaic .mt.tall{grid-row:span 2}
+.mosaic .mt img{width:100%;height:100%;object-fit:cover;display:block}
+.mosaic .mt .who{position:absolute;left:6px;bottom:6px}
+.mosaic .mt .dl{position:absolute;right:6px;top:6px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.5);color:#fff;font-size:15px;display:grid;place-items:center}
+.collage{width:100%;border-radius:16px;display:block;box-shadow:var(--shadow);background:var(--surface2);aspect-ratio:4/5;object-fit:cover}
+.collage-styles{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .auth{max-width:440px;margin:0 auto;padding-block:8px 40px}
 .auth-hero{padding:28px 4px 22px}
 .auth-logo{font-family:var(--f-display);font-weight:800;font-size:46px;letter-spacing:-.03em;line-height:1}
@@ -498,7 +507,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.8";
+const APP_VERSION="2026-11-10.9";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1267,6 +1276,63 @@ function stickerHalo(st,av){
   if(!st.length)return av;const n=st.length,span=Math.min(170,n>1?(n-1)*30:0),start=270-span/2,R=82;
   return`<div class="halo">${av}${st.map((e,i)=>{const a=(n>1?start+span*i/(n-1):270)*Math.PI/180;return`<span style="left:calc(50% + ${(Math.cos(a)*R).toFixed(1)}px);top:calc(50% + ${(Math.sin(a)*R).toFixed(1)}px);--r:${(((n>1?start+span*i/(n-1):270))+90).toFixed(0)}deg;animation-delay:${i*60}ms">${e}</span>`}).join("")}</div>`;
 }
+/* ---------- album viewer + collage ---------- */
+const COLLAGE_STYLES=[["polaroid","📷 Polaroid"],["grid","🔲 Grid"],["film","🎞️ Film"]];
+const loadI=src=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src});
+function drawCover(g,img,x,y,w,h){const r=Math.max(w/img.naturalWidth,h/img.naturalHeight),sw=w/r,sh=h/r;g.drawImage(img,(img.naturalWidth-sw)/2,(img.naturalHeight-sh)/2,sw,sh,x,y,w,h)}
+function rrect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
+function gridCells(n,W,H,pad){const L={1:[[0,0,1,1]],2:[[0,0,.5,1],[.5,0,.5,1]],3:[[0,0,.6,1],[.6,0,.4,.5],[.6,.5,.4,.5]],4:[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]],5:[[0,0,.5,.55],[.5,0,.5,.55],[0,.55,1/3,.45],[1/3,.55,1/3,.45],[2/3,.55,1/3,.45]],6:[[0,0,2/3,.5],[2/3,0,1/3,.25],[2/3,.25,1/3,.25],[0,.5,1/3,.5],[1/3,.5,1/3,.5],[2/3,.5,1/3,.5]]};
+  let c=L[n];if(!c){const cols=n<=9?3:4,rows=Math.ceil(n/cols);c=[];for(let i=0;i<n;i++)c.push([(i%cols)/cols,Math.floor(i/cols)/rows,1/cols,1/rows])}
+  return c.map(([x,y,w,h])=>[pad+x*(W-pad*2)+pad/2,pad+y*(H-pad*2)+pad/2,w*(W-pad*2)-pad,h*(H-pad*2)-pad])}
+async function makeCollage(p,items,style){
+  const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
+  const imgs=(await Promise.all(items.slice(0,style==="grid"?16:9).map(m=>loadI(m.kind==="video"?m.poster:m.src).catch(()=>null)))).filter(Boolean);
+  const title=`${p.emoji||""} ${p.title}`.trim(),date=p.final?fDate(p.final.date,{day:"numeric",month:"long",year:"numeric"}):"";
+  if(style==="polaroid"){
+    const bg=g.createLinearGradient(0,0,W,H);bg.addColorStop(0,"#FBE6D2");bg.addColorStop(1,"#F8DEDC");g.fillStyle=bg;g.fillRect(0,0,W,H);
+    const n=imgs.length,cols=n<=2?n:n<=4?2:3,rows=Math.ceil(n/cols),cw=(W-120)/cols,ch=(H-300)/rows;
+    imgs.forEach((im,i)=>{const col=i%cols,row=Math.floor(i/cols),w=Math.min(cw*.92,360+(n<=2?120:0)),h=w*1.18,cx=60+cw*col+cw/2+(Math.sin(i*7)*18),cy=110+ch*row+ch/2+(Math.cos(i*5)*14);
+      g.save();g.translate(cx,cy);g.rotate((((i*37)%11)-5)*Math.PI/180);g.shadowColor="rgba(0,0,0,.28)";g.shadowBlur=26;g.shadowOffsetY=10;g.fillStyle="#fff";g.fillRect(-w/2,-h/2,w,h);g.shadowColor="transparent";
+      drawCover(g,im,-w/2+16,-h/2+16,w-32,w-32);g.restore()});
+    g.fillStyle="#1F2328";g.font="800 64px 'Bricolage Grotesque',system-ui,sans-serif";g.textAlign="center";g.fillText(title,W/2,H-120,W-120);
+    g.font="600 34px Inter,system-ui,sans-serif";g.fillStyle="#5C6774";g.fillText([date,"Yalla Guys"].filter(Boolean).join(" · "),W/2,H-66);
+  }else if(style==="film"){
+    g.fillStyle="#111";g.fillRect(0,0,W,H);const n=Math.min(imgs.length,4),fh=(H-260)/Math.max(n,1);
+    for(let y=20;y<H-150;y+=46){g.fillStyle="#f2f2f2";rrect(g,22,y,28,26,5);g.fill();rrect(g,W-50,y,28,26,5);g.fill()}
+    imgs.slice(0,4).forEach((im,i)=>{drawCover(g,im,80,40+i*fh,W-160,fh-24)});
+    g.fillStyle="#F2C14E";g.font="800 58px 'Bricolage Grotesque',system-ui,sans-serif";g.textAlign="left";g.fillText(title,80,H-110,W-160);
+    g.font="600 32px Inter,system-ui,sans-serif";g.fillStyle="#ddd";g.fillText([date,"Yalla Guys"].filter(Boolean).join(" · "),80,H-60);
+  }else{
+    g.fillStyle="#0E1318";g.fillRect(0,0,W,H);const cells=gridCells(imgs.length,W,H-170,20);
+    imgs.forEach((im,i)=>{const[x,y,w,h]=cells[i];g.save();rrect(g,x,y,w,h,22);g.clip();drawCover(g,im,x,y,w,h);g.restore()});
+    g.fillStyle="#fff";g.font="800 56px 'Bricolage Grotesque',system-ui,sans-serif";g.textAlign="left";g.fillText(title,40,H-90,W-80);
+    g.font="600 30px Inter,system-ui,sans-serif";g.fillStyle="#9AA4B2";g.fillText([date,"Yalla Guys"].filter(Boolean).join(" · "),40,H-44);
+  }
+  return new Promise(r=>c.toBlob(r,"image/jpeg",.9));
+}
+const safeName=t=>String(t||"yalla").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"-").slice(0,40)||"yalla";
+async function itemFile(m,name){const u=m.kind==="photo"?m.src:await mediaURL(m);const b=await (await fetch(u)).blob();const ext=m.kind==="photo"?"jpg":(b.type.includes("mp4")?"mp4":b.type.includes("webm")?"webm":"mp4");return new File([b],`${name}.${ext}`,{type:b.type||(m.kind==="photo"?"image/jpeg":"video/mp4")})}
+async function saveFiles(files){
+  files=files.filter(Boolean);if(!files.length)return toast("Still loading, try again in a second.");
+  try{if(navigator.canShare&&navigator.canShare({files})){await navigator.share({files});return}}catch(e){if(e?.name==="AbortError")return}
+  for(const f of files){const a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();await new Promise(r=>setTimeout(r,400))}
+  toast(files.length>1?`Saving ${files.length} files…`:"Saved ⬇");
+}
+SHEETS.album={live:true,
+  init(){return{style:"polaroid"}},
+  render(s){const p=planById(s.args.id);if(!p)return{title:"Album",body:""};const items=albumOf(p.id).filter(m=>m.kind==="photo"||m.kind==="video");
+    return{title:`📸 ${esc(p.title)}`,right:`<button class="btn sm pri" data-act="albumAll">⬇ All</button>`,
+      top:`<div class="form" style="gap:10px"><div class="collage-styles">${COLLAGE_STYLES.map(([k,l])=>`<button class="chip" data-act="collageStyle" data-k="${k}" aria-pressed="${s.state.style===k}">${l}</button>`).join("")}</div>
+        <img class="collage" id="collageImg" alt="Collage of the plan's photos">
+        <div class="grid2"><button class="btn pri" data-act="collageSave">⬇ Save collage</button><button class="btn" data-act="addMedia" data-id="${esc(p.id)}" data-ph="memory">＋ Add pics</button></div></div>`,
+      body:`<div class="sec"><div class="between"><h2>All ${items.length}</h2><span class="meta">Tap ⬇ to save one</span></div>
+        <div class="mosaic">${items.map((m,i)=>`<div class="mt ${i%7===0?"big":i%5===3?"tall":""}"><button style="all:unset;display:block;width:100%;height:100%;cursor:pointer" ${m.kind==="photo"?`data-act="viewPhoto" data-id="${esc(m.id)}"`:`data-act="playVideo" data-key="media:${esc(m.id)}"`}><img src="${esc(m.kind==="video"?m.poster:m.src)}" alt="" loading="lazy">${m.kind==="video"?'<span class="vplay">▶</span>':""}</button><span class="who">${avatar(m.by,"xs")}</span><button class="dl" data-act="saveOne" data-id="${esc(m.id)}" aria-label="Save">⬇</button></div>`).join("")}</div></div>`}},
+  after(s,first){const p=planById(s.args.id);if(!p)return;const items=albumOf(p.id).filter(m=>m.kind==="photo"||m.kind==="video");
+    const sig=s.state.style+"|"+items.map(m=>m.id).join();if(s.cSig!==sig){s.cSig=sig;makeCollage(p,items,s.state.style).then(b=>{if(!b)return;s.collage=new File([b],`${safeName(p.title)}-collage.jpg`,{type:"image/jpeg"});if(s.cUrl)URL.revokeObjectURL(s.cUrl);s.cUrl=URL.createObjectURL(b);const im=$("#collageImg",s.el);if(im)im.src=s.cUrl})}
+    else{const im=$("#collageImg",s.el);if(im&&s.cUrl&&!im.src)im.src=s.cUrl}
+    const fsig=items.map(m=>m.id).join();if(s.fSig!==fsig){s.fSig=fsig;s.files={};items.forEach((m,i)=>itemFile(m,`${safeName(p.title)}-${i+1}`).then(f=>{s.files[m.id]=f}).catch(()=>{}))}},
+  destroy(s){if(s.cUrl)URL.revokeObjectURL(s.cUrl)}
+};
 /* person profile */
 SHEETS.person={live:true,
   render(s){const id=s.args.id,m=mem(id);if(!m)return{title:"Profile",body:`<div class="empty">This person isn't in the crew.</div>`};const me=id===ME;
@@ -1387,7 +1453,9 @@ function albumHtml(p,mems,tile){
   return`<div class="sec" id="album" style="margin-top:12px"><div class="between"><h2>📸 Plan album</h2><span class="meta">${mems.length} item${mems.length===1?"":"s"}</span></div>
     ${today?`<div class="banner" style="margin:0;background:var(--accent-soft)">🎉 It's plan day! Add your pics as you go. They stay in this plan for everyone.</div>`:""}
     <div class="grid3" style="grid-template-columns:1fr 1fr 1fr"><button class="btn pri" data-act="camera" data-ctx="album" data-id="${esc(p.id)}" style="min-height:52px">📷 Camera</button><button class="btn" data-act="addMedia" data-id="${esc(p.id)}" data-ph="memory" style="min-height:52px">🖼️ Gallery</button><button class="btn" data-act="voice" data-ctx="album" data-id="${esc(p.id)}" style="min-height:52px">🎤 Voice note</button></div>
-    ${mems.length?`<div class="media-grid">${mems.map(tile).join("")}</div><div class="row">${avStack(who,"xs",8)}<span class="meta">Shared by ${who.length} ${who.length===1?"person":"people"}</span></div>`:`<div class="meta">No photos yet. Be the first to add some.</div>`}</div>`;
+    <div class="hint" style="margin:0">You can add ${Math.max(0,albumLeft(p.id))} more of your ${ALBUM_MAX} photos/videos.</div>
+    ${mems.length?`<button class="btn block" data-act="viewAlbum" data-id="${esc(p.id)}" style="min-height:50px;justify-content:space-between"><span>🖼️ View album & collage</span><span class="meta">${mems.length} ›</span></button>
+      <div class="media-grid">${mems.slice(0,6).map(tile).join("")}</div><div class="row">${avStack(who,"xs",8)}<span class="meta">Shared by ${who.length} ${who.length===1?"person":"people"}</span></div>`:`<div class="meta">No photos yet. Be the first to add some.</div>`}</div>`;
 }
 /* ---------- rides: chauffeur requests, drivers, meetup spot ---------- */
 function saveRsvp(pid,patch){const r=myRsvp(pid)||{};const{id,...rest}=r;return Store.set("rsvps",pid+"__"+ME,{planId:pid,uid:ME,going:"in",slots:[],...rest,...patch,at:now()})}
@@ -1693,7 +1761,7 @@ SHEETS.media={
 SHEETS.photo={live:true,
   render(s){const m=D.media.find(x=>x.id===s.args.id);if(!m)return{title:"",body:'<p style="color:#fff">Photo removed.</p>'};
     return{title:`<span style="color:#fff">${esc(nick(m.by))} · ${ago(m.at)}</span>`,body:`<img src="${esc(m.src)}" alt="${esc(m.caption||"Photo")}">${m.caption?`<p style="color:#fff">${esc(m.caption)}</p>`:""}
-      <div class="row" style="margin-top:12px"><button class="btn sm" data-act="setCover" data-id="${esc(m.id)}">Use as cover</button>${m.by===ME?`<button class="btn sm danger" data-act="delMedia" data-id="${esc(m.id)}" data-confirm="Tap again to delete">Delete</button>`:""}</div>`}}
+      <div class="row" style="margin-top:12px"><button class="btn sm pri" data-act="saveOne" data-id="${esc(m.id)}">⬇ Save</button><button class="btn sm" data-act="setCover" data-id="${esc(m.id)}">Use as cover</button>${m.by===ME?`<button class="btn sm danger" data-act="delMedia" data-id="${esc(m.id)}" data-confirm="Tap again to delete">Delete</button>`:""}</div>`}}
 };
 /* busy */
 SHEETS.busy={
@@ -1830,7 +1898,11 @@ async function postItem(ctx,id,payload){
   if(ctx==="mc")return Store.add("mcomments",{momentId:id,...base});
   if(ctx==="album")return Store.add("media",{planId:id,phase:"memory",caption:"",...base});
 }
+const ALBUM_MAX=5;
+const albumLeft=pid=>ALBUM_MAX-D.media.filter(m=>m.planId===pid&&m.phase==="memory"&&m.by===ME&&(m.kind==="photo"||m.kind==="video")).length;
 async function sendFiles(ctx,id,files){
+  if(ctx==="album"){const left=albumLeft(id);if(left<=0)return toast(`You've added your ${ALBUM_MAX} pics for this plan. Delete one to add another.`);
+    if(files.length>left){toast(`Only ${left} more allowed (${ALBUM_MAX} per person). Adding the first ${left}.`);files=files.slice(0,left)}}
   if(BUSY)return toast("Still sending the last one…");BUSY=true;let ok=0;
   try{for(const f of files){
       if((f.type||"").startsWith("video/")||/\.(mov|mp4|m4v|webm|3gp)$/i.test(f.name||"")){
@@ -2102,13 +2174,18 @@ const ACT={
   offerPlan(d){const o=allOffers().find(x=>x.id===d.id);if(!o)return;openSheet("edit",{pre:{title:o.name,emoji:catOf(o.cat)[1],desc:"🏷️ Entertainer: "+(o.offer||""),stops:[{name:o.name,lat:o.lat,lng:o.lng,addr:o.area||""}]}})},
   async offerStop(d){const p=planById(d.plan),o=allOffers().find(x=>x.id===d.id);if(!p||!o)return;await Store.upd("plans",p.id,{stops:[...(p.stops||[]),{name:o.name,lat:o.lat,lng:o.lng,addr:"🏷️ "+(o.offer||"Entertainer offer")}]});toast(`Added ${o.name} to the route`)},
   edOfferStop(d){const s=topS(),o=allOffers().find(x=>x.id===d.id);if(o)addStop(s,{name:o.name,lat:o.lat,lng:o.lng,addr:"🏷️ "+(o.offer||"Entertainer offer")})},
+  viewAlbum(d){openSheet("album",{id:d.id})},
+  collageStyle(d){const s=topS();s.state.style=d.k;paintSheet(s)},
+  collageSave(){const s=topS();saveFiles([s.collage])},
+  albumAll(){const s=topS(),p=planById(s.args.id),items=albumOf(p.id).filter(m=>m.kind==="photo"||m.kind==="video");const fs=items.map(m=>s.files?.[m.id]).filter(Boolean);if(fs.length<items.length)toast("Some videos are still loading. Saving what's ready.");saveFiles(fs)},
+  saveOne(d){const s=stack.find(x=>x.kind==="album"),f=s?.files?.[d.id];if(f)return saveFiles([f]);const m=D.media.find(x=>x.id===d.id);if(m)itemFile(m,"yalla-"+d.id).then(f=>saveFiles([f]))},
   openBoard(d){openSheet("board",{id:d.id})},
   openAlbum(d){openSheet("plan",{id:d.id});setTimeout(()=>{$("#album",topS()?.el)?.scrollIntoView({behavior:"smooth"})},150)},
   addMedia(d){openSheet("media",{id:d.id,ph:d.ph,tab:d.tab})},
   attach(d){ensureAC();pickPhotos(fs=>{if(fs.length)sendFiles(d.ctx,d.id,fs)},"#mediaPick")},
   voice(d){ensureAC();startVoice(d.ctx,d.id)},
   recCancel(){stopVoice(false)},
-  camera(d){ensureAC();openSheet("camera",{ctx:d.ctx,id:d.id})},
+  camera(d){if(d.ctx==="album"&&albumLeft(d.id)<=0)return toast(`You've added your ${ALBUM_MAX} pics for this plan. Delete one to add another.`);ensureAC();openSheet("camera",{ctx:d.ctx,id:d.id})},
   camMode(d){const s=topS();if(s.state.rec)return;s.state.mode=d.k;paintSheet(s)},
   camFlip(){const s=topS();if(s.state.rec)return;s.state.facing=s.state.facing==="user"?"environment":"user";paintSheet(s)},
   camRetake(){const s=topS();if(s.state.shot?.url)URL.revokeObjectURL(s.state.shot.url);s.state.shot=null;paintSheet(s)},
