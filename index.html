@@ -236,7 +236,7 @@ textarea.inp{min-height:84px;resize:vertical}
 .vis-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
 .f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
-html{overscroll-behavior:none}
+html,body{overscroll-behavior:none;overscroll-behavior-x:none}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .install{display:flex;gap:12px;align-items:flex-start;margin-block:4px 12px;padding:12px 14px;border-radius:14px;background:var(--accent-soft);font-size:13px}
@@ -498,7 +498,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.6";
+const APP_VERSION="2026-11-10.7";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1081,13 +1081,15 @@ function afterView(){
 
 /* ---------- sheets ---------- */
 const SHEETS={};
-let histOn=false,ignorePop=0;
+let trapArmed=false;
+function armBack(){if(trapArmed&&history.state?.yg)return;try{history.pushState({yg:1},"");trapArmed=true}catch{}}
+document.addEventListener("pointerdown",armBack,{capture:true,passive:true});
 function openSheet(kind,args={}){
   const el=document.createElement("div");el.className="sheet"+(["photo","player","img","camera"].includes(kind)?" lightbox":"");el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");
   el.innerHTML=`<div class="sheet-h wrap"><div class="in"></div></div><div class="sheet-b wrap"><div class="in top-in"></div><div class="in main-in"></div></div><div class="sheet-f wrap" hidden><div class="in"></div></div>`;
   const s={kind,args,el,state:SHEETS[kind].init?SHEETS[kind].init(args):{},parts:{}};stack.push(s);$("#sheets").appendChild(el);
   paintSheet(s,true);document.body.style.overflow="hidden";
-  if(!history.state?.yg){try{history.pushState({yg:1},"")}catch{}}
+  armBack();
   return s;
 }
 function closeSheet(viaPop){
@@ -1095,7 +1097,14 @@ function closeSheet(viaPop){
   if(!stack.length)document.body.style.overflow="";
   schedule();
 }
-window.addEventListener("popstate",()=>{if(stack.length){closeSheet(true);if(stack.length){try{history.pushState({yg:1},"")}catch{}}}});
+window.addEventListener("popstate",()=>{
+  trapArmed=false;
+  if(stack.length)closeSheet(true);
+  else if(UI.tab!=="plans"){UI.tab="plans";ls.set("yg-tab","plans");render();window.scrollTo(0,0)}
+  else if(UI.planFilter!=="active"){UI.planFilter="active";render()}
+  else toast("Swipe up from the bottom to leave Yalla Guys");
+  try{history.pushState({yg:1},"")}catch{}
+});
 function paintSheet(s,first){
   const S=SHEETS[s.kind];const h=S.render(s);
   const parts={h:`<button class="back" data-act="close" aria-label="Back">${ICON.back}</button><h2>${h.title}</h2>${h.right||""}`,t:h.top||"",b:h.body,f:h.foot||""};
