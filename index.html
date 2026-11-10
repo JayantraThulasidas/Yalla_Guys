@@ -563,6 +563,9 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 canvas.bgfx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;display:block}
 canvas.bgfx.fixed{position:fixed}
 body.has-fx .app{position:relative;z-index:1}
+body.has-fx header.top{background:color-mix(in srgb,var(--bg) 55%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+body.has-fx nav.tabs{background:color-mix(in srgb,var(--surface) 70%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+body.has-fx::before{background:transparent}
 #sheets .sheet>canvas.bgfx~.sheet-h,#sheets .sheet>canvas.bgfx~.sheet-b,#sheets .sheet>canvas.bgfx~.sheet-f{position:relative;z-index:1}
 #sheets .sheet>canvas.bgfx~.sheet-h{background:color-mix(in srgb,var(--bg) 80%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .fxprev{position:relative;height:130px;border-radius:16px;background:var(--bg);border:1px solid var(--line);overflow:hidden;display:grid;place-items:center;margin:6px 0 4px}
@@ -692,7 +695,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.42";
+const APP_VERSION="2026-11-10.49";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1459,8 +1462,11 @@ function paintSheet(s,first){
     s.parts[k]=parts[k];
   }
   S.after?.(s,first);
+  sheetFx(s);
   try{syncVoice()}catch{}
 }
+const FX_SKIP=["person","photo","player","img","camera","fxPick"];
+function sheetFx(s){if(FX_SKIP.includes(s.kind))return;mountFx(s.el,appFxKind())}
 document.addEventListener("focusout",()=>setTimeout(()=>{for(const s of stack)if(s.dirty&&!s.el.contains(document.activeElement)){s.dirty=false;paintSheet(s)}},50));
 const topS=()=>stack[stack.length-1];
 
@@ -1547,8 +1553,9 @@ SHEETS.settings={live:true,
       <div class="hint">Alerts arrive while Yalla Guys is open or was recently open in the background. For reminders you can't miss, use “Add to phone calendar” on a plan.</div></div>
     <div class="sec"><h2>Default plan reminders</h2><div class="chips">${REM_OPTS.map(([m,l])=>`<button class="chip" data-act="defRemind" data-m="${m}" aria-pressed="${SET.remind.includes(m)}">${l} before</button>`.replace("At start before","At start")).join("")}</div>
       <div class="hint">Used for every plan you're going to. You can change them per plan.</div></div>
+    <div class="meta" style="text-align:center;margin:-4px 0 4px">App version ${APP_VERSION}</div>
     <div class="sec"><h2>Profile songs</h2><label class="check"><input type="checkbox" id="profSongs" ${SET.profSongs!==false?"checked":""}> Play song previews when I open someone's profile</label></div>
-    <div class="sec"><h2>Background animation</h2><label class="check"><input type="checkbox" id="appFx" ${SET.appFx?"checked":""}> Show my profile animation behind the whole app</label><div class="hint">${mem(ME)?.bgfx?"Change the animation in Edit profile.":"Pick one first in Edit profile → Animated background."}</div></div>
+    <div class="sec"><h2>Background animation</h2><label class="check"><input type="checkbox" id="appFx" ${SET.appFx!==false?"checked":""}> Show my profile animation behind every page</label><div class="hint">${mem(ME)?.bgfx?"Change the animation in Edit profile.":"Pick one first in Edit profile → Animated background."}</div></div>
     ${MODE==="live"?`<div class="sec"><h2>Data</h2><button class="btn block" data-act="resync">🔄 Refresh everything</button><div class="hint">The app saves a copy on this phone and only downloads what's new, to keep things fast and free. Use this if something looks out of date.</div></div>`:""}
     ${MODE==="live"?`<div class="sec"><h2>Your user ID</h2><div class="row" style="flex-wrap:nowrap"><code style="flex:1;min-width:0;overflow-wrap:anywhere;font-size:12px;background:var(--surface2);padding:8px 10px;border-radius:10px;user-select:all;-webkit-user-select:all">${esc(ME)}</code><button class="btn sm" data-act="copyUid">Copy</button></div>${crewOwner()===ME?`<div class="hint">You're the crew owner, so you can remove people from their profile. Paste this ID into the Firebase rules once so it works.</div>`:""}</div>`:""}
     ${MODE==="live"?`<div class="sec"><h2>Account</h2><button class="btn danger block" data-act="delAccount">Delete my account</button><div class="hint">Removes your profile, votes, busy times and login for good.</div></div>`:""}
@@ -2546,7 +2553,7 @@ SHEETS.badge={live:true,
       ${!me?`<div class="hint" style="margin:0">${esc(nick(uid))}'s badge.</div>`:""}</div>`}}
 };
 /* ---------- animated backgrounds ---------- */
-const FX_LIST=[["Pretty",[["galaxy","🌌","Galaxy"],["aurora","🌈","Aurora"],["bokeh","🔮","Dreamy lights"],["lanterns","🏮","Lanterns"],["fairydust","🧚","Fairy dust"],["dandelions","🌼","Dandelions"],["waves","🌊","Ocean waves"],["confetti","🎊","Confetti"]]],["Cute",[["stars","✨","Stars"],["bubbles","🫧","Bubbles"],["butterflies","🦋","Butterflies"],["petals","🌸","Petals"],["hearts","💗","Hearts"],["sparkles","🌟","Sparkles"],["fireflies","🌿","Fireflies"]]],
+const FX_LIST=[["Pretty",[["solar","🪐","Solar system"],["galaxy","🌌","Galaxy"],["aurora","🌈","Aurora"],["bokeh","🔮","Dreamy lights"],["lanterns","🏮","Lanterns"],["fairydust","🧚","Fairy dust"],["dandelions","🌼","Dandelions"],["waves","🌊","Ocean waves"],["confetti","🎊","Confetti"]]],["Cute",[["stars","✨","Stars"],["bubbles","🫧","Bubbles"],["butterflies","🦋","Butterflies"],["petals","🌸","Petals"],["hearts","💗","Hearts"],["sparkles","🌟","Sparkles"],["fireflies","🌿","Fireflies"]]],
   ["Bold",[["snow","❄️","Snow"],["rain","🌧️","Rain"],["embers","🔥","Embers"],["meteors","☄️","Meteors"],["matrix","💻","Matrix"],["speed","🏎️","Speed"],["lightning","⛈️","Storm"]]]];
 const fxName=k=>{for(const[,l]of FX_LIST)for(const[x,e,n]of l)if(x===k)return e+" "+n;return""};
 const FXS={},rnd=(a,b)=>a+Math.random()*(b-a);
@@ -2591,23 +2598,36 @@ const FX={
     draw:(g,p)=>{const gr=g.createLinearGradient(p.x-p.l,p.y,p.x,p.y);gr.addColorStop(0,"rgba(255,255,255,0)");gr.addColorStop(1,"rgba(255,255,255,.45)");g.globalAlpha=1;g.strokeStyle=gr;g.lineWidth=1.2;g.beginPath();g.moveTo(p.x-p.l,p.y);g.lineTo(p.x,p.y);g.stroke()}},
 };
 const gauss=()=>(Math.random()+Math.random()+Math.random()+Math.random()-2)/2;
-function galaxyLayer(W,H){const c=document.createElement("canvas"),dpr=Math.min(2,window.devicePixelRatio||1);c.width=W*dpr;c.height=H*dpr;const g=c.getContext("2d");g.scale(dpr,dpr);
-  const ang=-0.55,cx=W/2,cy=H/2,L=Math.hypot(W,H),ca=Math.cos(ang),sa=Math.sin(ang);
+function galaxyLayer(W,H){const c=document.createElement("canvas"),dpr=Math.min(2,window.devicePixelRatio||1);c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);const g=c.getContext("2d");g.scale(dpr,dpr);
+  const ang=-0.6,cx=W*.5,cy=H*.5,L=Math.hypot(W,H)*1.2,ca=Math.cos(ang),sa=Math.sin(ang),S=Math.min(W,H),area=Math.min(2.2,W*H/(390*780));
   const at=(u,v)=>[cx+u*ca-v*sa,cy+u*sa+v*ca];
+  const wob=u=>Math.sin(u*.005)*S*.06+Math.sin(u*.013+1.3)*S*.03;
+  const blob=(x,y,r,col)=>{const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,col);gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2)};
+  const PAL=[[168,85,247],[236,72,153],[59,130,246],[139,92,246],[244,114,182],[34,211,238],[99,102,241]];
+  // deep space wash: violet top, midnight blue, magenta corner
+  let gr=g.createLinearGradient(0,0,W,H);gr.addColorStop(0,"rgba(76,29,149,.35)");gr.addColorStop(.5,"rgba(30,27,75,.25)");gr.addColorStop(1,"rgba(131,24,67,.30)");g.fillStyle=gr;g.fillRect(0,0,W,H);
   g.globalCompositeOperation="lighter";
-  const neb=["rgba(140,90,255,.10)","rgba(255,110,190,.07)","rgba(90,170,255,.09)","rgba(255,200,150,.05)"];
-  for(let k=0;k<14;k++){const[x,y]=at(rnd(-L/2,L/2),gauss()*H*.08),r=rnd(.18,.4)*Math.min(W,H)*1.4,gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,neb[k%4]);gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2)}
-  const core=at(0,0),gr=g.createRadialGradient(core[0],core[1],0,core[0],core[1],Math.min(W,H)*.35);gr.addColorStop(0,"rgba(255,230,200,.16)");gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.fillRect(0,0,W,H);
-  const n=Math.round(1400*Math.min(2,W*H/(390*780)));
-  for(let k=0;k<n;k++){const[x,y]=at(rnd(-L/2,L/2),gauss()*H*.09);g.globalAlpha=rnd(.15,.6);g.fillStyle=Math.random()<.2?"#CFE0FF":Math.random()<.1?"#FFD9F0":"#fff";g.fillRect(x,y,rnd(.4,1.3),rnd(.4,1.3))}
-  g.globalCompositeOperation="source-over";g.globalAlpha=.35;g.strokeStyle="rgba(10,6,25,.6)";g.lineWidth=H*.025;g.beginPath();for(let u=-L/2;u<L/2;u+=20){const[x,y]=at(u,Math.sin(u*.01)*H*.012);u===-L/2?g.moveTo(x,y):g.lineTo(x,y)}g.stroke();
-  return c}
-function meteorShower(g,W,H,dt,st,max,rate){st.met=st.met||[];if(Math.random()<rate*dt&&st.met.length<max)st.met.push({x:rnd(W*.3,W*1.1),y:rnd(-H*.1,H*.5),v:rnd(420,700),l:rnd(70,160),life:1});
+  // big dreamy nebula clouds scattered across the sky
+  for(let k=0;k<Math.round(26*area);k++){const x=rnd(-.1,1.1)*W,y=rnd(-.1,1.1)*H,[r0,g0,b0]=PAL[k%PAL.length];blob(x,y,rnd(.25,.55)*S,`rgba(${r0},${g0},${b0},${rnd(.05,.1)})`)}
+  // the swirling band: colourful clouds following a wavy diagonal
+  for(let k=0;k<Math.round(220*area);k++){const u=rnd(-L/2,L/2),v=wob(u)+gauss()*S*.18,[x,y]=at(u,v),[r0,g0,b0]=PAL[Math.floor(rnd(0,PAL.length))],fall=1-Math.min(1,Math.abs(v)/(S*.42));
+    blob(x,y,rnd(.06,.2)*S,`rgba(${r0},${g0},${b0},${rnd(.045,.095)*fall})`)}
+  // glowing heart of the galaxy
+  const [hx,hy]=at(L*.04,wob(L*.04));blob(hx,hy,S*.42,"rgba(236,72,153,.16)");blob(hx,hy,S*.24,"rgba(196,181,253,.22)");blob(hx,hy,S*.1,"rgba(255,240,250,.35)");
+  // star dust inside the band
+  for(let k=0;k<Math.round(2200*area);k++){const u=rnd(-L/2,L/2),[x,y]=at(u,wob(u)+gauss()*S*.16);g.globalAlpha=rnd(.15,.6);g.fillStyle=["#fff","#F5D0FE","#BFDBFE","#FBCFE8"][Math.floor(rnd(0,4))];const z=rnd(.4,1.1);g.fillRect(x,y,z,z)}
+  // stars all over
+  for(let k=0;k<Math.round(700*area);k++){g.globalAlpha=rnd(.2,.7);g.fillStyle=Math.random()<.3?"#E9D5FF":Math.random()<.3?"#BFDBFE":"#fff";const z=rnd(.5,1.3);g.fillRect(rnd(0,W),rnd(0,H),z,z)}
+  // sparkly 4-point stars with coloured halos
+  for(let k=0;k<Math.round(22*area);k++){const x=rnd(0,W),y=rnd(0,H),[r0,g0,b0]=PAL[k%PAL.length],z=rnd(4,9);g.globalAlpha=1;blob(x,y,z*1.6,`rgba(${r0},${g0},${b0},.35)`);
+    g.globalAlpha=.85;g.fillStyle="#fff";g.beginPath();g.moveTo(x,y-z);g.quadraticCurveTo(x,y,x+z,y);g.quadraticCurveTo(x,y,x,y+z);g.quadraticCurveTo(x,y,x-z,y);g.quadraticCurveTo(x,y,x,y-z);g.fill()}
+  g.globalAlpha=1;g.globalCompositeOperation="source-over";return c}
+function meteorShower(g,W,H,dt,st,max,rate){st.met=st.met||[];st.mt=(st.mt??1)-dt;if(st.mt<=0&&st.met.length<max&&(st.mt=rnd(1.5,4)/Math.max(.3,rate*2),true))st.met.push({x:rnd(W*.3,W*1.1),y:rnd(-H*.1,H*.5),v:rnd(420,700),l:rnd(70,160),life:1});
   st.met=st.met.filter(m=>{m.x-=m.v*dt;m.y+=m.v*.5*dt;m.life-=dt*.7;if(m.life<=0||m.x<-200)return false;const gr=g.createLinearGradient(m.x,m.y,m.x+m.l,m.y-m.l*.5);gr.addColorStop(0,`rgba(255,255,255,${.85*m.life})`);gr.addColorStop(1,"rgba(255,255,255,0)");g.globalAlpha=1;g.strokeStyle=gr;g.lineWidth=1.8;g.beginPath();g.moveTo(m.x,m.y);g.lineTo(m.x+m.l,m.y-m.l*.5);g.stroke();dot(g,m.x,m.y,1.6,"#fff",m.life);return true})}
 Object.assign(FX,{
-  galaxy:{n:70,pre:(g,W,H,t,st,dt)=>{if(!st.gal||st.gw!==W||st.gh!==H){st.gal=galaxyLayer(W,H);st.gw=W;st.gh=H}g.globalAlpha=.85;g.drawImage(st.gal,0,0,W,H);meteorShower(g,W,H,dt,st,2,.35)},
+  galaxy:{n:55,pre:(g,W,H,t,st,dt)=>{if(!st.gal||st.gw!==W||st.gh!==H){st.gal=galaxyLayer(W,H);st.gw=W;st.gh=H}g.globalAlpha=.5;g.drawImage(st.gal,0,0,W,H);g.globalAlpha=1;meteorShower(g,W,H,dt,st,3,.55)},
     init:(p,W,H)=>Object.assign(p,{x:rnd(0,W),y:rnd(0,H),r:rnd(.6,1.8),ph:rnd(0,6),sp:rnd(1,3)}),
-    draw:(g,p,t)=>{const k=.5+.5*Math.sin(t*p.sp+p.ph);dot(g,p.x,p.y,p.r,"#fff",.15+.6*k);if(p.r>1.4&&k>.85){g.globalAlpha=.5*k;g.strokeStyle="#fff";g.lineWidth=.6;g.beginPath();g.moveTo(p.x-5,p.y);g.lineTo(p.x+5,p.y);g.moveTo(p.x,p.y-5);g.lineTo(p.x,p.y+5);g.stroke()}}},
+    draw:(g,p,t)=>{const k=.5+.5*Math.sin(t*p.sp+p.ph);dot(g,p.x,p.y,p.r*3,p.r>1.2?"#F0ABFC":"#93C5FD",.08*k);dot(g,p.x,p.y,p.r,"#fff",.2+.7*k);if(p.r>1.3&&k>.75){g.globalAlpha=.6*k;g.strokeStyle="#fff";g.lineWidth=.6;g.beginPath();g.moveTo(p.x-5,p.y);g.lineTo(p.x+5,p.y);g.moveTo(p.x,p.y-5);g.lineTo(p.x,p.y+5);g.stroke()}}},
   aurora:{n:30,pre:(g,W,H,t)=>{g.globalCompositeOperation="lighter";[["#3CFFB4",0],["#6A8CFF",1],["#D36BFF",2]].forEach(([c,i])=>{const base=H*(.18+i*.1);
       for(let x=0;x<=W;x+=6){const y=base+Math.sin(x*.006+t*.35+i*2)*H*.05+Math.sin(x*.017-t*.5+i)*H*.02,h=H*(.16+.07*Math.sin(x*.01+t*.6+i));
         const gr=g.createLinearGradient(0,y,0,y+h);gr.addColorStop(0,"rgba(0,0,0,0)");gr.addColorStop(.35,c);gr.addColorStop(1,"rgba(0,0,0,0)");g.globalAlpha=.10;g.fillStyle=gr;g.fillRect(x,y,6.5,h)}});g.globalCompositeOperation="source-over"},
@@ -2636,18 +2656,50 @@ Object.assign(FX,{
       if(st.flash>0){g.globalAlpha=st.flash*.18;g.fillStyle="#DDE6FF";g.fillRect(0,0,W,H);if(st.bolt){g.globalAlpha=Math.min(1,st.flash*1.6);g.strokeStyle="#EEF3FF";g.lineWidth=1.8;g.shadowColor="#9FB6FF";g.shadowBlur=12;g.beginPath();st.bolt.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.stroke();g.shadowBlur=0}}},
     init:(p,W,H,f)=>FX.rain.init(p,W,H,f),step:(p,dt,W,H)=>FX.rain.step(p,dt,W,H),draw:(g,p)=>FX.rain.draw(g,p)},
 });
+const PLANETS=[
+  {n:"Mercury",o:.15,r:2.2,s:.9,c:["#D9D4CF","#8E8780"]},{n:"Venus",o:.21,r:3.4,s:.62,c:["#FFF1C9","#D9A653"]},
+  {n:"Earth",o:.28,r:3.8,s:.46,c:["#9FD7FF","#2F6FD6"],land:"#4CAF6A",moon:1},{n:"Mars",o:.35,r:3,s:.34,c:["#FFB08A","#C4482A"]},
+  {n:"Jupiter",o:.51,r:8.5,s:.17,c:["#F3DFC0","#B98B5C"],bands:["#D6B08A","#A97B53","#E9D2B0","#C49468"],spot:1},
+  {n:"Saturn",o:.65,r:6.8,s:.11,c:["#F6E7B8","#C9A55E"],bands:["#E2C98E","#CFAE6E"],ring:1},
+  {n:"Uranus",o:.8,r:4.6,s:.07,c:["#D8FBFF","#5CC6D6"],ring:2},{n:"Neptune",o:.93,r:4.4,s:.05,c:["#9DB8FF","#2D4FC4"]}];
+function drawPlanet(g,p,x,y,r,t,sx,sy){g.save();g.beginPath();g.arc(x,y,r,0,7);g.clip();
+  const lx=x-(x-sx)/Math.hypot(x-sx,y-sy||1)*r*.45,ly=y-(y-sy)/Math.hypot(x-sx,y-sy||1)*r*.45;
+  let gr=g.createRadialGradient(lx,ly,r*.1,x,y,r*1.15);gr.addColorStop(0,p.c[0]);gr.addColorStop(1,p.c[1]);g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);
+  if(p.bands){const off=(t*r*1.2)%(r*2);p.bands.forEach((bc,k)=>{g.globalAlpha=.55;g.fillStyle=bc;const yy=y-r+(k+.6)*(2*r/(p.bands.length+.6));g.fillRect(x-r*2+off-r*2,yy-r*.11,r*8,r*.22)});g.globalAlpha=1;
+    if(p.spot){const sx2=x-r+((t*r*1.2+r*.6)%(r*3))-r*.4;g.fillStyle="rgba(200,90,60,.85)";g.beginPath();g.ellipse(sx2,y+r*.3,r*.28,r*.16,0,0,7);g.fill()}}
+  if(p.land){const off=(t*r*1.5)%(r*4);g.fillStyle=p.land;for(const[dx,dy,w,h]of[[0,-.3,.6,.35],[1.3,.25,.5,.4],[2.4,-.1,.7,.3],[3.3,.35,.4,.25]]){for(const k of[0,-1]){g.beginPath();g.ellipse(x-r*2+dx*r+off+k*r*4,y+dy*r,w*r,h*r,.3,0,7);g.fill()}}
+    g.fillStyle="rgba(255,255,255,.7)";g.fillRect(x-r,y-r,r*2,r*.25)}
+  gr=g.createRadialGradient(lx,ly,r*.2,x,y,r*1.05);gr.addColorStop(0,"rgba(0,0,0,0)");gr.addColorStop(.75,"rgba(0,0,0,.15)");gr.addColorStop(1,"rgba(0,0,0,.55)");g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);g.restore()}
+function drawRing(g,p,x,y,r,front){g.save();g.strokeStyle=p.ring===2?"rgba(190,240,255,.5)":"rgba(236,214,160,.75)";g.lineWidth=p.ring===2?.8:r*.35;g.beginPath();
+  if(p.ring===2)g.ellipse(x,y,r*.6,r*1.6,0,front?-Math.PI/2:Math.PI/2,front?Math.PI/2:Math.PI*1.5);else g.ellipse(x,y,r*2.1,r*.6,-.2,front?0:Math.PI,front?Math.PI:Math.PI*2);g.stroke();g.restore()}
+FX.solar={n:50,init:(p,W,H)=>Object.assign(p,{x:rnd(0,W),y:rnd(0,H),r:rnd(.4,1.3),ph:rnd(0,6)}),draw:(g,p,t)=>dot(g,p.x,p.y,p.r,"#fff",.12+.3*(.5+.5*Math.sin(t*1.4+p.ph))),
+  pre:(g,W,H,t,st)=>{st.ast=st.ast||Array.from({length:70},()=>({a:rnd(0,6.3),o:rnd(.41,.46),z:rnd(.5,1.3)}));
+    const cx=W/2,cy=H*.5,R=Math.min(W*.66,H*.62),tilt=.46,pos=[];
+    g.globalAlpha=.5;g.strokeStyle="rgba(170,190,255,.22)";g.lineWidth=.8;for(const p of PLANETS){g.beginPath();g.ellipse(cx,cy,R*p.o,R*p.o*tilt,0,0,7);g.stroke()}
+    for(const a of st.ast){const an=a.a+t*.24;dot(g,cx+Math.cos(an)*R*a.o,cy+Math.sin(an)*R*a.o*tilt,a.z*.6,"#C9B9A6",.35)}
+    PLANETS.forEach((p,k)=>{const an=k*1.7+t*p.s;pos.push({p,x:cx+Math.cos(an)*R*p.o,y:cy+Math.sin(an)*R*p.o*tilt,back:Math.sin(an)<0,an})});
+    const sun=()=>{let gr=g.createRadialGradient(cx,cy,0,cx,cy,R*.16);gr.addColorStop(0,"rgba(255,220,120,.55)");gr.addColorStop(1,"rgba(255,140,40,0)");g.globalAlpha=1;g.fillStyle=gr;g.fillRect(cx-R*.16,cy-R*.16,R*.32,R*.32);
+      gr=g.createRadialGradient(cx-3,cy-3,1,cx,cy,R*.065);gr.addColorStop(0,"#FFF7D6");gr.addColorStop(.6,"#FFC53D");gr.addColorStop(1,"#FF8A1F");g.globalAlpha=.9;g.fillStyle=gr;g.beginPath();g.arc(cx,cy,R*.065,0,7);g.fill()};
+    const draw=q=>{const{p,x,y}=q,sc=(1+(q.back?-.12:.12)*Math.abs(Math.sin(q.an))),r=p.r*sc*Math.max(1,R/130);g.globalAlpha=.9;
+      if(p.ring)drawRing(g,p,x,y,r,false);drawPlanet(g,p,x,y,r,t*(p.n==="Jupiter"||p.n==="Saturn"?1.6:1),cx,cy);if(p.ring)drawRing(g,p,x,y,r,true);
+      if(p.moon){const ma=t*1.8;dot(g,x+Math.cos(ma)*r*2.4,y+Math.sin(ma)*r*.9,1.1,"#E6E6E6",.85)}};
+    pos.filter(q=>q.back).sort((a,b)=>a.y-b.y).forEach(draw);sun();pos.filter(q=>!q.back).sort((a,b)=>a.y-b.y).forEach(draw);
+    g.globalAlpha=.42;g.fillStyle="#070910";g.fillRect(0,0,W,H);g.globalAlpha=1}};
 function runFx(cv,kind){const def=FX[kind];if(!def)return;const g=cv.getContext("2d");let W=0,H=0,ps=[],st={},last=performance.now(),t0=last;
   const fit=()=>{const r=cv.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);if(!r.width||!r.height)return false;W=r.width;H=r.height;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);g.setTransform(dpr,0,0,dpr,0,0);st.bg=null;return true};
   const seed=()=>{const n=Math.round(def.n*Math.min(1.6,Math.max(.6,W*H/(390*780))));ps=Array.from({length:n},()=>def.init({},W,H,true))};
   const still=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-  let ok=fit();if(ok)seed();try{new ResizeObserver(()=>{if(fit()&&!ps.length)seed()}).observe(cv)}catch{}
-  const frame=now=>{if(!cv.isConnected||cv.dataset.k!==kind)return;if(document.hidden||!W){last=now;return requestAnimationFrame(frame)}
+  let ok=fit();if(ok)seed();let drawn=false;try{new ResizeObserver(()=>{if(fit()){if(!ps.length)seed();if(still&&drawn)requestAnimationFrame(frame)}}).observe(cv)}catch{}
+  const frame=now=>{if(!cv.isConnected||cv.dataset.k!==kind)return;const top=stack[stack.length-1]?.el,mine=cv.parentElement;
+    if(document.hidden||!W||(top&&mine!==top&&!top.contains(mine))){last=now;return requestAnimationFrame(frame)}
     const dt=Math.min(.05,(now-last)/1000),t=(now-t0)/1000;last=now;g.globalAlpha=1;g.clearRect(0,0,W,H);
-    def.pre?.(g,W,H,t,st,dt);for(const p of ps){def.step?.(p,dt,W,H,t);def.draw(g,p,t,W,H)}g.globalAlpha=1;
+    def.pre?.(g,W,H,t,st,dt);for(const p of ps){def.step?.(p,dt,W,H,t);def.draw(g,p,t,W,H)}g.globalAlpha=1;drawn=true;
     if(!still)requestAnimationFrame(frame)};requestAnimationFrame(frame)}
 function mountFx(host,kind,fixed){if(!host)return;let cv=host.querySelector(":scope>canvas.bgfx");if(cv&&cv.dataset.k===(kind||""))return;cv?.remove();if(!kind||!FX[kind])return;
   cv=document.createElement("canvas");cv.className="bgfx"+(fixed?" fixed":"");cv.dataset.k=kind;cv.setAttribute("aria-hidden","true");host.prepend(cv);runFx(cv,kind)}
-function syncAppFx(){const k=SET.appFx&&(MODE==="live"||MODE==="demo")?mem(ME)?.bgfx:"";mountFx(document.body,k||"",true);document.body.classList.toggle("has-fx",!!k)}
+if(!ls.get("yg-fx-mig2",false)){delete SET.appFx;ls.set("yg-settings",SET);ls.set("yg-fx-mig2",true)}
+const appFxKind=()=>SET.appFx!==false&&(MODE==="live"||MODE==="demo")?mem(ME)?.bgfx||"":"";
+function syncAppFx(){const k=appFxKind();mountFx(document.body,k||"",true);document.body.classList.toggle("has-fx",!!k)}
 SHEETS.person.after=s=>{mountFx(s.el,mem(s.args.id)?.bgfx);SONG.paint()};
 SHEETS.profile.after=s=>mountFx($("#fxPrev",s.el),s.state.bgfx);
 const profS=()=>stack.find(x=>x.kind==="profile");
@@ -2671,6 +2723,10 @@ function songCard(m){if(!m.song)return"";const sp=spotifyTrack(m.song),title=m.s
     ${m.songPreview?`<button class="songbtn" data-act="songToggle" aria-label="Play or pause">▶</button>`:""}${m.songUrl||sp?`<a class="songsp" href="${esc(m.songUrl||m.song)}" target="_blank" rel="noopener" aria-label="Open in Spotify">↗</a>`:""}</div>`}
 SHEETS.person.init=a=>{SONG.play(a.id);return{}};
 SHEETS.person.destroy=()=>SONG.stop();
+// leaving the app (home button, switching apps, locking the phone, closing it) stops the song
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&SONG.a){SONG.a.pause();SONG.paint()}});
+window.addEventListener("pagehide",()=>SONG.stop());
+window.addEventListener("blur",()=>{if(document.hidden&&SONG.a)SONG.a.pause()});
 SHEETS.stickerPick={
   render(s){const p=profS(),st=p?p.state:{stickers:[]};
     return{title:"Stickers",right:`<span class="pill ${st.stickers.length>=8?"warn":"set"}">${st.stickers.length}/8</span>`,
@@ -3355,7 +3411,7 @@ document.addEventListener("change",ev=>{
   if(el.id?.startsWith("ridePartial-")){const pid=el.dataset.pid,r=myRsvp(pid);if(r?.ride)saveRsvp(pid,{ride:{...r.ride,partial:el.checked}})}
   if(["nMsgs","nPlans","nMoments"].includes(el.id)){SET[el.id]=el.checked;ls.set("yg-settings",SET)}
   if(el.id==="profSongs"){SET.profSongs=el.checked;ls.set("yg-settings",SET);if(!el.checked)SONG.stop()}
-  if(el.id==="appFx"){SET.appFx=el.checked;ls.set("yg-settings",SET);syncAppFx()}
+  if(el.id==="appFx"){SET.appFx=el.checked;ls.set("yg-settings",SET);syncAppFx();for(const x of stack)sheetFx(x)}
   if(el.id==="actAs"){ls.set("yg-actas",el.value);ME=el.value;while(stack.length)closeSheet();render();toast(ME==="me-demo"?"Back to being you":"Now testing as "+(mem(ME)?.nick||"a friend"))}
   if(el.id==="exPl"){const s=topS();s.state.plan=el.value}
   if(el.id==="pdfD"&&el.value){const s=topS();s.state.d=el.value;paintSheet(s)}
