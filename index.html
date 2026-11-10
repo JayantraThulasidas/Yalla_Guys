@@ -490,6 +490,10 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .replybar{display:flex;align-items:center;gap:8px;border-left:3px solid var(--accent);background:var(--surface2);border-radius:10px;padding:6px 6px 6px 10px}
 .replybar b{display:block;font-size:12px;color:var(--accent)} .replybar span>span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .msg{transition:transform .15s}
+.msg .mlike{margin-top:-9px;margin-inline:8px;position:relative;z-index:1;border:2px solid var(--bg);background:var(--surface2);border-radius:999px;padding:1px 6px;font-size:12px;line-height:1.4;display:inline-flex;gap:3px;align-items:center;color:var(--fg)}
+.msg .mlike b{font-size:11px}
+.hpop{position:absolute;left:50%;top:50%;font-size:34px;pointer-events:none;transform:translate(-50%,-50%) scale(.3);animation:hpop .7s ease-out forwards}
+@keyframes hpop{40%{transform:translate(-50%,-50%) scale(1.15);opacity:1}100%{transform:translate(-50%,-90%) scale(1);opacity:0}}
 .msg .stamp{font-size:10.5px;color:var(--muted);margin-top:2px;display:inline-flex;gap:4px;align-items:center}
 .msg .tk{letter-spacing:-3px;font-weight:700;padding-right:3px}
 .msg .tk.seen{color:var(--accent)}
@@ -550,7 +554,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.27";
+const APP_VERSION="2026-11-10.29";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2055,7 +2059,7 @@ SHEETS.chat={live:true,
     ms.forEach(m=>{const d=ymd(new Date(m.at));if(d!==last){html+=`<div class="daysep">${d===TODAY()?"Today":fDate(d)}</div>`;last=d}
       const me=m.by===ME;const rc=me&&!m.deleted&&m.kind!=="plan"?receipt(c,m):"";if(m.deleted){html+=`<div class="msg ${me?"me":""}">${me||c.dm?"":`<span class="who">${esc(nick(m.by))}</span>`}<div class="bub deleted">🚫 ${me?"You deleted this message":"This message was deleted"}</div></div>`;return}
       const rq=m.replyTo?D.msgs.find(x=>x.id===m.replyTo.id):null;
-      html+=`<div class="msg ${me?"me":""}" data-mid="${esc(m.id)}"${m.kind!=="plan"?` data-act="msgMenu" data-chat="${esc(c.id)}" data-id="${esc(m.id)}"`:""}>${me||c.dm?"":`<span class="who">${esc(nick(m.by))}</span>`}${m.replyTo?`<button class="quote" data-act="jumpMsg" data-id="${esc(m.replyTo.id)}"><b>${esc(m.replyTo.by===ME?"You":nick(m.replyTo.by))}</b><span>${esc(rq?(rq.deleted?"Message deleted":msgLabel(rq)):m.replyTo.text||"")}</span></button>`:""}${m.kind==="plan"&&planById(m.planId)?(pl=>`<button class="plan-msg" data-act="openPlan" data-id="${esc(pl.id)}"><span class="k">📌 New plan</span><b style="font-size:16px">${esc(pl.emoji||"")} ${esc(pl.title)}</b><span class="meta">${pl.final?esc(fDate(pl.final.date)+" · "+fRange(pl.final.start,pl.final.end)):`${(pl.slots||[]).length} dates to vote on`} · tap to open</span></button>`)(planById(m.planId)):`${m.kind?`<div class="bub mediab">${mediaHtml("msgs",m)}${m.text?`<div>${linkify(m.text)}</div>`:""}</div>`:`<div class="bub">${linkify(m.text)}</div>`}`}${me&&rc?`<span class="stamp">${m.edited?"edited · ":""}${msgTime(m.at)} ${TICK[rc]}</span>`:m.edited?`<span class="edited">edited</span>`:""}${me&&rc&&m.id===lastMine?`<span class="rcpt">${rc==="seen"?(c.dm?"Seen":chatOthers(c).length===1?"Seen by "+esc(nick(chatOthers(c)[0])):"Seen by everyone"):rc==="dlv"?"Delivered":(!c.dm&&seenBy(c,m).length?"Seen by "+seenBy(c,m).map(u=>esc(nick(u))).join(", "):"Sent")}</span>`:""}</div>`});
+      html+=`<div class="msg ${me?"me":""}" data-mid="${esc(m.id)}"${m.kind!=="plan"?` data-act="msgMenu" data-chat="${esc(c.id)}" data-id="${esc(m.id)}"`:""}>${me||c.dm?"":`<span class="who">${esc(nick(m.by))}</span>`}${m.replyTo?`<button class="quote" data-act="jumpMsg" data-id="${esc(m.replyTo.id)}"><b>${esc(m.replyTo.by===ME?"You":nick(m.replyTo.by))}</b><span>${esc(rq?(rq.deleted?"Message deleted":msgLabel(rq)):m.replyTo.text||"")}</span></button>`:""}${m.kind==="plan"&&planById(m.planId)?(pl=>`<button class="plan-msg" data-act="openPlan" data-id="${esc(pl.id)}"><span class="k">📌 New plan</span><b style="font-size:16px">${esc(pl.emoji||"")} ${esc(pl.title)}</b><span class="meta">${pl.final?esc(fDate(pl.final.date)+" · "+fRange(pl.final.start,pl.final.end)):`${(pl.slots||[]).length} dates to vote on`} · tap to open</span></button>`)(planById(m.planId)):`${m.kind?`<div class="bub mediab">${mediaHtml("msgs",m)}${m.text?`<div>${linkify(m.text)}</div>`:""}</div>`:`<div class="bub">${linkify(m.text)}</div>`}`}${Object.values(m.likes||{}).filter(Boolean).length?(n=>`<button class="mlike" data-act="msgLikes" data-id="${esc(m.id)}" aria-label="Liked by ${n}">❤️${n>1?`<b>${n}</b>`:""}</button>`)(Object.values(m.likes).filter(Boolean).length):""}${me&&rc?`<span class="stamp">${m.edited?"edited · ":""}${msgTime(m.at)} ${TICK[rc]}</span>`:m.edited?`<span class="edited">edited</span>`:""}${me&&rc&&m.id===lastMine?`<span class="rcpt">${rc==="seen"?(c.dm?"Seen":chatOthers(c).length===1?"Seen by "+esc(nick(chatOthers(c)[0])):"Seen by everyone"):rc==="dlv"?"Delivered":(!c.dm&&seenBy(c,m).length?"Seen by "+seenBy(c,m).map(u=>esc(nick(u))).join(", "):"Sent")}</span>`:""}</div>`});
     const plan=c.planId?planById(c.planId):null;
     return{title:c.dm?`<button class="prof-btn" data-act="person" data-id="${esc(chatOther(c))}">${avatar(chatOther(c),"sm")} ${esc(chatName(c))}</button>`:`${esc(c.emoji||"💬")} ${esc(c.name)}`,right:`<button class="btn sm" data-act="newPlanInChat" data-id="${esc(c.id)}">+ Plan</button><button class="btn sm" data-act="chatMenu" data-id="${esc(c.id)}" aria-label="Chat options">⋯</button>`,body:`${plan?`<button class="ev" data-act="openPlan" data-id="${esc(plan.id)}" style="margin-bottom:10px"><span class="stripe" style="background:${hue(plan.id)}"></span><span style="flex:1">Plan: <b>${esc(plan.title)}</b></span>${statusPill(plan)}</button>`:""}<div class="msgs">${html||'<div class="empty">Say hi 👋</div>'}</div>`,
       foot:`<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">${s.state.reply?`<div class="replybar"><span style="flex:1;min-width:0"><b>↩️ Replying to ${esc(s.state.reply.by===ME?"yourself":nick(s.state.reply.by))}</b><span>${esc(s.state.reply.text)}</span></span><button class="x" data-act="replyClear" aria-label="Cancel reply">✕</button></div>`:""}
@@ -2137,6 +2141,7 @@ async function prepVideo(file,onProg){
   const out=new Blob(parts,{type:mime.split(";")[0]});if(out.size>25e6)throw new Error("That video is still too big. Try a shorter clip.");
   return{blob:out,poster,dur};
 }
+function heartPop(el){const b=el?.querySelector(".bub,.mediab")||el;if(!b)return;const h=document.createElement("span");h.className="hpop";h.textContent="❤️";b.style.position="relative";b.appendChild(h);setTimeout(()=>h.remove(),700)}
 function startReply(m){const s=stack.find(x=>x.kind==="chat"&&x.args.id===m.chatId);if(!s)return;s.state.reply={id:m.id,by:m.by,text:(msgLabel(m)||"").slice(0,90)};paintSheet(s);setTimeout(()=>$("#chatIn-"+CSS.escape(m.chatId),s.el)?.focus(),60)}
 function takeReply(cid){const s=stack.find(x=>x.kind==="chat"&&x.args.id===cid);const r=s?.state.reply;if(r){s.state.reply=null;paintSheet(s)}return r?{id:r.id,by:r.by,text:r.text}:null}
 async function postItem(ctx,id,payload){
@@ -2198,9 +2203,9 @@ const attachBtns=(ctx,id)=>`<button class="att" data-act="camera" data-ctx="${ct
 SHEETS.msgMenu={
   render(s){const m=D.msgs.find(x=>x.id===s.args.id);if(!m)return{title:"Message",body:""};const mine=m.by===ME,canEdit=mine&&(!m.kind||m.kind==="photo"||m.kind==="video");
     if(!mine)return{title:esc(nick(m.by)),body:`<div class="form">${m.text?`<div class="note"><p>${esc(m.text.length>200?m.text.slice(0,200)+"…":m.text)}</p></div>`:`<div class="meta">${esc(msgLabel(m))}</div>`}
-      <button class="btn pri block" data-act="msgReply">↩️ Reply</button>${m.text?`<button class="btn block" data-act="msgCopy">📋 Copy text</button>`:""}<div class="hint">Tip: swipe a message to the right to reply.</div></div>`};
+      <button class="btn pri block" data-act="msgLikeMenu">${(m.likes||{})[ME]?"💔 Unlike":"❤️ Like"}</button>${m.text?`<button class="btn block" data-act="msgCopy">📋 Copy text</button>`:""}<div class="hint">Tip: swipe a message right to reply · double-tap to ❤️</div></div>`};
     return{title:"Your message",body:`<div class="form">
-      <button class="btn pri block" data-act="msgReply">↩️ Reply</button>
+      <button class="btn block" data-act="msgLikeMenu">${(m.likes||{})[ME]?"💔 Unlike":"❤️ Like"}</button>
       ${m.text?`<div class="note"><p>${esc(m.text.length>200?m.text.slice(0,200)+"…":m.text)}</p></div>`:`<div class="meta">${esc(msgLabel(m))}</div>`}
       ${canEdit?`<button class="btn block" data-act="msgEdit">✏️ ${m.kind&&!m.text?"Add a caption":"Edit message"}</button>`:""}
       ${m.text?`<button class="btn block" data-act="msgCopy">📋 Copy text</button>`:""}
@@ -2509,7 +2514,13 @@ const ACT={
       if(topS()!==s)return;s.state.shot={kind:"video",blob,poster,dur:(now()-t0)/1000,url:URL.createObjectURL(blob)};paintSheet(s)};
     rec.start(500);haptic();s.state.rec=true;paintSheet(s);
     s.recTimer=setInterval(()=>{const x=(now()-t0)/1000;const el=$("#camT",s.el);if(el)el.textContent=`● ${fDur(x)} / 0:20`;if(x>=20)rec.state==="recording"&&rec.stop()},250)},
-  msgMenu(d,el,ev){if(ev?.target.closest("a,button,.voice")||Date.now()-(window.__swiped||0)<500)return;openSheet("msgMenu",{chat:d.chat,id:d.id})},
+  msgMenu(d,el,ev){if(ev?.target.closest("a,button,.voice")||Date.now()-(window.__swiped||0)<500)return;const t=Date.now(),tp=window.__tap;
+    if(tp&&tp.id===d.id&&t-tp.t<350){window.__tap=null;const m=D.msgs.find(x=>x.id===d.id);if(m&&!(m.likes||{})[ME])ACT.msgLike(d);heartPop(el);return}
+    window.__tap={id:d.id,t}},
+  async msgLike(d){const m=D.msgs.find(x=>x.id===d.id);if(!m||m.deleted)return;const on=(m.likes||{})[ME];try{haptic()}catch{}
+    await Store.updMsg(m.chatId,m.id,{["likes."+ME]:on?(MODE==="demo"?DEL:firebase.firestore.FieldValue.delete()):true})},
+  msgLikeMenu(){const s=topS(),id=s.args.id;closeSheet();ACT.msgLike({id})},
+  msgLikes(d){const m=D.msgs.find(x=>x.id===d.id);if(!m)return;const who=Object.keys(m.likes||{}).filter(u=>m.likes[u]);toast("❤️ "+who.map(u=>u===ME?"You":nick(u)).join(", "))},
   msgEdit(){const s=topS();const a={...s.args};closeSheet();setTimeout(()=>openSheet("msgEdit",a),0)},
   async msgEditSave(){const s=topS(),m=D.msgs.find(x=>x.id===s.args.id),t=$("#meText",s.el).value.trim();if(!m)return closeSheet();
     if(!t&&!m.kind)return toast("Message can't be empty. Delete it instead.");if(t===m.text)return closeSheet();
@@ -2637,9 +2648,12 @@ document.addEventListener("keydown",ev=>{
 Store.init();
 document.addEventListener("focusout",e=>{if(e.target.matches?.("input,textarea")&&stack.length)setTimeout(()=>{if(!document.activeElement?.matches?.("input,textarea")&&window.scrollY)window.scrollTo(0,0)},120)});
 {let sw=null;
-  document.addEventListener("touchstart",e=>{const m=e.target.closest("#sheets .msg[data-mid]");if(!m||e.touches.length>1){sw=null;return}sw={m,x:e.touches[0].clientX,y:e.touches[0].clientY,dx:0,lock:null}},{passive:true});
-  document.addEventListener("touchmove",e=>{if(!sw)return;const dx=e.touches[0].clientX-sw.x,dy=e.touches[0].clientY-sw.y;if(sw.lock===null&&(Math.abs(dx)>8||Math.abs(dy)>8))sw.lock=Math.abs(dx)>Math.abs(dy)&&dx>0;if(!sw.lock)return;sw.dx=Math.min(80,Math.max(0,dx));sw.m.style.transform=`translateX(${sw.dx}px)`;if(sw.dx>=60&&!sw.buzzed){sw.buzzed=1;try{haptic()}catch{}}},{passive:true});
-  document.addEventListener("touchend",()=>{if(!sw)return;const{m,dx}=sw;m.style.transform="";sw=null;if(dx>=60){const s=topS(),msg=D.msgs.find(x=>x.id===m.dataset.mid);if(s?.kind==="chat"&&msg&&!msg.deleted){window.__swiped=Date.now();startReply(msg)}}},{passive:true});}
+  const lpOpen=m=>{if(!m.dataset.chat)return false;window.__tap=null;try{haptic()}catch{}openSheet("msgMenu",{chat:m.dataset.chat,id:m.dataset.id});return true};
+  document.addEventListener("touchstart",e=>{const m=e.target.closest("#sheets .msg[data-mid]");if(sw?.lp)clearTimeout(sw.lp);if(!m||e.touches.length>1||e.target.closest("a,button,.voice,video")){sw=null;return}
+    sw={m,x:e.touches[0].clientX,y:e.touches[0].clientY,dx:0,lock:null};const me=sw;sw.lp=setTimeout(()=>{if(sw===me&&!me.lock&&lpOpen(m))me.lpFired=1},480)},{passive:true});
+  document.addEventListener("contextmenu",e=>{const m=e.target.closest("#sheets .msg[data-mid]");if(!m||e.target.closest("a,video"))return;e.preventDefault();if(!sw?.lpFired&&!("ontouchstart" in window))lpOpen(m)});
+  document.addEventListener("touchmove",e=>{if(!sw)return;const dx=e.touches[0].clientX-sw.x,dy=e.touches[0].clientY-sw.y;if(sw.lock===null&&(Math.abs(dx)>8||Math.abs(dy)>8)){clearTimeout(sw.lp);if(sw.lpFired)return}if(sw.lock===null&&(Math.abs(dx)>8||Math.abs(dy)>8))sw.lock=Math.abs(dx)>Math.abs(dy)&&dx>0;if(!sw.lock)return;sw.dx=Math.min(80,Math.max(0,dx));sw.m.style.transform=`translateX(${sw.dx}px)`;if(sw.dx>=60&&!sw.buzzed){sw.buzzed=1;try{haptic()}catch{}}},{passive:true});
+  document.addEventListener("touchend",()=>{if(!sw)return;clearTimeout(sw.lp);if(sw.lpFired){window.__swiped=Date.now();sw=null;return}const{m,dx}=sw;m.style.transform="";sw=null;if(dx>=60){const s=topS(),msg=D.msgs.find(x=>x.id===m.dataset.mid);if(s?.kind==="chat"&&msg&&!msg.deleted){window.__swiped=Date.now();startReply(msg)}}},{passive:true});}
 async function checkUpdate(){try{if(location.protocol!=="https:")return;const r=await fetch("./index.html?u="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/APP_VERSION="([^"]+)"/);if(m&&m[1]!==APP_VERSION)$("#updBar").hidden=false}catch{}}
 setTimeout(checkUpdate,4000);setInterval(checkUpdate,5*6e4);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate()});
 async function notify(title,body,tag,data){
