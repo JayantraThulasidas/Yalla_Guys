@@ -509,7 +509,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.11";
+const APP_VERSION="2026-11-10.12";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -951,13 +951,32 @@ VIEWS.chat=()=>{
   <div class="people-row">${D.members.filter(m=>m.id!==ME).map(m=>`<button class="prof-btn" data-act="dm" data-id="${esc(m.id)}" style="flex-direction:column;gap:4px;font-size:11px;font-weight:600;width:60px;flex:none">${avatar(m.id,"","width:52px;height:52px;font-size:24px")}<span style="max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(m.nick||"")}</span></button>`).join("")}</div>
   <div class="list" style="gap:8px">${cs.length?cs.map(c=>{const ms=chatMsgs(c.id),l=ms[ms.length-1],u=unread(c);return`<button class="chat-row" data-act="openChat" data-id="${esc(c.id)}">${chatIcon(c,1)}<span class="grow"><span class="between"><b>${esc(chatName(c))}</b><span class="meta">${ago(lastAt(c))}</span></span><span class="between"><span class="last">${l?esc((l.by===ME?"You":nick(l.by))+": "+msgLabel(l)):esc((c.members||[]).length+" people")}</span>${u?`<span class="pill bad">${u}</span>`:""}</span></span></button>`}).join(""):`<div class="empty"><h3>No chats yet</h3>Start a group with some of the guys, or open a plan and tap <b>Plan chat</b>.</div>`}</div>`;
 };
+/* ---------- person-to-person balances: mutual debts cancel out; oldest dues clear first ---------- */
+function pairLedger(a,b){
+  // dues a owes b and b owes a, plus payments both ways, oldest first
+  const aOwes=[],bOwes=[],aPaid=[],bPaid=[];
+  for(const e of D.expenses){const sh=sharesOf(e);
+    if(e.paidBy===b&&sh[a])aOwes.push({e,amt:sh[a],at:e.at});
+    if(e.paidBy===a&&sh[b])bOwes.push({e,amt:sh[b],at:e.at})}
+  for(const p of D.settles){if(p.from===a&&p.to===b)aPaid.push(p);if(p.from===b&&p.to===a)bPaid.push(p)}
+  const sum=x=>x.reduce((t,i)=>t+(+i.amt||+i.amount||0),0);
+  const net=Math.round(((sum(aOwes)-sum(aPaid))-(sum(bOwes)-sum(bPaid)))*100)/100; // >0: a owes b
+  const clear=(dues,pool)=>{let left=pool;return[...dues].sort((x,y)=>x.at-y.at).map(d=>{const c=Math.min(d.amt,Math.max(0,left));left-=c;return{...d,cleared:c,status:c>=d.amt-0.009?"cleared":c>0?"part":"open"}})};
+  return{net,aDues:clear(aOwes,sum(bOwes)+sum(aPaid)),bDues:clear(bOwes,sum(aOwes)+sum(bPaid)),aPaid,bPaid};
+}
+function peopleMoneyHtml(){
+  const rows=D.members.filter(m=>m.id!==ME).map(m=>({m,net:pairLedger(ME,m.id).net})),open=rows.filter(r=>Math.abs(r.net)>0.009).sort((a,b)=>Math.abs(b.net)-Math.abs(a.net)),square=rows.filter(r=>Math.abs(r.net)<=0.009);
+  return`<div class="sec"><div class="between"><h2>People</h2><button class="btn sm ghost" data-act="allBalances">Everyone's balances ›</button></div>
+    ${open.length?`<div class="list" style="gap:8px">${open.map(r=>`<button class="item" data-act="pairOpen" data-id="${esc(r.m.id)}" style="width:100%;text-align:left">${avatar(r.m.id,"sm")}<span class="grow"><span class="t">${r.net>0?`You owe ${esc(r.m.nick)}`:`${esc(r.m.nick)} owes you`}</span><br><span class="meta">Tap to see every bill between you</span></span><span class="amt ${r.net>0?"neg":"pos"}">${dhs(Math.abs(r.net))}</span><span class="meta">›</span></button>`).join("")}</div>`:`<div class="meta">You're all square with everyone 🎉</div>`}
+    ${square.length&&open.length?`<div class="hint" style="margin:0">All square with ${square.map(r=>esc(r.m.nick)).join(", ")}.</div>`:""}</div>`;
+}
 VIEWS.money=()=>{
   const bal=balances(),mine=bal[ME]||0,plan=settlePlan(bal);
   const ex=D.expenses.filter(e=>!UI.moneyPlan||e.planId===UI.moneyPlan).sort((a,b)=>b.at-a.at);
   const plansWithEx=D.plans.filter(p=>D.expenses.some(e=>e.planId===p.id));
   return`<div class="view-title"><h1>Money</h1><button class="btn sm pri" data-act="newExpense">Add expense</button></div>
   <div class="money-hero"><span class="meta">${mine>0.009?"You're owed":mine<-0.009?"You owe":"You're all square"}</span><span class="big ${mine>0.009?"pos":mine<-0.009?"neg":""}">${dhs(Math.abs(mine))}</span><span class="meta">Across ${D.expenses.length} expense${D.expenses.length===1?"":"s"} · ${dhs(D.expenses.reduce((s,e)=>s+(+e.amount||0),0))} spent together</span></div>
-  <div class="sec"><h2>Settle up</h2>${plan.length?`<div class="list" style="gap:8px">${plan.map(s=>`<div class="item">${avatar(s.from,"sm")}<span class="grow"><span class="t">${esc(nick(s.from))} → ${esc(nick(s.to))}</span><br><span class="amt">${dhs(s.amount)}</span></span><button class="btn sm" data-act="settle" data-from="${esc(s.from)}" data-to="${esc(s.to)}" data-amt="${s.amount}">Mark paid</button></div>`).join("")}</div>`:`<div class="meta">Nobody owes anything right now.</div>`}</div>
+  ${peopleMoneyHtml()}
   <div class="sec"><div class="between"><h2>Expenses</h2><select class="inp" id="moneyPlan" style="width:auto;min-height:38px;padding:6px 10px;font-size:16px;max-width:55%"><option value="">All plans</option>${plansWithEx.map(p=>`<option value="${esc(p.id)}" ${UI.moneyPlan===p.id?"selected":""}>${esc(p.title)}</option>`).join("")}</select></div>
   ${ex.length?`<div class="list" style="gap:8px">${ex.map(expenseRow).join("")}</div>`:`<div class="empty">No expenses yet. Add the bill after a hangout and Yalla Guys works out who owes whom, in Dhs.</div>`}</div>
   ${D.settles.length?`<div class="sec"><h2>Payments</h2><div class="list" style="gap:8px">${[...D.settles].sort((a,b)=>b.at-a.at).slice(0,20).map(s=>`<div class="item"><span class="grow"><span class="t">${esc(nick(s.from))} paid ${esc(nick(s.to))}</span><br><span class="meta">${ago(s.at)}</span></span><span class="amt pos">${dhs(s.amount)}</span><button class="x" data-act="delSettle" data-id="${esc(s.id)}" data-confirm="Undo?" aria-label="Undo payment">✕</button></div>`).join("")}</div></div>`:""}`;
@@ -1362,6 +1381,24 @@ SHEETS.playlistAdd={render(){return{title:"Add a playlist",body:`<div class="for
   <label class="f">Spotify link<input class="inp" id="plUrl" type="url" inputmode="url" placeholder="https://open.spotify.com/playlist/…"></label>
   <label class="f">Name (optional)<input class="inp" id="plTitle" maxlength="60" placeholder="e.g. Hatta road trip 🚗"></label>
   <div class="hint">In Spotify: open the playlist → ⋯ → Share → Copy link. Apple Music, Anghami and YouTube links work too, as a link.</div></div>`,foot:`<button class="btn pri block" data-act="playlistSave">Add playlist</button>`}}};
+SHEETS.pair={live:true,
+  render(s){const o=s.args.id,m=mem(o),L=pairLedger(ME,o),net=L.net;
+    const row=(d,mine)=>`<div class="item" style="${d.status==="cleared"?"opacity:.55":""}"><span class="grow"><span class="t" style="${d.status==="cleared"?"text-decoration:line-through":""}">${esc(d.e.title)}</span><br><span class="meta">${new Date(d.at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} · ${esc(nick(d.e.paidBy))} paid${d.e.planId&&planById(d.e.planId)?" · "+esc(planById(d.e.planId).title):""}</span></span><span style="text-align:right"><span class="amt ${mine?"neg":"pos"}">${dhs(d.amt)}</span><br><span class="pill ${d.status==="cleared"?"done":d.status==="part"?"warn":"bad"}">${d.status==="cleared"?"✓ cleared":d.status==="part"?`${dhs(d.amt-d.cleared)} left`:"open"}</span></span></div>`;
+    const pays=[...L.aPaid.map(p=>({...p,me:true})),...L.bPaid.map(p=>({...p,me:false}))].sort((a,b)=>b.at-a.at);
+    return{title:`${avatar(o,"sm")} ${esc(m?.nick||"")}`,body:`<div class="form">
+      <div class="money-hero" style="align-items:center;text-align:center"><span class="meta">${net>0.009?`You owe ${esc(m?.nick)}`:net<-0.009?`${esc(m?.nick)} owes you`:"You're all square"}</span><span class="big ${net>0.009?"neg":net<-0.009?"pos":""}">${dhs(Math.abs(net))}</span><span class="meta">Bills you owe each other cancel out automatically</span></div>
+      ${Math.abs(net)>0.009?`<div class="sec" style="border:0;padding:0"><h2>${net>0?"Pay":"Record that they paid"}</h2><div class="row" style="flex-wrap:nowrap"><input class="inp" id="payAmt" type="number" inputmode="decimal" min="0" step="0.01" value="${Math.abs(net).toFixed(2)}" style="flex:1"><button class="btn pri" data-act="pairPay" data-id="${esc(o)}" style="flex:none">${net>0?"Mark paid":"Mark received"}</button></div><div class="hint">Pay part of it if you like. It clears the oldest bills first.</div></div>`:""}
+      ${L.aDues.length?`<div class="sec" style="padding-top:6px"><h2>You owe ${esc(m?.nick)}</h2><div class="list" style="gap:6px">${[...L.aDues].reverse().map(d=>row(d,true)).join("")}</div></div>`:""}
+      ${L.bDues.length?`<div class="sec" style="padding-top:6px"><h2>${esc(m?.nick)} owes you</h2><div class="list" style="gap:6px">${[...L.bDues].reverse().map(d=>row(d,false)).join("")}</div></div>`:""}
+      ${pays.length?`<div class="sec" style="padding-top:6px"><h2>Payments</h2><div class="list" style="gap:6px">${pays.map(p=>`<div class="item"><span class="grow"><span class="t">${p.me?`You paid ${esc(m?.nick)}`:`${esc(m?.nick)} paid you`}</span><br><span class="meta">${ago(p.at)}</span></span><span class="amt pos">${dhs(p.amount)}</span>${p.by===ME?`<button class="x" data-act="delSettle" data-id="${esc(p.id)}" data-confirm="Undo?" aria-label="Undo payment">✕</button>`:""}</div>`).join("")}</div></div>`:""}
+      ${!L.aDues.length&&!L.bDues.length?`<div class="empty">No shared bills with ${esc(m?.nick)} yet.</div>`:""}</div>`}}
+};
+SHEETS.allBalances={live:true,
+  render(){const ms=D.members,pairs=[];for(let i=0;i<ms.length;i++)for(let j=i+1;j<ms.length;j++){const n=pairLedger(ms[i].id,ms[j].id).net;if(Math.abs(n)>0.009)pairs.push(n>0?{from:ms[i].id,to:ms[j].id,amt:n}:{from:ms[j].id,to:ms[i].id,amt:-n})}
+    pairs.sort((a,b)=>b.amt-a.amt);
+    return{title:"Everyone's balances",body:`<div class="form"><div class="hint" style="margin:0">Who owes whom, after bills between each pair cancel out.</div>
+      ${pairs.length?`<div class="list" style="gap:6px">${pairs.map(p=>`<button class="item" ${p.from===ME||p.to===ME?`data-act="pairOpen" data-id="${esc(p.from===ME?p.to:p.from)}"`:""} style="width:100%;text-align:left">${avatar(p.from,"xs")}<span class="grow"><span class="t">${esc(nick(p.from))} → ${esc(nick(p.to))}</span></span><span class="amt">${dhs(p.amt)}</span></button>`).join("")}</div>`:`<div class="empty">Everyone's all square 🎉</div>`}</div>`}}
+};
 /* person profile */
 SHEETS.person={live:true,
   render(s){const id=s.args.id,m=mem(id);if(!m)return{title:"Profile",body:`<div class="empty">This person isn't in the crew.</div>`};const me=id===ME;
@@ -2310,6 +2347,10 @@ const ACT={
   exEven(){const s=topS(),a=parseFloat(val("exA"))||0,ins=$$("input[data-cu]",s.el),filled=ins.filter(x=>parseFloat(x.value)>0),use=filled.length?filled:ins,each=Math.floor(a/use.length*100)/100;
     use.forEach((x,i)=>x.value=i===use.length-1?(Math.round((a-each*(use.length-1))*100)/100):each);exLeft()},
   async exDel(){const s=topS();await Store.del("expenses",s.args.id);closeSheet();toast("Expense deleted")},
+  pairOpen(d){openSheet("pair",{id:d.id})},
+  allBalances(){openSheet("allBalances")},
+  async pairPay(d){const s=topS(),L=pairLedger(ME,d.id),amt=Math.round((parseFloat(val("payAmt"))||0)*100)/100;if(!(amt>0))return toast("Enter an amount.");
+    const iOwe=L.net>0;await Store.add("settles",{from:iOwe?ME:d.id,to:iOwe?d.id:ME,amount:amt,at:now(),by:ME});toast(`Recorded ${dhs(amt)} ✓`);setTimeout(()=>{const i=$("#payAmt",s.el);if(i)i.value=Math.abs(pairLedger(ME,d.id).net).toFixed(2)},80)},
   async settle(d){await Store.add("settles",{from:d.from,to:d.to,amount:+d.amt,at:now(),by:ME});toast(`Recorded ${dhs(+d.amt)} payment`)},
   async delSettle(d){await Store.del("settles",d.id)},
 };
