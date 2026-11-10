@@ -449,15 +449,21 @@ const Store={
     const done=c=>{seen.add(c);if(seen.size>=COLS.length+1)Store.ready=true;schedule()};
     const fail=e=>{console.error(e);toast(e.code==="permission-denied"?"You don't have access. Check your crew code.":"Sync paused. Check your connection.")};
     COLS.forEach(c=>unsubs.push(FS.collection(c).onSnapshot(s=>{D[c]=s.docs.map(d=>({id:d.id,...d.data()}));done(c)},fail)));
-    unsubs.push(FS.collection("chats").where("members","array-contains",ME).onSnapshot(s=>{D.chats=s.docs.map(d=>({id:d.id,...d.data()}));Store.syncMsgSubs();done("chats")},fail));
+    unsubs.push(FS.collection("chats").where("members","array-contains",ME).onSnapshot({includeMetadataChanges:true},s=>{D.chats=s.docs.map(d=>({id:d.id,...d.data()}));Store.pendingChats=new Set(s.docs.filter(d=>d.metadata.hasPendingWrites).map(d=>d.id));Store.syncMsgSubs();done("chats")},fail));
     unsubs.push(FS.doc("priv/"+ME).onSnapshot(s=>{D.priv=s.exists?{labels:{},...s.data()}:{labels:{}};schedule()},()=>{}));
     render();
   },
   syncMsgSubs(){
     const ids=new Set(D.chats.map(c=>c.id));
     for(const[id,f]of msgSubs)if(!ids.has(id)){f();msgSubs.delete(id);msgData.delete(id)}
-    for(const id of ids)if(!msgSubs.has(id))msgSubs.set(id,FS.collection(`chats/${id}/msgs`).orderBy("at","desc").limit(300).onSnapshot(s=>{msgData.set(id,s.docs.map(d=>({id:d.id,chatId:id,...d.data()})));D.msgs=[...msgData.values()].flat();schedule()},()=>{}));
+    // Wait until a new chat (or a chat we just joined) is saved online; reading its messages earlier gets refused.
+    for(const id of ids)if(!msgSubs.has(id)&&!Store.pendingChats?.has(id))Store.subMsgs(id,0);
   },
+  subMsgs(id,tries){
+    msgSubs.set(id,FS.collection(`chats/${id}/msgs`).orderBy("at","desc").limit(300).onSnapshot(s=>{msgData.set(id,s.docs.map(d=>({id:d.id,chatId:id,...d.data()})));D.msgs=[...msgData.values()].flat();schedule()},
+      e=>{msgSubs.delete(id);if(tries<6)setTimeout(()=>{if(D.chats.some(c=>c.id===id)&&!msgSubs.has(id))Store.subMsgs(id,tries+1)},1000*(tries+1))}));
+  },
+
   path(c,id,obj){return c==="msgs"?`chats/${obj.chatId}/msgs/${id}`:`${c}/${id}`},
   async add(c,obj){const id=obj.id||rid();delete obj.id;await Store.set(c,id,obj);return id},
   async set(c,id,obj){if(MODE==="demo")return Demo.set(c,id,obj);try{await FS.doc(Store.path(c,id,obj)).set(obj)}catch(e){Store.err(e)}},
