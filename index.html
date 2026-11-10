@@ -500,6 +500,8 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .msg .rcpt{font-size:11px;color:var(--muted);font-weight:600;margin-top:1px}
 .msg.flash .bub{animation:flash 1.2s}
 @keyframes flash{0%,60%{box-shadow:0 0 0 3px var(--sun)}100%{box-shadow:none}}
+.pdfopt{display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;border-radius:16px;border:2px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;cursor:pointer}
+.pdfopt[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
 .auth{max-width:440px;margin:0 auto;padding-block:8px 40px}
 .auth-hero{padding:28px 4px 22px}
 .auth-logo{font-family:var(--f-display);font-weight:800;font-size:46px;letter-spacing:-.03em;line-height:1}
@@ -554,7 +556,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.30";
+const APP_VERSION="2026-11-10.32";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1005,7 +1007,7 @@ VIEWS.cal=()=>{
     :{bday:bdaysOn(ds).length,plan:visiblePlans().some(p=>covers(p.final,ds)),poll:visiblePlans().some(p=>!p.final&&(p.slots||[]).some(s=>covers(s,ds))),me:D.busy.some(b=>b.uid===ME&&b.date===ds),oth:D.busy.some(b=>b.uid!==ME&&b.date===ds)};
   const grid=cells.slice(0,rows).map(d=>{const ds=ymd(d);if(mode==="friends")return friendDayCell(d,ds,mo,sel);const i=dayInfo(ds);return`<button class="day ${d.getMonth()!==mo-1?"out":""} ${ds===TODAY()?"today":""}" data-act="calDay" data-d="${ds}" aria-pressed="${UI.calDay===ds}" aria-label="${fDate(ds,{weekday:"long",day:"numeric",month:"long"})}"><span class="dn">${d.getDate()}</span><span class="dots">${i.bday?'<i class="dot-bday"></i>':""}${i.plan?'<i class="dot-plan"></i>':""}${i.poll?'<i class="dot-poll"></i>':""}${i.me?'<i class="dot-me"></i>':""}${i.oth?'<i class="dot-oth"></i>':""}</span></button>`}).join("");
   const nb=nextBday();
-  return`<div class="view-title"><h1>Calendar</h1><button class="btn sm pri" data-act="newBusy" data-d="${UI.calDay}">Block my time</button></div>
+  return`<div class="view-title"><h1>Calendar</h1><span class="row" style="gap:6px;flex-wrap:nowrap"><button class="btn sm" data-act="calPdf" aria-label="Download calendar as PDF">⬇ PDF</button><button class="btn sm pri" data-act="newBusy" data-d="${UI.calDay}">Block my time</button></span></div>
   <div class="seg" style="margin-bottom:10px">${[["me","🙋 Just me"],["friends","👥 Friends"]].map(([k,l])=>`<button data-act="calMode" data-k="${k}" aria-pressed="${mode===k}">${l}</button>`).join("")}</div>
   ${mode==="friends"?`<div class="between" style="margin-bottom:6px"><span class="meta">${sel.length} of ${D.members.length} selected</span><span class="row" style="gap:6px"><button class="btn sm" data-act="calAll">${sel.length===D.members.length?"Clear":"Select all"}</button></span></div><div class="people-row" style="margin-bottom:12px">${D.members.map(m=>`<button class="prof-btn fpick" data-act="calPerson" data-id="${esc(m.id)}" aria-pressed="${sel.includes(m.id)}">${avatar(m.id,"","width:48px;height:48px;font-size:22px")}<span>${esc(m.id===ME?"You":m.nick)}</span></button>`).join("")}</div>
     <div class="hint" style="margin:-4px 0 10px">${sel.length?sel.length===1?"Showing "+esc(nick(sel[0]))+"'s busy times.":`Comparing ${sel.length} people. Darker days are busier. Pick a day to see when you're all free.`:"Tap people above to see their busy times, or pick several to find a time that works for everyone."}</div>`:""}
@@ -2010,6 +2012,146 @@ SHEETS.photo={live:true,
     return{title:`<span style="color:#fff">${esc(nick(m.by))} · ${ago(m.at)}</span>`,body:`<img src="${esc(m.src)}" alt="${esc(m.caption||"Photo")}">${m.caption?`<p style="color:#fff">${esc(m.caption)}</p>`:""}
       <div class="row" style="margin-top:12px"><button class="btn sm pri" data-act="saveOne" data-id="${esc(m.id)}">⬇ Save</button><button class="btn sm" data-act="setCover" data-id="${esc(m.id)}">Use as cover</button>${m.by===ME?`<button class="btn sm danger" data-act="delMedia" data-id="${esc(m.id)}" data-confirm="Tap again to delete">Delete</button>`:""}</div>`}}
 };
+/* ---------- calendar PDF (itinerary / schedule) ---------- */
+const PDF_W=1240,PDF_H=1754,PM=84,INK="#111827",MUTE="#6B7280",LINE="#E5E7EB",BRAND="#0B7A75";
+function calRange(kind,ds){const d=pd(ds);if(kind==="day")return[ds,ds];
+  if(kind==="week"){const a=new Date(d);a.setDate(d.getDate()-((d.getDay()+6)%7));const b=new Date(a);b.setDate(a.getDate()+6);return[ymd(a),ymd(b)]}
+  return[ymd(new Date(d.getFullYear(),d.getMonth(),1)),ymd(new Date(d.getFullYear(),d.getMonth()+1,0))]}
+function calRangeLabel(kind,a,b){if(kind==="day")return fDate(a,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  if(kind==="month")return pd(a).toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+  return`${fDate(a,{day:"numeric",month:"short"})} – ${fDate(b,{day:"numeric",month:"short",year:"numeric"})}`}
+function calEvents(a,b,inc){const ev=[];
+  if(inc.plans)for(const p of visiblePlans())if(p.final&&goingWith(p,ME)&&p.final.date<=b&&endOf(p.final)>=a)
+    ev.push({type:"plan",p,date:p.final.date<a?a:p.final.date,from:p.final.date,to:endOf(p.final),start:p.final.start||"",end:p.final.end||"",title:`${p.emoji?p.emoji+" ":""}${p.title||"Plan"}`,loc:(p.stops||[]).map(x=>x.name).filter(Boolean).join(" → "),color:hue(p.id)});
+  if(inc.mine)for(const x of D.busy.filter(x=>x.uid===ME&&x.date>=a&&x.date<=b))
+    ev.push({type:"mine",b:x,date:x.date,from:x.date,to:x.date,start:x.start||"",end:x.end||"",title:myLabel(x)||"Busy",loc:"",color:"#64748B"});
+  if(inc.bday)for(const ds of dayList(a,b))for(const m of bdaysOn(ds))
+    ev.push({type:"bday",m,date:ds,from:ds,to:ds,start:"",end:"",title:`🎂 ${m.id===ME?"Your":(m.nick||"Someone")+"'s"} birthday`,loc:"",color:"#D9468F"});
+  return ev.sort((x,y)=>(x.date+(x.start||"0")).localeCompare(y.date+(y.start||"0")))}
+const evOn=(ev,ds)=>ev.filter(e=>ds>=e.from&&ds<=e.to);
+const evWhen=e=>e.from!==e.to?`${fDate(e.from,{day:"numeric",month:"short"})} – ${fDate(e.to,{day:"numeric",month:"short"})}${e.start?" · from "+fTime(e.start):""}`:fRange(e.start,e.end);
+function loadSrc(src){return new Promise(res=>{if(!src||!/^(data:image|blob:)/.test(src))return res(null);const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(null);i.src=src})}
+class PdfDoc{
+  constructor(head){this.pages=[];this.head=head;const cs=getComputedStyle(document.documentElement);this.font=cs.getPropertyValue("--f-body").trim()||"sans-serif";this.disp=cs.getPropertyValue("--f-display").trim()||this.font;this.add()}
+  add(){const c=document.createElement("canvas");c.width=PDF_W;c.height=PDF_H;this.g=c.getContext("2d");this.g.fillStyle="#fff";this.g.fillRect(0,0,PDF_W,PDF_H);this.pages.push(c);this.header()}
+  f(o={}){return`${o.weight||400} ${o.size||22}px ${o.disp?this.disp:this.font}`}
+  text(t,x,y,o={}){const g=this.g;g.font=this.f(o);g.fillStyle=o.color||INK;g.textAlign=o.align||"left";g.textBaseline="alphabetic";g.fillText(t,x,y);g.textAlign="left"}
+  w(t,o){this.g.font=this.f(o);return this.g.measureText(t).width}
+  fit(t,w,o){t=String(t);if(this.w(t,o)<=w)return t;while(t.length>1&&this.w(t+"…",o)>w)t=t.slice(0,-1);return t+"…"}
+  wrap(t,w,o={}){const out=[];for(const para of String(t).split("\n")){let line="";for(const word of para.split(/\s+/)){const tt=line?line+" "+word:word;if(this.w(tt,o)>w&&line){out.push(line);line=word}else line=tt}out.push(line)}return out}
+  rr(x,y,w,h,r,fill,stroke){const g=this.g;g.beginPath();g.roundRect?g.roundRect(x,y,w,h,r):g.rect(x,y,w,h);if(fill){g.fillStyle=fill;g.fill()}if(stroke){g.strokeStyle=stroke;g.lineWidth=2;g.stroke()}}
+  header(){this.text("Yalla",PM,PM+34,{size:38,weight:800,disp:1});this.text("Guys",PM+this.w("Yalla ",{size:38,weight:800,disp:1}),PM+34,{size:38,weight:800,disp:1,color:BRAND});
+    this.text(this.head,PDF_W-PM,PM+30,{size:20,color:MUTE,align:"right"});this.g.fillStyle=LINE;this.g.fillRect(PM,PM+58,PDF_W-2*PM,2);this.y=PM+96}
+  need(h){if(this.y+h>PDF_H-PM-30){this.add();return true}return false}
+  para(t,x,w,o={}){const sz=o.size||22,lh=sz*1.42;for(const l of this.wrap(t,w,o)){this.need(lh);this.text(l,x,this.y+sz,o);this.y+=lh}}
+  img(im,x,y,w,h,contain){const g=this.g;g.save();g.beginPath();g.roundRect?g.roundRect(x,y,w,h,14):g.rect(x,y,w,h);g.clip();if(contain){g.fillStyle="#F3F4F6";g.fillRect(x,y,w,h)}const r=(contain?Math.min:Math.max)(w/im.naturalWidth,h/im.naturalHeight),iw=im.naturalWidth*r,ih=im.naturalHeight*r;g.drawImage(im,x+(w-iw)/2,y+(h-ih)/2,iw,ih);g.restore()}
+  finish(){this.pages.forEach((c,i)=>{const g=c.getContext("2d");g.font=`400 17px ${this.font}`;g.fillStyle="#9CA3AF";g.textAlign="center";g.fillText(`Page ${i+1} of ${this.pages.length}`,PDF_W/2,PDF_H-44);g.textAlign="left"})}
+}
+const PDF_DOW=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+function pdfGrid(doc,days,ev,{cellH,maxChips,inMonth,showTime}){
+  const W=PDF_W-2*PM,cw=W/7,rows=Math.ceil(days.length/7),hh=38;doc.need(hh+rows*cellH+20);const y0=doc.y;
+  PDF_DOW.forEach((d,i)=>doc.text(d.toUpperCase(),PM+i*cw+cw/2,y0+26,{size:17,weight:700,color:MUTE,align:"center"}));
+  days.forEach((ds,i)=>{const x=PM+(i%7)*cw,y=y0+hh+Math.floor(i/7)*cellH,out=inMonth&&ds.slice(0,7)!==inMonth;
+    doc.rr(x+3,y+3,cw-6,cellH-6,12,out?"#F9FAFB":"#FFFFFF",LINE);
+    const today=ds===TODAY();if(today)doc.rr(x+10,y+10,40,32,10,BRAND);
+    doc.text(String(+ds.slice(8)),x+30,y+34,{size:20,weight:700,color:today?"#fff":out?"#C4C7CC":INK,align:"center"});
+    const es=evOn(ev,ds);let cy=y+50;const chipH=showTime?44:30;
+    es.slice(0,maxChips).forEach(e=>{if(cy+chipH>y+cellH-8)return;doc.rr(x+9,cy,cw-18,chipH-4,8,e.color);
+      if(showTime){doc.text(doc.fit(e.from!==e.to?"Multi-day":e.start?fTime(e.start):"All day",cw-34,{size:13,weight:600}),x+17,cy+15,{size:13,weight:600,color:"rgba(255,255,255,.85)"});doc.text(doc.fit(e.title,cw-34,{size:15,weight:700}),x+17,cy+33,{size:15,weight:700,color:"#fff"})}
+      else doc.text(doc.fit(e.title,cw-32,{size:15,weight:700}),x+16,cy+19,{size:15,weight:700,color:"#fff"});cy+=chipH});
+    if(es.length>maxChips)doc.text(`+${es.length-maxChips} more`,x+14,Math.min(cy+18,y+cellH-12),{size:14,weight:600,color:MUTE})});
+  doc.y=y0+hh+rows*cellH+24}
+function pdfGridFor(doc,kind,a,b,ev,big){
+  if(kind==="day")return;
+  if(kind==="week")return pdfGrid(doc,dayList(a,b),ev,{cellH:big?420:300,maxChips:big?8:5,showTime:1});
+  const first=pd(a),start=new Date(first);start.setDate(1-((first.getDay()+6)%7));const days=[];for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);days.push(ymd(d))}
+  const n=days[35].slice(0,7)!==a.slice(0,7)?35:42;pdfGrid(doc,days.slice(0,n),ev,{cellH:big?(n>35?170:200):(n>35?118:140),maxChips:big?4:2,inMonth:a.slice(0,7)})}
+const PDF_TAG={plan:"Group plan",mine:"Personal",bday:"Birthday"};
+function pdfDayHead(doc,ds,sub){doc.need(200);doc.y+=14;doc.text(fDate(ds,{weekday:"long",day:"numeric",month:"long"}),PM,doc.y+32,{size:30,weight:800,disp:1});
+  if(sub)doc.text(sub,PDF_W-PM,doc.y+30,{size:18,color:MUTE,align:"right"});doc.y+=50;doc.g.fillStyle=LINE;doc.g.fillRect(PM,doc.y,PDF_W-2*PM,2);doc.y+=16}
+function pdfList(doc,a,b,ev){
+  const days=dayList(a,b).filter(ds=>ev.some(e=>e.date===ds));
+  if(!days.length){doc.need(60);doc.text("Nothing on the calendar for these dates.",PM,doc.y+30,{size:22,color:MUTE});doc.y+=60;return}
+  doc.need(70);doc.text("Activities",PM,doc.y+36,{size:34,weight:800,disp:1});doc.y+=56;
+  for(const ds of days){const es=ev.filter(e=>e.date===ds);pdfDayHead(doc,ds,`${es.length} ${es.length>1?"activities":"activity"}`);
+    for(const e of es){const tx=PM+250,tw=PDF_W-PM-tx-150,sub=[e.from!==e.to?evWhen(e):"",e.loc?"📍 "+e.loc:""].filter(Boolean).join("   ");
+      const h=sub?82:56;doc.need(h);const y=doc.y;
+      doc.text(e.start&&e.from===e.to?fRange(e.start,e.end):e.from!==e.to?"Multi-day":"All day",PM,y+30,{size:21,weight:600,color:MUTE});
+      doc.rr(tx-26,y+14,14,14,7,e.color);doc.text(doc.fit(e.title,tw,{size:24,weight:700}),tx,y+30,{size:24,weight:700});
+      if(sub)doc.text(doc.fit(sub,tw,{size:19}),tx,y+60,{size:19,color:MUTE});
+      const tg=PDF_TAG[e.type],tgw=doc.w(tg,{size:15,weight:700})+24;doc.rr(PDF_W-PM-tgw,y+8,tgw,30,15,e.color+"22");doc.text(tg,PDF_W-PM-tgw/2,y+29,{size:15,weight:700,color:e.color,align:"center"});
+      doc.y+=h;doc.g.fillStyle="#F3F4F6";doc.g.fillRect(tx,doc.y-6,PDF_W-PM-tx,1)}}}
+async function pdfPhotos(doc,label,srcs,contain){const ims=(await Promise.all(srcs.map(loadSrc))).filter(Boolean);if(!ims.length)return;
+  const x0=PM+40,W=PDF_W-PM-x0,cols=3,gap=14,cw=(W-gap*(cols-1))/cols,ch=cw*.75;
+  doc.need(40+ch);doc.text(label,x0,doc.y+24,{size:18,weight:700,color:MUTE});doc.y+=38;
+  ims.forEach((im,i)=>{if(i%cols===0&&i){doc.y+=ch+gap;doc.need(ch)}doc.img(im,x0+(i%cols)*(cw+gap),doc.y,cw,ch,contain)});doc.y+=ch+20}
+function pdfLine(doc,icon,label,val){const x0=PM+40,lw=170,w=PDF_W-PM-x0-lw;const ls=doc.wrap(val,w,{size:21});doc.need(34);
+  doc.text(`${icon} ${label}`,x0,doc.y+25,{size:19,weight:700,color:MUTE});ls.forEach((l,i)=>{if(i)doc.need(30);doc.text(l,x0+lw,doc.y+25,{size:21});doc.y+=30});doc.y+=6}
+async function pdfTickets(doc,ts){if(!ts.length)return;for(const t of ts)pdfLine(doc,t.icon||"🎟️","Ticket",[t.title||"Ticket",t.code?"Code: "+t.code:"",t.forUid?(t.forUid==="group"?"Group ticket":"For "+nick(t.forUid)):""].filter(Boolean).join(" · "));
+  const srcs=[];for(const t of ts)if(t.file&&t.fileType!=="pdf"){try{srcs.push(await mediaURL(t.file))}catch{}}await pdfPhotos(doc,"Ticket images",srcs,true)}
+async function pdfItinerary(doc,a,b,ev){
+  const days=dayList(a,b).filter(ds=>ev.some(e=>e.date===ds));
+  doc.need(70);doc.text("Itinerary",PM,doc.y+36,{size:34,weight:800,disp:1});doc.y+=56;
+  if(!days.length){doc.text("Nothing planned for these dates yet.",PM,doc.y+30,{size:22,color:MUTE});doc.y+=60;return}
+  for(const ds of days){const es=ev.filter(e=>e.date===ds);pdfDayHead(doc,ds,`${es.length} ${es.length>1?"activities":"activity"}`);
+    for(const e of es){doc.need(120);const y=doc.y;doc.rr(PM,y+6,10,46,5,e.color);
+      doc.para(e.title,PM+40,PDF_W-2*PM-200,{size:30,weight:800,disp:1});
+      const tg=PDF_TAG[e.type],tgw=doc.w(tg,{size:15,weight:700})+24;doc.rr(PDF_W-PM-tgw,y+6,tgw,30,15,e.color+"22");doc.text(tg,PDF_W-PM-tgw/2,y+27,{size:15,weight:700,color:e.color,align:"center"});
+      doc.y+=4;
+      if(e.type==="bday"){pdfLine(doc,"🎈","When","All day");doc.y+=24;continue}
+      pdfLine(doc,"🕒","When",evWhen(e));
+      if(e.type==="plan"){const p=e.p;
+        (p.stops||[]).filter(x=>x.name).forEach((x,i,arr)=>pdfLine(doc,"📍",arr.length>1?`Stop ${i+1}`:"Where",x.name));
+        if(p.meetup?.name)pdfLine(doc,"🤝","Meet at",p.meetup.name);
+        const go=[...new Set([p.by,...goingOf(p.id)])].filter(u=>u===ME||mem(u));if(go.length)pdfLine(doc,"👥","Going",go.map(nick).join(", "));
+        if(p.desc)pdfLine(doc,"📝","Details",p.desc);
+        const est=(p.est||[]).filter(x=>+x.amount);if(est.length){const tot=est.reduce((t,x)=>t+(+x.amount||0),0);pdfLine(doc,"💸","Est. cost",est.map(x=>`${x.label||"Item"} Dhs ${+x.amount}`).join(" · ")+`  =  Dhs ${tot}`)}
+        if(p.playlist)pdfLine(doc,"🎵","Playlist",String(p.playlist.url||p.playlist));
+        await pdfTickets(doc,D.media.filter(m=>m.planId===p.id&&m.kind==="ticket").sort((x,y)=>x.at-y.at));
+        await pdfPhotos(doc,"Mood board",mediaOf(p.id).filter(m=>m.phase!=="memory"&&m.phase!=="ticket"&&m.kind==="photo").slice(0,6).map(m=>m.src));
+        await pdfPhotos(doc,"Memories",albumOf(p.id).filter(m=>m.kind==="photo"||m.poster).slice(0,6).map(m=>m.kind==="photo"?m.src:m.poster))}
+      else{const att=D.mine.filter(m=>m.busyId===e.b.id).sort((x,y)=>x.at-y.at);
+        att.filter(m=>m.url).forEach(m=>pdfLine(doc,"🔗","Link",m.caption?`${m.caption} (${m.url})`:m.url));
+        await pdfTickets(doc,att.filter(m=>m.kind==="ticket"));
+        await pdfPhotos(doc,"Photos",att.filter(m=>m.kind==="photo").slice(0,6).map(m=>m.src))}
+      doc.y+=18;doc.need(10);doc.g.fillStyle=LINE;doc.g.fillRect(PM+40,doc.y,PDF_W-2*PM-40,1);doc.y+=22}}}
+async function pdfBlob(pages){const enc=new TextEncoder(),parts=[],offs=[];let len=0;const push=x=>{const u=typeof x==="string"?enc.encode(x):x;parts.push(u);len+=u.length};
+  const W=595.28,H=841.89,n=pages.length,N=2+n*3;push("%PDF-1.4\n");
+  const start=i=>{offs[i]=len;push(`${i} 0 obj\n`)};
+  start(1);push("<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
+  start(2);push(`<< /Type /Pages /Count ${n} /Kids [${pages.map((_,k)=>`${3+k*3} 0 R`).join(" ")}] >>\nendobj\n`);
+  for(let k=0;k<n;k++){const pg=3+k*3,ct=pg+1,im=pg+2;const jpg=new Uint8Array(await (await new Promise(r=>pages[k].toBlob(r,"image/jpeg",.84))).arrayBuffer());
+    start(pg);push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /XObject << /Im0 ${im} 0 R >> >> /Contents ${ct} 0 R >>\nendobj\n`);
+    const c=`q ${W} 0 0 ${H} 0 0 cm /Im0 Do Q`;start(ct);push(`<< /Length ${c.length} >>\nstream\n${c}\nendstream\nendobj\n`);
+    start(im);push(`<< /Type /XObject /Subtype /Image /Width ${PDF_W} /Height ${PDF_H} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n`);push(jpg);push("\nendstream\nendobj\n");
+    pages[k].width=pages[k].height=1}
+  const xr=len;push(`xref\n0 ${N+1}\n0000000000 65535 f \n`+offs.slice(1).map(o=>String(o).padStart(10,"0")+" 00000 n \n").join(""));
+  push(`trailer\n<< /Size ${N+1} /Root 1 0 R >>\nstartxref\n${xr}\n%%EOF\n`);return new Blob(parts,{type:"application/pdf"})}
+async function buildCalPdf(o){const[a,b]=calRange(o.range,o.d),ev=calEvents(a,b,o),label=calRangeLabel(o.range,a,b);
+  try{await document.fonts?.ready}catch{}
+  const doc=new PdfDoc(`${o.style==="itin"?"Itinerary":"Schedule"} · ${label}`);
+  const me=mem(ME);doc.text(o.style==="itin"?`${me?.nick||"My"}${me?.nick?"'s":""} itinerary`:`${me?.nick||"My"}${me?.nick?"'s":""} schedule`,PM,doc.y+44,{size:46,weight:800,disp:1});doc.y+=62;
+  const np=ev.filter(e=>e.type==="plan").length,nm=ev.filter(e=>e.type==="mine").length,nb=ev.filter(e=>e.type==="bday").length;
+  doc.text([label,np&&`${np} group plan${np>1?"s":""}`,nm&&`${nm} personal`,nb&&`${nb} birthday${nb>1?"s":""}`].filter(Boolean).join("  ·  "),PM,doc.y+26,{size:22,color:MUTE});doc.y+=56;
+  pdfGridFor(doc,o.range,a,b,ev,o.style!=="itin");
+  if(o.range!=="day"){const ks=[["plan","Group plan"],["mine","Personal"],["bday","Birthday"]].filter(([k])=>o[{plan:"plans",mine:"mine",bday:"bday"}[k]]);let x=PM;
+    ks.forEach(([k,l])=>{const c=k==="plan"?BRAND:k==="mine"?"#64748B":"#D9468F";doc.rr(x,doc.y,22,22,6,c);doc.text(k==="plan"?l+" (own colour each)":l,x+32,doc.y+18,{size:17,color:MUTE});x+=doc.w(k==="plan"?l+" (own colour each)":l,{size:17})+70});doc.y+=46}
+  if(o.style==="itin")await pdfItinerary(doc,a,b,ev);else pdfList(doc,a,b,ev);
+  doc.finish();return{blob:await pdfBlob(doc.pages),name:`Yalla-Guys-${o.style==="itin"?"itinerary":"schedule"}-${o.range}-${a}.pdf`,count:ev.length}}
+SHEETS.calPdf={
+  init(a){return{range:"week",style:"itin",d:a.d||TODAY(),plans:true,mine:true,bday:true}},
+  render(s){const st=s.state,[a,b]=calRange(st.range,st.d),n=calEvents(a,b,st).length;
+    const opt=(k,emo,t,sub)=>`<button class="pdfopt" data-act="pdfSet" data-k="style" data-v="${k}" aria-pressed="${st.style===k}"><span style="font-size:26px">${emo}</span><span style="flex:1;min-width:0;text-align:left"><b>${t}</b><span class="meta" style="display:block">${sub}</span></span></button>`;
+    const tog=(k,l)=>`<label class="check"><input type="checkbox" data-act="pdfSet" data-k="${k}" ${st[k]?"checked":""}> ${l}</label>`;
+    return{title:"Download calendar",body:`<div class="form">
+      <div class="seg">${[["day","Daily"],["week","Weekly"],["month","Monthly"]].map(([k,l])=>`<button data-act="pdfSet" data-k="range" data-v="${k}" aria-pressed="${st.range===k}">${l}</button>`).join("")}</div>
+      <label class="f">${st.range==="day"?"Which day":st.range==="week"?"Any day in the week":"Any day in the month"}<input class="inp" type="date" id="pdfD" value="${esc(st.d)}"></label>
+      <div class="meta" style="margin-top:-4px">📅 <b style="color:var(--fg)">${esc(calRangeLabel(st.range,a,b))}</b> · ${n} ${n===1?"activity":"activities"}</div>
+      ${opt("itin","📖","Itinerary","Detailed: places, who's going, costs, tickets, mood board and your photos")}
+      ${opt("sched","🗓️","Schedule","Simple: the calendar with everything marked, plus a list by date, time, name and location")}
+      <div class="sec" style="margin:4px 0 0"><h2 style="font-size:15px">Include</h2>${tog("plans","👥 Group plans I'm going to")}${tog("mine","🙋 My blocked time (private details included)")}${tog("bday","🎂 Birthdays")}</div></div>`,
+      foot:`<button class="btn pri block" data-act="pdfGo" id="pdfBtn">⬇ Download PDF</button>`}}
+};
 /* busy */
 SHEETS.busy={
   render(s){return{title:"Block my time",body:`<div class="form">
@@ -2400,6 +2542,12 @@ const ACT={
   busyRem(d){const all=ls.get("yg-remind-busy",{}),a=all[d.id]||[],m=+d.m,i=a.indexOf(m);if(i>=0)a.splice(i,1);else a.push(m);all[d.id]=a;ls.set("yg-remind-busy",all);paintSheet(topS());if(!SET.notifyOn)toast("Turn on notifications in ⚙️ Settings, or add it to your phone calendar")},
   busyIcs(d){const b=D.busy.find(x=>x.id===d.id);if(!b)return;const p=busyAsPlan(b),txt=icsFor(p,busyRemind(b.id).length?busyRemind(b.id):[60]);const a=document.createElement("a");a.href=/iPhone|iPad/i.test(navigator.userAgent)?"data:text/calendar;charset=utf-8,"+encodeURIComponent(txt):URL.createObjectURL(new Blob([txt],{type:"text/calendar"}));a.download=(p.title.replace(/[^\w]+/g,"-")||"plan")+".ics";document.body.appendChild(a);a.click();a.remove()},
   delAccount(){openSheet("delAccount")},
+  calPdf(){openSheet("calPdf",{d:UI.calDay||TODAY()})},
+  pdfSet(d,el){const s=topS();if(!s||s.kind!=="calPdf")return;if(el.type==="checkbox")s.state[d.k]=el.checked;else s.state[d.k]=d.v;paintSheet(s)},
+  async pdfGo(){const s=topS(),st=s.state,btn=$("#pdfBtn",s.el);if(!st.plans&&!st.mine&&!st.bday)return toast("Tick at least one thing to include.");
+    btn.disabled=true;btn.textContent="Making your PDF…";
+    try{const r=await buildCalPdf(st);await saveFiles([new File([r.blob],r.name,{type:"application/pdf"})])}catch(e){console.error(e);toast("Couldn't make the PDF. Try a shorter range.")}
+    btn.disabled=false;btn.textContent="⬇ Download PDF"},
   copyUid(){try{navigator.clipboard.writeText(ME);toast("Copied your user ID")}catch{toast("Long-press the ID to copy it")}},
   async kickMember(d){if(crewOwner()!==ME)return;const uid=d.id,m=mem(uid);toast("Removing…");
     try{await FS.doc("members/"+uid).delete()}catch(e){return toast(e?.code==="permission-denied"?"Add your user ID to the Firebase rules first (see Settings).":"Couldn't remove them. Try again.")}
@@ -2636,6 +2784,7 @@ document.addEventListener("change",ev=>{
   if(["nMsgs","nPlans","nMoments"].includes(el.id)){SET[el.id]=el.checked;ls.set("yg-settings",SET)}
   if(el.id==="actAs"){ls.set("yg-actas",el.value);ME=el.value;while(stack.length)closeSheet();render();toast(ME==="me-demo"?"Back to being you":"Now testing as "+(mem(ME)?.nick||"a friend"))}
   if(el.id==="exPl"){const s=topS();s.state.plan=el.value}
+  if(el.id==="pdfD"&&el.value){const s=topS();s.state.d=el.value;paintSheet(s)}
   if(el.id==="bzAll"){["bzS","bzE"].forEach(i=>$("#"+i).disabled=el.checked)}
 });
 document.addEventListener("keydown",ev=>{
