@@ -456,6 +456,13 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .collage-wrap.film{max-height:68dvh;overflow-y:auto;border-radius:16px;box-shadow:var(--shadow);-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#111}
 .collage-wrap.film .collage{aspect-ratio:auto;height:auto;object-fit:contain;box-shadow:none;border-radius:0}
 .collage-styles{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.mday{border:0;aspect-ratio:3/4;border-radius:10px;background:var(--surface2) center/cover no-repeat;position:relative;padding:0;display:flex;align-items:flex-start;justify-content:flex-start;min-width:0;color:var(--fg)}
+.mday.out{opacity:.35}
+.mday[style*="background-image"] .mdn{background:rgba(0,0,0,.5);color:#fff}
+.mday .mdn{margin:4px;font-size:11px;font-weight:800;border-radius:6px;padding:1px 5px;font-variant-numeric:tabular-nums}
+.mday.today .mdn{background:var(--sun);color:#fff}
+.mday[aria-pressed="true"]{outline:3px solid var(--accent);outline-offset:-1px}
+.mday .mcnt{position:absolute;right:4px;bottom:4px;background:var(--accent);color:var(--accent-fg);font-size:10px;font-weight:800;border-radius:999px;padding:1px 6px}
 .auth{max-width:440px;margin:0 auto;padding-block:8px 40px}
 .auth-hero{padding:28px 4px 22px}
 .auth-logo{font-family:var(--f-display);font-weight:800;font-size:46px;letter-spacing:-.03em;line-height:1}
@@ -510,7 +517,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.14";
+const APP_VERSION="2026-11-10.15";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -732,6 +739,11 @@ function dummyPhoto(e,a,b){try{const c=document.createElement("canvas");c.width=
   x.font="200px serif";x.textAlign="center";x.textBaseline="middle";x.fillText(e,240,320);return c.toDataURL("image/jpeg",.7)}catch{return""}}
 const avStack=(ids,cls="sm",max=5)=>`<span class="stack">${ids.slice(0,max).map(i=>avatar(i,cls)).join("")}${ids.length>max?`<span class="av ${cls}" style="background:var(--surface2);color:var(--fg)">+${ids.length-max}</span>`:""}</span>`;
 const planById=id=>D.plans.find(p=>p.id===id);
+const endOf=x=>x&&x.endDate&&x.endDate>x.date?x.endDate:x?.date;
+const dayList=(a,b)=>{const out=[],d=pd(a),e=pd(b||a);for(let i=0;d<=e&&i<62;i++){out.push(ymd(d));d.setDate(d.getDate()+1)}return out};
+const covers=(x,ds)=>!!x&&ds>=x.date&&ds<=endOf(x);
+const nDays=x=>x&&x.endDate&&x.endDate>x.date?dayList(x.date,x.endDate).length:1;
+const fDates=(x,o)=>x?(x.endDate&&x.endDate>x.date?`${fDate(x.date,o)} – ${fDate(x.endDate,o)}`:fDate(x.date,o)):"";
 const albumOpen=p=>!!(p.final&&p.final.date<=TODAY())||p.status==="done";
 const albumOf=pid=>D.media.filter(m=>m.planId===pid&&m.phase==="memory").sort((a,b)=>a.at-b.at);
 const albumThumbs=pid=>albumOf(pid).filter(m=>m.kind==="photo"||(m.kind==="video"&&m.poster)).slice(-4).map(m=>m.kind==="photo"?m.src:m.poster);
@@ -743,12 +755,12 @@ const goingOf=pid=>rsvpsOf(pid).filter(r=>r.going==="in").map(r=>r.uid);
 const mediaOf=pid=>D.media.filter(m=>m.planId===pid).sort((a,b)=>a.at-b.at);
 const coverOf=p=>mediaOf(p.id).find(m=>m.kind==="photo")?.src;
 const myLabel=b=>D.priv.labels?.[b.id]||b.label||"";
-const planStatus=p=>{if(p.status==="done")return"done";if(p.final){return p.final.date<TODAY()?"past":"set"}return"poll"};
+const planStatus=p=>{if(p.status==="done")return"done";if(p.final){return endOf(p.final)<TODAY()?"past":"set"}return"poll"};
 const statusPill=p=>({poll:'<span class="pill vote">Voting</span>',set:'<span class="pill set">Locked in</span>',past:'<span class="pill done">Happened</span>',done:'<span class="pill done">Done</span>'})[planStatus(p)];
-function conflictsFor(date,start,end,excludePlan){
-  const sp=span(start,end),out=new Map();
-  for(const b of D.busy)if(b.date===date&&overlap(sp,span(b.start,b.end)))out.set(b.uid,b.uid===ME&&myLabel(b)?myLabel(b):"busy");
-  for(const p of D.plans){if(p.id===excludePlan||!p.final||p.final.date!==date)continue;if(!overlap(sp,span(p.final.start,p.final.end)))continue;for(const u of goingOf(p.id))if(!out.has(u))out.set(u,"at "+p.title)}
+function conflictsFor(date,start,end,excludePlan,endDate){
+  const multi=endDate&&endDate>date,days=multi?dayList(date,endDate):[date],sp=multi?[0,1440]:span(start,end),out=new Map();
+  for(const b of D.busy)if(days.includes(b.date)&&overlap(sp,span(b.start,b.end)))out.set(b.uid,b.uid===ME&&myLabel(b)?myLabel(b):"busy");
+  for(const p of D.plans){if(p.id===excludePlan||!p.final)continue;const pm=nDays(p.final)>1;if(!days.some(d=>covers(p.final,d)))continue;if(!multi&&!pm&&!overlap(sp,span(p.final.start,p.final.end)))continue;for(const u of goingOf(p.id))if(!out.has(u))out.set(u,"at "+p.title)}
   return[...out].map(([uid,why])=>({uid,why}));
 }
 function balances(){
@@ -883,7 +895,7 @@ VIEWS.plans=()=>{
 function planCard(p){
   const cov=coverOf(p),g=goingOf(p.id),st=planStatus(p);
   const estTot=(p.est||[]).reduce((s,e)=>s+(+e.amount||0),0);
-  const when=p.final?`${fDate(p.final.date)} · ${fRange(p.final.start,p.final.end)}`:`${(p.slots||[]).length} date${(p.slots||[]).length===1?"":"s"} proposed`;
+  const when=p.final?`${fDates(p.final)}${nDays(p.final)>1?` · ${nDays(p.final)} days`:` · ${fRange(p.final.start,p.final.end)}`}`:`${(p.slots||[]).length} date${(p.slots||[]).length===1?"":"s"} proposed`;
   const bg=cov?`background-image:url('${esc(cov)}')`:`background:linear-gradient(135deg,${hue(p.id)},color-mix(in srgb,${hue(p.id)} 55%,#000))`;
   return`<button class="pcard" data-act="openPlan" data-id="${esc(p.id)}">
     <div class="cover" style="${bg}"><span class="emo">${esc(p.emoji||"📍")}</span></div>
@@ -898,7 +910,7 @@ VIEWS.cal=()=>{
   const start=new Date(y,mo-1,1-startDow);const cells=[];
   for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);cells.push(d)}
   const rows=cells[35].getMonth()!==mo-1?35:42;
-  const dayInfo=ds=>({bday:bdaysOn(ds).length,plan:visiblePlans().some(p=>p.final?.date===ds),poll:visiblePlans().some(p=>!p.final&&(p.slots||[]).some(s=>s.date===ds)),me:D.busy.some(b=>b.uid===ME&&b.date===ds),oth:D.busy.some(b=>b.uid!==ME&&b.date===ds)});
+  const dayInfo=ds=>({bday:bdaysOn(ds).length,plan:visiblePlans().some(p=>covers(p.final,ds)),poll:visiblePlans().some(p=>!p.final&&(p.slots||[]).some(s=>covers(s,ds))),me:D.busy.some(b=>b.uid===ME&&b.date===ds),oth:D.busy.some(b=>b.uid!==ME&&b.date===ds)});
   const grid=cells.slice(0,rows).map(d=>{const ds=ymd(d),i=dayInfo(ds);return`<button class="day ${d.getMonth()!==mo-1?"out":""} ${ds===TODAY()?"today":""}" data-act="calDay" data-d="${ds}" aria-pressed="${UI.calDay===ds}" aria-label="${fDate(ds,{weekday:"long",day:"numeric",month:"long"})}"><span class="dn">${d.getDate()}</span><span class="dots">${i.bday?'<i class="dot-bday"></i>':""}${i.plan?'<i class="dot-plan"></i>':""}${i.poll?'<i class="dot-poll"></i>':""}${i.me?'<i class="dot-me"></i>':""}${i.oth?'<i class="dot-oth"></i>':""}</span></button>`}).join("");
   const nb=nextBday();
   return`<div class="view-title"><h1>Calendar</h1><button class="btn sm pri" data-act="newBusy" data-d="${UI.calDay}">Block my time</button></div>
@@ -913,9 +925,9 @@ function nextBday(){let best=null;const t=pd(TODAY());for(const m of D.members){
 function agenda(ds){
   const items=[];
   for(const p of visiblePlans()){
-    if(p.final?.date===ds){const g=goingOf(p.id);const cf=conflictsFor(ds,p.final.start,p.final.end,p.id).filter(c=>g.includes(c.uid));
-      items.push({s:p.final.start||"00:00",h:`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}"><span class="stripe" style="background:${hue(p.id)}"></span><span class="tm">${fRange(p.final.start,p.final.end)}</span><span style="flex:1;min-width:0"><b>${esc(p.emoji||"")} ${esc(p.title)}</b><br><span class="meta">${g.length} going${myRsvp(p.id)?.going==="in"?" · you're in":""}</span>${cf.length?`<br><span class="pill warn">Clash: ${cf.map(c=>esc(nick(c.uid))).join(", ")}</span>`:""}</span></button>`})}
-    else if(!p.final)for(const s of p.slots||[])if(s.date===ds){const v=rsvpsOf(p.id).filter(r=>(r.slots||[]).includes(s.id)).length;
+    if(covers(p.final,ds)){const g=goingOf(p.id),multi=nDays(p.final)>1,dn=dayList(p.final.date,ds).length;const cf=conflictsFor(p.final.date,p.final.start,p.final.end,p.id,p.final.endDate).filter(c=>g.includes(c.uid));
+      items.push({s:multi?"00:00":p.final.start||"00:00",h:`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}"><span class="stripe" style="background:${hue(p.id)}"></span><span class="tm">${multi?`Day ${dn}/${nDays(p.final)}`:fRange(p.final.start,p.final.end)}</span><span style="flex:1;min-width:0"><b>${esc(p.emoji||"")} ${esc(p.title)}</b><br><span class="meta">${g.length} going${myRsvp(p.id)?.going==="in"?" · you're in":""}</span>${cf.length?`<br><span class="pill warn">Clash: ${cf.map(c=>esc(nick(c.uid))).join(", ")}</span>`:""}</span></button>`})}
+    else if(!p.final)for(const s of p.slots||[])if(covers(s,ds)){const v=rsvpsOf(p.id).filter(r=>(r.slots||[]).includes(s.id)).length;
       items.push({s:s.start||"00:00",h:`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}" style="border-style:dashed"><span class="stripe" style="background:var(--sun)"></span><span class="tm">${fRange(s.start,s.end)}</span><span style="flex:1;min-width:0"><b>Proposed: ${esc(p.title)}</b><br><span class="meta">${v} vote${v===1?"":"s"} · tap to vote</span></span></button>`})}
   }
   for(const b of D.busy.filter(b=>b.date===ds)){const mine=b.uid===ME,lab=mine?myLabel(b):"";
@@ -937,11 +949,28 @@ function momentCard(x,full){
     ${x.caption&&!locked?`<div class="cap">${esc(x.caption)}</div>`:""}
     ${locked?"":`<div class="reacts">${REACTS.map(e=>`<button class="rx" data-act="react" data-id="${esc(x.id)}" data-e="${e}" aria-pressed="${mine===e}">${e}${counts[e]?`<small>${counts[e]}</small>`:""}</button>`).join("")}${full?"":`<button class="rx" data-act="openMoment" data-id="${esc(x.id)}">💬<small>${nc||""}</small></button>`}</div>`}</article>`;
 }
+function momentArchive(){
+  const m=UI.momMonth||TODAY().slice(0,7);UI.momMonth=m;const who=UI.momWho||"me";
+  const[y,mo]=m.split("-").map(Number),first=new Date(y,mo-1,1),startDow=(first.getDay()+6)%7,start=new Date(y,mo-1,1-startDow);
+  const list=D.moments.filter(x=>who==="all"||x.by===ME),byDay={};list.forEach(x=>(byDay[x.day]=byDay[x.day]||[]).push(x));
+  const cells=[];for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);cells.push(d)}const rows=cells[35].getMonth()!==mo-1?35:42;
+  const monthCount=Object.keys(byDay).filter(k=>k.startsWith(m)).reduce((t,k)=>t+byDay[k].length,0);
+  const sel=UI.momDay&&UI.momDay.startsWith(m)?UI.momDay:null;
+  return`<div class="row" style="margin-bottom:10px"><div class="seg" style="flex:1"><button data-act="momWho" data-k="me" aria-pressed="${who==="me"}">Mine</button><button data-act="momWho" data-k="all" aria-pressed="${who==="all"}">Everyone</button></div></div>
+  <div class="cal"><div class="cal-h"><button class="back" data-act="momNav" data-n="-1" aria-label="Previous month">${ICON.back}</button><h2>${first.toLocaleDateString("en-GB",{month:"long",year:"numeric"})}</h2><button class="back" data-act="momNav" data-n="1" aria-label="Next month" style="transform:scaleX(-1)">${ICON.back}</button></div>
+  <div class="cal-g">${["M","T","W","T","F","S","S"].map(d=>`<div class="dow">${d}</div>`).join("")}${cells.slice(0,rows).map(d=>{const ds=ymd(d),ms=byDay[ds]||[],t=ms[0],th=t?(t.kind==="video"?t.poster:t.src):"";
+    return`<button class="mday ${d.getMonth()!==mo-1?"out":""} ${ds===TODAY()?"today":""}" data-act="momDay" data-d="${ds}" aria-pressed="${sel===ds}" ${th?`style="background-image:url('${esc(th)}')"`:""} aria-label="${fDate(ds)}${ms.length?", "+ms.length+" moments":""}"><span class="mdn">${d.getDate()}</span>${ms.length>1?`<span class="mcnt">${ms.length}</span>`:""}</button>`}).join("")}</div>
+  <div class="hint" style="margin:8px 4px 0">${monthCount} moment${monthCount===1?"":"s"} this month · tap a day to see them</div></div>
+  ${sel?`<div class="sec" style="border:0"><h2>${fDate(sel,{weekday:"long",day:"numeric",month:"long"})}</h2>${(byDay[sel]||[]).length?`<div class="list">${byDay[sel].sort((a,b)=>b.at-a.at).map(x=>momentCard(x)).join("")}</div>`:`<div class="meta">No moments that day.</div>`}</div>`:""}`;
+}
 VIEWS.moments=()=>{
   const st=streakOf(ME),done=postedToday(ME);
   const byDay={};[...D.moments].sort((a,b)=>b.at-a.at).forEach(m=>(byDay[m.day]=byDay[m.day]||[]).push(m));
   const days=Object.keys(byDay).sort().reverse().slice(0,14);
+  const seg=`<div class="seg" style="margin-bottom:12px"><button data-act="momView" data-k="feed" aria-pressed="${UI.momView!=="archive"}">📸 Feed</button><button data-act="momView" data-k="archive" aria-pressed="${UI.momView==="archive"}">🗓️ Archive</button></div>`;
+  if(UI.momView==="archive")return`<div class="view-title"><h1>Moments</h1>${st?`<span class="streak">🔥 ${st} day${st>1?"s":""}</span>`:""}</div>${seg}${momentArchive()}`;
   return`<div class="view-title"><h1>Moments</h1>${st?`<span class="streak">🔥 ${st} day${st>1?"s":""}</span>`:""}</div>
+  ${seg}
   ${done?`<div class="banner" style="background:var(--accent-soft)">✅ You posted today. Post more if something fun happens.</div>`:""}
   <div class="shoot"><div class="big"><b>${done?"Another moment?":"Today's moment"}</b><span style="opacity:.9;font-size:13px">${done?"Share what you're up to right now.":"Snap what you're doing right now. The guys' moments unlock once you post."}</span><br><button class="btn sm" data-act="momentGallery" style="margin-top:8px;background:rgba(255,255,255,.18);color:inherit;border-color:transparent">Pick from photos</button></div><button class="cam" data-act="momentShot" aria-label="Take a photo">📸</button></div>
   <div class="list" style="margin-top:14px">${days.length?days.map(d=>`<div class="daylabel">${d===TODAY()?"Today":fDate(d,{weekday:"long",day:"numeric",month:"short"})}</div>${byDay[d].map(m=>momentCard(m)).join("")}`).join(""):`<div class="empty"><h3>No moments yet</h3>Be the first: tap 📸 and share what you're doing right now.</div>`}</div>`;
@@ -1223,13 +1252,13 @@ SHEETS.settings={live:true,
 };
 function icsFor(p,mins){
   const f=p.final,d=f.date.replace(/-/g,""),t=x=>x.replace(":","")+"00",e=s=>String(s||"").replace(/[\\;,]/g,m=>"\\"+m).replace(/\n/g,"\\n");
-  let dt;if(f.start){const end=f.end||((h,m)=>`${pad((h+2)%24)}:${pad(m)}`)(...f.start.split(":").map(Number));let ed=d;if(end<=f.start){const x=pd(f.date);x.setDate(x.getDate()+1);ed=ymd(x).replace(/-/g,"")}dt=`DTSTART:${d}T${t(f.start)}\r\nDTEND:${ed}T${t(end)}`}
-  else{const x=pd(f.date);x.setDate(x.getDate()+1);dt=`DTSTART;VALUE=DATE:${d}\r\nDTEND;VALUE=DATE:${ymd(x).replace(/-/g,"")}`}
+  let dt;if(f.start){const end=f.end||((h,m)=>`${pad((h+2)%24)}:${pad(m)}`)(...f.start.split(":").map(Number));let ed=endOf(f).replace(/-/g,"");if(ed===d&&end<=f.start){const x=pd(f.date);x.setDate(x.getDate()+1);ed=ymd(x).replace(/-/g,"")}dt=`DTSTART:${d}T${t(f.start)}\r\nDTEND:${ed}T${t(end)}`}
+  else{const x=pd(endOf(f));x.setDate(x.getDate()+1);dt=`DTSTART;VALUE=DATE:${d}\r\nDTEND;VALUE=DATE:${ymd(x).replace(/-/g,"")}`}
   const st=new Date().toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
   const al=mins.map(m=>`BEGIN:VALARM\r\nTRIGGER:-PT${m}M\r\nACTION:DISPLAY\r\nDESCRIPTION:${e(p.title)}\r\nEND:VALARM`).join("\r\n");
   return`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Yalla Guys//EN\r\nBEGIN:VEVENT\r\nUID:${p.id}@yallaguys\r\nDTSTAMP:${st}\r\n${dt}\r\nSUMMARY:${e((p.emoji||"")+" "+p.title)}\r\nLOCATION:${e((p.stops||[]).map(x=>x.name).join(" → "))}\r\nDESCRIPTION:${e(p.desc||"")}${al?"\r\n"+al:""}\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n`;
 }
-function gcalUrl(p){const f=p.final,d=f.date.replace(/-/g,"");const dates=f.start?`${d}T${f.start.replace(":","")}00/${d}T${(f.end||f.start).replace(":","")}00`:`${d}/${d}`;return`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent((p.emoji||"")+" "+p.title)}&dates=${dates}&location=${encodeURIComponent((p.stops||[]).map(x=>x.name).join(" → "))}&details=${encodeURIComponent(p.desc||"")}`}
+function gcalUrl(p){const f=p.final,d=f.date.replace(/-/g,"");if(nDays(f)>1){const x=pd(endOf(f));x.setDate(x.getDate()+1);return`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent((p.emoji||"")+" "+p.title)}&dates=${d}/${ymd(x).replace(/-/g,"")}&location=${encodeURIComponent((p.stops||[]).map(x=>x.name).join(" → "))}&details=${encodeURIComponent(p.desc||"")}`}const dates=f.start?`${d}T${f.start.replace(":","")}00/${d}T${(f.end||f.start).replace(":","")}00`:`${d}/${d}`;return`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent((p.emoji||"")+" "+p.title)}&dates=${dates}&location=${encodeURIComponent((p.stops||[]).map(x=>x.name).join(" → "))}&details=${encodeURIComponent(p.desc||"")}`}
 /* timeline: scroll through past and future, day by day or month by month */
 const haptic=(()=>{let lbl=null,last=0;return()=>{const t=performance.now();if(t-last<40)return;last=t;
   try{if(navigator.vibrate){navigator.vibrate(7);return}
@@ -1237,9 +1266,11 @@ const haptic=(()=>{let lbl=null,last=0;return()=>{const t=performance.now();if(t
 function timelineDays(u){
   const days={},add=(d,k,v)=>{if(!d)return;(days[d]=days[d]||{plans:[],media:[],reels:[],board:[]})[k].push(v)};
   const boardOf=p=>albumOpen(p)?[]:mediaOf(p.id).filter(m=>m.phase!=="memory"&&m.phase!=="ticket"&&(m.kind==="photo"||m.kind==="note"||m.kind==="color")).map(m=>({thumb:m.kind==="photo"?m.src:"",color:m.color||"",text:m.kind==="note"?m.text:m.kind==="color"?(m.caption||m.color):"",t:m.at,plan:p.id}));
-  for(const m of D.moments)if(m.by===u)add(m.day,"media",{video:m.kind==="video",thumb:m.kind==="video"?m.poster:m.src,act:`data-act="openMoment" data-id="${esc(m.id)}"`,t:m.at});
+  if(u===ME)for(const b of D.busy.filter(x=>x.uid===ME)){const pics=D.mine.filter(m=>m.busyId===b.id&&m.kind==="photo");const tix=D.mine.filter(m=>m.busyId===b.id&&m.kind!=="photo");if(!pics.length&&!tix.length&&!myLabel(b))continue;
+    add(b.date,"plans",{id:"busy:"+b.id,_busy:b.id,title:myLabel(b)||"Personal",emoji:"🔒",final:{date:b.date,start:b.start,end:b.end},status:b.date<TODAY()?"done":"set"});
+    for(const m of pics)add(b.date,"media",{thumb:m.src,act:`data-act="viewSrc" data-key="mine:${esc(m.id)}"`,t:m.at})}
   for(const p of visiblePlans()){const r=D.rsvps.find(x=>x.planId===p.id&&x.uid===u);if(!(p.by===u||(r&&r.going!=="out")))continue;
-    if(p.final){const d=p.final.date;add(d,"plans",p);for(const b of boardOf(p))add(d,"board",b);
+    if(p.final){const d=p.final.date;for(const dd of dayList(p.final.date,endOf(p.final)))add(dd,"plans",p);for(const b of boardOf(p))add(d,"board",b);
       for(const m of albumOf(p.id))if(m.kind==="photo"||(m.kind==="video"&&m.poster))add(d,"media",{thumb:m.kind==="photo"?m.src:m.poster,video:m.kind==="video",act:m.kind==="photo"?`data-act="viewPhoto" data-id="${esc(m.id)}"`:`data-act="playVideo" data-key="media:${esc(m.id)}"`,t:m.at});
 }
     else for(const sl of p.slots||[]){add(sl.date,"plans",{...p,_proposed:sl});for(const b of boardOf(p))add(sl.date,"board",b)}}
@@ -1298,7 +1329,7 @@ function tlDetail(s,i){
   else{title=fDate(x.k,{weekday:"long",day:"numeric",month:"long",year:pd(x.k).getFullYear()===new Date().getFullYear()?undefined:"numeric"});const diff=Math.round((pd(x.k)-pd(today))/864e5);rel=diff===0?"Today":diff===1?"Tomorrow":diff===-1?"Yesterday":diff>0?`In ${diff} days`:`${-diff} days ago`}
   const plans=[...new Map(a.plans.map(p=>[p.id,p])).values()];
   el.innerHTML=`<div class="tl-head"><h2>${esc(title)}</h2><span class="pill ${x.k>=(s.month?today.slice(0,7):today)?"set":"done"}">${esc(rel)}</span></div>
-    ${plans.length?`<div class="list" style="gap:8px;margin-top:10px">${plans.map(p=>`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}"><span class="stripe" style="background:${p._proposed?"var(--sun)":hue(p.id)}"></span><span style="flex:1;min-width:0"><b>${esc(p.emoji||"")} ${esc(p.title)}</b><br><span class="meta">${p._proposed?"Proposed date · vote":p.final?`${s.month?fDate(p.final.date)+" · ":""}${fRange(p.final.start,p.final.end)}`:""}</span></span>${statusPill(p)}</button>`).join("")}</div>`:""}
+    ${plans.length?`<div class="list" style="gap:8px;margin-top:10px">${plans.map(p=>p._busy?`<button class="ev busy" data-act="openBusy" data-id="${esc(p._busy)}"><span class="stripe"></span><span style="flex:1;min-width:0"><b>🔒 ${esc(p.title)}</b><br><span class="meta">${fRange(p.final.start,p.final.end)} · only you see this</span></span><span class="meta">›</span></button>`:`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}"><span class="stripe" style="background:${p._proposed?"var(--sun)":hue(p.id)}"></span><span style="flex:1;min-width:0"><b>${esc(p.emoji||"")} ${esc(p.title)}</b><br><span class="meta">${p._proposed?"Proposed date · vote":p.final?`${s.month?fDate(p.final.date)+" · ":""}${fRange(p.final.start,p.final.end)}`:""}</span></span>${statusPill(p)}</button>`).join("")}</div>`:""}
     ${!plans.length?`<div class="empty" style="margin-top:10px">${x.k>=(s.month?today.slice(0,7):today)&&!a.media.length?"Nothing planned yet. Make a plan!":(a.media.length?`📸 ${a.media.length} memor${a.media.length===1?"y":"ies"} · tap the photos above to open`:"Nothing saved from this "+(s.month?"month":"day")+".")}</div>`:""}`;
 }
 SHEETS.linkAdd={render(){return{title:"Add a link or reel",body:`<div class="form"><label class="f">Link<input class="inp" id="lkUrl" type="url" inputmode="url" placeholder="Instagram reel, TikTok, website…"></label><label class="f">Caption (optional)<input class="inp" id="lkCap"></label><div class="hint">🔒 Only you can see this.</div></div>`,foot:`<button class="btn pri block" data-act="linkSave">Add</button>`}}};
@@ -1428,18 +1459,18 @@ SHEETS.plan={live:true,
     const media=mediaOf(p.id),ideas=media.filter(m=>m.phase!=="memory"&&m.phase!=="ticket"),mems=media.filter(m=>m.phase==="memory");
     const notes=D.notes.filter(n=>n.planId===p.id).sort((a,b)=>a.at-b.at);
     let when="";
-    if(p.final){const d=pd(p.final.date);const cf=conflictsFor(p.final.date,p.final.start,p.final.end,p.id).filter(c=>g.includes(c.uid)||c.uid===ME);
-      when=`<div class="when"><div class="cal-ic"><div class="m">${d.toLocaleDateString("en-GB",{month:"short"})}</div><div class="dd">${d.getDate()}</div></div><div style="flex:1;min-width:0"><div class="d">${fDate(p.final.date,{weekday:"long"})}</div><div>${fRange(p.final.start,p.final.end)} · on everyone's calendar</div>${cf.length?`<div style="margin-top:6px">${cf.map(c=>`<span class="pill warn">${esc(nick(c.uid))} ${esc(c.why)}</span>`).join(" ")}</div>`:""}</div></div>
+    if(p.final){const d=pd(p.final.date);const cf=conflictsFor(p.final.date,p.final.start,p.final.end,p.id,p.final.endDate).filter(c=>g.includes(c.uid)||c.uid===ME);
+      when=`<div class="when"><div class="cal-ic"><div class="m">${d.toLocaleDateString("en-GB",{month:"short"})}</div><div class="dd">${d.getDate()}</div></div><div style="flex:1;min-width:0"><div class="d">${nDays(p.final)>1?esc(fDates(p.final,{weekday:"short",day:"numeric",month:"short"})):fDate(p.final.date,{weekday:"long"})}</div><div>${nDays(p.final)>1?`${nDays(p.final)} days${p.final.start?" · starts "+fTime(p.final.start):""}`:fRange(p.final.start,p.final.end)} · on everyone's calendar</div>${cf.length?`<div style="margin-top:6px">${cf.map(c=>`<span class="pill warn">${esc(nick(c.uid))} ${esc(c.why)}</span>`).join(" ")}</div>`:""}</div></div>
       <div class="row"><button class="btn sm" data-act="reopen" data-id="${esc(p.id)}">Change date (reopen poll)</button></div>`;
     }else{
       const slots=[...(p.slots||[])].sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
       const max=Math.max(1,...slots.map(sl=>rs.filter(r=>(r.slots||[]).includes(sl.id)).length));
       when=`<p class="hint" style="margin:0">Tick every time that works for you. Clashes come from people's calendars.</p>${slots.map(sl=>{
-        const voters=rs.filter(r=>(r.slots||[]).includes(sl.id)).map(r=>r.uid),on=voters.includes(ME),cf=conflictsFor(sl.date,sl.start,sl.end,p.id),past=sl.date<TODAY();
-        return`<div class="slot ${on?"mine":""}"><div class="between"><div style="min-width:0"><b>${fDate(sl.date)}</b> · ${fRange(sl.start,sl.end)}${past?' <span class="pill done">past</span>':""}<div class="meta">${voters.length} vote${voters.length===1?"":"s"}${sl.by?` · suggested by ${esc(nick(sl.by))}`:""}</div></div><button class="vote-btn" data-act="vote" data-id="${esc(p.id)}" data-slot="${esc(sl.id)}" aria-pressed="${on}" aria-label="I can make this time">${on?"✓":""}</button></div>
+        const voters=rs.filter(r=>(r.slots||[]).includes(sl.id)).map(r=>r.uid),on=voters.includes(ME),cf=conflictsFor(sl.date,sl.start,sl.end,p.id,sl.endDate),past=sl.date<TODAY();
+        return`<div class="slot ${on?"mine":""}"><div class="between"><div style="min-width:0"><b>${fDates(sl)}</b> · ${nDays(sl)>1?nDays(sl)+" days":fRange(sl.start,sl.end)}${past?' <span class="pill done">past</span>':""}<div class="meta">${voters.length} vote${voters.length===1?"":"s"}${sl.by?` · suggested by ${esc(nick(sl.by))}`:""}</div></div><button class="vote-btn" data-act="vote" data-id="${esc(p.id)}" data-slot="${esc(sl.id)}" aria-pressed="${on}" aria-label="I can make this time">${on?"✓":""}</button></div>
         <div class="bar"><i style="width:${voters.length/max*100}%"></i></div>
         <div class="between"><div class="row">${voters.length?avStack(voters,"xs",8):""}${cf.map(c=>`<span class="pill warn">${esc(nick(c.uid))} busy</span>`).join("")}</div><button class="btn sm ghost" data-act="lock" data-id="${esc(p.id)}" data-slot="${esc(sl.id)}">Lock in</button></div></div>`}).join("")||`<div class="meta">No dates suggested yet.</div>`}
-      <details><summary class="btn sm" style="list-style:none;display:inline-flex">+ Suggest a time</summary><div class="grid3" style="margin-top:10px"><label class="f">Date<input class="inp" type="date" id="slD"></label><label class="f">From<input class="inp" type="time" id="slS"></label><label class="f">To<input class="inp" type="time" id="slE"></label></div><button class="btn pri block" style="margin-top:8px" data-act="addSlot" data-id="${esc(p.id)}">Add this time</button></details>`;
+      <details><summary class="btn sm" style="list-style:none;display:inline-flex">+ Suggest a time</summary><div class="grid2" style="margin-top:10px"><label class="f">Start date<input class="inp" type="date" id="slD"></label><label class="f">Until (multi-day)<input class="inp" type="date" id="slD2"></label></div><div class="grid3" style="grid-template-columns:1fr 1fr;margin-top:8px"><label class="f">From<input class="inp" type="time" id="slS"></label><label class="f">To<input class="inp" type="time" id="slE"></label></div><button class="btn pri block" style="margin-top:8px" data-act="addSlot" data-id="${esc(p.id)}">Add this time</button></details>`;
     }
     const stops=p.stops||[],pts=stops.filter(x=>x.lat!=null),route=routeFor(stops);
     let legs="",tk=0,tm=0,li=0;
@@ -1743,8 +1774,9 @@ SHEETS.edit={
           ${st.chatId?`<div class="hint">📌 Will be posted in ${esc(D.chats.find(c=>c.id===st.chatId)?.name||"the group chat")}.</div>`:""}`:`<div class="hint">Everyone in Yalla Guys can see and join.</div>`}</div>
       <label class="toggle"><span><b>📸 This already happened</b><br><span class="meta">Saves it straight to Memories with the date locked, so everyone can add pics</span></span><input type="checkbox" id="edPast" ${st.past?"checked":""}></label>
       <div class="sec"><h2>${st.past?"When was it?":"Suggested dates"}</h2><p class="hint" style="margin:0">${st.past?"Pick the day it happened. Add a time if you like.":"Add one or more options; the guys vote. Lock in the winner from the plan page. Past dates work too."}</p>
-        ${st.slots.map((x,i)=>`<div class="item"><span class="grow"><span class="t">${fDate(x.date)}</span> · ${fRange(x.start,x.end)}${(()=>{const c=conflictsFor(x.date,x.start,x.end,s.args.id);return c.length?`<br>${c.map(k=>`<span class="pill warn">${esc(nick(k.uid))} busy</span>`).join(" ")}`:""})()}</span><button class="x" data-act="slotDel" data-i="${i}" aria-label="Remove date">✕</button></div>`).join("")}
-        <div class="grid3"><label class="f">Date<input class="inp" type="date" id="edD"></label><label class="f">From<input class="inp" type="time" id="edS"></label><label class="f">To<input class="inp" type="time" id="edE"></label></div>
+        ${st.slots.map((x,i)=>`<div class="item"><span class="grow"><span class="t">${fDates(x)}</span> · ${nDays(x)>1?nDays(x)+" days":fRange(x.start,x.end)}${(()=>{const c=conflictsFor(x.date,x.start,x.end,s.args.id,x.endDate);return c.length?`<br>${c.map(k=>`<span class="pill warn">${esc(nick(k.uid))} busy</span>`).join(" ")}`:""})()}</span><button class="x" data-act="slotDel" data-i="${i}" aria-label="Remove date">✕</button></div>`).join("")}
+        <div class="grid2"><label class="f">${st.past?"Date":"Start date"}<input class="inp" type="date" id="edD"></label><label class="f">Until (multi-day)<input class="inp" type="date" id="edD2"></label></div>
+        <div class="grid3" style="grid-template-columns:1fr 1fr"><label class="f">From<input class="inp" type="time" id="edS"></label><label class="f">To<input class="inp" type="time" id="edE"></label></div>
         <button class="btn" data-act="slotAdd">+ Add this date</button></div>
       <div class="sec"><h2>Potential costs (Dhs per person)</h2>
         ${st.est.map((x,i)=>`<div class="item"><span class="grow t">${esc(x.label)}</span><span class="amt">${dhs(x.amount)}</span><button class="x" data-act="estDel" data-i="${i}" aria-label="Remove cost">✕</button></div>`).join("")}
@@ -2122,20 +2154,20 @@ const ACT={
     const ed=stack.find(x=>x.kind==="edit");const stop={name:val("pickName")||"Dropped pin",...s.state.pt};closeSheet();if(ed)setTimeout(()=>addStop(ed,stop),0)},
   stopUp(d){const a=topS().state.stops,i=+d.i;[a[i-1],a[i]]=[a[i],a[i-1]];paintSheet(topS())},
   stopDel(d){topS().state.stops.splice(+d.i,1);paintSheet(topS())},
-  slotAdd(){const s=topS(),date=val("edD");if(!date)return toast("Pick a date first.");s.state.slots.push({id:rid(),date,start:val("edS"),end:val("edE"),by:ME});paintSheet(s);["edD","edS","edE"].forEach(i=>$("#"+i,s.el).value="")},
+  slotAdd(){const s=topS(),date=val("edD"),e2=val("edD2");if(!date)return toast("Pick a date first.");if(e2&&e2<date)return toast("The end date is before the start.");const sl={id:rid(),date,start:val("edS"),end:val("edE"),by:ME};if(e2&&e2>date)sl.endDate=e2;s.state.slots.push(sl);paintSheet(s);["edD","edD2","edS","edE"].forEach(i=>{const x=$("#"+i,s.el);if(x)x.value=""})},
   slotDel(d){topS().state.slots.splice(+d.i,1);paintSheet(topS())},
   estAdd(){const s=topS(),l=val("edEL"),a=parseFloat(val("edEA"));if(!l||!(a>=0))return toast("Add a label and an amount in Dhs.");s.state.est.push({label:l,amount:Math.round(a*100)/100});paintSheet(s);["edEL","edEA"].forEach(i=>$("#"+i,s.el).value="")},
   estDel(d){topS().state.est.splice(+d.i,1);paintSheet(topS())},
   edPhotos(){const s=topS();pickPhotos(fs=>{s.state.files.push(...fs);paintSheet(s)})},
   async edSave(){
     const s=topS(),st=s.state,title=val("edTitle");if(!title)return toast("Give the plan a name.");
-    const pend=val("edD");if(pend&&!st.slots.some(x=>x.date===pend))st.slots.push({id:rid(),date:pend,start:val("edS"),end:val("edE"),by:ME});
+    const pend=val("edD"),pend2=val("edD2");if(pend&&!st.slots.some(x=>x.date===pend)){const sl={id:rid(),date:pend,start:val("edS"),end:val("edE"),by:ME};if(pend2&&pend2>pend)sl.endDate=pend2;st.slots.push(sl)}
     const link=val("edLink");if(link&&!validUrl(link))return toast("That link doesn't look right. Paste the full https:// address.");if(link&&!st.links.includes(link))st.links.push(link);
     $("#edSaveBtn",s.el).disabled=true;
     const invited=st.invited.length?[...new Set([ME,...st.invited])]:[];
     const base={title,emoji:st.emoji,desc:val("edDesc"),stops:st.stops,slots:st.slots,est:st.est,invited,chatId:st.chatId||""};
     if(st.past){const sl=[...st.slots].sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start))[0];if(!sl)return $("#edSaveBtn",s.el).disabled=false,toast("Pick the date it happened.");
-      base.final={date:sl.date,start:sl.start||"",end:sl.end||""};base.status="done";base.slots=[sl]}
+      base.final={date:sl.date,start:sl.start||"",end:sl.end||"",...(sl.endDate?{endDate:sl.endDate}:{})};base.status="done";base.slots=[sl]}
     if(s.args.id){await Store.upd("plans",s.args.id,base);closeSheet();toast("Plan updated");return}
     const id=rid();await Store.set("plans",id,{status:"poll",final:null,...base,by:ME,at:now()});
     if(s.args.wish)await Store.upd("wishes",s.args.wish,{pushedPlanId:id});
@@ -2164,16 +2196,16 @@ const ACT={
     const a=document.createElement("a");a.href=/iPhone|iPad/i.test(navigator.userAgent)?"data:text/calendar;charset=utf-8,"+encodeURIComponent(txt):URL.createObjectURL(new Blob([txt],{type:"text/calendar"}));a.download=name;document.body.appendChild(a);a.click();a.remove()},
   async vote(d){const r=myRsvp(d.id);const sl=new Set(r?.slots||[]);sl.has(d.slot)?sl.delete(d.slot):sl.add(d.slot);await saveRsvp(d.id,{going:r?.going||(sl.size?"in":"maybe"),slots:[...sl]})},
   async rsvp(d){const patch={going:d.k};if(d.k==="out"){patch.ride=null;patch.riders=[]}await saveRsvp(d.id,patch)},
-  async lock(d){const p=planById(d.id),sl=(p.slots||[]).find(x=>x.id===d.slot);if(!sl)return;await Store.upd("plans",d.id,{final:{date:sl.date,start:sl.start||"",end:sl.end||""},status:"set"});if(p.chatId&&D.chats.some(c=>c.id===p.chatId))await Store.add("msgs",{chatId:p.chatId,by:ME,text:`📅 Locked in: ${fDate(sl.date)} ${fRange(sl.start,sl.end)}`,at:now()});toast("Locked in. It's on everyone's calendar now.")},
+  async lock(d){const p=planById(d.id),sl=(p.slots||[]).find(x=>x.id===d.slot);if(!sl)return;await Store.upd("plans",d.id,{final:{date:sl.date,start:sl.start||"",end:sl.end||"",...(sl.endDate?{endDate:sl.endDate}:{})},status:"set"});if(p.chatId&&D.chats.some(c=>c.id===p.chatId))await Store.add("msgs",{chatId:p.chatId,by:ME,text:`📅 Locked in: ${fDates(sl)} ${nDays(sl)>1?"("+nDays(sl)+" days)":fRange(sl.start,sl.end)}`,at:now()});toast("Locked in. It's on everyone's calendar now.")},
   async reopen(d){await Store.upd("plans",d.id,{final:null,status:"poll"});toast("Poll reopened")},
-  async addSlot(d){const s=topS(),date=val("slD");if(!date)return toast("Pick a date first.");const p=planById(d.id);await Store.upd("plans",d.id,{slots:[...(p.slots||[]),{id:rid(),date,start:val("slS"),end:val("slE"),by:ME}]});["slD","slS","slE"].forEach(i=>{const e=$("#"+i,s.el);if(e)e.value=""})},
+  async addSlot(d){const s=topS(),date=val("slD"),e2=val("slD2");if(!date)return toast("Pick a date first.");if(e2&&e2<date)return toast("The end date is before the start.");const p=planById(d.id);const sl={id:rid(),date,start:val("slS"),end:val("slE"),by:ME};if(e2&&e2>date)sl.endDate=e2;await Store.upd("plans",d.id,{slots:[...(p.slots||[]),sl]});["slD","slD2","slS","slE"].forEach(i=>{const e=$("#"+i,s.el);if(e)e.value=""})},
   async markDone(d){await Store.upd("plans",d.id,{status:"done"});toast("Moved to Memories. Add your photos!")},
   async unDone(d){await Store.upd("plans",d.id,{status:planById(d.id)?.final?"set":"poll"})},
   async delPlan(d){await Store.del("plans",d.id);for(const c of["rsvps","media","notes"])for(const x of D[c].filter(x=>x.planId===d.id))await Store.del(c,x.id);closeSheet();toast("Plan deleted")},
   timeline(d){openSheet("timeline",{id:d.id})},
   tlMode(d){const s=topS();s.state.mode=d.k;ls.set("yg-tlmode",d.k);paintSheet(s);s.ro?.disconnect();buildTimeline(s)},
   tlGo(d){const s=topS();if(+d.i===s.state.idx)return ACT.tlOpen();s.go?.(+d.i)},
-  tlOpen(){const s=topS(),t=s?.fanTarget;if(!t)return;if(t.plan){if(albumOpen(t.plan))ACT.openAlbum({id:t.plan.id});else if(t.board)openSheet("board",{id:t.plan.id});else openSheet("plan",{id:t.plan.id});return}
+  tlOpen(){const s=topS(),t=s?.fanTarget;if(!t)return;if(t.plan?._busy)return openSheet("busyView",{id:t.plan._busy});if(t.plan){if(albumOpen(t.plan))ACT.openAlbum({id:t.plan.id});else if(t.board)openSheet("board",{id:t.plan.id});else openSheet("plan",{id:t.plan.id});return}
     const m=t.media[0];if(!m)return;const mm=/data-act="(\w+)" data-(id|key)="([^"]+)"/.exec(m.act);if(mm)ACT[mm[1]]?.({[mm[2]]:mm[3]})},
   tlJump(d){const s=topS();if(!s.slots)return;const cur=s.month?TODAY().slice(0,7):TODAY();const i=d.k==="past"?0:d.k==="future"?s.slots.length-1:Math.max(0,s.slots.findIndex(x=>x.k===cur));s.go(i)},
   async rideRole(d){const p=planById(d.id);const r=myRsvp(d.id);
@@ -2254,6 +2286,10 @@ const ACT={
   async playlistSave(){const s=topS(),u=val("plUrl");if(!validUrl(u))return toast("Paste the full link that starts with https://");const p=planById(s.args.id);if(!p)return closeSheet();
     await Store.upd("plans",p.id,{playlists:[...(p.playlists||[]),{url:u,title:val("plTitle"),by:ME,at:now()}]});closeSheet();toast(spotifyEmbed(u)?"Playlist added 🎵":"Link added 🎵")},
   async playlistDel(d){const p=planById(d.id);if(!p)return;await Store.upd("plans",p.id,{playlists:(p.playlists||[]).filter((_,i)=>i!==+d.i)});toast("Removed")},
+  momView(d){UI.momView=d.k;render()},
+  momWho(d){UI.momWho=d.k;render()},
+  momNav(d){const[y,m]=UI.momMonth.split("-").map(Number),n=new Date(y,m-1+(+d.n),1);UI.momMonth=`${n.getFullYear()}-${pad(n.getMonth()+1)}`;UI.momDay=null;render()},
+  momDay(d){UI.momDay=UI.momDay===d.d?null:d.d;render()},
   openBoard(d){openSheet("board",{id:d.id})},
   openAlbum(d){openSheet("plan",{id:d.id});setTimeout(()=>{$("#album",topS()?.el)?.scrollIntoView({behavior:"smooth"})},150)},
   addMedia(d){openSheet("media",{id:d.id,ph:d.ph,tab:d.tab})},
