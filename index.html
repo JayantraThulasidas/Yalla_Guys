@@ -498,7 +498,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.7";
+const APP_VERSION="2026-11-10.8";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -777,7 +777,7 @@ function applyTheme(){
 }
 function saveSet(){ls.set("yg-settings",SET);applyTheme();Object.values(MAPS).forEach(x=>x.map?.remove());for(const k in MAPS)delete MAPS[k];render();for(const st of stack)paintSheet(st)}
 applyTheme();matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{applyTheme();render()});
-const UI={mapMode:"plans",tab:(t=>t==="map"?"plans":t)(ls.get("yg-tab","plans")),planFilter:"active",calMonth:null,calDay:TODAY(),mapFilter:"upcoming",moneyPlan:"",authTab:"signup"};
+const UI={mapMode:"plans",tab:"plans",planFilter:"active",calMonth:null,calDay:TODAY(),mapFilter:"upcoming",moneyPlan:"",authTab:"signup"};
 const stack=[];
 let pending=false;
 function schedule(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;render()})}
@@ -1081,9 +1081,10 @@ function afterView(){
 
 /* ---------- sheets ---------- */
 const SHEETS={};
-let trapArmed=false;
-function armBack(){if(trapArmed&&history.state?.yg)return;try{history.pushState({yg:1},"");trapArmed=true}catch{}}
-document.addEventListener("pointerdown",armBack,{capture:true,passive:true});
+/* Back / edge-swipe: only Plans home lets the phone leave the app; anywhere else Back steps towards home.
+   A history entry is added right after a tap that leaves home (Chrome only honours entries added during a tap). */
+const atHome=()=>!stack.length&&UI.tab==="plans"&&UI.planFilter==="active";
+function armBack(){if(!atHome()&&!history.state?.yg){try{history.pushState({yg:1},"")}catch{}}}
 function openSheet(kind,args={}){
   const el=document.createElement("div");el.className="sheet"+(["photo","player","img","camera"].includes(kind)?" lightbox":"");el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");
   el.innerHTML=`<div class="sheet-h wrap"><div class="in"></div></div><div class="sheet-b wrap"><div class="in top-in"></div><div class="in main-in"></div></div><div class="sheet-f wrap" hidden><div class="in"></div></div>`;
@@ -1098,12 +1099,11 @@ function closeSheet(viaPop){
   schedule();
 }
 window.addEventListener("popstate",()=>{
-  trapArmed=false;
+  if(atHome()){try{history.back()}catch{}return}
   if(stack.length)closeSheet(true);
-  else if(UI.tab!=="plans"){UI.tab="plans";ls.set("yg-tab","plans");render();window.scrollTo(0,0)}
-  else if(UI.planFilter!=="active"){UI.planFilter="active";render()}
-  else toast("Swipe up from the bottom to leave Yalla Guys");
-  try{history.pushState({yg:1},"")}catch{}
+  else if(UI.tab!=="plans"){UI.tab="plans";render();window.scrollTo(0,0)}
+  else if(UI.planFilter!=="active"){UI.planFilter="active";render();window.scrollTo(0,0)}
+  if(!atHome()){try{history.pushState({yg:1},"")}catch{}}
 });
 function paintSheet(s,first){
   const S=SHEETS[s.kind];const h=S.render(s);
@@ -2208,6 +2208,7 @@ document.addEventListener("click",ev=>{
   if(el.dataset.confirm){if(!el._armed){el._armed=true;const o=el.innerHTML;el.textContent=el.dataset.confirm;setTimeout(()=>{el._armed=false;if(el.isConnected)el.innerHTML=o},3000);return}}
   if(el.tagName==="A"&&el.getAttribute("href")==="#")ev.preventDefault();
   const r=fn(el.dataset,el,ev);if(r&&r.catch)r.catch(e=>{console.error(e);toast("Something went wrong. Try again.")});
+  armBack();
 });
 document.addEventListener("input",ev=>{
   const el=ev.target;
