@@ -88,6 +88,7 @@ nav.tabs button[aria-current="true"]{color:var(--accent)}
 .fab{position:fixed;z-index:25;right:max(16px,calc((100vw - 560px)/2 + 16px),env(safe-area-inset-right,0px));bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 16px);border:0;background:var(--accent);color:var(--accent-fg);font-weight:700;font-size:16px;border-radius:999px;padding:0 20px;height:54px;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px}
 .fab b{font-size:24px;line-height:1;font-weight:500}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 14px;font-weight:600;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;font-size:14px}
+a.btn{color:var(--fg)}
 .btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 .btn.sun{background:var(--sun);color:#fff;border-color:var(--sun)}
 .btn.ghost{background:none;border-color:transparent;color:var(--accent)}
@@ -203,7 +204,7 @@ textarea.inp{min-height:84px;resize:vertical}
 .chat-row .last{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gav{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:22px;flex:none;background:var(--accent-soft)}
 .msgs{display:flex;flex-direction:column;gap:4px}
-.msg{max-width:80%;display:flex;flex-direction:column;gap:2px}
+.msg{max-width:80%;display:flex;flex-direction:column;gap:2px;align-items:flex-start;align-self:flex-start}
 .msg .bub{padding:8px 12px;border-radius:18px;background:var(--surface);border:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere}
 .msg.me{align-self:flex-end;align-items:flex-end}
 .msg.me .bub{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
@@ -269,6 +270,13 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .daylabel{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:8px 2px 0}
 .people-row{display:flex;gap:12px;overflow-x:auto;margin-bottom:12px;padding-bottom:4px;scrollbar-width:none}
 .prof-btn{border:0;background:none;padding:0;display:inline-flex;align-items:center;gap:8px;color:inherit;text-align:left}
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.swatch{width:46px;height:46px;border-radius:50%;border:3px solid transparent;box-shadow:0 0 0 1px var(--line)}
+.swatch[aria-pressed="true"]{border-color:var(--fg)}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;min-height:52px}
+.toggle input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.plan-msg{display:flex;flex-direction:column;gap:4px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:10px 12px;max-width:100%;min-width:200px;color:var(--fg)}
+.plan-msg .k{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
 .auth{max-width:440px;margin:0 auto;padding-block:8px 40px}
 .auth-hero{padding:28px 4px 22px}
 .auth-logo{font-family:var(--f-display);font-weight:800;font-size:46px;letter-spacing:-.03em;line-height:1}
@@ -530,6 +538,8 @@ function dummyPhoto(e,a,b){try{const c=document.createElement("canvas");c.width=
   x.font="200px serif";x.textAlign="center";x.textBaseline="middle";x.fillText(e,240,320);return c.toDataURL("image/jpeg",.7)}catch{return""}}
 const avStack=(ids,cls="sm",max=5)=>`<span class="stack">${ids.slice(0,max).map(i=>avatar(i,cls)).join("")}${ids.length>max?`<span class="av ${cls}" style="background:var(--surface2);color:var(--fg)">+${ids.length-max}</span>`:""}</span>`;
 const planById=id=>D.plans.find(p=>p.id===id);
+const canSee=p=>!(p.invited||[]).length||p.invited.includes(ME)||p.by===ME;
+const visiblePlans=()=>D.plans.filter(canSee);
 const rsvpsOf=pid=>D.rsvps.filter(r=>r.planId===pid);
 const myRsvp=pid=>D.rsvps.find(r=>r.planId===pid&&r.uid===ME);
 const goingOf=pid=>rsvpsOf(pid).filter(r=>r.going==="in").map(r=>r.uid);
@@ -570,6 +580,18 @@ const unread=c=>{const seen=ls.get("yg-seen",{})[c.id]||0;return chatMsgs(c.id).
 const markSeen=cid=>{const s=ls.get("yg-seen",{});s[cid]=now();ls.set("yg-seen",s)};
 
 /* ---------- app state + render ---------- */
+const ACCENTS={teal:["#0B7A75","#3CC0B7"],coral:["#D2493F","#FF8A7A"],purple:["#6D4FC2","#A88BFF"],ocean:["#2F6FB5","#6EA8FF"],pink:["#C2307A","#FF7AB8"],lime:["#4F7A12","#A6D94A"],gold:["#A86A00","#F2C14E"],mono:["#1D2530","#E9EEF2"]};
+const SET=Object.assign({mode:"system",accent:"teal",notifyOn:false,nMsgs:true,nPlans:true,nMoments:true,remind:[1440,60]},ls.get("yg-settings",{}));
+const darkNow=()=>SET.mode==="dark"||(SET.mode==="system"&&matchMedia("(prefers-color-scheme: dark)").matches);
+function applyTheme(){
+  const r=document.documentElement,dk=darkNow(),c=(ACCENTS[SET.accent]||ACCENTS.teal)[dk?1:0];
+  if(SET.mode==="system")delete r.dataset.theme;else r.dataset.theme=SET.mode;
+  r.style.setProperty("--accent",c);r.style.setProperty("--accent-fg",dk?"#0B1014":"#FFFFFF");
+  r.style.setProperty("--accent-soft",`color-mix(in srgb, ${c} ${dk?22:15}%, ${dk?"#0E1318":"#FFFFFF"})`);
+  const m=$('meta[name="theme-color"]');if(m)m.content=dk?"#0E1318":c;
+}
+function saveSet(){ls.set("yg-settings",SET);applyTheme();Object.values(MAPS).forEach(x=>x.map?.remove());for(const k in MAPS)delete MAPS[k];render();for(const st of stack)paintSheet(st)}
+applyTheme();matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{applyTheme();render()});
 const UI={tab:(t=>t==="map"?"plans":t)(ls.get("yg-tab","plans")),planFilter:"active",calMonth:null,calDay:TODAY(),mapFilter:"upcoming",moneyPlan:"",authTab:"signup"};
 const stack=[];
 let pending=false;
@@ -651,7 +673,7 @@ document.addEventListener("submit",async ev=>{
 /* ---------- views ---------- */
 const VIEWS={};
 VIEWS.plans=()=>{
-  const all=[...D.plans],f=UI.planFilter;
+  const all=visiblePlans(),f=UI.planFilter;
   let list=all.filter(p=>{const s=planStatus(p);return f==="active"?(s==="poll"||s==="set"):(s==="past"||s==="done")});
   list.sort((a,b)=>{const da=a.final?.date||a.slots?.[0]?.date||"9",db=b.final?.date||b.slots?.[0]?.date||"9";return f==="active"?da.localeCompare(db):db.localeCompare(da)});
   const voting=all.filter(p=>planStatus(p)==="poll"&&!(myRsvp(p.id)?.slots||[]).length).length;
@@ -676,7 +698,7 @@ VIEWS.cal=()=>{
   const start=new Date(y,mo-1,1-startDow);const cells=[];
   for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);cells.push(d)}
   const rows=cells[35].getMonth()!==mo-1?35:42;
-  const dayInfo=ds=>({plan:D.plans.some(p=>p.final?.date===ds),poll:D.plans.some(p=>!p.final&&(p.slots||[]).some(s=>s.date===ds)),me:D.busy.some(b=>b.uid===ME&&b.date===ds),oth:D.busy.some(b=>b.uid!==ME&&b.date===ds)});
+  const dayInfo=ds=>({plan:visiblePlans().some(p=>p.final?.date===ds),poll:visiblePlans().some(p=>!p.final&&(p.slots||[]).some(s=>s.date===ds)),me:D.busy.some(b=>b.uid===ME&&b.date===ds),oth:D.busy.some(b=>b.uid!==ME&&b.date===ds)});
   const grid=cells.slice(0,rows).map(d=>{const ds=ymd(d),i=dayInfo(ds);return`<button class="day ${d.getMonth()!==mo-1?"out":""} ${ds===TODAY()?"today":""}" data-act="calDay" data-d="${ds}" aria-pressed="${UI.calDay===ds}" aria-label="${fDate(ds,{weekday:"long",day:"numeric",month:"long"})}"><span class="dn">${d.getDate()}</span><span class="dots">${i.plan?'<i class="dot-plan"></i>':""}${i.poll?'<i class="dot-poll"></i>':""}${i.me?'<i class="dot-me"></i>':""}${i.oth?'<i class="dot-oth"></i>':""}</span></button>`}).join("");
   return`<div class="view-title"><h1>Calendar</h1><button class="btn sm pri" data-act="newBusy" data-d="${UI.calDay}">Block my time</button></div>
   <div class="cal"><div class="cal-h"><button class="back" data-act="calNav" data-n="-1" aria-label="Previous month">${ICON.back}</button><h2>${first.toLocaleDateString("en-GB",{month:"long",year:"numeric"})}</h2><button class="back" data-act="calNav" data-n="1" aria-label="Next month" style="transform:scaleX(-1)">${ICON.back}</button></div>
@@ -686,7 +708,7 @@ VIEWS.cal=()=>{
 };
 function agenda(ds){
   const items=[];
-  for(const p of D.plans){
+  for(const p of visiblePlans()){
     if(p.final?.date===ds){const g=goingOf(p.id);const cf=conflictsFor(ds,p.final.start,p.final.end,p.id).filter(c=>g.includes(c.uid));
       items.push({s:p.final.start||"00:00",h:`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}"><span class="stripe" style="background:${hue(p.id)}"></span><span class="tm">${fRange(p.final.start,p.final.end)}</span><span style="flex:1;min-width:0"><b>${esc(p.emoji||"")} ${esc(p.title)}</b><br><span class="meta">${g.length} going${myRsvp(p.id)?.going==="in"?" · you're in":""}</span>${cf.length?`<br><span class="pill warn">Clash: ${cf.map(c=>esc(nick(c.uid))).join(", ")}</span>`:""}</span></button>`})}
     else if(!p.final)for(const s of p.slots||[])if(s.date===ds){const v=rsvpsOf(p.id).filter(r=>(r.slots||[]).includes(s.id)).length;
@@ -744,7 +766,7 @@ function expenseRow(e){
 
 /* ---------- maps ---------- */
 const MAPS={};
-const isDark=()=>matchMedia("(prefers-color-scheme: dark)").matches;
+const isDark=()=>darkNow();
 function baseMap(el,opts={}){
   if(!window.L){el.innerHTML='<div class="empty" style="height:100%;display:grid;place-items:center">Map couldn\'t load. Check your connection.</div>';return null}
   const m=L.map(el,{zoomControl:true,attributionControl:true,...opts});
@@ -775,7 +797,7 @@ function afterView(){
   const slot=$("#mapSlot");if(!slot)return;
   if(!MAPS.main){const el=document.createElement("div");el.className="map-full";MAPS.main={el};slot.appendChild(el);MAPS.main.map=baseMap(el);MAPS.main.layer=MAPS.main.map&&L.layerGroup().addTo(MAPS.main.map)}else slot.appendChild(MAPS.main.el);
   const{map,layer}=MAPS.main;
-  const ps=D.plans.filter(p=>(p.stops||[]).some(s=>s.lat!=null));
+  const ps=visiblePlans().filter(p=>(p.stops||[]).some(s=>s.lat!=null));
   if(map){setTimeout(()=>map.invalidateSize(),30);layer.clearLayers();const all=[];
     ps.forEach(p=>{const sub=L.layerGroup().addTo(layer);all.push(...drawStops(sub,p.stops,hue(p.id),(mk,s)=>mk.bindPopup(`<b>${esc(p.emoji||"")} ${esc(p.title)}</b><br>${esc(s.name||"")}<br><a href="#" data-act="openPlan" data-id="${esc(p.id)}">Open plan</a>`)))});
     const sig=ps.map(p=>p.id).join();if(MAPS.main.sig!==sig){MAPS.main.sig=sig;fit(map,all)}}
@@ -850,6 +872,40 @@ SHEETS.moment={live:true,
       <div class="sec"><h2>Comments</h2>${cs.map(c=>`<div class="note">${avatar(c.by,"xs")}<div style="flex:1;min-width:0"><div class="meta"><b style="color:var(--fg)">${esc(nick(c.by))}</b> · ${ago(c.at)}</div><p>${esc(c.text)}</p></div>${c.by===ME?`<button class="x" data-act="delComment" data-id="${esc(c.id)}" aria-label="Delete comment">✕</button>`:""}</div>`).join("")||`<div class="meta">No comments yet.</div>`}</div>`,
       foot:`<textarea class="compose" id="mcIn-${esc(x.id)}" rows="1" placeholder="Add a comment"></textarea><button class="send" data-act="addComment" data-id="${esc(x.id)}" aria-label="Post comment">${ICON.send}</button>`}}
 };
+SHEETS.invite={
+  render(s){const p=planById(s.args.id);const inv=p?.invited||[];return{title:"Invite people",body:`<div class="form"><p class="meta" style="margin:0">Invited people see this plan in their Plans, Calendar and Map.</p>
+    ${D.members.map(m=>`<label class="check"><input type="checkbox" data-inv2="${esc(m.id)}" ${!inv.length||inv.includes(m.id)||m.id===ME?"checked":""} ${m.id===ME||m.id===p?.by?"disabled":""}>${avatar(m.id,"xs")}<span style="color:var(--fg)">${esc(nick(m.id))}</span></label>`).join("")}
+    ${inv.length?`<button class="btn" data-act="inviteAll">Open to the whole crew</button>`:""}</div>`,foot:`<button class="btn pri block" data-act="inviteSave">Save invites</button>`}}
+};
+const REM_OPTS=[[10080,"1 week"],[1440,"1 day"],[180,"3 hours"],[60,"1 hour"],[30,"30 min"],[0,"At start"]];
+const remindFor=id=>ls.get("yg-remind",{})[id]||SET.remind;
+SHEETS.settings={live:true,
+  render(){const perm="Notification" in window?Notification.permission:"unsupported";const ios=/iPhone|iPad/i.test(navigator.userAgent);
+    return{title:"Settings",body:`<div class="form">
+    <div class="sec" style="border:0;padding-top:0"><h2>Theme</h2>
+      <div class="seg">${[["system","Auto"],["light","Light"],["dark","Dark"]].map(([k,l])=>`<button data-act="setMode" data-k="${k}" aria-pressed="${SET.mode===k}">${l}</button>`).join("")}</div>
+      <div class="swatches">${Object.entries(ACCENTS).map(([k,c])=>`<button class="swatch" data-act="setAccent" data-k="${k}" aria-label="${k}" aria-pressed="${SET.accent===k}" style="background:${c[darkNow()?1:0]}"></button>`).join("")}</div>
+      <div class="hint">Only changes how the app looks on this phone.</div></div>
+    <div class="sec"><h2>Notifications 🔔</h2>
+      ${SET.notifyOn&&perm==="granted"?`<div class="toggle"><span><b>Notifications are on</b><br><span class="meta">On this phone</span></span><button class="btn sm" data-act="notifOff">Turn off</button></div>
+        <label class="toggle"><span>New messages</span><input type="checkbox" id="nMsgs" ${SET.nMsgs?"checked":""}></label>
+        <label class="toggle"><span>New plans & invites</span><input type="checkbox" id="nPlans" ${SET.nPlans?"checked":""}></label>
+        <label class="toggle"><span>Friends' moments</span><input type="checkbox" id="nMoments" ${SET.nMoments?"checked":""}></label>`
+      :`<button class="btn pri block" data-act="notifOn">Turn on notifications</button>${ios&&!STANDALONE?`<div class="banner" style="margin:0">On iPhone, notifications only work after you add Yalla Guys to your Home Screen (Safari → Share → Add to Home Screen) and open it from there.</div>`:""}`}
+      <div class="hint">Alerts arrive while Yalla Guys is open or was recently open in the background. For reminders you can't miss, use “Add to phone calendar” on a plan.</div></div>
+    <div class="sec"><h2>Default plan reminders</h2><div class="chips">${REM_OPTS.map(([m,l])=>`<button class="chip" data-act="defRemind" data-m="${m}" aria-pressed="${SET.remind.includes(m)}">${l} before</button>`.replace("At start before","At start")).join("")}</div>
+      <div class="hint">Used for every plan you're going to. You can change them per plan.</div></div>
+    </div>`}}
+};
+function icsFor(p,mins){
+  const f=p.final,d=f.date.replace(/-/g,""),t=x=>x.replace(":","")+"00",e=s=>String(s||"").replace(/[\\;,]/g,m=>"\\"+m).replace(/\n/g,"\\n");
+  let dt;if(f.start){const end=f.end||((h,m)=>`${pad((h+2)%24)}:${pad(m)}`)(...f.start.split(":").map(Number));let ed=d;if(end<=f.start){const x=pd(f.date);x.setDate(x.getDate()+1);ed=ymd(x).replace(/-/g,"")}dt=`DTSTART:${d}T${t(f.start)}\r\nDTEND:${ed}T${t(end)}`}
+  else{const x=pd(f.date);x.setDate(x.getDate()+1);dt=`DTSTART;VALUE=DATE:${d}\r\nDTEND;VALUE=DATE:${ymd(x).replace(/-/g,"")}`}
+  const st=new Date().toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
+  const al=mins.map(m=>`BEGIN:VALARM\r\nTRIGGER:-PT${m}M\r\nACTION:DISPLAY\r\nDESCRIPTION:${e(p.title)}\r\nEND:VALARM`).join("\r\n");
+  return`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Yalla Guys//EN\r\nBEGIN:VEVENT\r\nUID:${p.id}@yallaguys\r\nDTSTAMP:${st}\r\n${dt}\r\nSUMMARY:${e((p.emoji||"")+" "+p.title)}\r\nLOCATION:${e((p.stops||[]).map(x=>x.name).join(" → "))}\r\nDESCRIPTION:${e(p.desc||"")}${al?"\r\n"+al:""}\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n`;
+}
+function gcalUrl(p){const f=p.final,d=f.date.replace(/-/g,"");const dates=f.start?`${d}T${f.start.replace(":","")}00/${d}T${(f.end||f.start).replace(":","")}00`:`${d}/${d}`;return`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent((p.emoji||"")+" "+p.title)}&dates=${dates}&location=${encodeURIComponent((p.stops||[]).map(x=>x.name).join(" → "))}&details=${encodeURIComponent(p.desc||"")}`}
 /* person profile */
 SHEETS.person={live:true,
   render(s){const id=s.args.id,m=mem(id);if(!m)return{title:"Profile",body:`<div class="empty">This person isn't in the crew.</div>`};const me=id===ME;
@@ -858,7 +914,7 @@ SHEETS.person={live:true,
     const bd=m.birthday?pd("2000-"+m.birthday).toLocaleDateString("en-GB",{day:"numeric",month:"long"}):"";
     const grid=list=>`<div class="media-grid">${list.map(x=>`<button data-act="openMoment" data-id="${esc(x.id)}" aria-label="Moment from ${esc(fDate(x.day))}"><img src="${esc(x.src)}" alt="" loading="lazy"><span style="position:absolute;left:6px;bottom:5px;color:#fff;font-size:11px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.6)">${esc(fDate(x.day,{day:"numeric",month:"short"}))}</span></button>`).join("")}</div>`;
     const facts=[["🎂","Birthday",bd],["📍","Fav spot",m.spot],["🎵","On repeat",m.song]].filter(f=>f[2]);
-    return{title:me?"My profile":esc(m.nick),right:me?`<button class="btn sm" data-act="profile">Edit</button>`:"",body:`
+    return{title:me?"My profile":esc(m.nick),right:me?`<button class="btn sm" data-act="settings" aria-label="Settings">⚙️</button><button class="btn sm" data-act="profile">Edit</button>`:"",body:`
       <div class="prof-hero">${(m.stickers||[]).length?`<div class="stickers">${m.stickers.map((e,i)=>`<span style="--r:${(i%2?1:-1)*(6+i*3)}deg">${e}</span>`).join("")}</div>`:""}
         ${avatar(id)}<h1>${esc(m.nick)}</h1>${m.vibe?`<span class="vibe">${esc(m.vibe)}</span>`:""}${m.bio?`<p style="margin:0;max-width:34ch;color:var(--muted)">${esc(m.bio)}</p>`:me?`<button class="btn sm ghost" data-act="profile">+ Add a bio, photo and cute stuff</button>`:""}
         ${me?"":`<button class="btn pri" data-act="dm" data-id="${esc(id)}" style="margin-top:4px">💬 Message</button>`}</div>
@@ -904,6 +960,10 @@ SHEETS.plan={live:true,
       <div class="hero" style="${bg}"><span class="emo">${esc(p.emoji||"📍")}</span></div>
       <div style="padding-top:12px;display:flex;flex-direction:column;gap:6px"><div class="row">${statusPill(p)}<span class="meta">by ${esc(nick(p.by))} · ${ago(p.at)}</span></div>${p.desc?`<p style="margin:0;white-space:pre-wrap;overflow-wrap:anywhere">${esc(p.desc)}</p>`:""}</div>
       <div class="sec" style="margin-top:12px"><h2>When</h2>${when}</div>
+      ${(p.invited||[]).length?`<div class="sec"><div class="between"><h2>Invited</h2><button class="btn sm" data-act="invite" data-id="${esc(p.id)}">+ Invite</button></div><div class="row">${p.invited.map(u=>`<span class="row" style="gap:4px">${avatar(u,"xs")}<span style="font-size:13px">${esc(nick(u))}</span></span>`).join("")}</div>${p.chatId&&D.chats.find(c=>c.id===p.chatId)?`<div class="hint">From group chat: ${esc(D.chats.find(c=>c.id===p.chatId).name||"")}</div>`:""}</div>`:`<div class="sec"><div class="between"><h2>Invited</h2><button class="btn sm" data-act="invite" data-id="${esc(p.id)}">Only some people?</button></div><div class="hint" style="margin:0">Whole crew</div></div>`}
+      ${p.final&&p.final.date>=TODAY()?`<div class="sec"><h2>⏰ Remind me</h2><div class="chips">${REM_OPTS.map(([m,l])=>`<button class="chip" data-act="remindToggle" data-id="${esc(p.id)}" data-m="${m}" aria-pressed="${remindFor(p.id).includes(m)}">${m?l+" before":l}</button>`).join("")}</div>
+        <div class="row"><button class="btn sm pri" data-act="icsDl" data-id="${esc(p.id)}">📅 Add to phone calendar</button><a class="btn sm" href="${esc(gcalUrl(p))}" target="_blank" rel="noopener">Google Calendar</a></div>
+        <div class="hint">“Add to phone calendar” saves these reminders in your calendar app, so they ring even when Yalla Guys is closed.${SET.notifyOn?"":" Turn on notifications in ⚙️ Settings for in-app alerts too."}</div></div>`:""}
       <div class="sec"><h2>Who's going</h2><div class="seg">${rsvpBtns}</div>
         ${[["in","Going"],["maybe","Maybe"],["out","Can't make it"]].map(([k,l])=>{const u=grp(k);return u.length?`<div class="row"><span class="meta" style="width:92px">${l} (${u.length})</span>${u.map(x=>`<span class="row" style="gap:4px">${avatar(x,"xs")}<span style="font-size:13px">${esc(nick(x))}</span></span>`).join("")}</div>`:""}).join("")}
         <button class="btn" data-act="planChat" data-id="${esc(p.id)}">💬 Plan chat</button></div>
@@ -926,7 +986,7 @@ const hostOf=u=>{try{return new URL(u).hostname.replace(/^www\./,"")}catch{retur
 
 /* plan editor */
 SHEETS.edit={
-  init(a){const p=a.id?planById(a.id):null;const cp=x=>JSON.parse(JSON.stringify(x||[]));return{emoji:p?.emoji||PLAN_EMOJIS[0],stops:cp(p?.stops),slots:cp(p?.slots),est:cp(p?.est),files:[],q:"",res:[],msg:"",loading:false}},
+  init(a){const p=a.id?planById(a.id):null;const cp=x=>JSON.parse(JSON.stringify(x||[]));return{emoji:p?.emoji||PLAN_EMOJIS[0],stops:cp(p?.stops),slots:cp(p?.slots),est:cp(p?.est),files:[],q:"",res:[],msg:"",loading:false,invited:a.chat?[...(D.chats.find(c=>c.id===a.chat)?.members||[])]:cp(p?.invited),chatId:a.chat||p?.chatId||""}},
   render(s){const p=s.args.id?planById(s.args.id):null,st=s.state,hasPts=st.stops.some(x=>x.lat!=null);
     return{title:p?"Edit plan":"Make a plan",body:`<div class="form">
       <div class="emo-pick">${PLAN_EMOJIS.map(e=>`<button data-act="edEmoji" data-v="${e}" aria-pressed="${st.emoji===e}">${e}</button>`).join("")}</div>
@@ -938,6 +998,11 @@ SHEETS.edit={
         <input class="inp" id="edQ" type="search" enterkeyhint="search" placeholder="🔎 Search a place or paste a maps link" autocomplete="off" autocorrect="off">
         <div id="edSugg">${edSugg(st)}</div>
         <button class="btn" data-act="stopPick">🗺️ Drop a pin on the map instead</button></div>
+      <div class="sec"><h2>Who's invited</h2>
+        <div class="seg"><button data-act="audAll" aria-pressed="${!st.invited.length}">Whole crew</button><button data-act="audPick" aria-pressed="${!!st.invited.length}">Choose people</button></div>
+        ${st.invited.length?`${myChats().filter(c=>!c.dm).length?`<div class="hint">Quick pick from a group chat:</div><div class="chips">${myChats().filter(c=>!c.dm).map(c=>`<button class="chip" data-act="audChat" data-id="${esc(c.id)}" aria-pressed="${st.chatId===c.id}">${esc(c.emoji||"💬")} ${esc(c.name)}</button>`).join("")}</div>`:""}
+          <div class="list" style="gap:6px">${D.members.map(m=>`<label class="check"><input type="checkbox" data-inv="${esc(m.id)}" ${st.invited.includes(m.id)||m.id===ME?"checked":""} ${m.id===ME?"disabled":""}>${avatar(m.id,"xs")}<span style="color:var(--fg)">${esc(nick(m.id))}</span></label>`).join("")}</div>
+          ${st.chatId?`<div class="hint">📌 Will be posted in ${esc(D.chats.find(c=>c.id===st.chatId)?.name||"the group chat")}.</div>`:""}`:`<div class="hint">Everyone in Yalla Guys can see and join.</div>`}</div>
       <div class="sec"><h2>Suggested dates</h2><p class="hint" style="margin:0">Add one or more options; the guys vote. Lock in the winner from the plan page.</p>
         ${st.slots.map((x,i)=>`<div class="item"><span class="grow"><span class="t">${fDate(x.date)}</span> · ${fRange(x.start,x.end)}${(()=>{const c=conflictsFor(x.date,x.start,x.end,s.args.id);return c.length?`<br>${c.map(k=>`<span class="pill warn">${esc(nick(k.uid))} busy</span>`).join(" ")}`:""})()}</span><button class="x" data-act="slotDel" data-i="${i}" aria-label="Remove date">✕</button></div>`).join("")}
         <div class="grid3"><input class="inp" type="date" id="edD" min="${TODAY()}" aria-label="Date"><input class="inp" type="time" id="edS" aria-label="Start time"><input class="inp" type="time" id="edE" aria-label="End time"></div>
@@ -1055,9 +1120,9 @@ SHEETS.chat={live:true,
   render(s){const c=D.chats.find(x=>x.id===s.args.id);if(!c)return{title:"Chat",body:`<div class="loading"><div class="spin"></div></div>`};
     const ms=chatMsgs(c.id).slice(-300);let last="",html="";
     ms.forEach(m=>{const d=ymd(new Date(m.at));if(d!==last){html+=`<div class="daysep">${d===TODAY()?"Today":fDate(d)}</div>`;last=d}
-      const me=m.by===ME;html+=`<div class="msg ${me?"me":""}">${me||c.dm?"":`<span class="who">${esc(nick(m.by))}</span>`}<div class="bub">${linkify(m.text)}</div></div>`});
+      const me=m.by===ME;html+=`<div class="msg ${me?"me":""}">${me||c.dm?"":`<span class="who">${esc(nick(m.by))}</span>`}${m.kind==="plan"&&planById(m.planId)?(pl=>`<button class="plan-msg" data-act="openPlan" data-id="${esc(pl.id)}"><span class="k">📌 New plan</span><b style="font-size:16px">${esc(pl.emoji||"")} ${esc(pl.title)}</b><span class="meta">${pl.final?esc(fDate(pl.final.date)+" · "+fRange(pl.final.start,pl.final.end)):`${(pl.slots||[]).length} dates to vote on`} · tap to open</span></button>`)(planById(m.planId)):`<div class="bub">${linkify(m.text)}</div>`}</div>`});
     const plan=c.planId?planById(c.planId):null;
-    return{title:c.dm?`<button class="prof-btn" data-act="person" data-id="${esc(chatOther(c))}">${avatar(chatOther(c),"sm")} ${esc(chatName(c))}</button>`:`${esc(c.emoji||"💬")} ${esc(c.name)}`,right:c.dm?"":avStack(c.members||[],"xs",4),body:`${plan?`<button class="ev" data-act="openPlan" data-id="${esc(plan.id)}" style="margin-bottom:10px"><span class="stripe" style="background:${hue(plan.id)}"></span><span style="flex:1">Plan: <b>${esc(plan.title)}</b></span>${statusPill(plan)}</button>`:""}<div class="msgs">${html||'<div class="empty">Say hi 👋</div>'}</div>`,
+    return{title:c.dm?`<button class="prof-btn" data-act="person" data-id="${esc(chatOther(c))}">${avatar(chatOther(c),"sm")} ${esc(chatName(c))}</button>`:`${esc(c.emoji||"💬")} ${esc(c.name)}`,right:`<button class="btn sm" data-act="newPlanInChat" data-id="${esc(c.id)}">+ Plan</button>`,body:`${plan?`<button class="ev" data-act="openPlan" data-id="${esc(plan.id)}" style="margin-bottom:10px"><span class="stripe" style="background:${hue(plan.id)}"></span><span style="flex:1">Plan: <b>${esc(plan.title)}</b></span>${statusPill(plan)}</button>`:""}<div class="msgs">${html||'<div class="empty">Say hi 👋</div>'}</div>`,
       foot:`<textarea class="compose" id="chatIn-${esc(s.args.id)}" rows="1" placeholder="Message" enterkeyhint="send"></textarea><button class="send" data-act="send" data-id="${esc(s.args.id)}" aria-label="Send">${ICON.send}</button>`}},
   after(s,first){markSeen(s.args.id);const b=$(".sheet-b",s.el);const n=chatMsgs(s.args.id).length;if(first||n!==s.n){b.scrollTop=b.scrollHeight}s.n=n;renderTabs()}
 };
@@ -1140,13 +1205,33 @@ const ACT={
     const pend=val("edD");if(pend&&!st.slots.some(x=>x.date===pend))st.slots.push({id:rid(),date:pend,start:val("edS"),end:val("edE"),by:ME});
     const link=val("edLink");if(link&&!validUrl(link))return toast("That link doesn't look right. Paste the full https:// address.");
     $("#edSaveBtn",s.el).disabled=true;
-    const base={title,emoji:st.emoji,desc:val("edDesc"),stops:st.stops,slots:st.slots,est:st.est};
+    const invited=st.invited.length?[...new Set([ME,...st.invited])]:[];
+    const base={title,emoji:st.emoji,desc:val("edDesc"),stops:st.stops,slots:st.slots,est:st.est,invited,chatId:st.chatId||""};
     if(s.args.id){await Store.upd("plans",s.args.id,base);closeSheet();toast("Plan updated");return}
-    const id=rid();await Store.set("plans",id,{...base,by:ME,at:now(),status:"poll",final:null,chatId:""});
+    const id=rid();await Store.set("plans",id,{...base,by:ME,at:now(),status:"poll",final:null});
+    if(st.chatId&&D.chats.some(c=>c.id===st.chatId))await Store.add("msgs",{chatId:st.chatId,by:ME,kind:"plan",planId:id,text:`📌 New plan: ${title}`,at:now()});
     await Store.set("rsvps",id+"__"+ME,{planId:id,uid:ME,going:"in",slots:st.slots.map(x=>x.id),at:now()});
     if(link)await Store.add("media",{planId:id,by:ME,at:now(),kind:linkKind(link),url:link,caption:"",phase:"idea"});
     const files=st.files;closeSheet();toast("Plan posted! Tell the guys to vote.");openSheet("plan",{id});if(files.length)addPhotos(id,files,"idea");
   },
+  audAll(){const s=topS();s.state.invited=[];s.state.chatId="";paintSheet(s)},
+  audPick(){const s=topS();if(!s.state.invited.length)s.state.invited=[ME];paintSheet(s)},
+  audChat(d){const s=topS(),c=D.chats.find(x=>x.id===d.id);if(!c)return;s.state.chatId=s.state.chatId===c.id?"":c.id;if(s.state.chatId)s.state.invited=[...new Set([ME,...c.members])];paintSheet(s)},
+  invite(d){openSheet("invite",{id:d.id})},
+  async inviteSave(){const s=topS(),p=planById(s.args.id);const ids=$$("input[data-inv2]",s.el).filter(x=>x.checked).map(x=>x.dataset.inv2);
+    await Store.upd("plans",p.id,{invited:[...new Set([p.by,ME,...ids])]});closeSheet();toast("Invites updated")},
+  async inviteAll(){const s=topS();await Store.upd("plans",s.args.id,{invited:[]});closeSheet();toast("Open to the whole crew")},
+  newPlanInChat(d){openSheet("edit",{chat:d.id})},
+  settings(){openSheet("settings")},
+  setMode(d){SET.mode=d.k;saveSet()},
+  setAccent(d){SET.accent=d.k;saveSet()},
+  async notifOn(){if(!("Notification" in window))return toast(/iPhone|iPad/i.test(navigator.userAgent)?"On iPhone, add Yalla Guys to your Home Screen first, then open it from there.":"This browser doesn't support notifications.");
+    const r=await Notification.requestPermission();SET.notifyOn=r==="granted";saveSet();toast(SET.notifyOn?"Notifications on 🔔":"Notifications are blocked. Allow them in your phone's settings for this app.");if(SET.notifyOn)notify("Yalla Guys","Notifications are working 🎉","test")},
+  notifOff(){SET.notifyOn=false;saveSet()},
+  remindToggle(d){const m=+d.m,id=d.id;const all=ls.get("yg-remind",{});const cur=all[id]||[...SET.remind];const i=cur.indexOf(m);if(i>=0)cur.splice(i,1);else cur.push(m);all[id]=cur.sort((a,b)=>b-a);ls.set("yg-remind",all);paintSheet(topS())},
+  defRemind(d){const m=+d.m,i=SET.remind.indexOf(m);if(i>=0)SET.remind.splice(i,1);else SET.remind.push(m);SET.remind.sort((a,b)=>b-a);saveSet()},
+  icsDl(d){const p=planById(d.id);if(!p?.final)return;const txt=icsFor(p,remindFor(p.id));const name=(p.title.replace(/[^\w]+/g,"-")||"plan")+".ics";
+    const a=document.createElement("a");a.href=/iPhone|iPad/i.test(navigator.userAgent)?"data:text/calendar;charset=utf-8,"+encodeURIComponent(txt):URL.createObjectURL(new Blob([txt],{type:"text/calendar"}));a.download=name;document.body.appendChild(a);a.click();a.remove()},
   async vote(d){const r=myRsvp(d.id);const sl=new Set(r?.slots||[]);sl.has(d.slot)?sl.delete(d.slot):sl.add(d.slot);await Store.set("rsvps",d.id+"__"+ME,{planId:d.id,uid:ME,going:r?.going||(sl.size?"in":"maybe"),slots:[...sl],at:now()})},
   async rsvp(d){const r=myRsvp(d.id);await Store.set("rsvps",d.id+"__"+ME,{planId:d.id,uid:ME,going:d.k,slots:r?.slots||[],at:now()})},
   async lock(d){const p=planById(d.id),sl=(p.slots||[]).find(x=>x.id===d.slot);if(!sl)return;await Store.upd("plans",d.id,{final:{date:sl.date,start:sl.start||"",end:sl.end||""},status:"set"});if(p.chatId&&D.chats.some(c=>c.id===p.chatId))await Store.add("msgs",{chatId:p.chatId,by:ME,text:`📅 Locked in: ${fDate(sl.date)} ${fRange(sl.start,sl.end)}`,at:now()});toast("Locked in. It's on everyone's calendar now.")},
@@ -1203,6 +1288,7 @@ document.addEventListener("input",ev=>{
 });
 document.addEventListener("change",ev=>{
   const el=ev.target;if(el.id==="moneyPlan"){UI.moneyPlan=el.value;render()}
+  if(["nMsgs","nPlans","nMoments"].includes(el.id)){SET[el.id]=el.checked;ls.set("yg-settings",SET)}
   if(el.id==="actAs"){ls.set("yg-actas",el.value);ME=el.value;while(stack.length)closeSheet();render();toast(ME==="me-demo"?"Back to being you":"Now testing as "+(mem(ME)?.nick||"a friend"))}
   if(el.id==="exPl"){const s=topS();s.state.plan=el.value}
   if(el.id==="bzAll"){["bzS","bzE"].forEach(i=>$("#"+i).disabled=el.checked)}
@@ -1214,6 +1300,36 @@ document.addEventListener("keydown",ev=>{
   if(ev.key==="Escape"&&stack.length)closeSheet();
 });
 Store.init();
+async function notify(title,body,tag,data){
+  if(!SET.notifyOn||!("Notification" in window)||Notification.permission!=="granted")return;
+  try{const reg=await navigator.serviceWorker?.getRegistration();if(reg)await reg.showNotification(title,{body,tag,icon:"icon-192.png",badge:"icon-192.png",data});else new Notification(title,{body,tag})}catch{}
+}
+const SEEN={msgs:null,plans:null,moments:null};
+function checkNotify(){
+  if(!Store.ready||MODE==="loading"||MODE==="auth"||MODE==="join")return;
+  const first=SEEN.msgs===null;
+  if(first){SEEN.msgs=new Set(D.msgs.map(m=>m.id));SEEN.plans=new Set(visiblePlans().map(p=>p.id));SEEN.moments=new Set(D.moments.map(m=>m.id));return}
+  const openChat=!document.hidden&&topS()?.kind==="chat"?topS().args.id:null;
+  for(const m of D.msgs){if(SEEN.msgs.has(m.id))continue;SEEN.msgs.add(m.id);
+    if(m.by!==ME&&m.chatId!==openChat&&SET.nMsgs&&now()-m.at<6e5){const c=D.chats.find(x=>x.id===m.chatId);notify(c?(c.dm?nick(m.by):`${c.emoji||"💬"} ${c.name}`):"New message",c?.dm?m.text:`${nick(m.by)}: ${m.text}`,"chat-"+m.chatId,{kind:"chat",id:m.chatId})}}
+  for(const p of visiblePlans()){if(SEEN.plans.has(p.id))continue;SEEN.plans.add(p.id);
+    if(p.by!==ME&&SET.nPlans&&now()-p.at<36e5)notify(`📌 New plan: ${p.title}`,`${nick(p.by)} ${(p.invited||[]).length?"invited you":"posted a plan"}. Vote on the dates!`,"plan-"+p.id,{kind:"plan",id:p.id})}
+  for(const m of D.moments){if(SEEN.moments.has(m.id))continue;SEEN.moments.add(m.id);
+    if(m.by!==ME&&SET.nMoments&&now()-m.at<36e5)notify(`📸 ${nick(m.by)} posted a moment`,m.caption||"Tap to see it","moment-"+m.id,{kind:"moment",id:m.id})}
+  const un=myChats().reduce((n,c)=>n+unread(c),0);try{un?navigator.setAppBadge?.(un):navigator.clearAppBadge?.()}catch{}
+}
+function checkReminders(){
+  if(!Store.ready||!SET.notifyOn)return;const fired=ls.get("yg-fired",{});let ch=false;
+  for(const p of visiblePlans()){if(!p.final)continue;const r=myRsvp(p.id);if(!(r&&r.going!=="out")&&p.by!==ME)continue;
+    const start=new Date(p.final.date+"T"+(p.final.start||"09:00")).getTime();if(now()>start)continue;
+    for(const m of remindFor(p.id)){const key=`${p.id}|${p.final.date}|${p.final.start}|${m}`;if(fired[key]||now()<start-m*6e4)continue;fired[key]=1;ch=true;
+      const lbl=m>=1440?`${m>=10080?"Next week":"Tomorrow"}${p.final.start?" at "+fTime(p.final.start):""}`:m?`In ${m>=60?m/60+" hour"+(m>60?"s":""):m+" min"}`:"Starting now";
+      notify(`⏰ ${p.emoji||""} ${p.title}`,`${lbl}${(p.stops||[])[0]?" · "+p.stops[0].name:""}`,"rem-"+key,{kind:"plan",id:p.id})}}
+  if(ch)ls.set("yg-fired",fired);
+}
+const _render=render;render=function(){_render();try{checkNotify()}catch(e){console.error(e)}};
+setInterval(checkReminders,30000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkReminders()});
+navigator.serviceWorker?.addEventListener("message",e=>{const d=e.data?.open;if(!d)return;if(d.kind==="chat")openSheet("chat",{id:d.id});else if(d.kind==="plan")openSheet("plan",{id:d.id});else if(d.kind==="moment")openSheet("moment",{id:d.id})});
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 </script>
