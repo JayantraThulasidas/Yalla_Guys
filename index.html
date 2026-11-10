@@ -505,6 +505,33 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .pdfopt{display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;border-radius:16px;border:2px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;cursor:pointer}
 .pdfopt[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
 .shstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.shstats div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:2px}.shstats b{font-size:20px}.shstats span{font-size:11px;color:var(--muted);text-align:center}
+.hwrap{display:flex;flex-direction:column}
+.proofbtn{align-self:flex-end;margin:-6px 14px 0 0;position:relative;z-index:1;border:1px solid var(--line);background:var(--surface2);color:var(--fg);font:inherit;font-size:12px;font-weight:700;border-radius:0 0 10px 10px;padding:4px 10px 5px}
+.proofs{display:flex;gap:12px;overflow-x:auto;padding:12px 6px 8px;scrollbar-width:none}
+.proofs::-webkit-scrollbar{display:none}
+.pola{all:unset;flex:none;width:92px;background:#FFFDF7;padding:5px 5px 7px;border-radius:5px;box-shadow:0 4px 12px rgba(0,0,0,.35);transform:rotate(-3deg);position:relative;cursor:pointer;box-sizing:border-box}
+.proofs .pola:nth-child(even){transform:rotate(3deg)}
+.pola::before{content:"";position:absolute;top:-6px;left:50%;width:34px;height:12px;background:rgba(255,214,102,.8);transform:translateX(-50%) rotate(-5deg);border-radius:2px}
+.pola img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:2px;display:block}
+.pola .cap{display:block;color:#2B2B2B;font-size:11px;font-weight:700;text-align:center;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:"Marker Felt","Chalkboard SE","Comic Sans MS","Segoe Print",cursive}
+.pola .stk{position:absolute;bottom:14px;right:-8px;font-size:22px;transform:rotate(14deg);z-index:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+.pola.add{background:var(--surface2);border:2px dashed var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;height:116px;color:var(--muted);font-size:12px;font-weight:700;box-shadow:none;gap:2px;transform:none!important}
+.pola.add::before{display:none}
+.proofs.sm .pola{width:70px}.proofs.sm .pola .cap{font-size:9.5px}.proofs.sm .pola .stk{font-size:17px}
+.pola.big{width:min(260px,70vw);padding:10px 10px 14px;transform:rotate(-2deg);cursor:default}.pola.big .cap{font-size:17px;margin-top:10px}.pola.big .stk{font-size:40px;right:-14px;bottom:24px}.pola.big::before{width:70px;height:20px;top:-10px}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:10px 6px}
+.bcell{all:unset;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;cursor:pointer;min-width:0}
+.bcell b{font-size:11.5px;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bcell .stars{font-size:11px;letter-spacing:1px;color:#F2C14E;line-height:1}
+.bprog{width:54px;height:4px;border-radius:2px;background:var(--surface2);overflow:hidden}.bprog i{display:block;height:100%;background:var(--muted)}
+.patch{--bc:#555;--tc:var(--line);width:62px;height:62px;border-radius:50%;display:grid;place-items:center;position:relative;flex:none;
+  background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--bc) 70%,#fff),var(--bc) 70%);
+  box-shadow:0 0 0 4px var(--tc),0 0 0 6px color-mix(in srgb,var(--tc) 40%,#000),0 4px 10px rgba(0,0,0,.35)}
+.patch::after{content:"";position:absolute;inset:4px;border-radius:50%;border:2px dashed rgba(255,255,255,.55)}
+.patch .pe{font-size:28px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+.patch.locked{filter:grayscale(1);opacity:.35}
+.patch.big{width:120px;height:120px;margin-top:10px;box-shadow:0 0 0 7px var(--tc),0 0 0 10px color-mix(in srgb,var(--tc) 40%,#000),0 8px 20px rgba(0,0,0,.4)}.patch.big::after{inset:8px;border-width:3px}.patch.big .pe{font-size:56px}
+.tdot{width:18px;height:18px;border-radius:50%;flex:none;box-shadow:inset 0 -2px 0 rgba(0,0,0,.2)}
 .podcard{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:12px 0 10px;margin:4px 0 14px;overflow:hidden}
 .podtabs{display:flex;gap:6px;margin:0 12px;background:var(--surface2);border-radius:999px;padding:4px}
 .podtabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:8px 6px;border-radius:999px;white-space:nowrap}
@@ -520,7 +547,7 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .pod.r1 .pav .av{width:70px;height:70px;font-size:34px}
 .pav .av.ghost{background:var(--surface2)!important;color:var(--muted);box-shadow:none}
 .hat{position:absolute;left:50%;pointer-events:none}
-.hat.crown{top:-30px;font-size:34px;transform:translateX(-50%) rotate(-14deg);filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+.hat.crown{top:-27px;left:-4px;font-size:34px;transform:rotate(-24deg);transform-origin:center;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
 .hat.dunce{top:-44px;width:38px;height:48px;transform:translateX(-30%) rotate(16deg);filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
 .pmed{position:absolute;right:-6px;bottom:-4px;font-size:22px}
 .pname{font-size:13px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:6px}
@@ -630,7 +657,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.36";
+const APP_VERSION="2026-11-10.39";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1674,6 +1701,7 @@ SHEETS.person={live:true,
       ${!me&&MODE==="live"&&crewOwner()===ME?`<div style="display:flex;justify-content:center;margin-top:8px"><button class="btn sm danger" data-act="kickMember" data-id="${esc(id)}" data-confirm="Tap again to remove ${esc(m.nick)}">Remove from crew</button></div>`:""}
       <div class="stats" style="margin-top:14px"><div class="stat"><b>${streakOf(id)}🔥</b><span>day streak</span></div><div class="stat"><b>${mine.length}</b><span>moments</span></div><div class="stat"><b>${plansIn}</b><span>plans joined</span></div></div>
       ${facts.length||(m.likes||[]).length?`<div class="sec" style="border:0"><div class="facts">${facts.map(f=>`<div class="fact"><span style="font-size:22px">${f[0]}</span><span><span class="k">${f[1]}</span><br><b>${esc(f[2])}</b></span></div>`).join("")}</div>${(m.likes||[]).length?`<div class="tags">${m.likes.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`:""}</div>`:""}
+      ${badgesHtml(id)}
       <div class="sec"><h2>${me?"My moments":"Moments"}</h2>${mine.length?grid(mine):`<div class="meta">No moments yet.</div>`}</div>
       ${me?`<div class="sec"><h2>Saved memories</h2>${saved.length?grid(saved):`<div class="meta">Tap 🔖 on anyone's moment to keep it here.</div>`}</div>`:""}
       ${me&&MODE==="demo"?`<div class="sec"><h2>Test as a dummy friend</h2><p class="hint" style="margin:0">Switch who you are to see the app from a friend's side: vote, react, reply to DMs. Demo only.</p><select class="inp" id="actAs">${D.members.map(x=>`<option value="${esc(x.id)}" ${x.id===ME?"selected":""}>${esc(x.nick)}</option>`).join("")}</select><button class="btn" data-act="addDummy">+ Add another dummy friend</button><button class="btn danger" data-act="resetDemo" data-confirm="Tap again to wipe demo data">Reset demo data</button></div>`:""}`}}
@@ -2096,7 +2124,7 @@ SHEETS.media={
 SHEETS.photo={live:true,
   render(s){const m=D.media.find(x=>x.id===s.args.id);if(!m)return{title:"",body:'<p style="color:#fff">Photo removed.</p>'};
     return{title:`<span style="color:#fff">${esc(nick(m.by))} · ${ago(m.at)}</span>`,body:`<img src="${esc(m.src)}" alt="${esc(m.caption||"Photo")}">${m.caption?`<p style="color:#fff">${esc(m.caption)}</p>`:""}
-      <div class="row" style="margin-top:12px"><button class="btn sm pri" data-act="saveOne" data-id="${esc(m.id)}">⬇ Save</button><button class="btn sm" data-act="setCover" data-id="${esc(m.id)}">Use as cover</button>${m.by===ME?`<button class="btn sm danger" data-act="delMedia" data-id="${esc(m.id)}" data-confirm="Tap again to delete">Delete</button>`:""}</div>`}}
+      <div class="row" style="margin-top:12px"><button class="btn sm pri" data-act="saveOne" data-id="${esc(m.id)}">⬇ Save</button>${m.planId?`<button class="btn sm" data-act="setCover" data-id="${esc(m.id)}">Use as cover</button>`:""}${m.by===ME?`<button class="btn sm danger" data-act="delMedia" data-id="${esc(m.id)}" data-confirm="Tap again to delete">Delete</button>`:""}</div>`}}
 };
 /* ---------- calendar PDF (itinerary / schedule) ---------- */
 const PDF_W=1240,PDF_H=1754,PM=84,INK="#111827",MUTE="#6B7280",LINE="#E5E7EB",BRAND="#0B7A75";
@@ -2283,7 +2311,22 @@ function achievements(uid){const m=mem(uid);const hs=habitsOf(uid),since=m?.habi
   ].map(a=>({...a,cur:a.t==="On fire"?cp:0}))}
 function habitChip(uid,h,ds,mine){const v=hVal(uid,ds,h.id),done=isDone(h,v);
   const lab=h.type==="count"?`${(+v||0).toLocaleString()}/${(+h.goal||0).toLocaleString()}`:h.type==="log"?(Array.isArray(v)&&v.length?`${v.length} logged`:"—"):done?"Done":"—";
-  return`<span class="hchip ${done?"ok":ds<TODAY()?"bad":""}">${esc(h.emoji)} <span>${esc(lab)}</span>${!done&&!mine&&ds===TODAY()?`<button class="poke" data-act="poke" data-id="${esc(uid)}" data-h="${esc(h.id)}" aria-label="Poke about ${esc(h.name)}">👉</button>`:""}</span>`}
+  const pf=proofsFor(uid,ds,[h]).length;
+  return`<span class="hchip ${done?"ok":ds<TODAY()?"bad":""}">${esc(h.emoji)} <span>${esc(lab)}</span>${pf?`<span title="Has proof">📸</span>`:""}${!done&&!mine&&ds===TODAY()?`<button class="poke" data-act="poke" data-id="${esc(uid)}" data-h="${esc(h.id)}" aria-label="Poke about ${esc(h.name)}">👉</button>`:""}</span>`}
+const proofsFor=(uid,ds,hs)=>D.media.filter(m=>m.phase==="proof"&&m.by===uid&&m.date===ds&&(!hs||hs.some(h=>h.id===m.hid))).sort((a,b)=>a.at-b.at);
+function polaroid(p,hs){const h=(hs||habitsOf(p.by)).find(x=>x.id===p.hid);
+  return`<button class="pola" data-act="viewPhoto" data-id="${esc(p.id)}"><span class="stk">${esc(h?.emoji||"📸")}</span><img src="${esc(p.src)}" alt="${esc(p.caption||h?.name||"Proof")}" loading="lazy"><span class="cap">${esc(p.caption||h?.name||"Proof")}</span></button>`}
+function proofStrip(uid,h,ds,mine){const ps=proofsFor(uid,ds,[h]);if(!ps.length&&!mine)return"";
+  if(!ps.length)return`<button class="proofbtn" data-act="proofAdd" data-h="${esc(h.id)}">📸 Add proof</button>`;
+  return`<div class="proofs">${mine&&ps.length<3?`<button class="pola add" data-act="proofAdd" data-h="${esc(h.id)}"><span style="font-size:22px">📸</span>${ps.length?"Add more":"Add proof"}</button>`:""}${ps.map(p=>polaroid(p,[h])).join("")}</div>`}
+const PROOF_HINT={gym:"Gym selfie caption… 💪",food:"What's on the plate? 🍽️",water:"Bottle count 💧",supps:"Today's stack 💊",protein:"Protein of the day 🍗",sleep:"Rise and shine ☀️",read:"What are you reading? 📖",skincare:"Glow check ✨",meditate:"Zen spot 🧘",study:"Study setup 📚",nojunk:"Clean eating 🥗"};
+SHEETS.proofPost={
+  render(s){const h=habitsOf(ME).find(x=>x.id===s.args.hid);return{title:`${esc(h?.emoji||"📸")} Proof: ${esc(h?.name||"")}`,body:`<div class="form" style="align-items:center">
+    <div class="pola big"><span class="stk">${esc(h?.emoji||"📸")}</span><img src="${esc(s.args.src)}" alt="Preview"><span class="cap" id="ppCapPrev">${esc(h?.name||"")}</span></div>
+    <label class="f" style="width:100%">Caption (optional)<input class="inp" id="ppCap" maxlength="60" placeholder="${esc(PROOF_HINT[s.args.hid]||"Say something…")}"></label>
+    <div class="hint" style="margin:0">${h?.type==="check"?"Posting proof also ticks this habit as done ✅":h?.type==="log"?"Your caption gets added to the log too.":"The crew sees this on today's board."}</div></div>`,
+    foot:`<button class="btn pri block" data-act="proofSave" id="ppBtn">Post proof</button>`}}
+};
 function myHabitRow(h,ds){const v=hVal(ME,ds,h.id),done=isDone(h,v);
   if(h.type==="check")return`<button class="hrow chk ${done?"ok":""}" data-act="hToggle" data-h="${esc(h.id)}"><span class="he">${esc(h.emoji)}</span><span class="grow"><b>${esc(h.name)}</b>${h.show===false?'<span class="meta"> · hidden</span>':""}</span><span class="hbox">${done?"✅":"Tap when done"}</span></button>`;
   if(h.type==="count"){const n=+v||0,g=+h.goal||1,pc=Math.min(100,Math.round(n/g*100));
@@ -2341,26 +2384,26 @@ VIEWS.shame=()=>{
     </div><div class="poddots"><i class="${slide===0?"on":""}"></i><i class="${slide===1?"on":""}"></i></div></div>`;
   const meHtml=mine.length?`<div class="sec"><div class="between"><h2>My check-in</h2><div class="seg sm" style="width:auto"><button data-act="shameDaySet" data-k="t" aria-pressed="${UI.shameDay!=="y"}">Today</button><button data-act="shameDaySet" data-k="y" aria-pressed="${UI.shameDay==="y"}">Yesterday</button></div></div>
       ${UI.shameDay==="y"?`<div class="hint" style="margin:0 0 8px">Forgot to log yesterday? Fix it here and you'll come off the wall.</div>`:""}
-      <div class="list" style="gap:8px">${mine.filter(h=>hLive(h,ds)).map(h=>myHabitRow(h,ds)).join("")}</div></div>`
+      <div class="list" style="gap:8px">${mine.filter(h=>hLive(h,ds)).map(h=>`<div class="hwrap">${myHabitRow(h,ds)}${proofStrip(ME,h,ds,true)}</div>`).join("")}</div></div>`
     :`<div class="shoot" style="margin-top:12px"><div class="big"><b>Join the accountability crew</b><span style="opacity:.9;font-size:13px">Pick what you want to track: gym, water, supplements, food… Miss a day and you end up on the Wall of Shame with a dunce cap.</span><br><button class="btn sm" data-act="habitSetup" style="margin-top:10px">Pick my habits</button></div></div>`;
   const others=D.members.filter(m=>m.id!==ME);
   const board=`<div class="sec"><h2>The crew today</h2><div class="list" style="gap:8px">${[mem(ME),...others].filter(Boolean).map(m=>{const hs=shownHabits(m.id).filter(h=>hLive(h,TODAY())),me=m.id===ME;
       if(!hs.length)return me?"":`<div class="pcard row" style="flex-wrap:nowrap">${avatar(m.id)}<span class="grow"><b>${esc(m.nick)}</b><br><span class="meta">Not playing yet</span></span><button class="btn sm" data-act="poke" data-id="${esc(m.id)}" data-h="join">👉 Poke</button></div>`;
       const n=hs.filter(h=>isDone(h,hVal(m.id,TODAY(),h.id))).length,stk=curStreak(m.id,perfectOk(m.id)),p=Math.round(n/hs.length*100);
       return`<div class="pcard"><button data-act="shamePerson" data-id="${esc(m.id)}" class="pc-head"><span class="mini-ring" style="--p:${p}">${avatar(m.id)}</span><span class="grow" style="text-align:left;min-width:0"><b>${esc(nick(m.id))}</b><span class="meta" style="display:block">${n===hs.length?"All done today ✅":`${n} of ${hs.length} done`}${stk?` · 🔥 ${stk}`:""}</span></span><span class="meta">›</span></button>
-        <div class="hchips">${hs.map(h=>habitChip(m.id,h,TODAY(),me)).join("")}</div></div>`}).join("")}</div></div>`;
+        <div class="hchips">${hs.map(h=>habitChip(m.id,h,TODAY(),me)).join("")}</div>${proofsFor(m.id,TODAY(),hs).length?`<div class="proofs">${proofsFor(m.id,TODAY(),hs).map(p=>polaroid(p,hs)).join("")}</div>`:""}</div>`}).join("")}</div></div>`;
   return head+pokeHtml+pod+meHtml+crewStats()+board};
 function shameHeat(uid){const out=[];for(let d=34;d>=0;d--){const ds=shameDay(d),m=mem(uid),sc=m?.habitsSince&&m.habitsSince<=ds?dayScore(uid,ds):null;
     out.push(`<span class="hd" title="${esc(fDate(ds))}" style="background:${sc==null?"var(--surface2)":sc===1?"var(--ok)":sc>0?"var(--sun)":"var(--danger)"};${ds===TODAY()?"outline:2px solid var(--fg);outline-offset:1px":""}"></span>`)}return out.join("")}
 SHEETS.shamePerson={live:true,
-  render(s){const uid=s.args.id,m=mem(uid);if(!m)return{title:"Shame",body:""};const me=uid===ME,hs=me?habitsOf(uid):shownHabits(uid),ach=achievements(uid);
+  render(s){const uid=s.args.id,m=mem(uid);if(!m)return{title:"Shame",body:""};const me=uid===ME,hs=me?habitsOf(uid):shownHabits(uid);
     const days=[];for(let d=0;d<14;d++){const ds=shameDay(d);if(m.habitsSince&&ds>=m.habitsSince)days.push(ds)}
     return{title:`${avatar(uid,"sm")} ${esc(nick(uid))}`,body:`
       <div class="shstats"><div><b>🔥 ${curStreak(uid,perfectOk(uid))}</b><span>Streak</span></div><div><b>⭐️ ${bestStreak(uid,perfectOk(uid))}</b><span>Best streak</span></div><div><b>🍅 ${shameCount(uid)}</b><span>Days on the wall</span></div></div>
       <div class="sec"><h2>Last 5 weeks</h2><div class="heat">${shameHeat(uid)}</div><div class="legend"><span><i style="background:var(--ok)"></i>All done</span><span><i style="background:var(--sun)"></i>Some</span><span><i style="background:var(--danger)"></i>None</span></div></div>
-      <div class="sec"><h2>Achievements</h2><div class="ach">${ach.map(a=>`<div class="ach-i ${a.ok?"on":""}" title="${esc(a.d)}"><span class="ae">${a.e}</span><b>${esc(a.t)}</b><span class="meta">${esc(a.d)}</span></div>`).join("")}</div></div>
+      <button class="btn block" data-act="person" data-id="${esc(uid)}" style="margin-top:14px">🏅 See ${me?"my":esc(nick(uid))+"'s"} badges</button>
       <div class="sec"><h2>Streaks</h2><div class="list" style="gap:6px">${hs.map(h=>`<div class="item"><span style="font-size:22px">${esc(h.emoji)}</span><span class="grow"><b>${esc(h.name)}</b><br><span class="meta">Now 🔥 ${curStreak(uid,habitOk(uid,h))} · Best ${bestStreak(uid,habitOk(uid,h))}</span></span><span class="row" style="gap:3px">${[6,5,4,3,2,1,0].map(d=>{const ds=shameDay(d);const ok=isDone(h,hVal(uid,ds,h.id));return`<i class="hdot ${ok?"ok":hLive(h,ds)&&m.habitsSince&&ds>=m.habitsSince&&ds<TODAY()?"bad":""}"></i>`}).join("")}</span></div>`).join("")||`<div class="meta">No habits shown.</div>`}</div></div>
-      <div class="sec"><h2>History</h2><div class="list" style="gap:6px">${days.map(ds=>{const sc=dayScore(uid,ds,hs);return`<div class="item"><span style="width:84px;flex:none" class="meta"><b style="color:var(--fg)">${ds===TODAY()?"Today":esc(fDate(ds,{weekday:"short",day:"numeric",month:"short"}))}</b></span><span class="grow" style="display:flex;flex-wrap:wrap;gap:4px">${hs.filter(h=>hLive(h,ds)).map(h=>{const v=hVal(uid,ds,h.id),ok=isDone(h,v);return`<span class="hchip sm ${ok?"ok":ds<TODAY()?"bad":""}">${esc(h.emoji)}${h.type==="count"&&v?` ${(+v).toLocaleString()}`:""}${h.type==="log"&&Array.isArray(v)&&v.length?` ${v.length}`:""}</span>`}).join("")}</span><span>${sc===1?"✅":ds===TODAY()?"⏳":sc==null?"":"🍅"}</span></div>`}).join("")||`<div class="meta">No history yet.</div>`}</div>
+      <div class="sec"><h2>History</h2><div class="list" style="gap:6px">${days.map(ds=>{const sc=dayScore(uid,ds,hs);return`<div class="item"><span style="width:84px;flex:none" class="meta"><b style="color:var(--fg)">${ds===TODAY()?"Today":esc(fDate(ds,{weekday:"short",day:"numeric",month:"short"}))}</b></span><span class="grow" style="display:flex;flex-wrap:wrap;gap:4px">${hs.filter(h=>hLive(h,ds)).map(h=>{const v=hVal(uid,ds,h.id),ok=isDone(h,v);return`<span class="hchip sm ${ok?"ok":ds<TODAY()?"bad":""}">${esc(h.emoji)}${h.type==="count"&&v?` ${(+v).toLocaleString()}`:""}${h.type==="log"&&Array.isArray(v)&&v.length?` ${v.length}`:""}</span>`}).join("")}</span><span>${sc===1?"✅":ds===TODAY()?"⏳":sc==null?"":"🍅"}</span></div>${proofsFor(uid,ds,hs).length?`<div class="proofs sm">${proofsFor(uid,ds,hs).map(p=>polaroid(p,hs)).join("")}</div>`:""}`}).join("")||`<div class="meta">No history yet.</div>`}</div>
       ${me&&habitsOf(ME).some(h=>h.id==="food")?`<div class="hint">Tap a day above on the main Shame page (Today / Yesterday) to edit.</div>`:""}</div>`}}
 };
 SHEETS.habitSetup={
@@ -2384,6 +2427,69 @@ let POKE_SEEN=null;
 function checkPokes(){if(!D.pokes)return;if(POKE_SEEN===null){POKE_SEEN=new Set(D.pokes.map(p=>p.id));return}
   for(const p of D.pokes){if(POKE_SEEN.has(p.id))continue;POKE_SEEN.add(p.id);if(p.to!==ME||p.date!==TODAY()||!mem(p.from))continue;
     const h=habitsOf(ME).find(x=>x.id===p.hid);notify(`👉 ${nick(p.from)} poked you`,p.hid==="join"?"Join the Shame tab and start tracking 😤":`Did you do ${h?h.emoji+" "+h.name:"your habits"} today?`,"poke-"+p.id,{kind:"shame"})}}
+/* ---------- badges (scout-style, bronze/silver/gold) ---------- */
+const TIER=[{n:"Bronze",c:"#C98A4B"},{n:"Silver",c:"#B9C3CE"},{n:"Gold",c:"#F2C14E"}];
+const attendedBy=uid=>D.plans.filter(p=>p.final&&endOf(p.final)<=TODAY()&&p.status!=="cancelled"&&(p.by===uid||D.rsvps.some(r=>r.planId===p.id&&r.uid===uid&&r.going==="in")));
+const ridesBy=(uid,role)=>D.rsvps.filter(r=>r.uid===uid&&r.ride?.role===role&&D.plans.some(p=>p.id===r.planId&&p.final&&endOf(p.final)<=TODAY())).length;
+function bestMomentStreak(uid){const days=[...new Set(momentsBy(uid).map(m=>m.day))].sort();let best=0,run=0,prev=null;for(const d of days){if(prev){const x=pd(prev);x.setDate(x.getDate()+1);run=ymd(x)===d?run+1:1}else run=1;best=Math.max(best,run);prev=d}return best}
+function habitDays(uid,hid){const h=(uid===ME?habitsOf(uid):shownHabits(uid)).find(x=>x.id===hid);if(!h)return 0;return D.checkins.filter(c=>c.uid===uid&&isDone(h,c.v?.[hid])).length}
+function cleanDays(uid){const m=mem(uid);if(!m?.habitsSince)return 0;let n=0;for(const ds of shameRange(m.habitsSince,shameDay(1)))if(dayScore(uid,ds)!=null&&!missesOn(uid,ds).length)n++;return n}
+const BADGES=[
+ {id:"planner",cat:"Plans",e:"🗺️",t:"Planner",u:"plans created",d:"Make plans for the crew",c:"#0B7A75",tiers:[1,5,15],f:u=>D.plans.filter(p=>p.by===u).length},
+ {id:"showup",cat:"Plans",e:"🎟️",t:"Show-upper",u:"plans attended",d:"Actually turn up to plans",c:"#2F6FB5",tiers:[1,10,25],f:u=>attendedBy(u).length},
+ {id:"voter",cat:"Plans",e:"🗳️",t:"Democracy",u:"polls voted on",d:"Vote on plan dates",c:"#6D4FC2",tiers:[3,15,40],f:u=>D.rsvps.filter(r=>r.uid===u&&(r.slots||[]).length).length},
+ {id:"explorer",cat:"Plans",e:"🧭",t:"Explorer",u:"different places",d:"Visit new spots on plans",c:"#7A8B1E",tiers:[3,10,25],f:u=>new Set(attendedBy(u).flatMap(p=>(p.stops||[]).map(x=>(x.name||"").toLowerCase()).filter(Boolean))).size},
+ {id:"weekender",cat:"Plans",e:"🏕️",t:"Weekender",u:"multi-day trips",d:"Go on plans that last more than a day",c:"#8A5A2B",tiers:[1,3,8],f:u=>attendedBy(u).filter(p=>nDays(p.final)>1).length},
+ {id:"nightowl",cat:"Plans",e:"🦉",t:"Night owl",u:"late-night plans",d:"Plans starting 9pm or later",c:"#2B2F6B",tiers:[1,5,15],f:u=>attendedBy(u).filter(p=>(p.final.start||"")>="21:00").length},
+ {id:"earlybird",cat:"Plans",e:"🌅",t:"Early bird",u:"early plans",d:"Plans starting before 8am",c:"#E07A3E",tiers:[1,3,10],f:u=>attendedBy(u).filter(p=>p.final.start&&p.final.start<"08:00").length},
+ {id:"driver",cat:"Plans",e:"🚗",t:"Designated driver",u:"rides given",d:"Drive the crew to plans",c:"#C2372F",tiers:[1,5,15],f:u=>ridesBy(u,"driver")},
+ {id:"shotgun",cat:"Plans",e:"🛺",t:"Shotgun",u:"rides taken",d:"Catch a ride with the crew",c:"#B5307A",tiers:[1,5,15],f:u=>ridesBy(u,"rider")},
+ {id:"photographer",cat:"Memories",e:"📸",t:"Photographer",u:"album photos & videos",d:"Fill plan albums with memories",c:"#3A7D8C",tiers:[5,25,75],f:u=>D.media.filter(m=>m.by===u&&m.phase==="memory").length},
+ {id:"moodsetter",cat:"Memories",e:"🎨",t:"Mood setter",u:"mood board items",d:"Add pics, colours and notes to mood boards",c:"#C2408F",tiers:[3,15,40],f:u=>D.media.filter(m=>m.by===u&&m.planId&&!["memory","ticket","proof"].includes(m.phase)).length},
+ {id:"reels",cat:"Memories",e:"🎬",t:"Reel dealer",u:"reels shared",d:"Share reels and TikToks on plans",c:"#E1306C",tiers:[3,15,40],f:u=>D.media.filter(m=>m.by===u&&isReel(m)).length},
+ {id:"dj",cat:"Memories",e:"🎧",t:"DJ",u:"playlists added",d:"Add Spotify playlists to plans",c:"#1DB954",tiers:[1,3,10],f:u=>D.plans.reduce((n,p)=>n+(p.playlists||[]).filter(x=>x.by===u).length,0)},
+ {id:"tickets",cat:"Memories",e:"🎫",t:"Ticket master",u:"tickets added",d:"Keep the crew's tickets sorted",c:"#9A6B12",tiers:[1,5,15],f:u=>D.media.filter(m=>m.by===u&&m.kind==="ticket").length},
+ {id:"scribe",cat:"Memories",e:"📝",t:"Scribe",u:"plan comments",d:"Chat in plan discussions",c:"#5B6B7A",tiers:[5,25,75],f:u=>D.notes.filter(n=>n.by===u).length},
+ {id:"moments",cat:"Moments",e:"📷",t:"Moment maker",u:"moments posted",d:"Post daily moments",c:"#0E7C66",tiers:[5,30,100],f:u=>momentsBy(u).length},
+ {id:"mstreak",cat:"Moments",e:"🔥",t:"Moment streak",u:"days in a row (best)",d:"Post a moment every day",c:"#D9480F",tiers:[3,7,30],f:u=>bestMomentStreak(u)},
+ {id:"hype",cat:"Moments",e:"❤️",t:"Hype squad",u:"reactions given",d:"React to the crew's moments",c:"#D6336C",tiers:[10,50,200],f:u=>D.moments.filter(m=>m.reacts&&m.reacts[u]).length},
+ {id:"commentator",cat:"Moments",e:"💬",t:"Commentator",u:"moment comments",d:"Comment on moments",c:"#1971C2",tiers:[5,25,100],f:u=>D.mcomments.filter(c=>c.by===u).length},
+ {id:"chatter",cat:"Chats",e:"🗨️",t:"Chatterbox",u:"messages",d:"Keep the chats alive",c:"#4263EB",tiers:[50,300,1000],f:u=>D.msgs.filter(m=>m.by===u&&!m.deleted).length},
+ {id:"voice",cat:"Chats",e:"🎙️",t:"Voice of the crew",u:"voice notes",d:"Send voice notes",c:"#7048E8",tiers:[3,15,50],f:u=>D.msgs.filter(m=>m.by===u&&m.kind==="voice").length+D.notes.filter(n=>n.by===u&&n.kind==="voice").length},
+ {id:"banker",cat:"Money",e:"💸",t:"Banker",u:"bills paid",d:"Pay for the group",c:"#2B8A3E",tiers:[1,10,30],f:u=>D.expenses.filter(e=>e.paidBy===u).length},
+ {id:"settler",cat:"Money",e:"🤝",t:"Debt free",u:"debts settled",d:"Pay back what you owe",c:"#5C940D",tiers:[1,5,15],f:u=>D.settles.filter(x=>x.from===u).length},
+ {id:"dreamer",cat:"Life",e:"✨",t:"Dreamer",u:"wishlist items",d:"Add ideas to the wishlist",c:"#AE3EC9",tiers:[3,10,25],f:u=>D.wishes.filter(w=>w.by===u).length},
+ {id:"organised",cat:"Life",e:"🗓️",t:"Organised",u:"times blocked",d:"Keep your calendar up to date",c:"#495057",tiers:[5,25,75],f:u=>D.busy.filter(b=>b.uid===u).length},
+ {id:"veteran",cat:"Life",e:"🎖️",t:"Veteran",u:"days in the crew",d:"Stick around",c:"#8C6D1F",tiers:[30,180,365],f:u=>{const j=mem(u)?.joined;return j>1e12?Math.floor((now()-j)/864e5):0}},
+ {id:"og",cat:"Life",e:"👑",t:"OG",u:"",d:"Started the crew",c:"#B08900",tiers:[1],f:u=>crewOwner()===u?1:0},
+ {id:"gymrat",cat:"Shame",e:"🏋️",t:"Gym rat",u:"gym days",d:"Check in at the gym",c:"#364FC7",tiers:[5,20,60],f:u=>habitDays(u,"gym")},
+ {id:"hydro",cat:"Shame",e:"💧",t:"Hydro homie",u:"water goals hit",d:"Hit your water goal",c:"#1098AD",tiers:[5,20,60],f:u=>habitDays(u,"water")},
+ {id:"perfect",cat:"Shame",e:"⚡️",t:"Perfectionist",u:"perfect days in a row (best)",d:"Do every habit, every day",c:"#F08C00",tiers:[3,7,30],f:u=>bestStreak(u,perfectOk(u))},
+ {id:"saint",cat:"Shame",e:"😇",t:"Saint",u:"clean days",d:"Days you stayed off the wall",c:"#74B816",tiers:[7,30,100],f:u=>cleanDays(u)},
+ {id:"receipts",cat:"Shame",e:"🤳",t:"Receipts",u:"proofs posted",d:"Post photo proof of your habits",c:"#E64980",tiers:[1,10,50],f:u=>D.media.filter(m=>m.by===u&&m.phase==="proof").length},
+ {id:"poker",cat:"Shame",e:"👉",t:"Poke master",u:"pokes sent",d:"Keep the crew accountable",c:"#F76707",tiers:[5,20,60],f:u=>D.pokes.filter(p=>p.from===u).length},
+ {id:"dunce",cat:"Shame",e:"🫣",t:"Wall regular",u:"days on the wall",d:"A badge of… shame",c:"#868E96",tiers:[3,10,30],f:u=>shameCount(u)},
+];
+function badgeState(b,uid){let n=0;try{n=b.f(uid)||0}catch{}const lvl=b.tiers.filter(t=>n>=t).length,next=b.tiers[lvl];return{n,lvl,next,max:lvl>=b.tiers.length}}
+function badgePatch(b,st,big){const t=st.lvl?TIER[b.tiers.length===1?2:st.lvl-1]:null;
+  return`<span class="patch ${st.lvl?"":"locked"} ${big?"big":""}" style="--bc:${b.c};--tc:${t?t.c:"var(--line)"}"><span class="pe">${b.e}</span></span>`}
+function badgesHtml(uid){const all=BADGES.map(b=>({b,st:badgeState(b,uid)})),got=all.filter(x=>x.st.lvl).sort((a,c)=>c.st.lvl-a.st.lvl),left=all.filter(x=>!x.st.lvl).sort((a,c)=>c.st.n/c.b.tiers[0]-a.st.n/a.b.tiers[0]);
+  const open=UI.badgesOpen===uid;const shown=open?left:left.slice(0,4);
+  const cell=({b,st})=>`<button class="bcell" data-act="badge" data-id="${b.id}" data-u="${esc(uid)}">${badgePatch(b,st)}<b>${esc(b.t)}</b><span class="stars">${b.tiers.length===1?(st.lvl?"★":"☆"):[0,1,2].map(i=>i<st.lvl?"★":"☆").join("")}</span>${!st.lvl?`<span class="bprog"><i style="width:${Math.min(100,Math.round(st.n/b.tiers[0]*100))}%"></i></span>`:""}</button>`;
+  return`<div class="sec"><div class="between"><h2>🏅 Badges</h2><span class="meta"><b style="color:var(--fg)">${got.length}</b> of ${BADGES.length} earned</span></div>
+    ${got.length?`<div class="bgrid">${got.map(cell).join("")}</div>`:`<div class="meta" style="margin-bottom:8px">No badges yet. Make a plan, post a moment or check in on Shame to earn the first one.</div>`}
+    ${left.length?`<div class="meta" style="margin:12px 0 6px;font-weight:700">Still to earn</div><div class="bgrid">${shown.map(cell).join("")}</div>${left.length>4?`<button class="btn sm block" data-act="badgesMore" data-u="${esc(uid)}" style="margin-top:8px">${open?"Show less":`Show all ${left.length}`}</button>`:""}`:""}</div>`}
+SHEETS.badge={live:true,
+  render(s){const b=BADGES.find(x=>x.id===s.args.id),uid=s.args.u;if(!b)return{title:"Badge",body:""};const st=badgeState(b,uid),me=uid===ME;
+    const tierRows=b.tiers.length===1?"":b.tiers.map((t,i)=>`<div class="item"><span class="tdot" style="background:${TIER[i].c}"></span><span class="grow"><b>${TIER[i].n}</b><br><span class="meta">${t} ${esc(b.u)}</span></span><span>${st.n>=t?"✅":`<span class="meta">${t-st.n} to go</span>`}</span></div>`).join("");
+    return{title:`${esc(b.t)}`,body:`<div class="form" style="align-items:center;text-align:center">
+      ${badgePatch(b,st,true)}
+      <h2 style="margin:6px 0 0">${esc(b.t)}</h2><div class="meta">${esc(b.cat)} badge · ${esc(b.d)}</div>
+      <div class="pill" style="background:${st.lvl?"var(--accent-soft)":"var(--surface2)"};font-size:14px;padding:6px 14px">${st.lvl?(b.tiers.length===1?"Earned":TIER[st.lvl-1].n+" level"):"Not earned yet"}${b.u?` · ${st.n} ${esc(b.u)}`:""}</div>
+      ${!st.max&&b.u?`<div style="width:100%"><div class="hbar" style="height:10px"><i style="width:${Math.min(100,Math.round(st.n/st.next*100))}%;background:${b.c}"></i></div><div class="meta" style="margin-top:4px">${st.next-st.n} more ${esc(b.u)} for ${b.tiers.length===1?"this badge":TIER[st.lvl].n}</div></div>`:""}
+      ${tierRows?`<div class="list" style="gap:6px;width:100%;text-align:left">${tierRows}</div>`:""}
+      ${!me?`<div class="hint" style="margin:0">${esc(nick(uid))}'s badge.</div>`:""}</div>`}}
+};
 /* busy */
 SHEETS.busy={
   render(s){return{title:"Block my time",body:`<div class="form">
@@ -2780,6 +2886,14 @@ const ACT={
   habitSetup(){openSheet("habitSetup")},
   shamePerson(d){openSheet("shamePerson",{id:d.id})},
   shameDaySet(d){UI.shameDay=d.k;render()},
+  badge(d){openSheet("badge",{id:d.id,u:d.u})},
+  badgesMore(d){UI.badgesOpen=UI.badgesOpen===d.u?null:d.u;const s=topS();if(s)paintSheet(s)},
+  proofAdd(d){const ds=UI.shameDay==="y"?shameDay(1):TODAY();ensureAC?.();pickPhotos(async fs=>{const f=fs[0];if(!f)return;try{toast("Preparing photo…");const src=await storePhoto(f);if(!src)return toast("Couldn't read that photo.");openSheet("proofPost",{src,hid:d.h,ds})}catch{toast("Couldn't read that photo. Try another.")}},"#onePick")},
+  async proofSave(){const s=topS(),{src,hid,ds}=s.args,h=habitsOf(ME).find(x=>x.id===hid),cap=val("ppCap").slice(0,60);$("#ppBtn",s.el).disabled=true;
+    await Store.add("media",{kind:"photo",phase:"proof",by:ME,hid,date:ds,src,caption:cap,at:now()});
+    if(h?.type==="check"&&!hVal(ME,ds,hid))await saveCheckin(ds,hid,true);
+    else if(h?.type==="log"){const cur=hVal(ME,ds,hid);await saveCheckin(ds,hid,[...(Array.isArray(cur)?cur:[]),cap||"📸 Photo"].slice(-30))}
+    closeSheet();toast("Proof posted 📸")},
   podGo(d){const pw=$(".podswipe");UI.podSlide=+d.k;if(pw)pw.scrollTo({left:UI.podSlide*pw.clientWidth,behavior:"smooth"});podMark()},
   hToggle(d){const ds=UI.shameDay==="y"?shameDay(1):TODAY();saveCheckin(ds,d.h,hVal(ME,ds,d.h)?null:true)},
   hStep(d){const ds=UI.shameDay==="y"?shameDay(1):TODAY(),h=habitsOf(ME).find(x=>x.id===d.h);if(!h)return;const n=Math.max(0,(+hVal(ME,ds,d.h)||0)+(+d.v)*(+h.step||1));saveCheckin(ds,d.h,n||null)},
@@ -3041,6 +3155,7 @@ document.addEventListener("change",ev=>{
   if(el.id==="exPl"){const s=topS();s.state.plan=el.value}
   if(el.id==="pdfD"&&el.value){const s=topS();s.state.d=el.value;paintSheet(s)}
   if(el.dataset?.hv){const hid=el.dataset.hv,ds=UI.shameDay==="y"?shameDay(1):TODAY();saveCheckin(ds,hid,Math.max(0,Math.round(+el.value||0))||null)}
+  if(el.id==="ppCap"){const c=$("#ppCapPrev");if(c&&el.value)c.textContent=el.value}
   if(el.id==="edEmoCustom"){const v=[...(el.value||"").trim()].slice(0,4).join("");if(v){const s=topS();s.state.emoji=v;paintSheet(s)}}
   if(el.id==="bzAll"){["bzS","bzE"].forEach(i=>$("#"+i).disabled=el.checked)}
 });
