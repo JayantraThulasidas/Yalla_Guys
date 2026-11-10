@@ -809,13 +809,13 @@ function styleFor(dark){
     return st;
   });
 }
-function rasterTiles(m,el){L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(m);el.classList.toggle("dark-tiles",isDark())}
+function rasterTiles(m,el){L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(m);el.classList.remove("dark-tiles")}
 function baseMap(el,opts={}){
   if(!window.L){el.innerHTML='<div class="empty" style="height:100%;display:grid;place-items:center">Map couldn\'t load. Check your connection.</div>';return null}
   const m=L.map(el,{zoomControl:true,attributionControl:true,...opts});
   m.attributionControl.setPrefix(false);
   m.on("unload",()=>m._dead=true);
-  if(glOK())styleFor(isDark()).then(st=>{if(m._dead)return;try{L.maplibreGL({style:st,attributionControl:false}).addTo(m)}catch(e){console.error(e);rasterTiles(m,el)}}).catch(e=>{console.error(e);if(!m._dead)rasterTiles(m,el)});
+  if(glOK())styleFor(false).then(st=>{if(m._dead)return;try{L.maplibreGL({style:st,attributionControl:false}).addTo(m)}catch(e){console.error(e);rasterTiles(m,el)}}).catch(e=>{console.error(e);if(!m._dead)rasterTiles(m,el)});
   else rasterTiles(m,el);
   m.attributionControl.addAttribution('<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>');
   m.setView([25.15,55.25],10);
