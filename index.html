@@ -510,7 +510,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.13";
+const APP_VERSION="2026-11-10.14";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1439,7 +1439,7 @@ SHEETS.plan={live:true,
         return`<div class="slot ${on?"mine":""}"><div class="between"><div style="min-width:0"><b>${fDate(sl.date)}</b> · ${fRange(sl.start,sl.end)}${past?' <span class="pill done">past</span>':""}<div class="meta">${voters.length} vote${voters.length===1?"":"s"}${sl.by?` · suggested by ${esc(nick(sl.by))}`:""}</div></div><button class="vote-btn" data-act="vote" data-id="${esc(p.id)}" data-slot="${esc(sl.id)}" aria-pressed="${on}" aria-label="I can make this time">${on?"✓":""}</button></div>
         <div class="bar"><i style="width:${voters.length/max*100}%"></i></div>
         <div class="between"><div class="row">${voters.length?avStack(voters,"xs",8):""}${cf.map(c=>`<span class="pill warn">${esc(nick(c.uid))} busy</span>`).join("")}</div><button class="btn sm ghost" data-act="lock" data-id="${esc(p.id)}" data-slot="${esc(sl.id)}">Lock in</button></div></div>`}).join("")||`<div class="meta">No dates suggested yet.</div>`}
-      <details><summary class="btn sm" style="list-style:none;display:inline-flex">+ Suggest a time</summary><div class="grid3" style="margin-top:10px"><label class="f">Date<input class="inp" type="date" id="slD" min="${TODAY()}"></label><label class="f">From<input class="inp" type="time" id="slS"></label><label class="f">To<input class="inp" type="time" id="slE"></label></div><button class="btn pri block" style="margin-top:8px" data-act="addSlot" data-id="${esc(p.id)}">Add this time</button></details>`;
+      <details><summary class="btn sm" style="list-style:none;display:inline-flex">+ Suggest a time</summary><div class="grid3" style="margin-top:10px"><label class="f">Date<input class="inp" type="date" id="slD"></label><label class="f">From<input class="inp" type="time" id="slS"></label><label class="f">To<input class="inp" type="time" id="slE"></label></div><button class="btn pri block" style="margin-top:8px" data-act="addSlot" data-id="${esc(p.id)}">Add this time</button></details>`;
     }
     const stops=p.stops||[],pts=stops.filter(x=>x.lat!=null),route=routeFor(stops);
     let legs="",tk=0,tm=0,li=0;
@@ -1723,7 +1723,7 @@ SHEETS.wishAdd={
 };
 /* plan editor */
 SHEETS.edit={
-  init(a){const p=a.id?planById(a.id):null;const cp=x=>JSON.parse(JSON.stringify(x||[]));const pre=a.pre||{};return{emoji:p?.emoji||pre.emoji||PLAN_EMOJIS[0],stops:cp(p?.stops||pre.stops),slots:cp(p?.slots),est:cp(p?.est),files:[],links:[...(pre.links||[])],q:"",res:[],msg:"",loading:false,invited:a.chat?[...(D.chats.find(c=>c.id===a.chat)?.members||[])]:pre.invited?[...pre.invited]:cp(p?.invited),chatId:a.chat||p?.chatId||""}},
+  init(a){const p=a.id?planById(a.id):null;const cp=x=>JSON.parse(JSON.stringify(x||[]));const pre=a.pre||{};return{past:p?.status==="done"&&!!p?.final,emoji:p?.emoji||pre.emoji||PLAN_EMOJIS[0],stops:cp(p?.stops||pre.stops),slots:cp(p?.slots),est:cp(p?.est),files:[],links:[...(pre.links||[])],q:"",res:[],msg:"",loading:false,invited:a.chat?[...(D.chats.find(c=>c.id===a.chat)?.members||[])]:pre.invited?[...pre.invited]:cp(p?.invited),chatId:a.chat||p?.chatId||""}},
   render(s){const p=s.args.id?planById(s.args.id):null,st=s.state,hasPts=st.stops.some(x=>x.lat!=null);
     return{title:p?"Edit plan":"Make a plan",body:`<div class="form">
       <div class="emo-pick">${PLAN_EMOJIS.map(e=>`<button data-act="edEmoji" data-v="${e}" aria-pressed="${st.emoji===e}">${e}</button>`).join("")}</div>
@@ -1741,9 +1741,10 @@ SHEETS.edit={
         ${st.invited.length?`${myChats().filter(c=>!c.dm).length?`<div class="hint">Quick pick from a group chat:</div><div class="chips">${myChats().filter(c=>!c.dm).map(c=>`<button class="chip" data-act="audChat" data-id="${esc(c.id)}" aria-pressed="${st.chatId===c.id}">${esc(c.emoji||"💬")} ${esc(c.name)}</button>`).join("")}</div>`:""}
           <div class="list" style="gap:6px">${D.members.map(m=>`<label class="check"><input type="checkbox" data-inv="${esc(m.id)}" ${st.invited.includes(m.id)||m.id===ME?"checked":""} ${m.id===ME?"disabled":""}>${avatar(m.id,"xs")}<span style="color:var(--fg)">${esc(nick(m.id))}</span></label>`).join("")}</div>
           ${st.chatId?`<div class="hint">📌 Will be posted in ${esc(D.chats.find(c=>c.id===st.chatId)?.name||"the group chat")}.</div>`:""}`:`<div class="hint">Everyone in Yalla Guys can see and join.</div>`}</div>
-      <div class="sec"><h2>Suggested dates</h2><p class="hint" style="margin:0">Add one or more options; the guys vote. Lock in the winner from the plan page.</p>
+      <label class="toggle"><span><b>📸 This already happened</b><br><span class="meta">Saves it straight to Memories with the date locked, so everyone can add pics</span></span><input type="checkbox" id="edPast" ${st.past?"checked":""}></label>
+      <div class="sec"><h2>${st.past?"When was it?":"Suggested dates"}</h2><p class="hint" style="margin:0">${st.past?"Pick the day it happened. Add a time if you like.":"Add one or more options; the guys vote. Lock in the winner from the plan page. Past dates work too."}</p>
         ${st.slots.map((x,i)=>`<div class="item"><span class="grow"><span class="t">${fDate(x.date)}</span> · ${fRange(x.start,x.end)}${(()=>{const c=conflictsFor(x.date,x.start,x.end,s.args.id);return c.length?`<br>${c.map(k=>`<span class="pill warn">${esc(nick(k.uid))} busy</span>`).join(" ")}`:""})()}</span><button class="x" data-act="slotDel" data-i="${i}" aria-label="Remove date">✕</button></div>`).join("")}
-        <div class="grid3"><label class="f">Date<input class="inp" type="date" id="edD" min="${TODAY()}"></label><label class="f">From<input class="inp" type="time" id="edS"></label><label class="f">To<input class="inp" type="time" id="edE"></label></div>
+        <div class="grid3"><label class="f">Date<input class="inp" type="date" id="edD"></label><label class="f">From<input class="inp" type="time" id="edS"></label><label class="f">To<input class="inp" type="time" id="edE"></label></div>
         <button class="btn" data-act="slotAdd">+ Add this date</button></div>
       <div class="sec"><h2>Potential costs (Dhs per person)</h2>
         ${st.est.map((x,i)=>`<div class="item"><span class="grow t">${esc(x.label)}</span><span class="amt">${dhs(x.amount)}</span><button class="x" data-act="estDel" data-i="${i}" aria-label="Remove cost">✕</button></div>`).join("")}
@@ -2133,13 +2134,15 @@ const ACT={
     $("#edSaveBtn",s.el).disabled=true;
     const invited=st.invited.length?[...new Set([ME,...st.invited])]:[];
     const base={title,emoji:st.emoji,desc:val("edDesc"),stops:st.stops,slots:st.slots,est:st.est,invited,chatId:st.chatId||""};
+    if(st.past){const sl=[...st.slots].sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start))[0];if(!sl)return $("#edSaveBtn",s.el).disabled=false,toast("Pick the date it happened.");
+      base.final={date:sl.date,start:sl.start||"",end:sl.end||""};base.status="done";base.slots=[sl]}
     if(s.args.id){await Store.upd("plans",s.args.id,base);closeSheet();toast("Plan updated");return}
-    const id=rid();await Store.set("plans",id,{...base,by:ME,at:now(),status:"poll",final:null});
+    const id=rid();await Store.set("plans",id,{status:"poll",final:null,...base,by:ME,at:now()});
     if(s.args.wish)await Store.upd("wishes",s.args.wish,{pushedPlanId:id});
     if(st.chatId&&D.chats.some(c=>c.id===st.chatId))await Store.add("msgs",{chatId:st.chatId,by:ME,kind:"plan",planId:id,text:`📌 New plan: ${title}`,at:now()});
     await Store.set("rsvps",id+"__"+ME,{planId:id,uid:ME,going:"in",slots:st.slots.map(x=>x.id),at:now()});
     for(const [i,u] of st.links.entries())await Store.add("media",{planId:id,by:ME,at:now()+i,kind:linkKind(u),url:u,caption:"",phase:"idea"});
-    const files=st.files;closeSheet();toast("Plan posted! Tell the guys to vote.");openSheet("plan",{id});if(files.length)addPhotos(id,files,"idea");
+    const files=st.files;closeSheet();toast(st.past?"Saved to Memories 📸 Add your pics!":"Plan posted! Tell the guys to vote.");openSheet("plan",{id});if(files.length)addPhotos(id,files,"idea");
   },
   audAll(){const s=topS();s.state.invited=[];s.state.chatId="";paintSheet(s)},
   audPick(){const s=topS();if(!s.state.invited.length)s.state.invited=[ME];paintSheet(s)},
@@ -2377,6 +2380,7 @@ document.addEventListener("input",ev=>{
 document.addEventListener("change",ev=>{
   const el=ev.target;if(el.id==="moneyPlan"){UI.moneyPlan=el.value;render()}
   if(el.dataset.wish){Store.upd("wishes",el.dataset.wish,{done:el.checked})}
+  if(el.id==="edPast"){const s=topS();if(s?.kind==="edit"){s.state.past=el.checked;paintSheet(s)}}
   if(el.id==="shareLoc"){(async()=>{if(el.checked){if(!navigator.geolocation){el.checked=false;return toast("Location isn't available on this phone.")}
       navigator.geolocation.getCurrentPosition(async p=>{MYPOS={lat:p.coords.latitude,lng:p.coords.longitude};await Store.upd("members",ME,{shareLoc:true,locMode:mem(ME)?.locMode||"exact"});lastLocPos=null;lastLocWrite=0;setTimeout(()=>{writeLoc(MYPOS);syncLocWatch()},300);toast("📡 Sharing your location with the crew")},
         ()=>{el.checked=false;toast("Allow location for Yalla Guys to share it.")},{enableHighAccuracy:true,timeout:15000})}
