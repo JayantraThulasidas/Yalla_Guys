@@ -463,6 +463,19 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .mday.today .mdn{background:var(--sun);color:#fff}
 .mday[aria-pressed="true"]{outline:3px solid var(--accent);outline-offset:-1px}
 .mday .mcnt{position:absolute;right:4px;bottom:4px;background:var(--accent);color:var(--accent-fg);font-size:10px;font-weight:800;border-radius:999px;padding:1px 6px}
+.fpick{flex-direction:column;gap:4px;font-size:11px;font-weight:600;width:60px;flex:none;opacity:.55}
+.fpick[aria-pressed="true"]{opacity:1}
+.fpick[aria-pressed="true"] .av{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--accent)}
+.fpick>span:last-child{max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dot-ok{background:var(--ok)}
+.fcal{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px}
+.fscale{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-weight:700;margin-left:76px}
+.ftl{display:flex;align-items:center;gap:8px}
+.fwho{display:flex;align-items:center;gap:6px;width:70px;flex:none;font-size:12px;font-weight:700;overflow:hidden}
+.fwho>span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ftrack{flex:1;height:16px;border-radius:8px;background:color-mix(in srgb,var(--ok) 22%,var(--surface2));position:relative;overflow:hidden}
+.ftrack i{position:absolute;top:0;bottom:0;background:var(--danger);border-radius:4px;opacity:.85}
+.fbusy{display:flex;flex-wrap:wrap;gap:4px 10px;margin:-2px 0 4px 78px;font-size:11px;color:var(--muted)}
 .auth{max-width:440px;margin:0 auto;padding-block:8px 40px}
 .auth-hero{padding:28px 4px 22px}
 .auth-logo{font-family:var(--f-display);font-weight:800;font-size:46px;letter-spacing:-.03em;line-height:1}
@@ -517,7 +530,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.16";
+const APP_VERSION="2026-11-10.17";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -910,29 +923,55 @@ VIEWS.cal=()=>{
   const start=new Date(y,mo-1,1-startDow);const cells=[];
   for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);cells.push(d)}
   const rows=cells[35].getMonth()!==mo-1?35:42;
-  const dayInfo=ds=>({bday:bdaysOn(ds).length,plan:visiblePlans().some(p=>covers(p.final,ds)),poll:visiblePlans().some(p=>!p.final&&(p.slots||[]).some(s=>covers(s,ds))),me:D.busy.some(b=>b.uid===ME&&b.date===ds),oth:D.busy.some(b=>b.uid!==ME&&b.date===ds)});
-  const grid=cells.slice(0,rows).map(d=>{const ds=ymd(d),i=dayInfo(ds);return`<button class="day ${d.getMonth()!==mo-1?"out":""} ${ds===TODAY()?"today":""}" data-act="calDay" data-d="${ds}" aria-pressed="${UI.calDay===ds}" aria-label="${fDate(ds,{weekday:"long",day:"numeric",month:"long"})}"><span class="dn">${d.getDate()}</span><span class="dots">${i.bday?'<i class="dot-bday"></i>':""}${i.plan?'<i class="dot-plan"></i>':""}${i.poll?'<i class="dot-poll"></i>':""}${i.me?'<i class="dot-me"></i>':""}${i.oth?'<i class="dot-oth"></i>':""}</span></button>`}).join("");
+  const mode=UI.calMode||"all",sel=(UI.calPeople||[]).filter(u=>mem(u));
+  const dayInfo=ds=>mode==="me"?{bday:bdaysOn(ds).some(m=>m.id===ME),plan:visiblePlans().some(p=>covers(p.final,ds)&&goingWith(p,ME)),poll:visiblePlans().some(p=>!p.final&&(p.by===ME||(myRsvp(p.id)?.slots||[]).length)&&(p.slots||[]).some(s=>covers(s,ds))),me:D.busy.some(b=>b.uid===ME&&b.date===ds),oth:false}
+    :{bday:bdaysOn(ds).length,plan:visiblePlans().some(p=>covers(p.final,ds)),poll:visiblePlans().some(p=>!p.final&&(p.slots||[]).some(s=>covers(s,ds))),me:D.busy.some(b=>b.uid===ME&&b.date===ds),oth:D.busy.some(b=>b.uid!==ME&&b.date===ds)};
+  const grid=cells.slice(0,rows).map(d=>{const ds=ymd(d);if(mode==="friends")return friendDayCell(d,ds,mo,sel);const i=dayInfo(ds);return`<button class="day ${d.getMonth()!==mo-1?"out":""} ${ds===TODAY()?"today":""}" data-act="calDay" data-d="${ds}" aria-pressed="${UI.calDay===ds}" aria-label="${fDate(ds,{weekday:"long",day:"numeric",month:"long"})}"><span class="dn">${d.getDate()}</span><span class="dots">${i.bday?'<i class="dot-bday"></i>':""}${i.plan?'<i class="dot-plan"></i>':""}${i.poll?'<i class="dot-poll"></i>':""}${i.me?'<i class="dot-me"></i>':""}${i.oth?'<i class="dot-oth"></i>':""}</span></button>`}).join("");
   const nb=nextBday();
   return`<div class="view-title"><h1>Calendar</h1><button class="btn sm pri" data-act="newBusy" data-d="${UI.calDay}">Block my time</button></div>
+  <div class="seg" style="margin-bottom:10px">${[["all","👥 Everyone"],["me","🙋 Just me"],["friends","🔎 Friends"]].map(([k,l])=>`<button data-act="calMode" data-k="${k}" aria-pressed="${mode===k}">${l}</button>`).join("")}</div>
+  ${mode==="friends"?`<div class="people-row" style="margin-bottom:12px">${D.members.map(m=>`<button class="prof-btn fpick" data-act="calPerson" data-id="${esc(m.id)}" aria-pressed="${sel.includes(m.id)}">${avatar(m.id,"","width:48px;height:48px;font-size:22px")}<span>${esc(m.id===ME?"You":m.nick)}</span></button>`).join("")}</div>
+    <div class="hint" style="margin:-4px 0 10px">${sel.length?sel.length===1?"Showing "+esc(nick(sel[0]))+"'s busy times.":`Comparing ${sel.length} people. Darker days are busier. Pick a day to see when you're all free.`:"Tap people above to see their busy times, or pick several to find a time that works for everyone."}</div>`:""}
   ${nb?`<button class="item" data-act="calDay" data-d="${nb.date}" style="width:100%;text-align:left;margin-bottom:12px">${avatar(nb.m.id,"sm")}<span class="grow"><span class="t">🎂 ${nb.days===0?`It's ${esc(nb.m.id===ME?"your":nb.m.nick+"'s")} birthday today!`:`${esc(nb.m.id===ME?"Your":nb.m.nick+"'s")} birthday`}</span><br><span class="meta">${nb.days===0?"Go say happy birthday 🎉":nb.days===1?"Tomorrow · "+fDate(nb.date):`In ${nb.days} days · ${fDate(nb.date)}`}</span></span></button>`:""}
   <div class="cal"><div class="cal-h"><button class="back" data-act="calNav" data-n="-1" aria-label="Previous month">${ICON.back}</button><h2>${first.toLocaleDateString("en-GB",{month:"long",year:"numeric"})}</h2><button class="back" data-act="calNav" data-n="1" aria-label="Next month" style="transform:scaleX(-1)">${ICON.back}</button></div>
   <div class="cal-g">${["MON","TUE","WED","THU","FRI","SAT","SUN"].map(d=>`<div class="dow">${d}</div>`).join("")}${grid}</div>
-  <div class="legend"><span><i class="dot-bday"></i>Birthday</span><span><i class="dot-plan"></i>Plan</span><span><i class="dot-poll"></i>Proposed date</span><span><i class="dot-me"></i>You're busy</span><span><i class="dot-oth"></i>Friend busy</span></div></div>
-  <div class="sec" style="border:0;padding-top:18px"><h2>${fDate(UI.calDay,{weekday:"long",day:"numeric",month:"long"})}</h2>${agenda(UI.calDay)}</div>`;
+  ${mode==="friends"?`<div class="legend"><span><i style="background:color-mix(in srgb,var(--danger) 30%,transparent)"></i>Some busy</span><span><i style="background:color-mix(in srgb,var(--danger) 75%,transparent)"></i>Most busy</span><span><i class="dot-ok"></i>All free</span></div>`:`<div class="legend"><span><i class="dot-bday"></i>Birthday</span><span><i class="dot-plan"></i>Plan</span><span><i class="dot-poll"></i>Proposed date</span><span><i class="dot-me"></i>You're busy</span>${mode==="me"?"":'<span><i class="dot-oth"></i>Friend busy</span>'}</div>`}</div>
+  <div class="sec" style="border:0;padding-top:18px"><h2>${fDate(UI.calDay,{weekday:"long",day:"numeric",month:"long"})}</h2>${mode==="friends"?friendsAgenda(UI.calDay,sel):agenda(UI.calDay,mode==="me")}</div>`;
 };
 const bdaysOn=ds=>D.members.filter(m=>m.birthday&&m.birthday===ds.slice(5));
 function nextBday(){let best=null;const t=pd(TODAY());for(const m of D.members){if(!m.birthday)continue;let d=pd(t.getFullYear()+"-"+m.birthday);if(isNaN(d))continue;if(d<t)d=pd((t.getFullYear()+1)+"-"+m.birthday);const days=Math.round((d-t)/864e5);if(!best||days<best.days)best={m,days,date:ymd(d)}}return best&&best.days<=31?best:null}
-function agenda(ds){
+function goingWith(p,u){if(p.by===u)return true;const r=D.rsvps.find(x=>x.planId===p.id&&x.uid===u);return!!r&&r.going!=="out"}
+/* busy intervals (minutes) for one person on one day: their blocks + plans they're going to */
+function busyOf(u,ds){const out=[];
+  for(const b of D.busy)if(b.uid===u&&b.date===ds){const[a,e]=span(b.start,b.end);out.push({a,e:Math.min(e,1440),what:u===ME?(myLabel(b)||"Busy"):"Busy",busy:b.id})}
+  for(const p of visiblePlans())if(p.final&&covers(p.final,ds)&&goingWith(p,u)){const multi=nDays(p.final)>1;const[a,e]=multi?[0,1440]:span(p.final.start,p.final.end);out.push({a,e:Math.min(e,1440),what:(p.emoji||"")+" "+p.title,plan:p.id})}
+  return out.sort((x,y)=>x.a-y.a)}
+function freeWindows(people,ds,from=8*60,to=24*60){const all=people.flatMap(u=>busyOf(u,ds)).map(x=>[Math.max(from,x.a),Math.min(to,x.e)]).filter(x=>x[1]>x[0]).sort((a,b)=>a[0]-b[0]);
+  const free=[];let cur=from;for(const[a,e]of all){if(a>cur)free.push([cur,a]);cur=Math.max(cur,e)}if(cur<to)free.push([cur,to]);return free.filter(([a,e])=>e-a>=60)}
+const hm=m=>m>=1440?"midnight":fTime(`${pad(Math.floor(m/60))}:${pad(m%60)}`);
+function friendDayCell(d,ds,mo,sel){const n=sel.filter(u=>busyOf(u,ds).length).length,ratio=sel.length?n/sel.length:0,allFree=sel.length>1&&!n;
+  const bg=n?`background:color-mix(in srgb,var(--danger) ${Math.round(15+60*ratio)}%,transparent)`:"";
+  return`<button class="day ${d.getMonth()!==mo-1?"out":""} ${ds===TODAY()?"today":""}" data-act="calDay" data-d="${ds}" aria-pressed="${UI.calDay===ds}" style="${bg}" aria-label="${fDate(ds)}${sel.length?`, ${n} of ${sel.length} busy`:""}"><span class="dn">${d.getDate()}</span><span class="dots">${allFree?'<i class="dot-ok"></i>':sel.length===1&&n?'<i class="dot-me"></i>':""}</span></button>`}
+function friendsAgenda(ds,sel){
+  if(!sel.length)return`<div class="empty">Pick people above to see their schedule.</div>`;
+  const F=8*60,T=24*60,pct=m=>((Math.min(T,Math.max(F,m))-F)/(T-F)*100).toFixed(1);
+  const rows=sel.map(u=>{const bs=busyOf(u,ds);return`<div class="ftl"><span class="fwho">${avatar(u,"xs")}<span>${esc(u===ME?"You":nick(u))}</span></span><div class="ftrack">${bs.map(b=>`<i style="left:${pct(b.a)}%;width:${Math.max(2,pct(b.e)-pct(b.a))}%" title="${esc(b.what)}"></i>`).join("")}</div></div>
+    ${bs.length?`<div class="fbusy">${bs.map(b=>`<span>${b.a===0&&b.e>=1440?"All day":hm(b.a)+"–"+hm(b.e)} · ${esc(b.what)}</span>`).join("")}</div>`:`<div class="fbusy"><span style="color:var(--ok)">Free all day</span></div>`}`}).join("");
+  const fw=freeWindows(sel,ds);
+  return`<div class="fcal"><div class="fscale"><span>8am</span><span>12pm</span><span>4pm</span><span>8pm</span><span>12am</span></div>${rows}</div>
+    ${sel.length>1?`<div class="sec" style="padding-top:12px"><h2>${fw.length?"✅ Free together":"😬 No shared free time"}</h2>${fw.length?`<div class="chips">${fw.map(([a,e])=>`<span class="chip" style="background:color-mix(in srgb,var(--ok) 18%,var(--surface));border-color:transparent">${hm(a)} – ${hm(e)}</span>`).join("")}</div><button class="btn pri" data-act="planFromFree" data-d="${ds}" data-s="${pad(Math.floor(fw[0][0]/60))}:${pad(fw[0][0]%60)}" style="margin-top:6px">+ Make a plan for ${fDate(ds)}</button>`:`<div class="meta">Try another day. Darker days on the calendar are busier.</div>`}</div>`:""}`;
+}
+function agenda(ds,onlyMe){
   const items=[];
-  for(const p of visiblePlans()){
+  for(const p of visiblePlans()){if(onlyMe&&!goingWith(p,ME)&&!(p.by===ME||(myRsvp(p.id)?.slots||[]).length))continue;
     if(covers(p.final,ds)){const g=goingOf(p.id),multi=nDays(p.final)>1,dn=dayList(p.final.date,ds).length;const cf=conflictsFor(p.final.date,p.final.start,p.final.end,p.id,p.final.endDate).filter(c=>g.includes(c.uid));
       items.push({s:multi?"00:00":p.final.start||"00:00",h:`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}"><span class="stripe" style="background:${hue(p.id)}"></span><span class="tm">${multi?`Day ${dn}/${nDays(p.final)}`:fRange(p.final.start,p.final.end)}</span><span style="flex:1;min-width:0"><b>${esc(p.emoji||"")} ${esc(p.title)}</b><br><span class="meta">${g.length} going${myRsvp(p.id)?.going==="in"?" · you're in":""}</span>${cf.length?`<br><span class="pill warn">Clash: ${cf.map(c=>esc(nick(c.uid))).join(", ")}</span>`:""}</span></button>`})}
     else if(!p.final)for(const s of p.slots||[])if(covers(s,ds)){const v=rsvpsOf(p.id).filter(r=>(r.slots||[]).includes(s.id)).length;
       items.push({s:s.start||"00:00",h:`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}" style="border-style:dashed"><span class="stripe" style="background:var(--sun)"></span><span class="tm">${fRange(s.start,s.end)}</span><span style="flex:1;min-width:0"><b>Proposed: ${esc(p.title)}</b><br><span class="meta">${v} vote${v===1?"":"s"} · tap to vote</span></span></button>`})}
   }
-  for(const b of D.busy.filter(b=>b.date===ds)){const mine=b.uid===ME,lab=mine?myLabel(b):"";
+  for(const b of D.busy.filter(b=>b.date===ds&&(!onlyMe||b.uid===ME))){const mine=b.uid===ME,lab=mine?myLabel(b):"";
     items.push({s:b.start||"00:00",h:`<div class="ev busy"><span class="stripe"></span><span class="tm">${fRange(b.start,b.end)}</span><span style="flex:1;min-width:0">${avatar(b.uid,"xs")} <b>${esc(nick(b.uid))}</b> ${mine?`· ${esc(lab||"Busy")}${lab?'<span class="meta"> (others see "Busy")</span>':""}`:"· Busy"}</span>${mine?`${D.mine.some(m=>m.busyId===b.id)?`<span class="meta">📎${D.mine.filter(m=>m.busyId===b.id).length}</span>`:""}<button class="btn sm" data-act="openBusy" data-id="${esc(b.id)}">Open</button>`:""}</div>`})}
-  for(const m of bdaysOn(ds))items.push({s:"00:00",h:`<div class="ev"><span class="stripe" style="background:#FF7AB8"></span><span class="tm">All day</span><span style="flex:1;min-width:0">${avatar(m.id,"xs")} <b>🎂 ${esc(m.id===ME?"Your":m.nick+"'s")} birthday</b></span>${m.id===ME?"":`<button class="btn sm" data-act="dm" data-id="${esc(m.id)}">Wish 🎉</button>`}</div>`});
+  for(const m of bdaysOn(ds).filter(m=>!onlyMe||m.id===ME))items.push({s:"00:00",h:`<div class="ev"><span class="stripe" style="background:#FF7AB8"></span><span class="tm">All day</span><span style="flex:1;min-width:0">${avatar(m.id,"xs")} <b>🎂 ${esc(m.id===ME?"Your":m.nick+"'s")} birthday</b></span>${m.id===ME?"":`<button class="btn sm" data-act="dm" data-id="${esc(m.id)}">Wish 🎉</button>`}</div>`});
   items.sort((a,b)=>a.s.localeCompare(b.s));
   return items.length?`<div class="list" style="gap:8px">${items.map(i=>i.h).join("")}</div>`:`<div class="empty">Nothing on this day. Tap <b>Block my time</b> to mark yourself busy, so the guys see the clash before voting.</div>`;
 }
@@ -1342,6 +1381,8 @@ function tlDetail(s,i){
     ${!plans.length?`<div class="empty" style="margin-top:10px">${x.k>=(s.month?today.slice(0,7):today)&&!a.media.length?"Nothing planned yet. Make a plan!":(a.media.length?`📸 ${a.media.length} memor${a.media.length===1?"y":"ies"} · tap the photos above to open`:"Nothing saved from this "+(s.month?"month":"day")+".")}</div>`:""}`;
 }
 SHEETS.linkAdd={render(){return{title:"Add a link or reel",body:`<div class="form"><label class="f">Link<input class="inp" id="lkUrl" type="url" inputmode="url" placeholder="Instagram reel, TikTok, website…"></label><label class="f">Caption (optional)<input class="inp" id="lkCap"></label><div class="hint">🔒 Only you can see this.</div></div>`,foot:`<button class="btn pri block" data-act="linkSave">Add</button>`}}};
+const busyRemind=id=>(ls.get("yg-remind-busy",{})[id])||[];
+const busyAsPlan=b=>({id:"busy-"+b.id,title:myLabel(b)||"Busy",emoji:"🔒",final:{date:b.date,start:b.start||"",end:b.end||""},stops:[],desc:"Personal plan from Yalla Guys"});
 function stickerHalo(st,av){
   if(!st.length)return av;const n=st.length,span=Math.min(170,n>1?(n-1)*30:0),start=270-span/2,R=82;
   return`<div class="halo">${av}${st.map((e,i)=>{const a=(n>1?start+span*i/(n-1):270)*Math.PI/180;return`<span style="left:calc(50% + ${(Math.cos(a)*R).toFixed(1)}px);top:calc(50% + ${(Math.sin(a)*R).toFixed(1)}px);--r:${(((n>1?start+span*i/(n-1):270))+90).toFixed(0)}deg;animation-delay:${i*60}ms">${e}</span>`}).join("")}</div>`;
@@ -1727,6 +1768,8 @@ SHEETS.busyView={live:true,
     return{title:esc(myLabel(b)||"Busy"),body:`<div class="form">
       <div class="when"><div class="cal-ic"><div class="m">${pd(b.date).toLocaleDateString("en-GB",{month:"short"})}</div><div class="dd">${pd(b.date).getDate()}</div></div><div><div class="d">${fDate(b.date,{weekday:"long"})}</div><div>${fRange(b.start,b.end)} · friends see “Busy”</div></div></div>
       ${reels.length?reelsHtml(reels):""}
+      <div class="sec" style="border:0;padding-top:0"><h2>⏰ Remind me</h2><div class="chips">${REM_OPTS.filter(([m])=>m<=1440).map(([m,l])=>`<button class="chip" data-act="busyRem" data-id="${esc(b.id)}" data-m="${m}" aria-pressed="${busyRemind(b.id).includes(m)}">${m?l+" before":l}</button>`).join("")}</div>
+        <button class="btn sm pri" data-act="busyIcs" data-id="${esc(b.id)}" style="align-self:flex-start">📅 Add to phone calendar</button><div class="hint" style="margin:0">Phone-calendar reminders ring even when Yalla Guys is closed.</div></div>
       <div class="sec" style="border:0;padding-top:0"><h2>🔒 Your stuff</h2><div class="hint" style="margin:0">Only you can see these.</div>${myAttachHtml(b.id)}</div>
       <button class="btn danger" data-act="delBusy" data-id="${esc(b.id)}" data-confirm="Tap again to remove">Remove this block</button></div>`}}
 };
@@ -1882,6 +1925,7 @@ SHEETS.busy={
     <label class="check"><input type="checkbox" id="bzAll"> All day</label>
     <label class="f">What is it? (only you see this)<input class="inp" id="bzL" placeholder="e.g. Work shift, dentist, family dinner"></label>
     <div class="f">🔒 Attach for yourself: photos, tickets, links or reels${myAttachHtml("",s.state.att||(s.state.att=[]))}</div>
+    <div class="f">⏰ Remind me<div class="chips">${REM_OPTS.filter(([m])=>m<=1440).map(([m,l])=>`<button class="chip" data-act="bzRem" data-m="${m}" aria-pressed="${(s.state.rem||(s.state.rem=[60])).includes(m)}">${m?l+" before":l}</button>`).join("")}</div></div>
     <label class="f">Repeat weekly<select class="inp" id="bzR"><option value="1">Just once</option><option value="4">Every week for 4 weeks</option><option value="8">Every week for 8 weeks</option><option value="12">Every week for 12 weeks</option></select></label>
     </div>`,foot:`<button class="btn pri block" data-act="bzSave">Save</button>`}}
 };
@@ -2238,6 +2282,12 @@ const ACT={
   pastDayClear(){UI.pastDay="";if(MAPS.main)MAPS.main.sig="";render()},
   async locMode(d){await Store.upd("members",ME,{locMode:d.k});lastLocPos=null;lastLocWrite=0;if(MYPOS)setTimeout(()=>writeLoc(MYPOS),300);toast(d.k==="approx"?"Friends see roughly where you are":"Friends see exactly where you are")},
   focusFriend(d){const m=mem(d.id);if(m?.loc&&MAPS.main?.map){MAPS.main.map.setView([m.loc.lat,m.loc.lng],15);window.scrollTo({top:0,behavior:"smooth"})}},
+  calMode(d){UI.calMode=d.k;if(d.k==="friends"&&!(UI.calPeople||[]).length)UI.calPeople=[ME];render()},
+  calPerson(d){const a=UI.calPeople||[],i=a.indexOf(d.id);if(i>=0)a.splice(i,1);else a.push(d.id);UI.calPeople=a;render()},
+  planFromFree(d){openSheet("edit",{pre:{invited:[...new Set([ME,...(UI.calPeople||[])])]}});setTimeout(()=>{const s=topS();const di=$("#edD",s.el),si=$("#edS",s.el);if(di)di.value=d.d;if(si)si.value=d.s},80)},
+  bzRem(d){const s=topS(),a=s.state.rem||(s.state.rem=[60]),m=+d.m,i=a.indexOf(m);if(i>=0)a.splice(i,1);else a.push(m);paintSheet(s)},
+  busyRem(d){const all=ls.get("yg-remind-busy",{}),a=all[d.id]||[],m=+d.m,i=a.indexOf(m);if(i>=0)a.splice(i,1);else a.push(m);all[d.id]=a;ls.set("yg-remind-busy",all);paintSheet(topS());if(!SET.notifyOn)toast("Turn on notifications in ⚙️ Settings, or add it to your phone calendar")},
+  busyIcs(d){const b=D.busy.find(x=>x.id===d.id);if(!b)return;const p=busyAsPlan(b),txt=icsFor(p,busyRemind(b.id).length?busyRemind(b.id):[60]);const a=document.createElement("a");a.href=/iPhone|iPad/i.test(navigator.userAgent)?"data:text/calendar;charset=utf-8,"+encodeURIComponent(txt):URL.createObjectURL(new Blob([txt],{type:"text/calendar"}));a.download=(p.title.replace(/[^\w]+/g,"-")||"plan")+".ics";document.body.appendChild(a);a.click();a.remove()},
   openBusy(d){openSheet("busyView",{id:d.id})},
   bzAttPhoto(d){const s=topS();pickPhotos(async fs=>{for(const f of fs){const src=await storePhoto(f);if(!src)continue;const m={kind:"photo",src};if(d.id)await Store.add("mine",{...m,busyId:d.id,at:now()});else{s.state.att.push(m);paintSheet(s)}}},"#filePick")},
   bzAttLink(d){openSheet("linkAdd",{busyId:d.id})},
@@ -2374,7 +2424,8 @@ const ACT={
   async bzSave(){const date=val("bzD");if(!date)return toast("Pick a date.");const all=$("#bzAll").checked;const s=all?"":val("bzS"),e=all?"":val("bzE");const n=+val("bzR")||1;const label=val("bzL");
     const att=topS().state.att||[];
     for(let i=0;i<n;i++){const d=pd(date);d.setDate(d.getDate()+7*i);const id=await Store.add("busy",{uid:ME,date:ymd(d),start:s,end:e,label:MODE==="demo"?label:"",at:now()});if(label&&MODE!=="demo")await Store.setLabel(id,label);
-      if(i===0)for(const [k,m] of att.entries())await Store.add("mine",{...m,busyId:id,at:now()+k})}
+      if(i===0)for(const [k,m] of att.entries())await Store.add("mine",{...m,busyId:id,at:now()+k});
+      const rem=topS().state.rem||[60];const all=ls.get("yg-remind-busy",{});all[id]=[...rem];ls.set("yg-remind-busy",all)}
     closeSheet();toast(n>1?`Blocked ${n} weeks`:"Time blocked")},
   async delBusy(d){await Store.del("busy",d.id)},
   mapFilter(d){UI.mapFilter=d.k;render()},
@@ -2479,6 +2530,9 @@ function checkReminders(){
     for(const m of remindFor(p.id)){const key=`${p.id}|${p.final.date}|${p.final.start}|${m}`;if(fired[key]||now()<start-m*6e4)continue;fired[key]=1;ch=true;
       const lbl=m>=1440?`${m>=10080?"Next week":"Tomorrow"}${p.final.start?" at "+fTime(p.final.start):""}`:m?`In ${m>=60?m/60+" hour"+(m>60?"s":""):m+" min"}`:"Starting now";
       notify(`⏰ ${p.emoji||""} ${p.title}`,`${lbl}${(p.stops||[])[0]?" · "+p.stops[0].name:""}`,"rem-"+key,{kind:"plan",id:p.id})}}
+  for(const b of D.busy){if(b.uid!==ME)continue;const mins=busyRemind(b.id);if(!mins.length)continue;const start=new Date(b.date+"T"+(b.start||"09:00")).getTime();if(now()>start)continue;
+    for(const m of mins){const key=`busy|${b.id}|${b.date}|${b.start}|${m}`;if(fired[key]||now()<start-m*6e4)continue;fired[key]=1;ch=true;
+      notify(`⏰ ${myLabel(b)||"Your plan"}`,m>=1440?`Tomorrow${b.start?" at "+fTime(b.start):""}`:m?`In ${m>=60?m/60+" hour"+(m>60?"s":""):m+" min"}`:"Starting now","busyrem-"+key,null)}}
   if(ch)ls.set("yg-fired",fired);
 }
 const _render=render;render=function(){_render();try{checkNotify();syncVoice()}catch(e){console.error(e)}};
