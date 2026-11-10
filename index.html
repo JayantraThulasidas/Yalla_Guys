@@ -114,6 +114,7 @@ textarea.inp{min-height:84px;resize:vertical}
 .sec h2{font-size:18px;font-weight:700}
 .sec .hint{font-size:12px;color:var(--muted)}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips.stkrow{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin:0 -16px;padding-inline:16px}.chips.stkrow::-webkit-scrollbar{display:none}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;min-height:36px;display:inline-flex;align-items:center;gap:6px}
 .chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 .emo-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px;max-height:168px;overflow-y:auto;padding:2px;scrollbar-width:thin}
@@ -519,8 +520,9 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .pola.add::before{display:none}
 .proofs.sm .pola{width:70px}.proofs.sm .pola .cap{font-size:9.5px}.proofs.sm .pola .stk{font-size:17px}
 .pola.big{width:min(260px,70vw);padding:10px 10px 14px;transform:rotate(-2deg);cursor:default}.pola.big .cap{font-size:17px;margin-top:10px}.pola.big .stk{font-size:40px;right:-14px;bottom:24px}.pola.big::before{width:70px;height:20px;top:-10px}
-.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:10px 6px}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:16px 6px;padding-top:8px}
 .bcell{all:unset;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;cursor:pointer;min-width:0}
+.bcell .patch{margin-bottom:10px}
 .bcell b{font-size:11.5px;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bcell .stars{font-size:11px;letter-spacing:1px;color:#F2C14E;line-height:1}
 .bprog{width:54px;height:4px;border-radius:2px;background:var(--surface2);overflow:hidden}.bprog i{display:block;height:100%;background:var(--muted)}
@@ -532,6 +534,13 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .patch.locked{filter:grayscale(1);opacity:.35}
 .patch.big{width:120px;height:120px;margin-top:10px;box-shadow:0 0 0 7px var(--tc),0 0 0 10px color-mix(in srgb,var(--tc) 40%,#000),0 8px 20px rgba(0,0,0,.4)}.patch.big::after{inset:8px;border-width:3px}.patch.big .pe{font-size:56px}
 .tdot{width:18px;height:18px;border-radius:50%;flex:none;box-shadow:inset 0 -2px 0 rgba(0,0,0,.2)}
+canvas.bgfx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;display:block}
+canvas.bgfx.fixed{position:fixed}
+body.has-fx .app{position:relative;z-index:1}
+#sheets .sheet>canvas.bgfx~.sheet-h,#sheets .sheet>canvas.bgfx~.sheet-b,#sheets .sheet>canvas.bgfx~.sheet-f{position:relative;z-index:1}
+#sheets .sheet>canvas.bgfx~.sheet-h{background:color-mix(in srgb,var(--bg) 80%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.fxprev{position:relative;height:130px;border-radius:16px;background:var(--bg);border:1px solid var(--line);overflow:hidden;display:grid;place-items:center;margin:6px 0 4px}
+.fxprev>span{position:relative;z-index:1;font-size:12px;color:var(--muted);font-weight:700}
 .podcard{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:12px 0 10px;margin:4px 0 14px;overflow:hidden}
 .podtabs{display:flex;gap:6px;margin:0 12px;background:var(--surface2);border-radius:999px;padding:4px}
 .podtabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:8px 6px;border-radius:999px;white-space:nowrap}
@@ -657,7 +666,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.39";
+const APP_VERSION="2026-11-10.41";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1369,6 +1378,7 @@ function pastFilterHtml(){
 }
 function afterView(){
   try{syncLocWatch()}catch{}
+  try{syncAppFx()}catch{}
   const pw=$(".podswipe");if(pw)pw.scrollLeft=(UI.podSlide||0)*pw.clientWidth;
   if(UI.tab!=="plans"||UI.planFilter!=="map")return;
   const slot=$("#mapSlot");if(!slot)return;
@@ -1435,10 +1445,24 @@ const STICKER_GROUPS=[
   ["Love",["🫶","💖","💕","💗","❤️","🩷","💜","🩵","💛","🖤","🤍","💌"]],
   ["Animals",["🐱","🐶","🐰","🐻","🐼","🦊","🐸","🦁","🐪","🦅","🐬","🦄"]],
   ["Treats",["🧋","☕️","🍩","🍉","🍦","🧁","🍕","🍣","🌮","🥙","🍫","🍿"]],
-  ["Vibes",["🎧","📸","🎮","🎨","🎤","📚","💅","🛍️","🏎️","⚽️","🏀","🏖️","🌴","🌵","🏔️","✈️","👑","💎","🪩","🎉","🧿","🕶️","💿","🛼"]]];
-const STICKERS=STICKER_GROUPS.flatMap(g=>g[1]);
+  ["Vibes",["🎧","📸","🎮","🎨","🎤","📚","💅","🛍️","🏎️","⚽️","🏀","🏖️","🌴","🌵","🏔️","✈️","👑","💎","🪩","🎉","🧿","🕶️","💿","🛼"]],
+  ["Rides",["🏍️","🛵","🚲","🚗","🏎️","🚙","🛻","🛞","🏁","🪖","⛽️","🛣️","🚀","🚁","🛩️","⛵️","🚤","🚂"]],
+  ["Engineering & tech",["🛠️","⚙️","🔧","🔩","🪛","🔌","🔋","💡","🧰","🏗️","📐","📏","🧮","💻","🖥️","⌨️","🖱️","💾","📡","🛰️","🤖","🧠","🧪","🔬","🔭","⚡️","🧲","📊"]],
+  ["Study & work",["🎓","📖","✏️","🖊️","📝","📎","🗂️","💼","📈","🩺","💊","⚖️","🧑‍💻","👩‍🔬","👨‍🔧","👷","🧑‍🍳","🧑‍🎨"]],
+  ["Fitness",["🏋️","💪","🤸","🏃","🚴","🏊","🧗","🥊","🥋","🧘","🏸","🎾","🏐","🏓","⛳️","🏄","🤿","⛷️","🛹","🏆","🥇","🏅","⚽️","🏈"]],
+  ["Music & art",["🎸","🎹","🥁","🎻","🎷","🎺","🪕","🎼","🎵","🎶","🖌️","🖼️","🎭","🎬","🎞️","📷","🎙️","📻"]],
+  ["Gaming",["🕹️","👾","🎲","♟️","🧩","🃏","🎯","🎳","🎰","🪀","🛸","👽"]],
+  ["Travel",["🗺️","🧭","🧳","🏝️","🏜️","🕌","🗼","🗽","🏰","🏯","🎡","⛺️","🚢","🌍","🌏","🛫","🏙️","🌆"]],
+  ["Nature",["🌿","🍀","🌱","🌾","🍁","🍂","🍄","🌲","🪴","🌊","🌋","🌕","🪐","🌌","🌪️","🌤️","🪨","🪷"]],
+  ["More food",["🍔","🍟","🌯","🥐","🍜","🥗","🍪","🍰","🎂","🥤","🧃","🍵","🥑","🍋","🥥","🍯","🌶️","🥞"]],
+  ["More animals",["🐢","🐙","🦈","🐝","🐞","🦩","🦚","🐧","🐨","🐯","🐺","🦉","🐍","🦎","🐉","🦖","🐴","🦓"]],
+  ["Moods",["😎","🤓","🥳","😈","👻","💀","🤠","🤪","🫠","😴","🙈","🤡","🥶","🤯","😇","🫡","🗿","👀"]],
+  ["Style",["👟","👠","👜","🧢","💍","👗","🧥","💄","⌚️","👓","🎒","🪞","🧴","💋"]],
+  ["Party",["🎂","🎁","🎈","🎊","🪅","🎆","🎇","🥂","🍾","🕯️","🪔","🏮"]],
+  ["Flags",["🇦🇪","🇮🇳","🇵🇰","🇵🇭","🇬🇧","🇺🇸","🇪🇬","🇱🇧","🇸🇦","🇯🇴","🇰🇼","🇴🇲","🇶🇦","🇧🇭","🇰🇪","🇳🇬","🇿🇦","🇨🇦","🇦🇺","🇫🇷","🇮🇹","🇪🇸","🇩🇪","🇷🇺","🇧🇷","🇯🇵","🇰🇷","🇨🇳","🇱🇰","🇧🇩","🇳🇵","🏳️‍🌈"]]];
+const STICKERS=[...new Set(STICKER_GROUPS.flatMap(g=>g[1]))];
 SHEETS.profile={
-  init(){const m=mem(ME)||{};return{emoji:m.emoji||EMOJIS[0],color:m.color||MEMBER_COLORS[0],photo:m.photo||"",stickers:[...(m.stickers||[])]}},
+  init(){const m=mem(ME)||{};return{emoji:m.emoji||EMOJIS[0],color:m.color||MEMBER_COLORS[0],photo:m.photo||"",stickers:[...(m.stickers||[])],bgfx:m.bgfx||""}},
   render(s){const m=mem(ME)||{},st=s.state;const email=AUTH?.currentUser?.email;
     return{title:"Edit profile",body:`<div class="form">
     <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px"><button class="prof-btn" data-act="pfPhoto" aria-label="Change profile photo"><span class="av" style="width:104px;height:104px;font-size:50px;background:${st.color}">${st.photo?`<img src="${esc(st.photo)}" alt="">`:st.emoji}</span></button>
@@ -1450,7 +1474,12 @@ SHEETS.profile={
     <label class="f">Song on repeat<input class="inp" id="pfSong" maxlength="60" value="${esc(m.song||"")}" placeholder="Song – Artist"></label>
     <label class="f">Things you love (separate with commas)<input class="inp" id="pfLikes" maxlength="120" value="${esc((m.likes||[]).join(", "))}" placeholder="karak, padel, sunsets"></label>
     <div class="f"><div class="between">Stickers for your profile<span class="pill ${st.stickers.length>=8?"warn":"set"}">${st.stickers.length}/8</span></div>
-      ${STICKER_GROUPS.map(([g,list])=>`<div style="display:flex;flex-direction:column;gap:4px"><span class="meta" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase">${g}</span><div class="chips">${list.map(e=>`<button class="chip" style="font-size:20px;padding:4px 10px" data-act="pfSticker" data-v="${e}" aria-pressed="${st.stickers.includes(e)}">${e}</button>`).join("")}</div></div>`).join("")}</div>
+      ${st.stickers.length?`<div class="chips" style="padding:8px;border-radius:14px;background:var(--surface2)">${st.stickers.map(e=>`<button class="chip" style="font-size:20px;padding:4px 10px" data-act="pfSticker" data-v="${esc(e)}" aria-label="Remove ${esc(e)}" aria-pressed="true">${esc(e)} <span style="font-size:12px;opacity:.7">✕</span></button>`).join("")}</div>`:`<div class="meta">Pick up to 8. They float around your photo.</div>`}
+      ${STICKER_GROUPS.map(([g,list])=>`<div style="display:flex;flex-direction:column;gap:4px"><span class="meta" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase">${g} <span style="opacity:.6;text-transform:none;letter-spacing:0">· swipe →</span></span><div class="chips stkrow">${list.map(e=>`<button class="chip" style="font-size:20px;padding:4px 10px" data-act="pfSticker" data-v="${e}" aria-pressed="${st.stickers.includes(e)}">${e}</button>`).join("")}</div></div>`).join("")}</div>
+    <div class="f">Animated background<span class="meta" style="font-weight:400">Shows behind your profile when anyone opens it.</span>
+      <div class="fxprev" id="fxPrev"><span>${st.bgfx?"Preview":"No animation"}</span></div>
+      <div class="chips"><button class="chip" data-act="pfFx" data-v="" aria-pressed="${!st.bgfx}">🚫 None</button></div>
+      ${FX_LIST.map(([g,list])=>`<span class="meta" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-top:4px">${g==="Cute"?"💗 Soft & cute":"🖤 Bold & dark"}</span><div class="chips">${list.map(([k,e,l])=>`<button class="chip" data-act="pfFx" data-v="${k}" aria-pressed="${st.bgfx===k}">${e} ${l}</button>`).join("")}</div>`).join("")}</div>
     <div class="f">Avatar emoji (shown when there's no photo)<div class="emo-pick">${EMOJIS.map(e=>`<button data-act="pfEmoji" data-v="${e}" aria-pressed="${st.emoji===e}">${e}</button>`).join("")}</div></div>
     <div class="f">Colour<div class="row">${MEMBER_COLORS.map(c=>`<button data-act="pfColor" data-v="${c}" aria-label="Colour" style="width:40px;height:40px;border-radius:50%;border:${st.color===c?"3px solid var(--fg)":"2px solid var(--line)"};background:${c}"></button>`).join("")}</div></div>
     ${email?`<p class="meta" style="margin:0">Signed in as ${esc(email)}</p><button class="btn danger" data-act="logout">Log out</button>`:""}
@@ -1495,6 +1524,7 @@ SHEETS.settings={live:true,
       <div class="hint">Alerts arrive while Yalla Guys is open or was recently open in the background. For reminders you can't miss, use “Add to phone calendar” on a plan.</div></div>
     <div class="sec"><h2>Default plan reminders</h2><div class="chips">${REM_OPTS.map(([m,l])=>`<button class="chip" data-act="defRemind" data-m="${m}" aria-pressed="${SET.remind.includes(m)}">${l} before</button>`.replace("At start before","At start")).join("")}</div>
       <div class="hint">Used for every plan you're going to. You can change them per plan.</div></div>
+    <div class="sec"><h2>Background animation</h2><label class="check"><input type="checkbox" id="appFx" ${SET.appFx?"checked":""}> Show my profile animation behind the whole app</label><div class="hint">${mem(ME)?.bgfx?"Change the animation in Edit profile.":"Pick one first in Edit profile → Animated background."}</div></div>
     ${MODE==="live"?`<div class="sec"><h2>Data</h2><button class="btn block" data-act="resync">🔄 Refresh everything</button><div class="hint">The app saves a copy on this phone and only downloads what's new, to keep things fast and free. Use this if something looks out of date.</div></div>`:""}
     ${MODE==="live"?`<div class="sec"><h2>Your user ID</h2><div class="row" style="flex-wrap:nowrap"><code style="flex:1;min-width:0;overflow-wrap:anywhere;font-size:12px;background:var(--surface2);padding:8px 10px;border-radius:10px;user-select:all;-webkit-user-select:all">${esc(ME)}</code><button class="btn sm" data-act="copyUid">Copy</button></div>${crewOwner()===ME?`<div class="hint">You're the crew owner, so you can remove people from their profile. Paste this ID into the Firebase rules once so it works.</div>`:""}</div>`:""}
     ${MODE==="live"?`<div class="sec"><h2>Account</h2><button class="btn danger block" data-act="delAccount">Delete my account</button><div class="hint">Removes your profile, votes, busy times and login for good.</div></div>`:""}
@@ -2490,6 +2520,64 @@ SHEETS.badge={live:true,
       ${tierRows?`<div class="list" style="gap:6px;width:100%;text-align:left">${tierRows}</div>`:""}
       ${!me?`<div class="hint" style="margin:0">${esc(nick(uid))}'s badge.</div>`:""}</div>`}}
 };
+/* ---------- animated backgrounds ---------- */
+const FX_LIST=[["Cute",[["stars","✨","Stars"],["bubbles","🫧","Bubbles"],["butterflies","🦋","Butterflies"],["petals","🌸","Petals"],["hearts","💗","Hearts"],["sparkles","🌟","Sparkles"],["fireflies","🌿","Fireflies"]]],
+  ["Bold",[["snow","❄️","Snow"],["rain","🌧️","Rain"],["embers","🔥","Embers"],["meteors","☄️","Meteors"],["matrix","💻","Matrix"],["speed","🏎️","Speed"]]]];
+const FXS={},rnd=(a,b)=>a+Math.random()*(b-a);
+function fxSprite(e,sz){const k=e+sz;if(FXS[k])return FXS[k];const c=document.createElement("canvas");c.width=c.height=Math.ceil(sz*1.4);const g=c.getContext("2d");
+  g.font=`${sz}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",system-ui`;g.textAlign="center";g.textBaseline="middle";g.fillText(e,c.width/2,c.height/2+sz*.06);return FXS[k]=c}
+const emo=(g,e,p,sz,a,rot,sx)=>{const sp=fxSprite(e,Math.round(sz));g.save();g.globalAlpha=a;g.translate(p.x,p.y);if(rot)g.rotate(rot);if(sx!=null)g.scale(sx,1);g.drawImage(sp,-sp.width/2,-sp.height/2);g.restore()};
+const dot=(g,x,y,r,c,a)=>{g.globalAlpha=a;g.fillStyle=c;g.beginPath();g.arc(x,y,r,0,7);g.fill()};
+const FX={
+  stars:{n:60,init:(p,W,H)=>Object.assign(p,{x:rnd(0,W),y:rnd(0,H),r:rnd(.5,1.7),ph:rnd(0,6),sp:rnd(.8,2.2)}),draw:(g,p,t)=>dot(g,p.x,p.y,p.r,"#fff",.12+.38*(.5+.5*Math.sin(t*p.sp+p.ph)))},
+  bubbles:{n:16,init:(p,W,H,f)=>Object.assign(p,{x:rnd(0,W),y:f?rnd(0,H):H+rnd(10,80),r:rnd(6,22),v:rnd(12,30),ph:rnd(0,6)}),
+    step:(p,dt,W,H,t)=>{p.y-=p.v*dt;p.x+=Math.sin(t*1.3+p.ph)*.35;if(p.y<-p.r*2)FX.bubbles.init(p,W,H)},
+    draw:(g,p)=>{g.globalAlpha=.32;g.strokeStyle="#BFE9FF";g.lineWidth=1.3;g.beginPath();g.arc(p.x,p.y,p.r,0,7);g.stroke();dot(g,p.x-p.r*.35,p.y-p.r*.35,p.r*.22,"#fff",.4)}},
+  butterflies:{n:7,init:(p,W,H)=>Object.assign(p,{x:rnd(0,W),y:rnd(0,H),vx:rnd(-22,22)||10,vy:rnd(-14,-4),sz:rnd(16,26),ph:rnd(0,6)}),
+    step:(p,dt,W,H,t)=>{p.x+=(p.vx+Math.sin(t*.9+p.ph)*14)*dt;p.y+=(p.vy+Math.cos(t*1.2+p.ph)*10)*dt;if(p.x<-30)p.x=W+20;if(p.x>W+30)p.x=-20;if(p.y<-30)p.y=H+20;if(p.y>H+30)p.y=-20},
+    draw:(g,p,t)=>emo(g,"🦋",p,p.sz,.38,Math.sin(t+p.ph)*.25,.35+.65*Math.abs(Math.sin(t*7+p.ph)))},
+  petals:{n:16,init:(p,W,H,f)=>Object.assign(p,{x:rnd(0,W),y:f?rnd(0,H):rnd(-60,-10),sz:rnd(11,19),v:rnd(18,40),ph:rnd(0,6),rs:rnd(-1.5,1.5)}),
+    step:(p,dt,W,H,t)=>{p.y+=p.v*dt;p.x+=Math.sin(t*1.1+p.ph)*.6;if(p.y>H+30)FX.petals.init(p,W,H)},draw:(g,p,t)=>emo(g,"🌸",p,p.sz,.34,t*p.rs+p.ph)},
+  hearts:{n:12,init:(p,W,H,f)=>Object.assign(p,{x:rnd(0,W),y:f?rnd(0,H):H+rnd(10,80),sz:rnd(12,22),v:rnd(14,32),ph:rnd(0,6)}),
+    step:(p,dt,W,H,t)=>{p.y-=p.v*dt;p.x+=Math.sin(t*1.4+p.ph)*.4;if(p.y<-30)FX.hearts.init(p,W,H)},draw:(g,p,t)=>emo(g,"💗",p,p.sz,.3,Math.sin(t*1.2+p.ph)*.2)},
+  sparkles:{n:18,init:(p,W,H)=>Object.assign(p,{x:rnd(0,W),y:rnd(0,H),sz:rnd(10,20),life:rnd(0,1),dur:rnd(2,4.5)}),
+    step:(p,dt,W,H)=>{p.life+=dt/p.dur;if(p.life>=1){FX.sparkles.init(p,W,H);p.life=0}},draw:(g,p)=>emo(g,"✨",p,p.sz*(.6+.4*Math.sin(Math.PI*p.life)),.5*Math.sin(Math.PI*p.life))},
+  fireflies:{n:22,init:(p,W,H)=>Object.assign(p,{x:rnd(0,W),y:rnd(0,H),a:rnd(0,6),v:rnd(8,20),ph:rnd(0,6)}),
+    step:(p,dt,W,H)=>{p.a+=rnd(-1.5,1.5)*dt;p.x+=Math.cos(p.a)*p.v*dt;p.y+=Math.sin(p.a)*p.v*dt;if(p.x<0||p.x>W)p.a=Math.PI-p.a;if(p.y<0||p.y>H)p.a=-p.a},
+    draw:(g,p,t)=>{const k=.5+.5*Math.sin(t*2+p.ph);dot(g,p.x,p.y,6,"#D8F36B",.08*k);dot(g,p.x,p.y,2,"#EFFF9C",.25+.45*k)}},
+  snow:{n:60,init:(p,W,H,f)=>Object.assign(p,{x:rnd(0,W),y:f?rnd(0,H):rnd(-20,-4),r:rnd(.8,2.6),v:rnd(14,40),ph:rnd(0,6)}),
+    step:(p,dt,W,H,t)=>{p.y+=p.v*dt;p.x+=Math.sin(t+p.ph)*.3;if(p.y>H+5)FX.snow.init(p,W,H)},draw:(g,p)=>dot(g,p.x,p.y,p.r,"#fff",.45)},
+  rain:{n:60,init:(p,W,H,f)=>Object.assign(p,{x:rnd(-40,W+40),y:f?rnd(0,H):rnd(-60,-10),l:rnd(10,22),v:rnd(320,520)}),
+    step:(p,dt,W,H)=>{p.y+=p.v*dt;p.x-=p.v*.12*dt;if(p.y>H+20)FX.rain.init(p,W,H)},
+    draw:(g,p)=>{g.globalAlpha=.3;g.strokeStyle="#A9C1DE";g.lineWidth=1.1;g.beginPath();g.moveTo(p.x,p.y);g.lineTo(p.x+p.l*.12,p.y-p.l);g.stroke()}},
+  embers:{n:30,init:(p,W,H,f)=>Object.assign(p,{x:rnd(0,W),y:f?rnd(0,H):H+rnd(5,40),r:rnd(1,2.6),v:rnd(18,45),ph:rnd(0,6),c:Math.random()<.5?"#FF7A2F":"#FFC15E"}),
+    step:(p,dt,W,H,t)=>{p.y-=p.v*dt;p.x+=Math.sin(t*2+p.ph)*.5;if(p.y<-10)FX.embers.init(p,W,H)},
+    draw:(g,p,t)=>{const k=.55+.45*Math.sin(t*9+p.ph);dot(g,p.x,p.y,p.r*3,p.c,.07*k);dot(g,p.x,p.y,p.r,p.c,.55*k)}},
+  meteors:{n:5,pre:(g,W,H,t,st)=>{st.bg=st.bg||Array.from({length:40},()=>({x:rnd(0,W),y:rnd(0,H),r:rnd(.4,1.2)}));for(const b of st.bg)dot(g,b.x,b.y,b.r,"#fff",.25)},
+    init:(p,W,H)=>Object.assign(p,{x:rnd(W*.2,W*1.2),y:rnd(-H*.3,H*.4),v:rnd(380,620),wait:rnd(0,5),l:rnd(60,130)}),
+    step:(p,dt,W,H)=>{if(p.wait>0){p.wait-=dt;return}p.x-=p.v*dt;p.y+=p.v*.55*dt;if(p.x<-150||p.y>H+150)FX.meteors.init(p,W,H)},
+    draw:(g,p)=>{if(p.wait>0)return;const gr=g.createLinearGradient(p.x,p.y,p.x+p.l,p.y-p.l*.55);gr.addColorStop(0,"rgba(255,255,255,.75)");gr.addColorStop(1,"rgba(255,255,255,0)");g.globalAlpha=1;g.strokeStyle=gr;g.lineWidth=1.6;g.beginPath();g.moveTo(p.x,p.y);g.lineTo(p.x+p.l,p.y-p.l*.55);g.stroke()}},
+  matrix:{n:0,pre:(g,W,H,t,st,dt)=>{const cw=16;if(!st.cols||st.W!==W){st.W=W;st.cols=Array.from({length:Math.ceil(W/cw)},()=>({y:rnd(-H*.2,H),v:rnd(40,110),ch:[]}))}
+      g.font='14px ui-monospace,Menlo,monospace';g.textAlign="center";const A="アイウエオカキクケコサシスセソ0123456789ﾊﾋﾌﾍﾎ";
+      st.cols.forEach((c,i)=>{c.y+=c.v*dt;if(c.y-200>H){c.y=rnd(-200,0);c.v=rnd(40,110)}for(let k=0;k<12;k++){const y=c.y-k*16;if(y<0||y>H)continue;g.globalAlpha=(k?.22*(1-k/12):.5);g.fillStyle=k?"#3CFF8F":"#C8FFD9";g.fillText(A[(i*7+k*3+Math.floor(c.y/16))%A.length],i*cw+cw/2,y)}})},init:p=>p,draw:()=>{}},
+  speed:{n:24,init:(p,W,H,f)=>Object.assign(p,{x:f?rnd(-W,W):rnd(-W,-50),y:rnd(0,H),l:rnd(40,140),v:rnd(500,900)}),
+    step:(p,dt,W,H)=>{p.x+=p.v*dt;if(p.x>W+20)FX.speed.init(p,W,H)},
+    draw:(g,p)=>{const gr=g.createLinearGradient(p.x-p.l,p.y,p.x,p.y);gr.addColorStop(0,"rgba(255,255,255,0)");gr.addColorStop(1,"rgba(255,255,255,.45)");g.globalAlpha=1;g.strokeStyle=gr;g.lineWidth=1.2;g.beginPath();g.moveTo(p.x-p.l,p.y);g.lineTo(p.x,p.y);g.stroke()}},
+};
+function runFx(cv,kind){const def=FX[kind];if(!def)return;const g=cv.getContext("2d");let W=0,H=0,ps=[],st={},last=performance.now(),t0=last;
+  const fit=()=>{const r=cv.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);if(!r.width||!r.height)return false;W=r.width;H=r.height;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);g.setTransform(dpr,0,0,dpr,0,0);st.bg=null;return true};
+  const seed=()=>{const n=Math.round(def.n*Math.min(1.6,Math.max(.6,W*H/(390*780))));ps=Array.from({length:n},()=>def.init({},W,H,true))};
+  const still=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  let ok=fit();if(ok)seed();try{new ResizeObserver(()=>{if(fit()&&!ps.length)seed()}).observe(cv)}catch{}
+  const frame=now=>{if(!cv.isConnected||cv.dataset.k!==kind)return;if(document.hidden||!W){last=now;return requestAnimationFrame(frame)}
+    const dt=Math.min(.05,(now-last)/1000),t=(now-t0)/1000;last=now;g.globalAlpha=1;g.clearRect(0,0,W,H);
+    def.pre?.(g,W,H,t,st,dt);for(const p of ps){def.step?.(p,dt,W,H,t);def.draw(g,p,t,W,H)}g.globalAlpha=1;
+    if(!still)requestAnimationFrame(frame)};requestAnimationFrame(frame)}
+function mountFx(host,kind,fixed){if(!host)return;let cv=host.querySelector(":scope>canvas.bgfx");if(cv&&cv.dataset.k===(kind||""))return;cv?.remove();if(!kind||!FX[kind])return;
+  cv=document.createElement("canvas");cv.className="bgfx"+(fixed?" fixed":"");cv.dataset.k=kind;cv.setAttribute("aria-hidden","true");host.prepend(cv);runFx(cv,kind)}
+function syncAppFx(){const k=SET.appFx&&(MODE==="live"||MODE==="demo")?mem(ME)?.bgfx:"";mountFx(document.body,k||"",true);document.body.classList.toggle("has-fx",!!k)}
+SHEETS.person.after=s=>mountFx(s.el,mem(s.args.id)?.bgfx);
+SHEETS.profile.after=s=>mountFx($("#fxPrev",s.el),s.state.bgfx);
 /* busy */
 SHEETS.busy={
   render(s){return{title:"Block my time",body:`<div class="form">
@@ -2760,7 +2848,7 @@ const ACT={
   person(d){openSheet("person",{id:d.id})},
   pfPhoto(){const s=topS();pickPhotos(async fs=>{if(!fs[0])return;try{s.state.photo=await squarePhoto(fs[0],320);paintSheet(s)}catch{toast("Couldn't read that photo. Try another.")}},"#onePick")},
   pfPhotoDel(){const s=topS();s.state.photo="";paintSheet(s)},
-  pfSticker(d){const s=topS(),a=s.state.stickers,i=a.indexOf(d.v);if(i>=0)a.splice(i,1);else if(a.length<8)a.push(d.v);else return toast("Max 8 stickers.");paintSheet(s)},
+  pfSticker(d){const s=topS(),a=s.state.stickers,i=a.indexOf(d.v);if(i>=0)a.splice(i,1);else if(a.length<8)a.push(d.v);else return toast("Max 8 stickers.");const sl=[...s.el.querySelectorAll(".stkrow")].map(r=>r.scrollLeft);paintSheet(s);[...s.el.querySelectorAll(".stkrow")].forEach((r,i)=>r.scrollLeft=sl[i]||0)},
   momentShot(){openSheet("camera",{ctx:"moment"})},
   momentGallery(){ensureAC();pickPhotos(fs=>ACT._momentFiles(fs),"#mediaPick")},
   async _momentFiles(fs){if(!fs.length)return;if(fs.length>5){toast("Up to 5 at a time — using the first 5");fs=fs.slice(0,5)}const items=[];
@@ -2786,8 +2874,9 @@ const ACT={
   resetDemo(){try{localStorage.removeItem(Demo.key);localStorage.removeItem("yg-actas")}catch{}location.reload()},
   pfEmoji(d){topS().state.emoji=d.v;paintSheet(topS())},
   pfColor(d){topS().state.color=d.v;paintSheet(topS())},
+  pfFx(d){const s=topS();s.state.bgfx=d.v;paintSheet(s)},
   async pfSave(){const n=val("pfNick");if(!n)return toast("Add a name first.");const s=topS(),bd=val("pfBday");
-    await Store.upd("members",ME,{nick:n.slice(0,24),emoji:s.state.emoji,color:s.state.color,photo:s.state.photo||"",bio:val("pfBio"),vibe:val("pfVibe"),birthday:bd?bd.slice(5):"",spot:val("pfSpot"),song:val("pfSong"),likes:val("pfLikes").split(",").map(x=>x.trim()).filter(Boolean).slice(0,10),stickers:s.state.stickers});closeSheet();toast("Profile saved")},
+    await Store.upd("members",ME,{nick:n.slice(0,24),emoji:s.state.emoji,color:s.state.color,photo:s.state.photo||"",bio:val("pfBio"),vibe:val("pfVibe"),birthday:bd?bd.slice(5):"",spot:val("pfSpot"),song:val("pfSong"),likes:val("pfLikes").split(",").map(x=>x.trim()).filter(Boolean).slice(0,10),stickers:s.state.stickers,bgfx:s.state.bgfx||""});closeSheet();toast("Profile saved")},
   planFilter(d){UI.planFilter=d.k;render()},
   newPlan(){openSheet("edit",{})},
   openPlan(d,el,ev){ev?.preventDefault();openSheet("plan",{id:d.id})},
@@ -3151,6 +3240,7 @@ document.addEventListener("change",ev=>{
     else{await Store.upd("members",ME,{shareLoc:false,loc:MODE==="demo"?DEL:firebase.firestore.FieldValue.delete()});syncLocWatch();toast("👻 Location hidden")}})()}
   if(el.id?.startsWith("ridePartial-")){const pid=el.dataset.pid,r=myRsvp(pid);if(r?.ride)saveRsvp(pid,{ride:{...r.ride,partial:el.checked}})}
   if(["nMsgs","nPlans","nMoments"].includes(el.id)){SET[el.id]=el.checked;ls.set("yg-settings",SET)}
+  if(el.id==="appFx"){SET.appFx=el.checked;ls.set("yg-settings",SET);syncAppFx()}
   if(el.id==="actAs"){ls.set("yg-actas",el.value);ME=el.value;while(stack.length)closeSheet();render();toast(ME==="me-demo"?"Back to being you":"Now testing as "+(mem(ME)?.nick||"a friend"))}
   if(el.id==="exPl"){const s=topS();s.state.plan=el.value}
   if(el.id==="pdfD"&&el.value){const s=topS();s.state.d=el.value;paintSheet(s)}
