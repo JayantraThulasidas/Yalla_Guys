@@ -452,6 +452,8 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .mosaic .mt .who{position:absolute;left:6px;bottom:6px}
 .mosaic .mt .dl{position:absolute;right:6px;top:6px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.5);color:#fff;font-size:15px;display:grid;place-items:center}
 .collage{width:100%;border-radius:16px;display:block;box-shadow:var(--shadow);background:var(--surface2);aspect-ratio:4/5;object-fit:cover}
+.collage-wrap.film{max-height:68dvh;overflow-y:auto;border-radius:16px;box-shadow:var(--shadow);-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#111}
+.collage-wrap.film .collage{aspect-ratio:auto;height:auto;object-fit:contain;box-shadow:none;border-radius:0}
 .collage-styles{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .auth{max-width:440px;margin:0 auto;padding-block:8px 40px}
 .auth-hero{padding:28px 4px 22px}
@@ -507,7 +509,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.10";
+const APP_VERSION="2026-11-10.11";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1293,8 +1295,11 @@ function gridCells(n,W,H,pad){const L={1:[[0,0,1,1]],2:[[0,0,.5,1],[.5,0,.5,1]],
   let c=L[n];if(!c){const cols=n<=9?3:4,rows=Math.ceil(n/cols);c=[];for(let i=0;i<n;i++)c.push([(i%cols)/cols,Math.floor(i/cols)/rows,1/cols,1/rows])}
   return c.map(([x,y,w,h])=>[pad+x*(W-pad*2)+pad/2,pad+y*(H-pad*2)+pad/2,w*(W-pad*2)-pad,h*(H-pad*2)-pad])}
 async function makeCollage(p,items,style){
-  const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
-  const imgs=(await Promise.all(items.slice(0,style==="grid"?16:9).map(m=>loadI(m.kind==="video"?m.poster:m.src).catch(()=>null)))).filter(Boolean);
+  const imgs=(await Promise.all(items.slice(0,style==="grid"?16:style==="film"?30:9).map(m=>loadI(m.kind==="video"?m.poster:m.src).catch(()=>null)))).filter(Boolean);
+  const W=1080,FW=W-160,FILM_TOP=40,FILM_FOOT=200;
+  const fh=imgs.map(im=>Math.round(FW*im.naturalHeight/im.naturalWidth));
+  let H=style==="film"?Math.min(30000,FILM_TOP+fh.reduce((a,b)=>a+b+24,0)+FILM_FOOT):1350;
+  const c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
   const title=`${p.emoji||""} ${p.title}`.trim(),date=p.final?fDate(p.final.date,{day:"numeric",month:"long",year:"numeric"}):"";
   if(style==="polaroid"){
     const bg=g.createLinearGradient(0,0,W,H);bg.addColorStop(0,"#FBE6D2");bg.addColorStop(1,"#F8DEDC");g.fillStyle=bg;g.fillRect(0,0,W,H);
@@ -1305,10 +1310,10 @@ async function makeCollage(p,items,style){
     g.fillStyle="#1F2328";g.font="800 64px 'Bricolage Grotesque',system-ui,sans-serif";g.textAlign="center";g.fillText(title,W/2,H-120,W-120);
     g.font="600 34px Inter,system-ui,sans-serif";g.fillStyle="#5C6774";g.fillText([date,"Yalla Guys"].filter(Boolean).join(" · "),W/2,H-66);
   }else if(style==="film"){
-    g.fillStyle="#111";g.fillRect(0,0,W,H);const n=Math.min(imgs.length,4),fh=(H-260)/Math.max(n,1);
-    for(let y=20;y<H-150;y+=46){g.fillStyle="#f2f2f2";rrect(g,22,y,28,26,5);g.fill();rrect(g,W-50,y,28,26,5);g.fill()}
-    imgs.slice(0,4).forEach((im,i)=>{drawCover(g,im,80,40+i*fh,W-160,fh-24)});
-    g.fillStyle="#F2C14E";g.font="800 58px 'Bricolage Grotesque',system-ui,sans-serif";g.textAlign="left";g.fillText(title,80,H-110,W-160);
+    g.fillStyle="#111";g.fillRect(0,0,W,H);
+    for(let y=16;y<H-FILM_FOOT+40;y+=46){g.fillStyle="#f2f2f2";rrect(g,22,y,28,26,5);g.fill();rrect(g,W-50,y,28,26,5);g.fill()}
+    let y=FILM_TOP;imgs.forEach((im,i)=>{g.drawImage(im,80,y,FW,fh[i]);g.fillStyle="rgba(242,193,78,.85)";g.font="700 22px ui-monospace,Menlo,monospace";g.textAlign="left";g.fillText(String(i+1).padStart(2,"0")+"A",84,y+fh[i]+18);y+=fh[i]+24});
+    g.fillStyle="#F2C14E";g.font="800 58px 'Bricolage Grotesque',system-ui,sans-serif";g.textAlign="left";g.fillText(title,80,H-104,W-160);
     g.font="600 32px Inter,system-ui,sans-serif";g.fillStyle="#ddd";g.fillText([date,"Yalla Guys"].filter(Boolean).join(" · "),80,H-60);
   }else{
     g.fillStyle="#0E1318";g.fillRect(0,0,W,H);const cells=gridCells(imgs.length,W,H-170,20);
@@ -1331,7 +1336,7 @@ SHEETS.album={live:true,
   render(s){const p=planById(s.args.id);if(!p)return{title:"Album",body:""};const items=albumOf(p.id).filter(m=>m.kind==="photo"||m.kind==="video");
     return{title:`📸 ${esc(p.title)}`,right:`<button class="btn sm pri" data-act="albumAll">⬇ All</button>`,
       top:`<div class="form" style="gap:10px"><div class="collage-styles">${COLLAGE_STYLES.map(([k,l])=>`<button class="chip" data-act="collageStyle" data-k="${k}" aria-pressed="${s.state.style===k}">${l}</button>`).join("")}</div>
-        <img class="collage" id="collageImg" alt="Collage of the plan's photos">
+        <div class="collage-wrap ${s.state.style==="film"?"film":""}"><img class="collage" id="collageImg" alt="Collage of the plan's photos"></div>${s.state.style==="film"?`<div class="hint" style="margin:-4px 0 0;text-align:center">↕ Scroll the film strip</div>`:""}
         <div class="grid2"><button class="btn pri" data-act="collageSave">⬇ Save collage</button><button class="btn" data-act="addMedia" data-id="${esc(p.id)}" data-ph="memory">＋ Add pics</button></div></div>`,
       body:`<div class="sec"><div class="between"><h2>All ${items.length}</h2><span class="meta">Tap ⬇ to save one</span></div>
         <div class="mosaic">${items.map((m,i)=>`<div class="mt ${i%7===0?"big":i%5===3?"tall":""}"><button style="all:unset;display:block;width:100%;height:100%;cursor:pointer" ${m.kind==="photo"?`data-act="viewPhoto" data-id="${esc(m.id)}"`:`data-act="playVideo" data-key="media:${esc(m.id)}"`}><img src="${esc(m.kind==="video"?m.poster:m.src)}" alt="" loading="lazy">${m.kind==="video"?'<span class="vplay">▶</span>':""}</button><span class="who">${avatar(m.by,"xs")}</span><button class="dl" data-act="saveOne" data-id="${esc(m.id)}" aria-label="Save">⬇</button></div>`).join("")}</div></div>`}},
