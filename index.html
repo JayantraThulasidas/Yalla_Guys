@@ -346,6 +346,14 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .tl-needle{position:absolute;left:50%;bottom:0;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:10px solid var(--accent);transform:translateX(-50%);pointer-events:none}
 .tl-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:14px}
 .tl-head h2{font-size:22px;font-weight:800}
+.ride-me{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
+.rstop{display:flex;gap:10px;align-items:flex-start}
+.rstop .n{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;color:#fff}
+.rstop .tm{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;font-size:13px;white-space:nowrap}
+.rleg{font-size:12px;color:var(--muted);margin:-4px 0 -4px 13px;padding:4px 0 4px 23px;border-left:2px dotted var(--line)}
+.stepper{display:inline-flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.stepper button{border:0;background:var(--surface2);width:40px;height:40px;font-size:18px}
+.stepper b{min-width:40px;text-align:center}
 .auth{max-width:440px;margin:0 auto;padding-block:8px 40px}
 .auth-hero{padding:28px 4px 22px}
 .auth-logo{font-family:var(--f-display);font-weight:800;font-size:46px;letter-spacing:-.03em;line-height:1}
@@ -1162,6 +1170,7 @@ SHEETS.plan={live:true,
       <div class="sec"><h2>Who's going</h2><div class="seg">${rsvpBtns}</div>
         ${[["in","Going"],["maybe","Maybe"],["out","Can't make it"]].map(([k,l])=>{const u=grp(k);return u.length?`<div class="row"><span class="meta" style="width:92px">${l} (${u.length})</span>${u.map(x=>`<span class="row" style="gap:4px">${avatar(x,"xs")}<span style="font-size:13px">${esc(nick(x))}</span></span>`).join("")}</div>`:""}).join("")}
         <button class="btn" data-act="planChat" data-id="${esc(p.id)}">💬 Plan chat</button></div>
+      ${ridesHtml(p,s)}
       <div class="sec"><div class="between"><h2>Route</h2>${pts.length?`<a class="btn sm" href="${esc(gmapsUrl(stops))}" target="_blank" rel="noopener">Open in Google Maps</a>`:""}</div>
         ${stops.length?`${pts.length?`<div class="mini-map" id="mm-plan"></div>`:""}<div>${legs}</div>${pts.length>1?`<div class="item"><span class="grow"><b>Total drive</b><br><span class="meta">${route?"Road route without traffic. Google Maps shows live traffic.":"Rough estimate while the road route loads"}</span></span><span class="amt">${route?"":"~"}${tk.toFixed(0)} km · ${fMin(tm)}</span></div>`:""}`:`<div class="meta">No places yet. Tap Edit to add stops.</div>`}</div>
       <div class="sec"><div class="between"><h2>Mood board</h2><span class="row" style="gap:6px"><button class="btn sm" data-act="openBoard" data-id="${esc(p.id)}">⤢ Open</button><button class="btn sm pri" data-act="addMedia" data-id="${esc(p.id)}" data-ph="idea">+ Add</button></span></div><p class="hint" style="margin:0">Photos, notes, colours and links that set the vibe. Anyone can add.</p>
@@ -1179,7 +1188,8 @@ SHEETS.plan={live:true,
         <div class="row" style="flex-wrap:nowrap;align-items:flex-end;gap:2px">${attachBtns("note",p.id)}<textarea class="compose" id="noteIn-${esc(p.id)}" rows="1" placeholder="${s.state.replyTo?"Write a reply…":"Add a comment…"}"></textarea><button class="send" data-act="addNote" data-id="${esc(p.id)}" aria-label="Post comment">${ICON.send}</button></div></div>
       <div class="sec"><div class="danger-zone">${st!=="done"?`<button class="btn sm" data-act="markDone" data-id="${esc(p.id)}">Mark as done</button>`:`<button class="btn sm" data-act="unDone" data-id="${esc(p.id)}">Move back to upcoming</button>`}<button class="btn sm danger" data-act="delPlan" data-id="${esc(p.id)}" data-confirm="Tap again to delete">Delete plan</button></div></div>`};
   },
-  after(s){const p=planById(s.args.id);if(p)miniMap(s,"plan",$("#mm-plan",s.el),p.stops||[],hue(p.id))}
+  after(s){const p=planById(s.args.id);if(!p)return;miniMap(s,"plan",$("#mm-plan",s.el),p.stops||[],hue(p.id));
+    const me=myRsvp(p.id);if(me?.ride?.role==="driver"){const{pts}=driverRoute(p,me,rideInfo(p));miniMap(s,"ride",$("#mm-ride",s.el),pts,hue(p.id))}}
 };
 const hostOf=u=>{try{return new URL(u).hostname.replace(/^www\./,"")}catch{return"Link"}};
 
@@ -1211,6 +1221,92 @@ function albumHtml(p,mems,tile){
     ${today?`<div class="banner" style="margin:0;background:var(--accent-soft)">🎉 It's plan day! Add your pics as you go. They stay in this plan for everyone.</div>`:""}
     <div class="grid2"><button class="btn pri" data-act="addMedia" data-id="${esc(p.id)}" data-ph="memory" style="min-height:52px">📷 Photos & videos</button><button class="btn" data-act="voice" data-ctx="album" data-id="${esc(p.id)}" style="min-height:52px">🎤 Voice note</button></div>
     ${mems.length?`<div class="media-grid">${mems.map(tile).join("")}</div><div class="row">${avStack(who,"xs",8)}<span class="meta">Shared by ${who.length} ${who.length===1?"person":"people"}</span></div>`:`<div class="meta">No photos yet. Be the first to add some.</div>`}</div>`;
+}
+/* ---------- rides: chauffeur requests, drivers, meetup spot ---------- */
+function saveRsvp(pid,patch){const r=myRsvp(pid)||{};const{id,...rest}=r;return Store.set("rsvps",pid+"__"+ME,{planId:pid,uid:ME,going:"in",slots:[],...rest,...patch,at:now()})}
+function rideInfo(p){
+  const rs=rsvpsOf(p.id).filter(r=>r.going!=="out");
+  const drivers=rs.filter(r=>r.ride?.role==="driver").sort((a,b)=>(a.ride.at||0)-(b.ride.at||0));
+  const riders=rs.filter(r=>r.ride?.role==="rider");
+  const assigned={};for(const d of drivers)for(const u of d.riders||[])if(!assigned[u]&&riders.some(r=>r.uid===u))assigned[u]=d.uid;
+  return{drivers,riders,assigned,meetup:p.meetup&&p.meetup.lat!=null?p.meetup:null};
+}
+function driverRoute(p,dr,info){
+  const pts=[];const start=dr.ride.start;if(start?.lat!=null)pts.push({...start,kind:"start",label:"Start"});
+  let pick=(dr.riders||[]).filter(u=>info.assigned[u]===dr.uid).map(u=>{const r=info.riders.find(x=>x.uid===u);return r?.ride?.pickup?.lat!=null?{...r.ride.pickup,kind:"pickup",uid:u}:null}).filter(Boolean);
+  let cur=pts[0]||pick[0];const ordered=[];
+  while(pick.length){pick.sort((a,b)=>hav(cur,a)-hav(cur,b));cur=pick.shift();ordered.push(cur)}
+  pts.push(...ordered);
+  const partial=dr.ride.partial&&info.meetup;
+  if(info.meetup)pts.push({...info.meetup,kind:"meetup",label:"Meetup spot"});
+  if(!partial)for(const st of p.stops||[])if(st.lat!=null)pts.push({...st,kind:"dest"});
+  return{pts,partial};
+}
+function rideTimes(p,pts){
+  const r=routeFor(pts),legs=[];let total=0;
+  for(let i=0;i<pts.length-1;i++){const l=r?r.legs[i]:legEst(pts[i],pts[i+1]);const m=(l?.min||0)+(pts[i+1].kind==="pickup"?3:0);legs.push({km:l?.km||0,min:m});total+=m}
+  let times=null;
+  if(p.final?.start){const arrive=new Date(p.final.date+"T"+p.final.start).getTime();const meetIdx=pts.findIndex(x=>x.kind==="meetup");
+    const endIdx=pts.length-1;let t=arrive-(pts[endIdx].kind==="meetup"?10:0)*6e4;times=new Array(pts.length);times[endIdx]=t;
+    for(let i=endIdx-1;i>=0;i--){t-=legs[i].min*6e4;times[i]=t}}
+  return{legs,total,times,real:!!r};
+}
+function rideMapsUrl(pts){if(pts[0]?.kind==="start"||pts.length<2)return gmapsUrl(pts);const ll=x=>`${x.lat},${x.lng}`,w=pts.slice(0,-1).map(ll).join("|");return`https://www.google.com/maps/dir/?api=1&destination=${ll(pts[pts.length-1])}${w?"&waypoints="+encodeURIComponent(w):""}&travelmode=driving`}
+const hhmm=t=>t?new Date(t).toLocaleTimeString("en-GB",{hour:"numeric",minute:"2-digit",hour12:true}).replace(" ",""):"";
+function ridesHtml(p,s){
+  const info=rideInfo(p),me=myRsvp(p.id),myRide=me?.ride,role=myRide?.role||"";
+  const col=hue(p.id);
+  const roleBtns=[["driver","🚗 I'm driving"],["rider","🙋 Request chauffeur"],["self","🚶 Going myself"]].map(([k,l])=>`<button data-act="rideRole" data-id="${esc(p.id)}" data-k="${k}" aria-pressed="${role===k}">${l}</button>`).join("");
+  let mine="";
+  if(role==="driver"){const{pts,partial}=driverRoute(p,me,info),t=rideTimes(p,pts),used=(me.riders||[]).filter(u=>info.assigned[u]===ME).length;
+    mine=`<div class="ride-me"><div class="between"><b>🚗 You're driving</b><span class="stepper"><button data-act="rideSeats" data-id="${esc(p.id)}" data-n="-1" aria-label="Fewer seats">−</button><b>${used}/${myRide.seats||3}</b><button data-act="rideSeats" data-id="${esc(p.id)}" data-n="1" aria-label="More seats">+</button></span></div>
+      <div class="between"><span class="meta">Start from: <b style="color:var(--fg)">${esc(myRide.start?.name||"not set")}</b></span><button class="btn sm" data-act="rideLoc" data-id="${esc(p.id)}" data-k="start">${myRide.start?"Change":"Set"}</button></div>
+      ${info.meetup?`<label class="toggle"><span>Only drive to the meetup spot<br><span class="meta">Drop your riders at the meetup; others take it from there</span></span><input type="checkbox" id="ridePartial-${esc(p.id)}" data-pid="${esc(p.id)}" ${myRide.partial?"checked":""}></label>`:""}
+      ${pts.length>1?`<div class="mini-map" id="mm-ride" style="height:200px"></div>
+        <div style="display:flex;flex-direction:column;gap:6px">${pts.map((x,i)=>`<div class="rstop"><span class="n" style="background:${x.kind==="pickup"?"var(--sun)":x.kind==="meetup"?"#6D4FC2":col}">${x.kind==="start"?"🏠":x.kind==="meetup"?"🤝":x.kind==="pickup"?"🙋":i+1}</span><span><b>${x.kind==="pickup"?esc(nick(x.uid)):esc(x.label||x.name||"Stop")}</b><br><span class="meta">${esc(x.kind==="pickup"?"Pickup · "+(x.name||""):x.kind==="dest"?"Destination":x.name||"")}</span></span>${t.times?`<span class="tm">${i===0?"Leave ":""}${hhmm(t.times[i])}</span>`:""}</div>${i<pts.length-1?`<div class="rleg">${t.real?"":"~"}${t.legs[i].km.toFixed(1)} km · ${fMin(t.legs[i].min)}</div>`:""}`).join("")}</div>
+        <div class="between"><span class="meta">${t.real?"":"~"}${fMin(t.total)} total${partial?" to the meetup":""}${p.final?.start?"":" · lock a time to see pickup times"}</span><a class="btn sm pri" href="${esc(rideMapsUrl(pts))}" target="_blank" rel="noopener">Open in Google Maps</a></div>`
+      :`<div class="meta">Set where you're starting from and pick up people below to build your route.</div>`}
+      <button class="btn sm ghost" data-act="rideRole" data-id="${esc(p.id)}" data-k="">Stop driving</button></div>`}
+  else if(role==="rider"){const d=info.assigned[ME],dr=d&&info.drivers.find(x=>x.uid===d);let when="";
+    if(dr){const{pts}=driverRoute(p,dr,info),t=rideTimes(p,pts),i=pts.findIndex(x=>x.kind==="pickup"&&x.uid===ME);if(t.times&&i>=0)when=hhmm(t.times[i])}
+    mine=`<div class="ride-me"><b>🙋 You requested a chauffeur</b>
+      <div class="between"><span class="meta">Pick me up at: <b style="color:var(--fg)">${esc(myRide.pickup?.name||"not set")}</b></span><button class="btn sm" data-act="rideLoc" data-id="${esc(p.id)}" data-k="pickup">${myRide.pickup?"Change":"Set"}</button></div>
+      ${dr?`<div class="banner" style="margin:0;background:var(--accent-soft)">🚗 <b>${esc(nick(dr.uid))}</b> is picking you up${when?` · be ready by <b>${when}</b>`:""}</div>`:`<div class="banner" style="margin:0">⏳ Waiting for a driver to pick you.</div>`}
+      <button class="btn sm ghost" data-act="rideRole" data-id="${esc(p.id)}" data-k="">Cancel request</button></div>`}
+  const amDriver=role==="driver",free=amDriver?(myRide.seats||3)-(me.riders||[]).filter(u=>info.assigned[u]===ME).length:0;
+  return`<div class="sec" id="rides"><div class="between"><h2>🚗 Rides</h2><span class="meta">${info.drivers.length} driver${info.drivers.length===1?"":"s"} · ${info.riders.length} need${info.riders.length===1?"s":""} a ride</span></div>
+    <div class="item"><span style="font-size:22px">🤝</span><span class="grow"><span class="t">${info.meetup?esc(info.meetup.name||"Meetup spot"):"No meetup spot"}</span><br><span class="meta">${info.meetup?"Every driver stops here before the destination":"Add one so cars can regroup before heading out"}</span></span><button class="btn sm" data-act="rideLoc" data-id="${esc(p.id)}" data-k="meetup">${info.meetup?"Change":"+ Add"}</button>${info.meetup?`<button class="x" data-act="meetupDel" data-id="${esc(p.id)}" aria-label="Remove meetup spot">✕</button>`:""}</div>
+    <div class="seg">${roleBtns}</div>
+    ${mine}
+    ${info.riders.length?`<div class="hint" style="font-weight:700;color:var(--fg)">Need a ride</div><div class="list" style="gap:6px">${info.riders.map(r=>{const d=info.assigned[r.uid],mineR=d===ME;
+      return`<div class="item">${avatar(r.uid,"sm")}<span class="grow"><span class="t">${esc(nick(r.uid))}</span><br><span class="meta">📍 ${esc(r.ride.pickup?.name||"No pickup spot yet")}${d?` · 🚗 ${esc(nick(d))}`:""}</span></span>
+        ${amDriver&&r.uid!==ME?(mineR?`<button class="btn sm" data-act="rideDrop" data-id="${esc(p.id)}" data-u="${esc(r.uid)}">Remove</button>`:d?"":`<button class="btn sm pri" data-act="ridePick" data-id="${esc(p.id)}" data-u="${esc(r.uid)}" ${free>0?"":"disabled"}>Pick up</button>`):(d?"":`<span class="pill warn">Waiting</span>`)}</div>`}).join("")}</div>`:""}
+    ${info.drivers.length?`<div class="hint" style="font-weight:700;color:var(--fg)">Drivers</div><div class="list" style="gap:6px">${info.drivers.map(d=>{const n=(d.riders||[]).filter(u=>info.assigned[u]===d.uid);
+      return`<div class="item">${avatar(d.uid,"sm")}<span class="grow"><span class="t">${esc(nick(d.uid))}${d.ride.partial&&info.meetup?' <span class="pill done">to meetup</span>':""}</span><br><span class="meta">${n.length}/${d.ride.seats||3} seats${n.length?" · "+n.map(u=>esc(nick(u))).join(", "):""}</span></span></div>`}).join("")}</div>`:""}
+  </div>`;
+}
+SHEETS.loc={
+  init(){return{q:"",res:[],loading:false}},
+  render(s){const t={pickup:"Pickup spot",start:"Where you're starting from",meetup:"Meetup spot"}[s.args.k]||"Location";
+    return{title:t,body:`<div class="form">
+      <button class="btn pri block" data-act="locHere" style="min-height:52px">📍 Use my current location</button>
+      <input class="inp" id="locQ" type="search" placeholder="🔎 Search a place or paste a maps link" autocomplete="off">
+      <div id="locRes"></div>
+      <button class="btn" data-act="locPin">🗺️ Drop a pin on the map</button></div>`}}
+};
+function locResHtml(st){return(st.loading?`<div class="meta">Searching…</div>`:"")+(st.res.length?`<div class="sugg">${st.res.map((x,i)=>`<button data-act="locPick" data-i="${i}"><b>${esc(x.name)}</b>${x.sub?`<br><span class="meta">${esc(x.sub)}</span>`:""}</button>`).join("")}</div>`:"")}
+let locTimer=null;
+async function locSearch(s,q){
+  const box=()=>$("#locRes",s.el);const p=parseLoc(q);if(p){return setLoc(s,{name:p.name||"Pinned spot",lat:p.lat,lng:p.lng})}
+  s.state.res=localSearch(q);s.state.loading=true;if(box())box().innerHTML=locResHtml(s.state);
+  try{const on=await onlineSearch(q);if(on){const seen=new Set(s.state.res.map(r=>r.name.toLowerCase()));s.state.res=s.state.res.concat(on.filter(r=>!seen.has(r.name.toLowerCase()))).slice(0,8)}}catch{}
+  s.state.loading=false;if(box())box().innerHTML=locResHtml(s.state);
+}
+async function setLoc(s,loc){
+  const pid=s.args.id,k=s.args.k;loc={name:loc.name||"Pinned spot",lat:+loc.lat,lng:+loc.lng};
+  if(k==="meetup")await Store.upd("plans",pid,{meetup:loc});
+  else{const r=myRsvp(pid);const ride={...(r?.ride||{role:k==="pickup"?"rider":"driver",seats:3,at:now()})};if(k==="pickup")ride.pickup=loc;else ride.start=loc;await saveRsvp(pid,{ride})}
+  if(topS()===s)closeSheet();toast("📍 Saved "+loc.name);
 }
 /* plan editor */
 SHEETS.edit={
@@ -1562,7 +1658,9 @@ const ACT={
   edEmoji(d){topS().state.emoji=d.v;paintSheet(topS())},
   pickRes(d){const s=topS(),r=s.state.res[+d.i];if(r)addStop(s,{name:r.name,lat:r.lat,lng:r.lng,addr:r.sub||""})},
   stopPick(){openSheet("pick",{})},
-  pickSave(){const s=topS();if(!s.state.pt)return toast("Tap the map to drop a pin first.");const ed=stack.find(x=>x.kind==="edit");const stop={name:val("pickName")||"Dropped pin",...s.state.pt};closeSheet();if(ed)setTimeout(()=>addStop(ed,stop),0)},
+  pickSave(){const s=topS();if(!s.state.pt)return toast("Tap the map to drop a pin first.");
+    if(s.args.forLoc){const ls_=stack[stack.length-2];const pt={name:val("pickName")||"Dropped pin",...s.state.pt};closeSheet();if(ls_?.kind==="loc")setTimeout(()=>setLoc(ls_,pt),0);return}
+    const ed=stack.find(x=>x.kind==="edit");const stop={name:val("pickName")||"Dropped pin",...s.state.pt};closeSheet();if(ed)setTimeout(()=>addStop(ed,stop),0)},
   stopUp(d){const a=topS().state.stops,i=+d.i;[a[i-1],a[i]]=[a[i],a[i-1]];paintSheet(topS())},
   stopDel(d){topS().state.stops.splice(+d.i,1);paintSheet(topS())},
   slotAdd(){const s=topS(),date=val("edD");if(!date)return toast("Pick a date first.");s.state.slots.push({id:rid(),date,start:val("edS"),end:val("edE"),by:ME});paintSheet(s);["edD","edS","edE"].forEach(i=>$("#"+i,s.el).value="")},
@@ -1602,8 +1700,8 @@ const ACT={
   defRemind(d){const m=+d.m,i=SET.remind.indexOf(m);if(i>=0)SET.remind.splice(i,1);else SET.remind.push(m);SET.remind.sort((a,b)=>b-a);saveSet()},
   icsDl(d){const p=planById(d.id);if(!p?.final)return;const txt=icsFor(p,remindFor(p.id));const name=(p.title.replace(/[^\w]+/g,"-")||"plan")+".ics";
     const a=document.createElement("a");a.href=/iPhone|iPad/i.test(navigator.userAgent)?"data:text/calendar;charset=utf-8,"+encodeURIComponent(txt):URL.createObjectURL(new Blob([txt],{type:"text/calendar"}));a.download=name;document.body.appendChild(a);a.click();a.remove()},
-  async vote(d){const r=myRsvp(d.id);const sl=new Set(r?.slots||[]);sl.has(d.slot)?sl.delete(d.slot):sl.add(d.slot);await Store.set("rsvps",d.id+"__"+ME,{planId:d.id,uid:ME,going:r?.going||(sl.size?"in":"maybe"),slots:[...sl],at:now()})},
-  async rsvp(d){const r=myRsvp(d.id);await Store.set("rsvps",d.id+"__"+ME,{planId:d.id,uid:ME,going:d.k,slots:r?.slots||[],at:now()})},
+  async vote(d){const r=myRsvp(d.id);const sl=new Set(r?.slots||[]);sl.has(d.slot)?sl.delete(d.slot):sl.add(d.slot);await saveRsvp(d.id,{going:r?.going||(sl.size?"in":"maybe"),slots:[...sl]})},
+  async rsvp(d){const patch={going:d.k};if(d.k==="out"){patch.ride=null;patch.riders=[]}await saveRsvp(d.id,patch)},
   async lock(d){const p=planById(d.id),sl=(p.slots||[]).find(x=>x.id===d.slot);if(!sl)return;await Store.upd("plans",d.id,{final:{date:sl.date,start:sl.start||"",end:sl.end||""},status:"set"});if(p.chatId&&D.chats.some(c=>c.id===p.chatId))await Store.add("msgs",{chatId:p.chatId,by:ME,text:`📅 Locked in: ${fDate(sl.date)} ${fRange(sl.start,sl.end)}`,at:now()});toast("Locked in. It's on everyone's calendar now.")},
   async reopen(d){await Store.upd("plans",d.id,{final:null,status:"poll"});toast("Poll reopened")},
   async addSlot(d){const s=topS(),date=val("slD");if(!date)return toast("Pick a date first.");const p=planById(d.id);await Store.upd("plans",d.id,{slots:[...(p.slots||[]),{id:rid(),date,start:val("slS"),end:val("slE"),by:ME}]});["slD","slS","slE"].forEach(i=>{const e=$("#"+i,s.el);if(e)e.value=""})},
@@ -1614,6 +1712,22 @@ const ACT={
   tlMode(d){const s=topS();s.state.mode=d.k;ls.set("yg-tlmode",d.k);paintSheet(s);s.ro?.disconnect();buildTimeline(s)},
   tlGo(d){topS().go?.(+d.i)},
   tlJump(d){const s=topS();if(!s.slots)return;const cur=s.month?TODAY().slice(0,7):TODAY();const i=d.k==="past"?0:d.k==="future"?s.slots.length-1:Math.max(0,s.slots.findIndex(x=>x.k===cur));s.go(i)},
+  async rideRole(d){const p=planById(d.id);const r=myRsvp(d.id);
+    if(!d.k){await saveRsvp(d.id,{ride:null,riders:[]});toast("Updated");return}
+    const ride={...(r?.ride||{}),role:d.k,at:r?.ride?.at||now(),seats:r?.ride?.seats||3};
+    await saveRsvp(d.id,{going:"in",ride,riders:d.k==="driver"?(r?.riders||[]):[]});
+    if(d.k==="rider"&&!ride.pickup)openSheet("loc",{id:d.id,k:"pickup"});
+    else if(d.k==="driver"&&!ride.start)openSheet("loc",{id:d.id,k:"start"});
+    else toast(d.k==="self"?"Got it, you're making your own way":"Updated")},
+  async rideSeats(d){const r=myRsvp(d.id);if(!r?.ride)return;const n=Math.max(1,Math.min(8,(r.ride.seats||3)+(+d.n)));await saveRsvp(d.id,{ride:{...r.ride,seats:n}})},
+  async ridePick(d){const r=myRsvp(d.id);if(r?.ride?.role!=="driver")return;await saveRsvp(d.id,{riders:[...new Set([...(r.riders||[]),d.u])]});toast(`Picking up ${nick(d.u)} 🚗 Added to your route`)},
+  async rideDrop(d){const r=myRsvp(d.id);await saveRsvp(d.id,{riders:(r?.riders||[]).filter(u=>u!==d.u)});toast("Removed from your route")},
+  rideLoc(d){openSheet("loc",{id:d.id,k:d.k})},
+  async meetupDel(d){await Store.upd("plans",d.id,{meetup:null});toast("Meetup spot removed")},
+  locHere(){const s=topS();if(!navigator.geolocation)return toast("Location isn't available on this phone.");toast("Finding you…");
+    navigator.geolocation.getCurrentPosition(pos=>setLoc(s,{name:"My location",lat:+pos.coords.latitude.toFixed(5),lng:+pos.coords.longitude.toFixed(5)}),()=>toast("Allow location for Yalla Guys, or search instead."),{enableHighAccuracy:true,timeout:12000})},
+  locPick(d){const s=topS(),r=s.state.res[+d.i];if(r)setLoc(s,{name:r.name,lat:r.lat,lng:r.lng})},
+  locPin(){openSheet("pick",{forLoc:true})},
   openBoard(d){openSheet("board",{id:d.id})},
   openAlbum(d){openSheet("plan",{id:d.id});setTimeout(()=>{$("#album",topS()?.el)?.scrollIntoView({behavior:"smooth"})},150)},
   addMedia(d){openSheet("media",{id:d.id,ph:d.ph,tab:d.tab})},
@@ -1694,11 +1808,13 @@ document.addEventListener("click",ev=>{
 });
 document.addEventListener("input",ev=>{
   const el=ev.target;
+  if(el.id==="locQ"){const s=topS();const q=el.value.trim();clearTimeout(locTimer);if(q.length<2){s.state.res=[];$("#locRes",s.el).innerHTML="";return}if(/https?:|^-?\d+\.\d+\s*,/.test(q)){locSearch(s,q);return}s.state.res=localSearch(q);$("#locRes",s.el).innerHTML=locResHtml(s.state);locTimer=setTimeout(()=>locSearch(s,q),450)}
   if(el.id==="edQ"){const s=stack.find(x=>x.kind==="edit");if(s)handleQuery(s,el.value)}
   if(el.classList.contains("compose")){el.style.height="";el.style.height=Math.min(el.scrollHeight,120)+"px"}
 });
 document.addEventListener("change",ev=>{
   const el=ev.target;if(el.id==="moneyPlan"){UI.moneyPlan=el.value;render()}
+  if(el.id?.startsWith("ridePartial-")){const pid=el.dataset.pid,r=myRsvp(pid);if(r?.ride)saveRsvp(pid,{ride:{...r.ride,partial:el.checked}})}
   if(["nMsgs","nPlans","nMoments"].includes(el.id)){SET[el.id]=el.checked;ls.set("yg-settings",SET)}
   if(el.id==="actAs"){ls.set("yg-actas",el.value);ME=el.value;while(stack.length)closeSheet();render();toast(ME==="me-demo"?"Back to being you":"Now testing as "+(mem(ME)?.nick||"a friend"))}
   if(el.id==="exPl"){const s=topS();s.state.plan=el.value}
