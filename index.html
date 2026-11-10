@@ -534,6 +534,32 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .patch.locked{filter:grayscale(1);opacity:.35}
 .patch.big{width:120px;height:120px;margin-top:10px;box-shadow:0 0 0 7px var(--tc),0 0 0 10px color-mix(in srgb,var(--tc) 40%,#000),0 8px 20px rgba(0,0,0,.4)}.patch.big::after{inset:8px;border-width:3px}.patch.big .pe{font-size:56px}
 .tdot{width:18px;height:18px;border-radius:50%;flex:none;box-shadow:inset 0 -2px 0 rgba(0,0,0,.2)}
+.pickrow{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:16px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;cursor:pointer;margin-top:6px;box-sizing:border-box}
+.fxprev.sm{width:64px;height:64px;margin:0;border-radius:12px;flex:none}
+.sheet-b .top-in:has(.stkchosen),.sheet-b .top-in:has(.fxbig){position:sticky;top:0;z-index:3;background:var(--bg);padding-bottom:8px}
+.stkchosen{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:var(--surface2);border-radius:16px;min-height:52px;align-items:center}
+.stkchosen button{position:relative;border:0;background:var(--surface);border-radius:12px;width:44px;height:44px;font-size:24px}
+.stkchosen i{position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--danger);color:#fff;font-size:10px;font-style:normal;display:grid;place-items:center}
+.stkhead{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:4px 0 8px}
+.stkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:6px}
+.stkgrid button{aspect-ratio:1;border:1px solid var(--line);background:var(--surface);border-radius:14px;font-size:24px;padding:0}
+.stkgrid button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);transform:scale(.94)}
+.fxbig{position:relative;height:170px;border-radius:18px;background:var(--bg);border:1px solid var(--line);overflow:hidden;display:grid;place-items:center}
+.fxbig>span{position:relative;z-index:1;color:var(--muted);font-weight:700}
+.fxlabel{position:absolute;left:12px;bottom:10px;z-index:1;font-size:14px;background:color-mix(in srgb,var(--bg) 70%,transparent);padding:4px 10px;border-radius:999px}
+.fxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.fxtile{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 6px;border-radius:16px;border:2px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;cursor:pointer}
+.fxtile span{font-size:28px}.fxtile b{font-size:12.5px}
+.fxtile.wide{flex-direction:row;justify-content:center;gap:10px;width:100%;padding:10px}.fxtile.wide span{font-size:20px}
+.fxtile[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--surface))}
+.songcard{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,#1DB954 22%,var(--surface)),var(--surface));border:1px solid var(--line)}
+.sart{width:54px;height:54px;border-radius:10px;overflow:hidden;flex:none;display:grid;place-items:center;background:var(--surface2);font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,.3)}.sart img{width:100%;height:100%;object-fit:cover}
+.songcard .k{display:block;font-size:11px;color:var(--muted)}.songcard b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.songbtn{flex:none;width:42px;height:42px;border-radius:50%;border:0;background:#1DB954;color:#04140A;font-size:16px;font-weight:800}
+.songsp{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);color:var(--fg);text-decoration:none;font-weight:800}
+.eq{display:none;gap:2px;height:12px;align-items:flex-end;margin-top:3px}.eq i{width:3px;background:#1DB954;border-radius:1px;animation:eq 0.9s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:.2s}.eq i:nth-child(3){animation-delay:.4s}.eq i:nth-child(4){animation-delay:.1s}
+.songcard.playing .eq{display:flex}@keyframes eq{0%,100%{height:3px}50%{height:12px}}
 canvas.bgfx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;display:block}
 canvas.bgfx.fixed{position:fixed}
 body.has-fx .app{position:relative;z-index:1}
@@ -666,7 +692,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.41";
+const APP_VERSION="2026-11-10.42";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1470,16 +1496,13 @@ SHEETS.profile={
     <label class="f">Name the guys see<input class="inp" id="pfNick" maxlength="24" value="${esc(m.nick||"")}"></label>
     <label class="f">Bio<textarea class="inp" id="pfBio" maxlength="160" placeholder="A line about you">${esc(m.bio||"")}</textarea></label>
     <label class="f">Current vibe<input class="inp" id="pfVibe" maxlength="32" value="${esc(m.vibe||"")}" placeholder="e.g. 🌊 beach mode, 📚 exam szn"></label>
-    <div class="grid2"><label class="f">Birthday<input class="inp" id="pfBday" type="date" value="${m.birthday?"2000-"+esc(m.birthday):""}"></label><label class="f">Fav spot<input class="inp" id="pfSpot" maxlength="40" value="${esc(m.spot||"")}" placeholder="e.g. Kite Beach"></label></div>
-    <label class="f">Song on repeat<input class="inp" id="pfSong" maxlength="60" value="${esc(m.song||"")}" placeholder="Song – Artist"></label>
+    <div class="grid2"><label class="f">Birthday<input class="inp" id="pfBday" type="date" value="${m.birthday?(m.birthYear||"2000")+"-"+esc(m.birthday):""}"></label><label class="f">Fav spot<input class="inp" id="pfSpot" maxlength="40" value="${esc(m.spot||"")}" placeholder="e.g. Kite Beach"></label></div>
+    <label class="f">Song on repeat<input class="inp" id="pfSong" maxlength="300" value="${esc(m.song||"")}" placeholder="Paste a Spotify song link, or Song – Artist"><span class="meta" style="font-weight:400">A 30-second preview plays when someone opens your profile.</span></label>
     <label class="f">Things you love (separate with commas)<input class="inp" id="pfLikes" maxlength="120" value="${esc((m.likes||[]).join(", "))}" placeholder="karak, padel, sunsets"></label>
-    <div class="f"><div class="between">Stickers for your profile<span class="pill ${st.stickers.length>=8?"warn":"set"}">${st.stickers.length}/8</span></div>
-      ${st.stickers.length?`<div class="chips" style="padding:8px;border-radius:14px;background:var(--surface2)">${st.stickers.map(e=>`<button class="chip" style="font-size:20px;padding:4px 10px" data-act="pfSticker" data-v="${esc(e)}" aria-label="Remove ${esc(e)}" aria-pressed="true">${esc(e)} <span style="font-size:12px;opacity:.7">✕</span></button>`).join("")}</div>`:`<div class="meta">Pick up to 8. They float around your photo.</div>`}
-      ${STICKER_GROUPS.map(([g,list])=>`<div style="display:flex;flex-direction:column;gap:4px"><span class="meta" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase">${g} <span style="opacity:.6;text-transform:none;letter-spacing:0">· swipe →</span></span><div class="chips stkrow">${list.map(e=>`<button class="chip" style="font-size:20px;padding:4px 10px" data-act="pfSticker" data-v="${e}" aria-pressed="${st.stickers.includes(e)}">${e}</button>`).join("")}</div></div>`).join("")}</div>
-    <div class="f">Animated background<span class="meta" style="font-weight:400">Shows behind your profile when anyone opens it.</span>
-      <div class="fxprev" id="fxPrev"><span>${st.bgfx?"Preview":"No animation"}</span></div>
-      <div class="chips"><button class="chip" data-act="pfFx" data-v="" aria-pressed="${!st.bgfx}">🚫 None</button></div>
-      ${FX_LIST.map(([g,list])=>`<span class="meta" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-top:4px">${g==="Cute"?"💗 Soft & cute":"🖤 Bold & dark"}</span><div class="chips">${list.map(([k,e,l])=>`<button class="chip" data-act="pfFx" data-v="${k}" aria-pressed="${st.bgfx===k}">${e} ${l}</button>`).join("")}</div>`).join("")}</div>
+    <div class="f">Stickers around your photo
+      <button class="pickrow" data-act="pickStickers"><span class="grow" style="font-size:22px;letter-spacing:2px;text-align:left">${st.stickers.length?st.stickers.map(esc).join(""):`<span class="meta" style="font-size:14px;letter-spacing:0">None yet</span>`}</span><span class="pill ${st.stickers.length>=8?"warn":"set"}">${st.stickers.length}/8</span><span class="meta">Choose ›</span></button></div>
+    <div class="f">Animated background
+      <button class="pickrow fxrow" data-act="pickFx"><span class="fxprev sm" id="fxPrev"></span><span class="grow" style="text-align:left"><b>${st.bgfx?esc(fxName(st.bgfx)):"None"}</b><span class="meta" style="display:block">Plays behind your profile</span></span><span class="meta">Change ›</span></button></div>
     <div class="f">Avatar emoji (shown when there's no photo)<div class="emo-pick">${EMOJIS.map(e=>`<button data-act="pfEmoji" data-v="${e}" aria-pressed="${st.emoji===e}">${e}</button>`).join("")}</div></div>
     <div class="f">Colour<div class="row">${MEMBER_COLORS.map(c=>`<button data-act="pfColor" data-v="${c}" aria-label="Colour" style="width:40px;height:40px;border-radius:50%;border:${st.color===c?"3px solid var(--fg)":"2px solid var(--line)"};background:${c}"></button>`).join("")}</div></div>
     ${email?`<p class="meta" style="margin:0">Signed in as ${esc(email)}</p><button class="btn danger" data-act="logout">Log out</button>`:""}
@@ -1524,6 +1547,7 @@ SHEETS.settings={live:true,
       <div class="hint">Alerts arrive while Yalla Guys is open or was recently open in the background. For reminders you can't miss, use “Add to phone calendar” on a plan.</div></div>
     <div class="sec"><h2>Default plan reminders</h2><div class="chips">${REM_OPTS.map(([m,l])=>`<button class="chip" data-act="defRemind" data-m="${m}" aria-pressed="${SET.remind.includes(m)}">${l} before</button>`.replace("At start before","At start")).join("")}</div>
       <div class="hint">Used for every plan you're going to. You can change them per plan.</div></div>
+    <div class="sec"><h2>Profile songs</h2><label class="check"><input type="checkbox" id="profSongs" ${SET.profSongs!==false?"checked":""}> Play song previews when I open someone's profile</label></div>
     <div class="sec"><h2>Background animation</h2><label class="check"><input type="checkbox" id="appFx" ${SET.appFx?"checked":""}> Show my profile animation behind the whole app</label><div class="hint">${mem(ME)?.bgfx?"Change the animation in Edit profile.":"Pick one first in Edit profile → Animated background."}</div></div>
     ${MODE==="live"?`<div class="sec"><h2>Data</h2><button class="btn block" data-act="resync">🔄 Refresh everything</button><div class="hint">The app saves a copy on this phone and only downloads what's new, to keep things fast and free. Use this if something looks out of date.</div></div>`:""}
     ${MODE==="live"?`<div class="sec"><h2>Your user ID</h2><div class="row" style="flex-wrap:nowrap"><code style="flex:1;min-width:0;overflow-wrap:anywhere;font-size:12px;background:var(--surface2);padding:8px 10px;border-radius:10px;user-select:all;-webkit-user-select:all">${esc(ME)}</code><button class="btn sm" data-act="copyUid">Copy</button></div>${crewOwner()===ME?`<div class="hint">You're the crew owner, so you can remove people from their profile. Paste this ID into the Firebase rules once so it works.</div>`:""}</div>`:""}
@@ -1724,12 +1748,13 @@ SHEETS.person={live:true,
     const plansIn=D.rsvps.filter(r=>r.uid===id&&r.going==="in").length;
     const bd=m.birthday?pd("2000-"+m.birthday).toLocaleDateString("en-GB",{day:"numeric",month:"long"}):"";
     const grid=list=>`<div class="media-grid">${list.map(x=>`<button data-act="openMoment" data-id="${esc(x.id)}" aria-label="Moment from ${esc(fDate(x.day))}"><img src="${esc(x.kind==="video"?x.poster:x.src)}" alt="" loading="lazy"><span style="position:absolute;left:6px;bottom:5px;color:#fff;font-size:11px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.6)">${esc(fDate(x.day,{day:"numeric",month:"short"}))}</span></button>`).join("")}</div>`;
-    const facts=[["🎂","Birthday",bd],["📍","Fav spot",m.spot],["🎵","On repeat",m.song]].filter(f=>f[2]);
+    const sc=songCard(m),facts=[["🎂","Birthday",bd],["📍","Fav spot",m.spot],["🎵","On repeat",sc?"":m.song]].filter(f=>f[2]);
     return{title:me?"My profile":esc(m.nick),right:me?`<button class="btn sm" data-act="settings" aria-label="Settings">⚙️</button><button class="btn sm" data-act="profile">Edit</button>`:"",body:`
       <div class="prof-hero">${stickerHalo(m.stickers||[],avatar(id))}<h1>${esc(m.nick)}</h1>${m.vibe?`<span class="vibe">${esc(m.vibe)}</span>`:""}${m.bio?`<p style="margin:0;max-width:34ch;color:var(--muted)">${esc(m.bio)}</p>`:me?`<button class="btn sm ghost" data-act="profile">+ Add a bio, photo and cute stuff</button>`:""}
         <div class="row" style="justify-content:center;margin-top:4px"><button class="btn" data-act="timeline" data-id="${esc(id)}">🕰️ Timeline</button>${me?"":`<button class="btn pri" data-act="dm" data-id="${esc(id)}">💬 Message</button>`}</div></div>
       ${!me&&MODE==="live"&&crewOwner()===ME?`<div style="display:flex;justify-content:center;margin-top:8px"><button class="btn sm danger" data-act="kickMember" data-id="${esc(id)}" data-confirm="Tap again to remove ${esc(m.nick)}">Remove from crew</button></div>`:""}
       <div class="stats" style="margin-top:14px"><div class="stat"><b>${streakOf(id)}🔥</b><span>day streak</span></div><div class="stat"><b>${mine.length}</b><span>moments</span></div><div class="stat"><b>${plansIn}</b><span>plans joined</span></div></div>
+      ${sc?`<div style="margin-top:12px">${sc}</div>`:""}
       ${facts.length||(m.likes||[]).length?`<div class="sec" style="border:0"><div class="facts">${facts.map(f=>`<div class="fact"><span style="font-size:22px">${f[0]}</span><span><span class="k">${f[1]}</span><br><b>${esc(f[2])}</b></span></div>`).join("")}</div>${(m.likes||[]).length?`<div class="tags">${m.likes.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`:""}</div>`:""}
       ${badgesHtml(id)}
       <div class="sec"><h2>${me?"My moments":"Moments"}</h2>${mine.length?grid(mine):`<div class="meta">No moments yet.</div>`}</div>
@@ -2521,8 +2546,9 @@ SHEETS.badge={live:true,
       ${!me?`<div class="hint" style="margin:0">${esc(nick(uid))}'s badge.</div>`:""}</div>`}}
 };
 /* ---------- animated backgrounds ---------- */
-const FX_LIST=[["Cute",[["stars","✨","Stars"],["bubbles","🫧","Bubbles"],["butterflies","🦋","Butterflies"],["petals","🌸","Petals"],["hearts","💗","Hearts"],["sparkles","🌟","Sparkles"],["fireflies","🌿","Fireflies"]]],
-  ["Bold",[["snow","❄️","Snow"],["rain","🌧️","Rain"],["embers","🔥","Embers"],["meteors","☄️","Meteors"],["matrix","💻","Matrix"],["speed","🏎️","Speed"]]]];
+const FX_LIST=[["Pretty",[["galaxy","🌌","Galaxy"],["aurora","🌈","Aurora"],["bokeh","🔮","Dreamy lights"],["lanterns","🏮","Lanterns"],["fairydust","🧚","Fairy dust"],["dandelions","🌼","Dandelions"],["waves","🌊","Ocean waves"],["confetti","🎊","Confetti"]]],["Cute",[["stars","✨","Stars"],["bubbles","🫧","Bubbles"],["butterflies","🦋","Butterflies"],["petals","🌸","Petals"],["hearts","💗","Hearts"],["sparkles","🌟","Sparkles"],["fireflies","🌿","Fireflies"]]],
+  ["Bold",[["snow","❄️","Snow"],["rain","🌧️","Rain"],["embers","🔥","Embers"],["meteors","☄️","Meteors"],["matrix","💻","Matrix"],["speed","🏎️","Speed"],["lightning","⛈️","Storm"]]]];
+const fxName=k=>{for(const[,l]of FX_LIST)for(const[x,e,n]of l)if(x===k)return e+" "+n;return""};
 const FXS={},rnd=(a,b)=>a+Math.random()*(b-a);
 function fxSprite(e,sz){const k=e+sz;if(FXS[k])return FXS[k];const c=document.createElement("canvas");c.width=c.height=Math.ceil(sz*1.4);const g=c.getContext("2d");
   g.font=`${sz}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",system-ui`;g.textAlign="center";g.textBaseline="middle";g.fillText(e,c.width/2,c.height/2+sz*.06);return FXS[k]=c}
@@ -2564,6 +2590,52 @@ const FX={
     step:(p,dt,W,H)=>{p.x+=p.v*dt;if(p.x>W+20)FX.speed.init(p,W,H)},
     draw:(g,p)=>{const gr=g.createLinearGradient(p.x-p.l,p.y,p.x,p.y);gr.addColorStop(0,"rgba(255,255,255,0)");gr.addColorStop(1,"rgba(255,255,255,.45)");g.globalAlpha=1;g.strokeStyle=gr;g.lineWidth=1.2;g.beginPath();g.moveTo(p.x-p.l,p.y);g.lineTo(p.x,p.y);g.stroke()}},
 };
+const gauss=()=>(Math.random()+Math.random()+Math.random()+Math.random()-2)/2;
+function galaxyLayer(W,H){const c=document.createElement("canvas"),dpr=Math.min(2,window.devicePixelRatio||1);c.width=W*dpr;c.height=H*dpr;const g=c.getContext("2d");g.scale(dpr,dpr);
+  const ang=-0.55,cx=W/2,cy=H/2,L=Math.hypot(W,H),ca=Math.cos(ang),sa=Math.sin(ang);
+  const at=(u,v)=>[cx+u*ca-v*sa,cy+u*sa+v*ca];
+  g.globalCompositeOperation="lighter";
+  const neb=["rgba(140,90,255,.10)","rgba(255,110,190,.07)","rgba(90,170,255,.09)","rgba(255,200,150,.05)"];
+  for(let k=0;k<14;k++){const[x,y]=at(rnd(-L/2,L/2),gauss()*H*.08),r=rnd(.18,.4)*Math.min(W,H)*1.4,gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,neb[k%4]);gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2)}
+  const core=at(0,0),gr=g.createRadialGradient(core[0],core[1],0,core[0],core[1],Math.min(W,H)*.35);gr.addColorStop(0,"rgba(255,230,200,.16)");gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.fillRect(0,0,W,H);
+  const n=Math.round(1400*Math.min(2,W*H/(390*780)));
+  for(let k=0;k<n;k++){const[x,y]=at(rnd(-L/2,L/2),gauss()*H*.09);g.globalAlpha=rnd(.15,.6);g.fillStyle=Math.random()<.2?"#CFE0FF":Math.random()<.1?"#FFD9F0":"#fff";g.fillRect(x,y,rnd(.4,1.3),rnd(.4,1.3))}
+  g.globalCompositeOperation="source-over";g.globalAlpha=.35;g.strokeStyle="rgba(10,6,25,.6)";g.lineWidth=H*.025;g.beginPath();for(let u=-L/2;u<L/2;u+=20){const[x,y]=at(u,Math.sin(u*.01)*H*.012);u===-L/2?g.moveTo(x,y):g.lineTo(x,y)}g.stroke();
+  return c}
+function meteorShower(g,W,H,dt,st,max,rate){st.met=st.met||[];if(Math.random()<rate*dt&&st.met.length<max)st.met.push({x:rnd(W*.3,W*1.1),y:rnd(-H*.1,H*.5),v:rnd(420,700),l:rnd(70,160),life:1});
+  st.met=st.met.filter(m=>{m.x-=m.v*dt;m.y+=m.v*.5*dt;m.life-=dt*.7;if(m.life<=0||m.x<-200)return false;const gr=g.createLinearGradient(m.x,m.y,m.x+m.l,m.y-m.l*.5);gr.addColorStop(0,`rgba(255,255,255,${.85*m.life})`);gr.addColorStop(1,"rgba(255,255,255,0)");g.globalAlpha=1;g.strokeStyle=gr;g.lineWidth=1.8;g.beginPath();g.moveTo(m.x,m.y);g.lineTo(m.x+m.l,m.y-m.l*.5);g.stroke();dot(g,m.x,m.y,1.6,"#fff",m.life);return true})}
+Object.assign(FX,{
+  galaxy:{n:70,pre:(g,W,H,t,st,dt)=>{if(!st.gal||st.gw!==W||st.gh!==H){st.gal=galaxyLayer(W,H);st.gw=W;st.gh=H}g.globalAlpha=.85;g.drawImage(st.gal,0,0,W,H);meteorShower(g,W,H,dt,st,2,.35)},
+    init:(p,W,H)=>Object.assign(p,{x:rnd(0,W),y:rnd(0,H),r:rnd(.6,1.8),ph:rnd(0,6),sp:rnd(1,3)}),
+    draw:(g,p,t)=>{const k=.5+.5*Math.sin(t*p.sp+p.ph);dot(g,p.x,p.y,p.r,"#fff",.15+.6*k);if(p.r>1.4&&k>.85){g.globalAlpha=.5*k;g.strokeStyle="#fff";g.lineWidth=.6;g.beginPath();g.moveTo(p.x-5,p.y);g.lineTo(p.x+5,p.y);g.moveTo(p.x,p.y-5);g.lineTo(p.x,p.y+5);g.stroke()}}},
+  aurora:{n:30,pre:(g,W,H,t)=>{g.globalCompositeOperation="lighter";[["#3CFFB4",0],["#6A8CFF",1],["#D36BFF",2]].forEach(([c,i])=>{const base=H*(.18+i*.1);
+      for(let x=0;x<=W;x+=6){const y=base+Math.sin(x*.006+t*.35+i*2)*H*.05+Math.sin(x*.017-t*.5+i)*H*.02,h=H*(.16+.07*Math.sin(x*.01+t*.6+i));
+        const gr=g.createLinearGradient(0,y,0,y+h);gr.addColorStop(0,"rgba(0,0,0,0)");gr.addColorStop(.35,c);gr.addColorStop(1,"rgba(0,0,0,0)");g.globalAlpha=.10;g.fillStyle=gr;g.fillRect(x,y,6.5,h)}});g.globalCompositeOperation="source-over"},
+    init:(p,W,H)=>Object.assign(p,{x:rnd(0,W),y:rnd(0,H),r:rnd(.4,1.2),ph:rnd(0,6)}),draw:(g,p,t)=>dot(g,p.x,p.y,p.r,"#fff",.12+.25*(.5+.5*Math.sin(t*1.5+p.ph)))},
+  bokeh:{n:14,init:(p,W,H)=>Object.assign(p,{x:rnd(0,W),y:rnd(0,H),r:rnd(18,60),vx:rnd(-6,6),vy:rnd(-8,-2),ph:rnd(0,6),c:["255,158,199","255,210,122","143,227,255","199,166,255","255,255,255"][Math.floor(rnd(0,5))]}),
+    step:(p,dt,W,H)=>{p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.y<-p.r)p.y=H+p.r;if(p.x<-p.r)p.x=W+p.r;if(p.x>W+p.r)p.x=-p.r},
+    draw:(g,p,t)=>{const a=.17+.08*Math.sin(t*.8+p.ph),gr=g.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);gr.addColorStop(0,`rgba(${p.c},${a*1.6})`);gr.addColorStop(.7,`rgba(${p.c},${a})`);gr.addColorStop(1,`rgba(${p.c},0)`);g.globalAlpha=1;g.fillStyle=gr;g.beginPath();g.arc(p.x,p.y,p.r,0,7);g.fill()}},
+  lanterns:{n:10,init:(p,W,H,f)=>Object.assign(p,{x:rnd(0,W),y:f?rnd(0,H):H+rnd(20,90),w:rnd(9,16),v:rnd(7,16),ph:rnd(0,6)}),
+    step:(p,dt,W,H,t)=>{p.y-=p.v*dt;p.x+=Math.sin(t*.5+p.ph)*.25;if(p.y<-40)FX.lanterns.init(p,W,H)},
+    draw:(g,p,t)=>{const k=.8+.2*Math.sin(t*3+p.ph),h=p.w*1.3,gr=g.createRadialGradient(p.x,p.y,0,p.x,p.y,p.w*3);gr.addColorStop(0,`rgba(255,170,80,${.22*k})`);gr.addColorStop(1,"rgba(255,170,80,0)");g.globalAlpha=1;g.fillStyle=gr;g.fillRect(p.x-p.w*3,p.y-p.w*3,p.w*6,p.w*6);
+      const bg=g.createLinearGradient(0,p.y-h/2,0,p.y+h/2);bg.addColorStop(0,"#FFE2A8");bg.addColorStop(1,"#FF8A3D");g.globalAlpha=.55*k;g.fillStyle=bg;g.beginPath();g.roundRect?g.roundRect(p.x-p.w/2,p.y-h/2,p.w,h,p.w*.35):g.rect(p.x-p.w/2,p.y-h/2,p.w,h);g.fill()}},
+  fairydust:{n:80,init:(p,W,H,f)=>Object.assign(p,{x:f?rnd(0,W):-99,y:f?rnd(0,H):-99,life:f?rnd(0,1):0,max:rnd(1.2,2.6),vx:rnd(-8,8),vy:rnd(6,20),c:Math.random()<.5?"#FFE08A":"#FFB3E6",r:rnd(1,2.4)}),
+    step:(p,dt,W,H,t)=>{p.life-=dt/p.max;if(p.life<=0){const off=rnd(0,1.2);p.x=W/2+W*.38*Math.sin((t-off)*.55)+rnd(-6,6);p.y=H/2+H*.3*Math.sin((t-off)*.37+1)+rnd(-6,6);p.life=1;p.vx=rnd(-8,8);p.vy=rnd(6,20)}p.x+=p.vx*dt;p.y+=p.vy*dt},
+    draw:(g,p)=>{const a=Math.max(0,p.life);dot(g,p.x,p.y,p.r*2.5,p.c,.08*a);dot(g,p.x,p.y,p.r,p.c,.7*a);if(p.r>1.6){g.globalAlpha=.5*a;g.strokeStyle=p.c;g.lineWidth=.6;g.beginPath();g.moveTo(p.x-4,p.y);g.lineTo(p.x+4,p.y);g.moveTo(p.x,p.y-4);g.lineTo(p.x,p.y+4);g.stroke()}}},
+  dandelions:{n:14,init:(p,W,H,f)=>Object.assign(p,{x:f?rnd(0,W):rnd(-40,W*.5),y:f?rnd(0,H):H+rnd(10,60),s:rnd(4,8),v:rnd(10,22),vx:rnd(6,18),rot:rnd(0,6),rs:rnd(-.6,.6),ph:rnd(0,6)}),
+    step:(p,dt,W,H,t)=>{p.y-=p.v*dt;p.x+=(p.vx+Math.sin(t+p.ph)*8)*dt;p.rot+=p.rs*dt;if(p.y<-20||p.x>W+20)FX.dandelions.init(p,W,H)},
+    draw:(g,p)=>{g.save();g.translate(p.x,p.y);g.rotate(p.rot);g.globalAlpha=.45;g.strokeStyle="#fff";g.lineWidth=.6;g.beginPath();for(let k=0;k<10;k++){const a=k/10*Math.PI*2;g.moveTo(0,0);g.lineTo(Math.cos(a)*p.s,Math.sin(a)*p.s)}g.moveTo(0,0);g.lineTo(0,p.s*1.8);g.stroke();g.restore()}},
+  waves:{n:14,pre:(g,W,H,t)=>{[["#3B82F6",.07,0],["#14B8A6",.08,1],["#60A5FA",.09,2]].forEach(([c,a,i])=>{g.globalAlpha=a;g.fillStyle=c;g.beginPath();g.moveTo(0,H);for(let x=0;x<=W;x+=8)g.lineTo(x,H*(.72+i*.07)+Math.sin(x*.012+t*(.6+i*.25)+i*2)*12+Math.sin(x*.03-t*.4)*5);g.lineTo(W,H);g.fill()})},
+    init:(p,W,H,f)=>Object.assign(p,{x:rnd(0,W),y:f?rnd(H*.6,H):H+rnd(5,40),r:rnd(1.5,4),v:rnd(8,20)}),
+    step:(p,dt,W,H)=>{p.y-=p.v*dt;if(p.y<H*.55)FX.waves.init(p,W,H)},draw:(g,p)=>{g.globalAlpha=.3;g.strokeStyle="#BFE9FF";g.lineWidth=.8;g.beginPath();g.arc(p.x,p.y,p.r,0,7);g.stroke()}},
+  confetti:{n:40,init:(p,W,H,f)=>Object.assign(p,{x:rnd(0,W),y:f?rnd(0,H):rnd(-60,-10),w:rnd(4,7),h:rnd(7,12),v:rnd(25,55),rot:rnd(0,6),rs:rnd(-3,3),fl:rnd(2,5),ph:rnd(0,6),c:["#FF6B9A","#FFC145","#5BD4C8","#8B7CFF","#7ED957","#FF8A4C"][Math.floor(rnd(0,6))]}),
+    step:(p,dt,W,H,t)=>{p.y+=p.v*dt;p.x+=Math.sin(t*1.5+p.ph)*.6;p.rot+=p.rs*dt;if(p.y>H+20)FX.confetti.init(p,W,H)},
+    draw:(g,p,t)=>{g.save();g.translate(p.x,p.y);g.rotate(p.rot);g.scale(1,Math.cos(t*p.fl+p.ph));g.globalAlpha=.4;g.fillStyle=p.c;g.fillRect(-p.w/2,-p.h/2,p.w,p.h);g.restore()}},
+  lightning:{n:50,pre:(g,W,H,t,st,dt)=>{st.next=st.next??rnd(2,5);st.next-=dt;st.flash=Math.max(0,(st.flash||0)-dt*1.8);
+      if(st.next<=0){st.next=rnd(3.5,8);st.flash=.5;let x=rnd(W*.15,W*.85),y=0;st.bolt=[[x,y]];while(y<H*rnd(.45,.8)){y+=rnd(14,34);x+=rnd(-22,22);st.bolt.push([x,y])}}
+      if(st.flash>0){g.globalAlpha=st.flash*.18;g.fillStyle="#DDE6FF";g.fillRect(0,0,W,H);if(st.bolt){g.globalAlpha=Math.min(1,st.flash*1.6);g.strokeStyle="#EEF3FF";g.lineWidth=1.8;g.shadowColor="#9FB6FF";g.shadowBlur=12;g.beginPath();st.bolt.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.stroke();g.shadowBlur=0}}},
+    init:(p,W,H,f)=>FX.rain.init(p,W,H,f),step:(p,dt,W,H)=>FX.rain.step(p,dt,W,H),draw:(g,p)=>FX.rain.draw(g,p)},
+});
 function runFx(cv,kind){const def=FX[kind];if(!def)return;const g=cv.getContext("2d");let W=0,H=0,ps=[],st={},last=performance.now(),t0=last;
   const fit=()=>{const r=cv.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);if(!r.width||!r.height)return false;W=r.width;H=r.height;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);g.setTransform(dpr,0,0,dpr,0,0);st.bg=null;return true};
   const seed=()=>{const n=Math.round(def.n*Math.min(1.6,Math.max(.6,W*H/(390*780))));ps=Array.from({length:n},()=>def.init({},W,H,true))};
@@ -2576,8 +2648,46 @@ function runFx(cv,kind){const def=FX[kind];if(!def)return;const g=cv.getContext(
 function mountFx(host,kind,fixed){if(!host)return;let cv=host.querySelector(":scope>canvas.bgfx");if(cv&&cv.dataset.k===(kind||""))return;cv?.remove();if(!kind||!FX[kind])return;
   cv=document.createElement("canvas");cv.className="bgfx"+(fixed?" fixed":"");cv.dataset.k=kind;cv.setAttribute("aria-hidden","true");host.prepend(cv);runFx(cv,kind)}
 function syncAppFx(){const k=SET.appFx&&(MODE==="live"||MODE==="demo")?mem(ME)?.bgfx:"";mountFx(document.body,k||"",true);document.body.classList.toggle("has-fx",!!k)}
-SHEETS.person.after=s=>mountFx(s.el,mem(s.args.id)?.bgfx);
+SHEETS.person.after=s=>{mountFx(s.el,mem(s.args.id)?.bgfx);SONG.paint()};
 SHEETS.profile.after=s=>mountFx($("#fxPrev",s.el),s.state.bgfx);
+const profS=()=>stack.find(x=>x.kind==="profile");
+const spotifyTrack=u=>{const m=String(u||"").match(/open\.spotify\.com\/(?:intl-[a-z]+\/)?track\/([A-Za-z0-9]+)/);return m?m[1]:null};
+function jsonp(url){return new Promise((res,rej)=>{const cb="yg_cb"+Math.random().toString(36).slice(2);const sc=document.createElement("script");const t=setTimeout(()=>{cleanup();rej(new Error("timeout"))},7000);
+  const cleanup=()=>{clearTimeout(t);delete window[cb];sc.remove()};window[cb]=d=>{cleanup();res(d)};sc.onerror=()=>{cleanup();rej(new Error("load"))};sc.src=url+(url.includes("?")?"&":"?")+"callback="+cb;document.head.appendChild(sc)})}
+async function resolveSong(text){text=String(text||"").trim();if(!text)return null;let q=text,art="",url="";const tid=spotifyTrack(text);
+  if(tid){url=`https://open.spotify.com/track/${tid}`;q="";try{const r=await fetch("https://open.spotify.com/oembed?url="+encodeURIComponent(url));if(r.ok){const j=await r.json();q=j.title||"";art=j.thumbnail_url||""}}catch{}
+    if(!q){try{const r=await fetch(url);const h=await r.text();const m=h.match(/<title>([^<]+)<\/title>/);if(m)q=m[1].replace(/\s*\|\s*Spotify.*$/,"").replace(/ - song and lyrics by /i," ").replace(/ - song by /i," ")}catch{}}}
+  if(!q)return url?{songUrl:url,songTitle:"Spotify song",songArt:art,songPreview:""}:null;
+  const api=`https://itunes.apple.com/search?term=${encodeURIComponent(q.replace(/[–—-]/g," "))}&media=music&entity=song&limit=1`;let j=null;
+  try{const r=await fetch(api);if(r.ok)j=await r.json()}catch{}if(!j){try{j=await jsonp(api)}catch{}}
+  const it=j?.results?.[0];if(!it)return{songUrl:url,songTitle:q,songArt:art,songPreview:""};
+  return{songUrl:url||it.trackViewUrl||"",songTitle:`${it.trackName} – ${it.artistName}`,songArt:art||(it.artworkUrl100||"").replace("100x100","300x300"),songPreview:it.previewUrl||""}}
+const SONG={a:null,uid:null,muted:false,
+  play(uid){const m=mem(uid);this.stop();if(!m?.songPreview||SET.profSongs===false||this.muted)return;try{const a=new Audio(m.songPreview);a.volume=.55;a.loop=true;this.a=a;this.uid=uid;a.play().then(()=>this.paint()).catch(()=>this.paint());a.onpause=a.onplay=()=>this.paint()}catch{}},
+  stop(){if(this.a){try{this.a.pause()}catch{}this.a=null}this.uid=null},
+  paint(){const b=document.querySelector(".songcard .songbtn");if(b){const on=this.a&&!this.a.paused;b.textContent=on?"⏸":"▶";b.closest(".songcard").classList.toggle("playing",!!on)}}};
+function songCard(m){if(!m.song)return"";const sp=spotifyTrack(m.song),title=m.songTitle||(sp?"Spotify song":m.song);if(!sp&&!m.songPreview)return"";
+  return`<div class="songcard"><span class="sart">${m.songArt?`<img src="${esc(m.songArt)}" alt="">`:"🎵"}</span><span class="grow" style="min-width:0"><span class="k">🎵 On repeat</span><b>${esc(title)}</b><span class="eq"><i></i><i></i><i></i><i></i></span></span>
+    ${m.songPreview?`<button class="songbtn" data-act="songToggle" aria-label="Play or pause">▶</button>`:""}${m.songUrl||sp?`<a class="songsp" href="${esc(m.songUrl||m.song)}" target="_blank" rel="noopener" aria-label="Open in Spotify">↗</a>`:""}</div>`}
+SHEETS.person.init=a=>{SONG.play(a.id);return{}};
+SHEETS.person.destroy=()=>SONG.stop();
+SHEETS.stickerPick={
+  render(s){const p=profS(),st=p?p.state:{stickers:[]};
+    return{title:"Stickers",right:`<span class="pill ${st.stickers.length>=8?"warn":"set"}">${st.stickers.length}/8</span>`,
+      top:`<div class="stkchosen">${st.stickers.length?st.stickers.map(e=>`<button data-act="pfSticker" data-v="${esc(e)}" aria-label="Remove ${esc(e)}">${esc(e)}<i>✕</i></button>`).join(""):`<span class="meta">Tap up to 8 stickers. They float around your photo.</span>`}</div>`,
+      body:`<div class="form">${STICKER_GROUPS.map(([g,list])=>`<div><div class="stkhead">${esc(g)}</div><div class="stkgrid">${list.map(e=>`<button data-act="pfSticker" data-v="${e}" aria-pressed="${st.stickers.includes(e)}">${e}</button>`).join("")}</div></div>`).join("")}</div>`,
+      foot:`<button class="btn pri block" data-act="close">Done</button>`}},
+  destroy(){const p=profS();if(p)paintSheet(p)}
+};
+SHEETS.fxPick={
+  render(s){const p=profS(),cur=p?p.state.bgfx:"";
+    return{title:"Animated background",top:`<div class="fxbig" id="fxBig">${cur?"":`<span>No animation</span>`}<b class="fxlabel">${cur?esc(fxName(cur)):""}</b></div>`,
+      body:`<div class="form"><button class="fxtile wide" data-act="pfFx" data-v="" aria-pressed="${!cur}"><span>🚫</span><b>None</b></button>
+        ${FX_LIST.map(([g,list])=>`<div><div class="stkhead">${g==="Pretty"?"🌌 Pretty":g==="Cute"?"💗 Soft & cute":"🖤 Bold & dark"}</div><div class="fxgrid">${list.map(([k,e,l])=>`<button class="fxtile" data-act="pfFx" data-v="${k}" aria-pressed="${cur===k}"><span>${e}</span><b>${l}</b></button>`).join("")}</div></div>`).join("")}</div>`,
+      foot:`<button class="btn pri block" data-act="close">Done</button>`}},
+  after(s){const p=profS();mountFx($("#fxBig",s.el),p?p.state.bgfx:"")},
+  destroy(){const p=profS();if(p)paintSheet(p)}
+};
 /* busy */
 SHEETS.busy={
   render(s){return{title:"Block my time",body:`<div class="form">
@@ -2848,7 +2958,7 @@ const ACT={
   person(d){openSheet("person",{id:d.id})},
   pfPhoto(){const s=topS();pickPhotos(async fs=>{if(!fs[0])return;try{s.state.photo=await squarePhoto(fs[0],320);paintSheet(s)}catch{toast("Couldn't read that photo. Try another.")}},"#onePick")},
   pfPhotoDel(){const s=topS();s.state.photo="";paintSheet(s)},
-  pfSticker(d){const s=topS(),a=s.state.stickers,i=a.indexOf(d.v);if(i>=0)a.splice(i,1);else if(a.length<8)a.push(d.v);else return toast("Max 8 stickers.");const sl=[...s.el.querySelectorAll(".stkrow")].map(r=>r.scrollLeft);paintSheet(s);[...s.el.querySelectorAll(".stkrow")].forEach((r,i)=>r.scrollLeft=sl[i]||0)},
+  pfSticker(d){const p=profS();if(!p)return;const a=p.state.stickers,i=a.indexOf(d.v);if(i>=0)a.splice(i,1);else if(a.length<8)a.push(d.v);else return toast("Max 8 stickers. Tap one at the top to remove it.");const t=topS(),b=$(".sheet-b",t.el),y=b?.scrollTop;paintSheet(t);if(b)b.scrollTop=y},
   momentShot(){openSheet("camera",{ctx:"moment"})},
   momentGallery(){ensureAC();pickPhotos(fs=>ACT._momentFiles(fs),"#mediaPick")},
   async _momentFiles(fs){if(!fs.length)return;if(fs.length>5){toast("Up to 5 at a time — using the first 5");fs=fs.slice(0,5)}const items=[];
@@ -2874,9 +2984,13 @@ const ACT={
   resetDemo(){try{localStorage.removeItem(Demo.key);localStorage.removeItem("yg-actas")}catch{}location.reload()},
   pfEmoji(d){topS().state.emoji=d.v;paintSheet(topS())},
   pfColor(d){topS().state.color=d.v;paintSheet(topS())},
-  pfFx(d){const s=topS();s.state.bgfx=d.v;paintSheet(s)},
-  async pfSave(){const n=val("pfNick");if(!n)return toast("Add a name first.");const s=topS(),bd=val("pfBday");
-    await Store.upd("members",ME,{nick:n.slice(0,24),emoji:s.state.emoji,color:s.state.color,photo:s.state.photo||"",bio:val("pfBio"),vibe:val("pfVibe"),birthday:bd?bd.slice(5):"",spot:val("pfSpot"),song:val("pfSong"),likes:val("pfLikes").split(",").map(x=>x.trim()).filter(Boolean).slice(0,10),stickers:s.state.stickers,bgfx:s.state.bgfx||""});closeSheet();toast("Profile saved")},
+  pfFx(d){const p=profS();if(!p)return;p.state.bgfx=d.v;paintSheet(topS())},
+  pickStickers(){openSheet("stickerPick")},
+  pickFx(){openSheet("fxPick")},
+  songToggle(){const a=SONG.a;if(!a)return;if(a.paused){a.play().catch(()=>{});SONG.muted=false}else{a.pause();SONG.muted=true}SONG.paint()},
+  async pfSave(){const n=val("pfNick");if(!n)return toast("Add a name first.");const s=topS(),bd=val("pfBday"),song=val("pfSong"),old=mem(ME)||{};let sg={};
+    if(song!==(old.song||"")){if(!song)sg={songTitle:"",songArt:"",songPreview:"",songUrl:""};else{toast("Finding your song…");try{const r=await resolveSong(song);sg=r?{songTitle:r.songTitle||"",songArt:r.songArt||"",songPreview:r.songPreview||"",songUrl:r.songUrl||""}:{songTitle:"",songArt:"",songPreview:"",songUrl:""};if(!r?.songPreview)toast("Saved. Couldn't find a preview for that song.")}catch{}}}
+    await Store.upd("members",ME,{nick:n.slice(0,24),emoji:s.state.emoji,color:s.state.color,photo:s.state.photo||"",bio:val("pfBio"),vibe:val("pfVibe"),birthday:bd?bd.slice(5):"",birthYear:bd?bd.slice(0,4):"",spot:val("pfSpot"),song:song,likes:val("pfLikes").split(",").map(x=>x.trim()).filter(Boolean).slice(0,10),stickers:s.state.stickers,bgfx:s.state.bgfx||"",...sg});closeSheet();toast("Profile saved")},
   planFilter(d){UI.planFilter=d.k;render()},
   newPlan(){openSheet("edit",{})},
   openPlan(d,el,ev){ev?.preventDefault();openSheet("plan",{id:d.id})},
@@ -3240,6 +3354,7 @@ document.addEventListener("change",ev=>{
     else{await Store.upd("members",ME,{shareLoc:false,loc:MODE==="demo"?DEL:firebase.firestore.FieldValue.delete()});syncLocWatch();toast("👻 Location hidden")}})()}
   if(el.id?.startsWith("ridePartial-")){const pid=el.dataset.pid,r=myRsvp(pid);if(r?.ride)saveRsvp(pid,{ride:{...r.ride,partial:el.checked}})}
   if(["nMsgs","nPlans","nMoments"].includes(el.id)){SET[el.id]=el.checked;ls.set("yg-settings",SET)}
+  if(el.id==="profSongs"){SET.profSongs=el.checked;ls.set("yg-settings",SET);if(!el.checked)SONG.stop()}
   if(el.id==="appFx"){SET.appFx=el.checked;ls.set("yg-settings",SET);syncAppFx()}
   if(el.id==="actAs"){ls.set("yg-actas",el.value);ME=el.value;while(stack.length)closeSheet();render();toast(ME==="me-demo"?"Back to being you":"Now testing as "+(mem(ME)?.nick||"a friend"))}
   if(el.id==="exPl"){const s=topS();s.state.plan=el.value}
