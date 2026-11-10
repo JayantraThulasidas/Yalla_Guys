@@ -532,7 +532,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.19";
+const APP_VERSION="2026-11-10.22";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -640,6 +640,41 @@ function routeFor(stops){
 }
 
 /* ---------- store: Firebase (shared) or demo (this device) ---------- */
+/* Delta sync: every phone keeps its own copy of the data (IndexedDB) and only downloads documents
+   created or changed since its last visit. Writes stamp a "u" (updated) time; deletes leave a small
+   tombstone so other phones can drop the item. A full refresh runs every 14 days as a safety net. */
+const DELTA=["plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers"];
+const FULL_EVERY=14*864e5,SKEW=5*6e4;
+const IDB={_db:null,
+  open(){return this._db||(this._db=new Promise((res,rej)=>{const r=indexedDB.open("yg-cache-"+ME,1);r.onupgradeneeded=()=>{r.result.createObjectStore("docs",{keyPath:"k"});r.result.createObjectStore("meta")};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))},
+  async all(key){const db=await this.open();return new Promise(res=>{const out=[],tx=db.transaction("docs");tx.objectStore("docs").openCursor(IDBKeyRange.bound(key+"/",key+"/\uffff")).onsuccess=e=>{const c=e.target.result;if(c){out.push(c.value);c.continue()}else res(out)};tx.onerror=()=>res(out)})},
+  async put(items){if(!items.length)return;const db=await this.open(),tx=db.transaction("docs","readwrite"),st=tx.objectStore("docs");items.forEach(x=>x.del?st.delete(x.k):st.put(x));return new Promise(r=>{tx.oncomplete=r;tx.onerror=r;tx.onabort=r})},
+  async clear(key){const db=await this.open(),tx=db.transaction("docs","readwrite");tx.objectStore("docs").delete(IDBKeyRange.bound(key+"/",key+"/\uffff"));return new Promise(r=>{tx.oncomplete=r;tx.onerror=r})},
+  async meta(k,v){const db=await this.open(),tx=db.transaction("meta",v===undefined?"readonly":"readwrite"),st=tx.objectStore("meta");
+    if(v===undefined)return new Promise(r=>{const q=st.get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)});st.put(v,k);return new Promise(r=>{tx.oncomplete=r;tx.onerror=r})},
+  async wipe(){try{const db=await this.open();const tx=db.transaction(["docs","meta"],"readwrite");tx.objectStore("docs").clear();tx.objectStore("meta").clear();await new Promise(r=>{tx.oncomplete=r;tx.onerror=r})}catch{}}
+};
+async function deltaSync(path,key,apply,onErr){
+  const offs=[];let map=new Map(),since=0,full=0;
+  try{(await IDB.all(key)).forEach(x=>map.set(x.id,x.d));since=await IDB.meta("since:"+key)||0;full=await IDB.meta("full:"+key)||0}catch{map=new Map();since=0}
+  if(map.size)apply(map);
+  if(!since||now()-full>FULL_EVERY){
+    const t0=now();const snap=await FS.collection(path).get();map=new Map();const items=[];
+    snap.docs.forEach(d=>{const v=d.data();if(v._del)return;map.set(d.id,v);items.push({k:key+"/"+d.id,id:d.id,d:v})});
+    try{await IDB.clear(key);await IDB.put(items);await IDB.meta("full:"+key,t0)}catch{}
+    since=t0-SKEW;try{await IDB.meta("since:"+key,since)}catch{}
+  }
+  apply(map);
+  let maxSeen=since;
+  const onSnap=sn=>{const items=[];sn.docChanges().forEach(ch=>{if(ch.type==="removed")return;const v=ch.doc.data(),id=ch.doc.id;
+      if(v._del){map.delete(id);items.push({k:key+"/"+id,del:true})}else{map.set(id,v);items.push({k:key+"/"+id,id,d:v})}
+      const t=Math.max(v.u||0,v.at||0);if(t-SKEW>maxSeen)maxSeen=t-SKEW});
+    if(!items.length)return;apply(map);IDB.put(items).then(()=>IDB.meta("since:"+key,maxSeen)).catch(()=>{})};
+  // changes stamped with "u", plus anything newly created (also catches friends still on an older version)
+  offs.push(FS.collection(path).where("u",">",since).onSnapshot(onSnap,onErr));
+  offs.push(FS.collection(path).where("at",">",since).onSnapshot(onSnap,onErr));
+  return()=>offs.forEach(f=>f());
+}
 const COLS=["members","plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers"];
 const D={chats:[],msgs:[],priv:{labels:{}},wishes:[],mine:[]};COLS.forEach(c=>D[c]=[]);
 let ME=null,MODE="loading",FS=null,AUTH=null,JOIN_ERR="";
@@ -650,7 +685,6 @@ const Store={
   init(){
     if(!configured()){Demo.start();return}
     try{firebase.initializeApp(FIREBASE_CONFIG);FS=firebase.firestore();AUTH=firebase.auth()}catch(e){console.error(e);Demo.start();return}
-    FS.enablePersistence({synchronizeTabs:true}).catch(()=>{});
     AUTH.onAuthStateChanged(async u=>{
       Store.stop();
       if(!u){ME=null;MODE="auth";render();return}
@@ -659,12 +693,14 @@ const Store={
       if(md&&md.exists)Store.live();else{MODE="join";render()}
     });
   },
-  stop(){unsubs.splice(0).forEach(f=>f());msgSubs.forEach(f=>f());msgSubs.clear();msgData.clear();COLS.forEach(c=>D[c]=[]);D.chats=[];D.msgs=[];D.priv={labels:{}};D.wishes=[];D.mine=[];Store.ready=false},
+  stop(){IDB._db=null;unsubs.splice(0).forEach(f=>f());msgSubs.forEach(f=>f());msgSubs.clear();msgData.clear();COLS.forEach(c=>D[c]=[]);D.chats=[];D.msgs=[];D.priv={labels:{}};D.wishes=[];D.mine=[];Store.ready=false},
   live(){
     MODE="live";const seen=new Set();
     const done=c=>{seen.add(c);if(seen.size>=COLS.length+1)Store.ready=true;schedule()};
     const fail=e=>{console.error(e);toast(e.code==="permission-denied"?"You don't have access. Check your crew code.":"Sync paused. Check your connection.")};
-    COLS.forEach(c=>unsubs.push(FS.collection(c).onSnapshot(s=>{D[c]=s.docs.map(d=>({id:d.id,...d.data()}));done(c)},fail)));
+    COLS.forEach(c=>{
+      if(DELTA.includes(c)){let first=true;deltaSync(c,c,map=>{D[c]=[...map].map(([id,v])=>({id,...v}));if(first){first=false;done(c)}else schedule()},fail).then(off=>{if(MODE==="live")unsubs.push(off);else off()}).catch(e=>{fail(e);done(c)})}
+      else unsubs.push(FS.collection(c).onSnapshot(s=>{D[c]=s.docs.map(d=>({id:d.id,...d.data()}));done(c)},fail))});
     unsubs.push(FS.collection("chats").where("members","array-contains",ME).onSnapshot({includeMetadataChanges:true},s=>{D.chats=s.docs.map(d=>({id:d.id,...d.data()}));Store.pendingChats=new Set(s.docs.filter(d=>d.metadata.hasPendingWrites).map(d=>d.id));Store.syncMsgSubs();done("chats")},fail));
     {const parts={};const mergeW=()=>{const m=new Map();Object.values(parts).flat().forEach(w=>m.set(w.id,w));D.wishes=[...m.values()];schedule()};
       [["all",FS.collection("wishes").where("vis","==","all")],["by",FS.collection("wishes").where("by","==",ME)],["inv",FS.collection("wishes").where("invited","array-contains",ME)]]
@@ -680,22 +716,26 @@ const Store={
     for(const id of ids)if(!msgSubs.has(id)&&!Store.pendingChats?.has(id))Store.subMsgs(id,0);
   },
   subMsgs(id,tries){
-    msgSubs.set(id,FS.collection(`chats/${id}/msgs`).orderBy("at","desc").limit(300).onSnapshot(s=>{msgData.set(id,s.docs.map(d=>({id:d.id,chatId:id,...d.data()})));D.msgs=[...msgData.values()].flat();schedule()},
-      e=>{msgSubs.delete(id);if(tries<6)setTimeout(()=>{if(D.chats.some(c=>c.id===id)&&!msgSubs.has(id))Store.subMsgs(id,tries+1)},1000*(tries+1))}));
+    let off=null,dead=false;msgSubs.set(id,()=>{dead=true;off&&off()});
+    const retry=()=>{msgSubs.delete(id);if(tries<6)setTimeout(()=>{if(D.chats.some(c=>c.id===id)&&!msgSubs.has(id))Store.subMsgs(id,tries+1)},1000*(tries+1))};
+    deltaSync(`chats/${id}/msgs`,"msgs:"+id,map=>{msgData.set(id,[...map].map(([mid,v])=>({id:mid,chatId:id,...v})));D.msgs=[...msgData.values()].flat();schedule()},e=>{if(!dead){off&&off();retry()}})
+      .then(f=>{off=f;if(dead)f()}).catch(()=>{if(!dead)retry()});
   },
 
   path(c,id,obj){return c==="msgs"?`chats/${obj.chatId}/msgs/${id}`:c==="mine"?`mine/${ME}/items/${id}`:`${c}/${id}`},
   async add(c,obj){const id=obj.id||rid();delete obj.id;await Store.set(c,id,obj);return id},
-  async set(c,id,obj){if(MODE==="demo")return Demo.set(c,id,obj);try{await FS.doc(Store.path(c,id,obj)).set(obj)}catch(e){Store.err(e)}},
-  async updMsg(chatId,id,patch){if(MODE==="demo")return Demo.upd("msgs",id,patch);try{await FS.doc(`chats/${chatId}/msgs/${id}`).update(patch)}catch(e){Store.err(e)}},
-  async upd(c,id,patch){if(MODE==="demo")return Demo.upd(c,id,patch);try{await FS.doc(Store.path(c,id,{})).update(patch)}catch(e){Store.err(e)}},
-  async del(c,id){if(MODE==="demo")return Demo.del(c,id);try{await FS.doc(Store.path(c,id,{})).delete()}catch(e){Store.err(e)}},
+  async set(c,id,obj){if(MODE==="demo")return Demo.set(c,id,obj);try{await FS.doc(Store.path(c,id,obj)).set({...obj,u:now()})}catch(e){Store.err(e)}},
+  async updMsg(chatId,id,patch){if(MODE==="demo")return Demo.upd("msgs",id,patch);try{await FS.doc(`chats/${chatId}/msgs/${id}`).update({...patch,u:now()})}catch(e){Store.err(e)}},
+  async upd(c,id,patch){if(MODE==="demo")return Demo.upd(c,id,patch);try{await FS.doc(Store.path(c,id,{})).update({...patch,u:now()})}catch(e){Store.err(e)}},
+  async del(c,id){if(MODE==="demo")return Demo.del(c,id);try{if(DELTA.includes(c))await FS.doc(Store.path(c,id,{})).set({_del:true,u:now()});else await FS.doc(Store.path(c,id,{})).delete()}catch(e){Store.err(e)}},
   async setLabel(busyId,label){if(MODE==="demo")return;try{await FS.doc("priv/"+ME).set({labels:{[busyId]:label}},{merge:true})}catch(e){}},
   async joinChat(cid){if(MODE==="demo"){const c=D.chats.find(x=>x.id===cid);if(c&&!c.members.includes(ME))Demo.upd("chats",cid,{members:[...c.members,ME]});return true}
     try{const snap=await FS.doc("chats/"+cid).get();if(!snap.exists)return false;if(!(snap.data().members||[]).includes(ME))await FS.doc("chats/"+cid).update({members:firebase.firestore.FieldValue.arrayUnion(ME)});return true}catch(e){return false}},
   err(e){console.error(e);if(e?.code==="permission-denied")toast("Not allowed. Are you in the crew?");else if(e?.code==="resource-exhausted")toast("Free storage limit reached. Delete some photos.");else toast("Couldn't save. Check your connection and try again.")}
 };
 const DEL={__del:true};
+{const raw={busy:[],rsvps:[]};for(const k of ["busy","rsvps"])Object.defineProperty(D,k,{configurable:true,enumerable:true,
+  get(){return D.members&&D.members.length?raw[k].filter(x=>D.members.some(m=>m.id===x.uid)):raw[k]},set(v){raw[k]=v||[]}});}
 const Demo={
   key:"yallaguys-demo-v1",
   start(){MODE="demo";ME=ls.get("yg-actas","me-demo");Store.ready=true;const s=ls.get(Demo.key,null);if(s&&s.members){[...COLS,"chats","msgs","wishes","mine"].forEach(c=>D[c]=s[c]||[])}else Demo.seed();schedule()},
@@ -746,6 +786,7 @@ const Demo={
 };
 
 /* ---------- derived ---------- */
+const crewOwner=()=>[...D.members].sort((a,b)=>(a.joined||0)-(b.joined||0))[0]?.id;
 const mem=id=>D.members.find(m=>m.id===id);
 const nick=id=>id===ME?"You":(mem(id)?.nick||"Someone");
 const avatar=(id,cls="",style="")=>{const m=mem(id);return`<span class="av ${cls}" style="background:${esc(m?.color||"#7A8794")};${style}" title="${esc(nick(id))}">${m?.photo?`<img src="${esc(m.photo)}" alt="">`:esc(m?.emoji||"🙂")}</span>`};
@@ -798,7 +839,7 @@ const postedToday=u=>D.moments.some(m=>m.by===u&&m.day===TODAY());
 function streakOf(u){const days=new Set(momentsBy(u).map(m=>m.day));let d=new Date();if(!days.has(ymd(d)))d.setDate(d.getDate()-1);let n=0;while(days.has(ymd(d))){n++;d.setDate(d.getDate()-1)}return n}
 const mySaved=()=>mem(ME)?.saved||[];
 const archivedIds=()=>mem(ME)?.archivedChats||[];
-const allMyChats=()=>D.chats.filter(c=>(c.members||[]).includes(ME)).sort((a,b)=>lastAt(b)-lastAt(a));
+const allMyChats=()=>D.chats.filter(c=>(c.members||[]).includes(ME)&&!(c.dm&&!mem(chatOther(c)))).sort((a,b)=>lastAt(b)-lastAt(a));
 const myChats=()=>allMyChats().filter(c=>!archivedIds().includes(c.id));
 const chatMsgs=cid=>D.msgs.filter(m=>m.chatId===cid).sort((a,b)=>a.at-b.at);
 const lastAt=c=>{const m=chatMsgs(c.id);return m.length?m[m.length-1].at:c.at};
@@ -981,7 +1022,7 @@ function agenda(ds,onlyMe){
 }
 VIEWS.map=()=>`<div class="view-title"><h1>Map</h1><div class="seg"><button data-act="mapFilter" data-k="upcoming" aria-pressed="${UI.mapFilter==="upcoming"}">Coming up</button><button data-act="mapFilter" data-k="all" aria-pressed="${UI.mapFilter==="all"}">All</button></div></div>
   <div id="mapSlot"></div><div id="mapList" class="list" style="gap:8px;margin-top:12px"></div>`;
-const REACTS=["❤️","😂","😍","🔥","😮","😭"];
+const REACTS=["❤️","😂","😍","🔥","😮","😭","🦧"];
 function momentCard(x,full){
   const me=x.by===ME,locked=!me&&x.day===TODAY()&&!postedToday(ME),saved=mySaved().includes(x.id);
   const rx=Object.entries(x.reacts||{}),counts={};rx.forEach(([u,e])=>counts[e]=(counts[e]||0)+1);const mine=(x.reacts||{})[ME];
@@ -1305,6 +1346,8 @@ SHEETS.settings={live:true,
       <div class="hint">Alerts arrive while Yalla Guys is open or was recently open in the background. For reminders you can't miss, use “Add to phone calendar” on a plan.</div></div>
     <div class="sec"><h2>Default plan reminders</h2><div class="chips">${REM_OPTS.map(([m,l])=>`<button class="chip" data-act="defRemind" data-m="${m}" aria-pressed="${SET.remind.includes(m)}">${l} before</button>`.replace("At start before","At start")).join("")}</div>
       <div class="hint">Used for every plan you're going to. You can change them per plan.</div></div>
+    ${MODE==="live"?`<div class="sec"><h2>Data</h2><button class="btn block" data-act="resync">🔄 Refresh everything</button><div class="hint">The app saves a copy on this phone and only downloads what's new, to keep things fast and free. Use this if something looks out of date.</div></div>`:""}
+    ${MODE==="live"?`<div class="sec"><h2>Your user ID</h2><div class="row" style="flex-wrap:nowrap"><code style="flex:1;min-width:0;overflow-wrap:anywhere;font-size:12px;background:var(--surface2);padding:8px 10px;border-radius:10px;user-select:all;-webkit-user-select:all">${esc(ME)}</code><button class="btn sm" data-act="copyUid">Copy</button></div>${crewOwner()===ME?`<div class="hint">You're the crew owner, so you can remove people from their profile. Paste this ID into the Firebase rules once so it works.</div>`:""}</div>`:""}
     ${MODE==="live"?`<div class="sec"><h2>Account</h2><button class="btn danger block" data-act="delAccount">Delete my account</button><div class="hint">Removes your profile, votes, busy times and login for good.</div></div>`:""}
     </div>`}}
 };
@@ -1506,6 +1549,7 @@ SHEETS.person={live:true,
     return{title:me?"My profile":esc(m.nick),right:me?`<button class="btn sm" data-act="settings" aria-label="Settings">⚙️</button><button class="btn sm" data-act="profile">Edit</button>`:"",body:`
       <div class="prof-hero">${stickerHalo(m.stickers||[],avatar(id))}<h1>${esc(m.nick)}</h1>${m.vibe?`<span class="vibe">${esc(m.vibe)}</span>`:""}${m.bio?`<p style="margin:0;max-width:34ch;color:var(--muted)">${esc(m.bio)}</p>`:me?`<button class="btn sm ghost" data-act="profile">+ Add a bio, photo and cute stuff</button>`:""}
         <div class="row" style="justify-content:center;margin-top:4px"><button class="btn" data-act="timeline" data-id="${esc(id)}">🕰️ Timeline</button>${me?"":`<button class="btn pri" data-act="dm" data-id="${esc(id)}">💬 Message</button>`}</div></div>
+      ${!me&&MODE==="live"&&crewOwner()===ME?`<div style="display:flex;justify-content:center;margin-top:8px"><button class="btn sm danger" data-act="kickMember" data-id="${esc(id)}" data-confirm="Tap again to remove ${esc(m.nick)}">Remove from crew</button></div>`:""}
       <div class="stats" style="margin-top:14px"><div class="stat"><b>${streakOf(id)}🔥</b><span>day streak</span></div><div class="stat"><b>${mine.length}</b><span>moments</span></div><div class="stat"><b>${plansIn}</b><span>plans joined</span></div></div>
       ${facts.length||(m.likes||[]).length?`<div class="sec" style="border:0"><div class="facts">${facts.map(f=>`<div class="fact"><span style="font-size:22px">${f[0]}</span><span><span class="k">${f[1]}</span><br><b>${esc(f[2])}</b></span></div>`).join("")}</div>${(m.likes||[]).length?`<div class="tags">${m.likes.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`:""}</div>`:""}
       <div class="sec"><h2>${me?"My moments":"Moments"}</h2>${mine.length?grid(mine):`<div class="meta">No moments yet.</div>`}</div>
@@ -1589,7 +1633,7 @@ const hostOf=u=>{try{return new URL(u).hostname.replace(/^www\./,"")}catch{retur
 
 function reelsHtml(reels){return`<div class="reels">${reels.map(m=>{const u=embedUrl(m.url),ty=/instagram/.test(u)?"ig":/tiktok/.test(u)?"tk":"yt",app={ig:"Instagram",tk:"TikTok",yt:"YouTube"}[ty];
   return`<div class="reel-card"><div class="reel-frame ${ty}"><iframe src="${esc(u)}" loading="lazy" scrolling="no" tabindex="-1" title="${app} video"></iframe><a class="reel-hit" href="${esc(m.url)}" target="_blank" rel="noopener" aria-label="Open in ${app}"><span class="reel-badge">${app} ↗</span></a></div>
-    <div class="rf">${avatar(m.by,"xs")}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(m.caption||nick(m.by))}</span>${m.by===ME?`<button class="x" data-act="delItem" data-id="${esc(m.id)}" data-confirm="🗑️?" aria-label="Remove">✕</button>`:""}</div></div>`}).join("")}</div>`}
+    <div class="rf">${avatar(m.by,"xs")}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(m.caption||nick(m.by))}</span>${canRemove(m)?`<button class="x" data-act="delItem" data-id="${esc(m.id)}" data-confirm="🗑️?" aria-label="Remove">✕</button>`:""}</div></div>`}).join("")}</div>`}
 const isReel=m=>(m.kind==="reel"||m.kind==="link")&&!!embedUrl(m.url);
 SHEETS.board={live:true,
   render(s){const p=planById(s.args.id);if(!p)return{title:"Mood board",body:""};
@@ -1598,9 +1642,10 @@ SHEETS.board={live:true,
       top:reels.length?`<div class="sec" style="border:0;padding-top:4px"><h2>▶ Reels (${reels.length})</h2>${reelsHtml(reels)}</div>`:"",
       body:`<div class="sec" style="${reels.length?"":"border:0;padding-top:4px"}"><h2>📌 Board (${rest.length})</h2>${rest.length?`<div class="board">${rest.map((m,i)=>boardItem(m,i)).join("")}</div>`:`<div class="empty">Nothing pinned yet. Tap <b>+ Add</b> for photos, notes, colours or links.</div>`}</div>`}}
 };
+const canRemove=m=>m.by===ME||planById(m.planId)?.by===ME;
 function boardItem(m,i){
-  const del=m.by===ME?`<button class="bdel" data-act="delItem" data-id="${esc(m.id)}" data-confirm="🗑️" aria-label="Remove">✕</button>`:"";
-  if(m.kind==="photo")return`<button class="bphoto" data-act="viewPhoto" data-id="${esc(m.id)}"><img src="${esc(m.src)}" alt="${esc(m.caption||"Photo")}" loading="lazy"></button>`;
+  const del=canRemove(m)?`<button class="bdel" data-act="delItem" data-id="${esc(m.id)}" data-confirm="🗑️" aria-label="Remove">✕</button>`:"";
+  if(m.kind==="photo")return`<div class="bphoto"><button data-act="viewPhoto" data-id="${esc(m.id)}" style="all:unset;display:block;width:100%;cursor:pointer"><img src="${esc(m.src)}" alt="${esc(m.caption||"Photo")}" loading="lazy"></button>${del}</div>`;
   if(m.kind==="note")return`<div class="bnote" style="background:${esc(m.color||NOTE_COLORS[0])};--r:${(i%3-1)*1.2}deg">${esc(m.text)}<small>${esc(nick(m.by))}</small>${del}</div>`;
   if(m.kind==="color")return`<div class="bcolor" style="background:${esc(m.color)}"><span>${esc((m.caption||m.color).toUpperCase())}</span>${del}</div>`;
   return`<a class="blink" href="${esc(m.url)}" target="_blank" rel="noopener"><b>${m.kind==="reel"?"▶ ":"🔗 "}${esc(m.caption||hostOf(m.url))}</b><span class="meta">${esc(hostOf(m.url))} · ${esc(nick(m.by))}</span>${del}</a>`;
@@ -2180,7 +2225,7 @@ const ACT={
   close(){closeSheet()},
   authTab(d){UI.authTab=d.k;render()},
   async forgot(){const em=val("auEmail");const err=$("#auErr");if(!em)return err.textContent="Type your email above first.";try{await AUTH.sendPasswordResetEmail(em);toast("Reset link sent. Check your email.")}catch(e){err.textContent=authMsg(e)}},
-  async logout(){while(stack.length)closeSheet();if(AUTH)await AUTH.signOut();else toast("Demo mode has no account.")},
+  async logout(){while(stack.length)closeSheet();IDB._db=null;if(AUTH)await AUTH.signOut();else toast("Demo mode has no account.")},
   jnEmoji(d){UI.join.emoji=d.v;render()},
   jnColor(d){UI.join.color=d.v;render()},
   async jnSave(){const n=val("jnNick"),code=val("jnCode");if(!n){JOIN_ERR="Add your name.";return render()}if(!code){JOIN_ERR="Enter the crew code.";return render()}
@@ -2308,18 +2353,25 @@ const ACT={
   busyRem(d){const all=ls.get("yg-remind-busy",{}),a=all[d.id]||[],m=+d.m,i=a.indexOf(m);if(i>=0)a.splice(i,1);else a.push(m);all[d.id]=a;ls.set("yg-remind-busy",all);paintSheet(topS());if(!SET.notifyOn)toast("Turn on notifications in ⚙️ Settings, or add it to your phone calendar")},
   busyIcs(d){const b=D.busy.find(x=>x.id===d.id);if(!b)return;const p=busyAsPlan(b),txt=icsFor(p,busyRemind(b.id).length?busyRemind(b.id):[60]);const a=document.createElement("a");a.href=/iPhone|iPad/i.test(navigator.userAgent)?"data:text/calendar;charset=utf-8,"+encodeURIComponent(txt):URL.createObjectURL(new Blob([txt],{type:"text/calendar"}));a.download=(p.title.replace(/[^\w]+/g,"-")||"plan")+".ics";document.body.appendChild(a);a.click();a.remove()},
   delAccount(){openSheet("delAccount")},
+  copyUid(){try{navigator.clipboard.writeText(ME);toast("Copied your user ID")}catch{toast("Long-press the ID to copy it")}},
+  async kickMember(d){if(crewOwner()!==ME)return;const uid=d.id,m=mem(uid);toast("Removing…");
+    try{await FS.doc("members/"+uid).delete()}catch(e){return toast(e?.code==="permission-denied"?"Add your user ID to the Firebase rules first (see Settings).":"Couldn't remove them. Try again.")}
+    const raw=Object.getOwnPropertyDescriptor(D,"busy");
+    for(const c of D.chats.filter(c=>(c.members||[]).includes(uid)))await FS.doc("chats/"+c.id).update({members:firebase.firestore.FieldValue.arrayRemove(uid),u:now()}).catch(()=>{});
+    while(stack.length)closeSheet();toast(`${m?.nick||"They"} ${m?"was":"were"} removed from the crew`)},
+  async resync(){toast("Refreshing…");await IDB.wipe();location.reload()},
   async delAccountGo(){const s=topS(),pw=$("#delPw",s.el).value,ok=val("delTxt").toUpperCase()==="DELETE";if(!ok)return toast("Type DELETE to confirm.");if(!pw)return toast("Enter your password.");
     const u=AUTH.currentUser;if(!u)return;$("#delBtn",s.el).disabled=true;
     try{await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,pw))}catch(e){$("#delBtn",s.el).disabled=false;return toast(authMsg(e))}
     toast("Deleting your account…");const uid=u.uid;
     try{
-      for(const r of D.rsvps.filter(x=>x.uid===uid))await FS.doc("rsvps/"+r.id).delete().catch(()=>{});
-      for(const b of D.busy.filter(x=>x.uid===uid))await FS.doc("busy/"+b.id).delete().catch(()=>{});
+      for(const r of D.rsvps.filter(x=>x.uid===uid))await FS.doc("rsvps/"+r.id).set({_del:true,u:now()}).catch(()=>{});
+      for(const b of D.busy.filter(x=>x.uid===uid))await FS.doc("busy/"+b.id).set({_del:true,u:now()}).catch(()=>{});
       for(const m of D.mine)await FS.doc(`mine/${uid}/items/${m.id}`).delete().catch(()=>{});
       for(const w of D.wishes.filter(x=>x.by===uid))await FS.doc("wishes/"+w.id).delete().catch(()=>{});
       await FS.doc("priv/"+uid).delete().catch(()=>{});
       await FS.doc("members/"+uid).delete();
-      Store.stop();await u.delete();
+      Store.stop();await IDB.wipe();await u.delete();
       while(stack.length)closeSheet();toast("Your account was deleted. Bye 👋");
     }catch(e){console.error(e);$("#delBtn",s.el).disabled=false;toast(e?.code==="permission-denied"?"The Firebase rules need updating to allow deleting accounts.":"Couldn't finish deleting. Try again.")}},
   chatMenu(d){openSheet("chatMenu",{id:d.id})},
@@ -2499,6 +2551,7 @@ document.addEventListener("click",ev=>{
   const el=ev.target.closest("[data-act]");if(!el)return;const fn=ACT[el.dataset.act];if(!fn)return;
   if(el.dataset.confirm){if(!el._armed){el._armed=true;const o=el.innerHTML;el.textContent=el.dataset.confirm;setTimeout(()=>{el._armed=false;if(el.isConnected)el.innerHTML=o},3000);return}}
   if(el.tagName==="A"&&el.getAttribute("href")==="#")ev.preventDefault();
+  if(el.tagName!=="A"&&ev.target.closest("a"))ev.preventDefault();
   const r=fn(el.dataset,el,ev);if(r&&r.catch)r.catch(e=>{console.error(e);toast("Something went wrong. Try again.")});
   armBack();
 });
