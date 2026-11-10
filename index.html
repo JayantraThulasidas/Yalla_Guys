@@ -308,7 +308,7 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .note-colors{display:flex;gap:8px}
 .note-colors button{width:40px;height:40px;border-radius:10px;border:3px solid transparent}
 .note-colors button[aria-pressed="true"]{border-color:var(--fg)}
-.att{flex:none;width:40px;height:44px;border:0;background:none;font-size:20px;border-radius:12px;display:grid;place-items:center}
+.att{flex:none;width:36px;height:44px;border:0;background:none;font-size:20px;border-radius:12px;display:grid;place-items:center}
 .att:active{background:var(--surface2)}
 .mediab{padding:4px!important;display:flex;flex-direction:column;gap:4px}
 .mediab>div{padding:4px 8px 6px}
@@ -367,6 +367,17 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .tslot .tk{width:2px;height:10px;border-radius:2px;background:var(--line)}
 .tslot.on .tk{background:var(--accent);height:16px}
 .tl-needle{position:absolute;left:50%;bottom:-2px;z-index:2;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:10px solid var(--accent);transform:translateX(-50%);pointer-events:none}
+.tl-wrap{height:330px!important}
+.tl-line,.tl-needle{display:none!important}
+.tl-strip{height:330px!important}
+.tslot,.tslot.on{height:330px!important;justify-content:flex-end!important;gap:0!important;padding:0 0 6px!important;transform:none!important}
+.tslot .pin{margin-bottom:8px!important}
+.tslot .pin.dot{margin-bottom:12px!important}
+.tslot .ln{align-self:stretch;height:3px;background:var(--line);margin-bottom:8px;flex:none}
+.tslot.on .ln{background:linear-gradient(90deg,var(--line),var(--accent),var(--line))}
+.tslot .dl{margin:0!important;height:14px;line-height:14px}
+.tslot .dn{height:28px;line-height:28px}
+.tl-fan{height:178px!important;top:4px!important}
 .tl-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:14px}
 .tl-head h2{font-size:22px;font-weight:800}
 .ride-me{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
@@ -388,6 +399,43 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 @media (prefers-reduced-motion:reduce){.fpin .pulse{animation:none}}
 .share-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--surface);border:1px solid var(--line);margin-bottom:10px}
 .dist{font-family:var(--f-display);font-weight:800;font-size:18px;white-space:nowrap;font-variant-numeric:tabular-nums}
+#updBar{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 10px);z-index:95;border:0;background:var(--accent);color:var(--accent-fg);font-weight:800;font-size:14px;border-radius:999px;padding:12px 18px;box-shadow:var(--shadow);white-space:nowrap}
+.camx{position:fixed;inset:0;z-index:70;background:#000;display:flex;flex-direction:column;color:#fff}
+.camx video,.camx img.shot,.camx video.shot{flex:1;min-height:0;width:100%;object-fit:cover;background:#000}
+.camx .mirror{transform:scaleX(-1)}
+.cam-top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;z-index:2}
+.cam-top button,.cam-flip{width:44px;height:44px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:20px}
+.cam-rec{background:var(--danger);color:#fff;border-radius:999px;padding:4px 10px;font-weight:800;font-size:13px;font-variant-numeric:tabular-nums}
+.cam-bot{display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 18px);background:#000}
+.cam-modes{display:flex;gap:6px}
+.cam-modes button{border:0;background:none;color:rgba(255,255,255,.6);font-weight:800;font-size:13px;letter-spacing:.06em;padding:6px 10px;border-radius:999px}
+.cam-modes button[aria-pressed="true"]{color:#000;background:#fff}
+.cam-row{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:360px}
+.shutter{width:76px;height:76px;border-radius:50%;border:5px solid #fff;background:rgba(255,255,255,.9);transition:all .15s}
+.shutter.vid{background:var(--danger)}
+.shutter.rec{border-radius:18px;transform:scale(.8);background:var(--danger)}
+.cam-side{width:44px}
+.cam-msg{margin:auto;padding:24px;text-align:center;color:#ddd;max-width:320px}
+.pchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 14px;padding:0 16px}
+.pchips::-webkit-scrollbar{display:none}
+.pchips .chip{flex:none}
+.wish{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.wish.done{opacity:.6}
+.wish.done h3{text-decoration:line-through}
+.wish h3{font-size:17px;font-weight:700}
+.wish .ph{width:100%;max-height:200px;object-fit:cover;border-radius:12px;display:block}
+.vis{font-size:11px;font-weight:800;border-radius:999px;padding:3px 8px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.ticket{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px 12px 18px;display:flex;gap:12px;align-items:center;width:100%;text-align:left;color:var(--fg);overflow:hidden}
+.ticket::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:repeating-linear-gradient(180deg,var(--sun) 0 8px,transparent 8px 14px)}
+.ticket .tk-ic{font-size:26px}
+.ticket .tk-code{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;letter-spacing:.06em;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bigcode{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:26px;font-weight:800;letter-spacing:.12em;text-align:center;padding:18px;border-radius:14px;background:#fff;color:#111;overflow-wrap:anywhere;user-select:all;-webkit-user-select:all}
+.offer{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.offer .oic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;background:var(--sun-soft);flex:none}
+.offer-near{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--sun-soft);border:1px solid color-mix(in srgb,var(--sun) 35%,transparent)}
+.ebadge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;color:var(--sun);background:var(--sun-soft);border-radius:999px;padding:2px 8px;white-space:nowrap}
+.att-row{display:flex;gap:6px;flex-wrap:wrap}
+.att-list{display:flex;flex-direction:column;gap:8px}
 .auth{max-width:440px;margin:0 auto;padding-block:8px 40px}
 .auth-hero{padding:28px 4px 22px}
 .auth-logo{font-family:var(--f-display);font-weight:800;font-size:46px;letter-spacing:-.03em;line-height:1}
@@ -412,6 +460,7 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none}
 <nav class="tabs" aria-label="Sections" hidden><div class="in" id="tabs"></div></nav>
 <div id="sheets"></div>
 <div id="toast" hidden></div>
+<button id="updBar" hidden data-act="doUpdate">✨ New version ready · Tap to update</button>
 <input type="file" id="filePick" accept="image/*" multiple class="vis-hidden" tabindex="-1" aria-hidden="true">
 <input type="file" id="camPick" accept="image/*" capture="environment" class="vis-hidden" tabindex="-1" aria-hidden="true">
 <div id="recbar" hidden><span class="dot"></span><b>Recording</b><span id="recT" class="num">0:00</span><span style="flex:1"></span><button class="btn sm" data-act="recCancel">Cancel</button><button class="btn sm pri" data-act="recSend">Send 🎤</button></div>
@@ -441,6 +490,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
+const APP_VERSION="2026-11-10.4";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -548,8 +598,8 @@ function routeFor(stops){
 }
 
 /* ---------- store: Firebase (shared) or demo (this device) ---------- */
-const COLS=["members","plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments"];
-const D={chats:[],msgs:[],priv:{labels:{}}};COLS.forEach(c=>D[c]=[]);
+const COLS=["members","plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers"];
+const D={chats:[],msgs:[],priv:{labels:{}},wishes:[],mine:[]};COLS.forEach(c=>D[c]=[]);
 let ME=null,MODE="loading",FS=null,AUTH=null,JOIN_ERR="";
 const unsubs=[];const msgSubs=new Map();const msgData=new Map();
 const configured=()=>!!(window.FIREBASE_CONFIG&&FIREBASE_CONFIG.apiKey&&FIREBASE_CONFIG.projectId&&window.firebase);
@@ -567,13 +617,17 @@ const Store={
       if(md&&md.exists)Store.live();else{MODE="join";render()}
     });
   },
-  stop(){unsubs.splice(0).forEach(f=>f());msgSubs.forEach(f=>f());msgSubs.clear();msgData.clear();COLS.forEach(c=>D[c]=[]);D.chats=[];D.msgs=[];D.priv={labels:{}};Store.ready=false},
+  stop(){unsubs.splice(0).forEach(f=>f());msgSubs.forEach(f=>f());msgSubs.clear();msgData.clear();COLS.forEach(c=>D[c]=[]);D.chats=[];D.msgs=[];D.priv={labels:{}};D.wishes=[];D.mine=[];Store.ready=false},
   live(){
     MODE="live";const seen=new Set();
     const done=c=>{seen.add(c);if(seen.size>=COLS.length+1)Store.ready=true;schedule()};
     const fail=e=>{console.error(e);toast(e.code==="permission-denied"?"You don't have access. Check your crew code.":"Sync paused. Check your connection.")};
     COLS.forEach(c=>unsubs.push(FS.collection(c).onSnapshot(s=>{D[c]=s.docs.map(d=>({id:d.id,...d.data()}));done(c)},fail)));
     unsubs.push(FS.collection("chats").where("members","array-contains",ME).onSnapshot({includeMetadataChanges:true},s=>{D.chats=s.docs.map(d=>({id:d.id,...d.data()}));Store.pendingChats=new Set(s.docs.filter(d=>d.metadata.hasPendingWrites).map(d=>d.id));Store.syncMsgSubs();done("chats")},fail));
+    {const parts={};const mergeW=()=>{const m=new Map();Object.values(parts).flat().forEach(w=>m.set(w.id,w));D.wishes=[...m.values()];schedule()};
+      [["all",FS.collection("wishes").where("vis","==","all")],["by",FS.collection("wishes").where("by","==",ME)],["inv",FS.collection("wishes").where("invited","array-contains",ME)]]
+        .forEach(([k,q])=>unsubs.push(q.onSnapshot(sn=>{parts[k]=sn.docs.map(d=>({id:d.id,...d.data()}));mergeW()},()=>{})))}
+    unsubs.push(FS.collection(`mine/${ME}/items`).onSnapshot(sn=>{D.mine=sn.docs.map(d=>({id:d.id,...d.data()}));schedule()},()=>{}));
     unsubs.push(FS.doc("priv/"+ME).onSnapshot(s=>{D.priv=s.exists?{labels:{},...s.data()}:{labels:{}};schedule()},()=>{}));
     render();
   },
@@ -588,12 +642,12 @@ const Store={
       e=>{msgSubs.delete(id);if(tries<6)setTimeout(()=>{if(D.chats.some(c=>c.id===id)&&!msgSubs.has(id))Store.subMsgs(id,tries+1)},1000*(tries+1))}));
   },
 
-  path(c,id,obj){return c==="msgs"?`chats/${obj.chatId}/msgs/${id}`:`${c}/${id}`},
+  path(c,id,obj){return c==="msgs"?`chats/${obj.chatId}/msgs/${id}`:c==="mine"?`mine/${ME}/items/${id}`:`${c}/${id}`},
   async add(c,obj){const id=obj.id||rid();delete obj.id;await Store.set(c,id,obj);return id},
   async set(c,id,obj){if(MODE==="demo")return Demo.set(c,id,obj);try{await FS.doc(Store.path(c,id,obj)).set(obj)}catch(e){Store.err(e)}},
   async updMsg(chatId,id,patch){if(MODE==="demo")return Demo.upd("msgs",id,patch);try{await FS.doc(`chats/${chatId}/msgs/${id}`).update(patch)}catch(e){Store.err(e)}},
-  async upd(c,id,patch){if(MODE==="demo")return Demo.upd(c,id,patch);try{await FS.doc(`${c}/${id}`).update(patch)}catch(e){Store.err(e)}},
-  async del(c,id){if(MODE==="demo")return Demo.del(c,id);try{await FS.doc(`${c}/${id}`).delete()}catch(e){Store.err(e)}},
+  async upd(c,id,patch){if(MODE==="demo")return Demo.upd(c,id,patch);try{await FS.doc(Store.path(c,id,{})).update(patch)}catch(e){Store.err(e)}},
+  async del(c,id){if(MODE==="demo")return Demo.del(c,id);try{await FS.doc(Store.path(c,id,{})).delete()}catch(e){Store.err(e)}},
   async setLabel(busyId,label){if(MODE==="demo")return;try{await FS.doc("priv/"+ME).set({labels:{[busyId]:label}},{merge:true})}catch(e){}},
   async joinChat(cid){if(MODE==="demo"){const c=D.chats.find(x=>x.id===cid);if(c&&!c.members.includes(ME))Demo.upd("chats",cid,{members:[...c.members,ME]});return true}
     try{const snap=await FS.doc("chats/"+cid).get();if(!snap.exists)return false;if(!(snap.data().members||[]).includes(ME))await FS.doc("chats/"+cid).update({members:firebase.firestore.FieldValue.arrayUnion(ME)});return true}catch(e){return false}},
@@ -602,8 +656,8 @@ const Store={
 const DEL={__del:true};
 const Demo={
   key:"yallaguys-demo-v1",
-  start(){MODE="demo";ME=ls.get("yg-actas","me-demo");Store.ready=true;const s=ls.get(Demo.key,null);if(s&&s.members){[...COLS,"chats","msgs"].forEach(c=>D[c]=s[c]||[])}else Demo.seed();schedule()},
-  save(){const o={};[...COLS,"chats","msgs"].forEach(c=>o[c]=D[c]);ls.set(Demo.key,o)},
+  start(){MODE="demo";ME=ls.get("yg-actas","me-demo");Store.ready=true;const s=ls.get(Demo.key,null);if(s&&s.members){[...COLS,"chats","msgs","wishes","mine"].forEach(c=>D[c]=s[c]||[])}else Demo.seed();schedule()},
+  save(){const o={};[...COLS,"chats","msgs","wishes","mine"].forEach(c=>o[c]=D[c]);ls.set(Demo.key,o)},
   set(c,id,obj){D[c]=D[c].filter(d=>d.id!==id).concat([{id,...obj}]);Demo.save();schedule()},
   upd(c,id,p){D[c]=D[c].map(d=>{if(d.id!==id)return d;const n=JSON.parse(JSON.stringify(d));for(const[k,v]of Object.entries(p)){const ks=k.split(".");let o=n;for(const x of ks.slice(0,-1))o=o[x]=o[x]||{};if(v===DEL)delete o[ks.at(-1)];else o[ks.at(-1)]=v}return n});Demo.save();schedule()},
   del(c,id){D[c]=D[c].filter(d=>d.id!==id);Demo.save();schedule()},
@@ -641,6 +695,8 @@ const Demo={
       {id:"mo5",by:"me-demo",at:now()-864e5*2,day:y2,src:ph("🍽️","#C9661A","#6D4FC2"),caption:"Shawarma o'clock",reacts:{}}];
     D.mcomments=[{id:"mc1",momentId:"mo1",by:"m-omar",text:"Invite next time 😤",at:now()-36e5},{id:"mc2",momentId:"mo3",by:"m-lina",text:"Who won??",at:now()-864e5}];
     D.chats=[{id:"c1",name:"The Guys",emoji:"🔥",members:["me-demo","m-sara","m-omar","m-lina"],by:"me-demo",at:now()-864e5*3}];
+    D.wishes=[{id:"w1",type:"wish",emoji:"🪂",title:"Skydive over the Palm (example)",note:"Someday… who's brave enough?",vis:"all",invited:[],by:"m-omar",at:now()-864e5*4,likes:{"m-sara":true},done:false},
+      {id:"w2",type:"todo",emoji:"",title:"Book the desert camp (example)",note:"",vis:"all",invited:[],by:"m-lina",at:now()-864e5,likes:{},done:false}];D.mine=[];D.offers=[];
     D.chats.push({id:"dm1",name:"",dm:true,members:["me-demo","m-lina"],by:"m-lina",at:now()-864e5,planId:""});
     D.msgs=[{id:"d1",chatId:"dm1",by:"m-lina",text:"Are you coming Saturday? 👀",at:now()-36e5*6},{id:"g1",chatId:"c1",by:"m-sara",text:"Vote on the Hatta dates pls!",at:now()-36e5*3},{id:"g2",chatId:"c1",by:"m-omar",text:"Saturday morning I'm busy till 2 😭",at:now()-36e5*2}];
     Demo.save();
@@ -677,7 +733,7 @@ function conflictsFor(date,start,end,excludePlan){
 }
 function balances(){
   const bal={};D.members.forEach(m=>bal[m.id]=0);
-  for(const e of D.expenses){const sp=(e.split||[]).filter(Boolean);if(!sp.length)continue;const sh=(+e.amount||0)/sp.length;bal[e.paidBy]=(bal[e.paidBy]||0)+(+e.amount||0);sp.forEach(u=>bal[u]=(bal[u]||0)-sh)}
+  for(const e of D.expenses){bal[e.paidBy]=(bal[e.paidBy]||0)+(+e.amount||0);for(const[u,a]of Object.entries(sharesOf(e)))bal[u]=(bal[u]||0)-a}
   for(const s of D.settles){bal[s.from]=(bal[s.from]||0)+(+s.amount||0);bal[s.to]=(bal[s.to]||0)-(+s.amount||0)}
   return bal;
 }
@@ -736,7 +792,7 @@ function render(){
   renderTabs();
   keepInputs(v,()=>{v.innerHTML=banners()+(VIEWS[UI.tab]||VIEWS.plans)()});
   afterView();
-  $("#fab").hidden=!(UI.tab==="plans"&&meDoc&&UI.planFilter!=="map");
+  $("#fab").hidden=!(UI.tab==="plans"&&meDoc&&["active","past"].includes(UI.planFilter));
   for(const s of stack)if(SHEETS[s.kind].live)paintSheet(s);
 }
 const STANDALONE=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
@@ -800,8 +856,8 @@ VIEWS.plans=()=>{
   const voting=all.filter(p=>planStatus(p)==="poll"&&!(myRsvp(p.id)?.slots||[]).length).length;
   return`<div class="view-title"><h1>Plans</h1>${voting?`<span class="pill vote">${voting} need${voting>1?"":"s"} your vote</span>`:""}</div>
   ${all.filter(p=>p.final&&p.final.date<=TODAY()&&p.final.date>=ymd(new Date(Date.now()-2*864e5))&&p.status!=="done").map(p=>`<button class="shoot" data-act="openAlbum" data-id="${esc(p.id)}" style="width:100%;border:0;text-align:left;margin-bottom:12px"><span class="big"><b>${p.final.date===TODAY()?"It's plan day! 🎉":"How was it? 📸"}</b><span style="opacity:.9;font-size:13px">Add your pics to ${esc(p.title)}</span></span><span class="cam">📷</span></button>`).join("")}
-  <div class="seg" style="margin-bottom:14px"><button data-act="planFilter" data-k="active" aria-pressed="${f==="active"}">Coming up</button><button data-act="planFilter" data-k="past" aria-pressed="${f==="past"}">Memories</button><button data-act="planFilter" data-k="map" aria-pressed="${f==="map"}">🗺️ Map</button></div>
-  ${f==="map"?`<div class="chips" style="margin-bottom:10px"><button class="chip" data-act="mapMode" data-k="plans" aria-pressed="${UI.mapMode!=="friends"}">📍 Plans</button><button class="chip" data-act="mapMode" data-k="friends" aria-pressed="${UI.mapMode==="friends"}">👯 Friend map</button></div>
+  <div class="pchips">${[["active","Coming up"],["past","📸 Memories"],["wish","✨ Wishlist"],["map","🗺️ Map"],["offers","🏷️ Offers"]].map(([k,l])=>`<button class="chip" data-act="planFilter" data-k="${k}" aria-pressed="${f===k}">${l}</button>`).join("")}</div>
+  ${f==="wish"?wishHtml():f==="offers"?offersHtml():f==="map"?`<div class="chips" style="margin-bottom:10px"><button class="chip" data-act="mapMode" data-k="plans" aria-pressed="${UI.mapMode!=="friends"}">📍 Plans</button><button class="chip" data-act="mapMode" data-k="friends" aria-pressed="${UI.mapMode==="friends"}">👯 Friend map</button></div>
   ${UI.mapMode==="friends"?shareCard():""}<div id="mapSlot"></div><div id="mapList" class="list" style="gap:8px;margin-top:12px"></div>`:`<div class="list">${list.length?list.map(planCard).join(""):`<div class="empty"><h3>${f==="active"?"No plans yet":"No memories yet"}</h3>${f==="active"?"Tap <b>+ Make plan</b> to suggest somewhere to go. Add dates, the guys vote, and it lands on everyone's calendar.":"Plans move here after their date. Add photos and split the bill from the plan page."}</div>`}</div>`}`;
 };
 function planCard(p){
@@ -839,7 +895,7 @@ function agenda(ds){
       items.push({s:s.start||"00:00",h:`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}" style="border-style:dashed"><span class="stripe" style="background:var(--sun)"></span><span class="tm">${fRange(s.start,s.end)}</span><span style="flex:1;min-width:0"><b>Proposed: ${esc(p.title)}</b><br><span class="meta">${v} vote${v===1?"":"s"} · tap to vote</span></span></button>`})}
   }
   for(const b of D.busy.filter(b=>b.date===ds)){const mine=b.uid===ME,lab=mine?myLabel(b):"";
-    items.push({s:b.start||"00:00",h:`<div class="ev busy"><span class="stripe"></span><span class="tm">${fRange(b.start,b.end)}</span><span style="flex:1;min-width:0">${avatar(b.uid,"xs")} <b>${esc(nick(b.uid))}</b> ${mine?`· ${esc(lab||"Busy")}${lab?'<span class="meta"> (others see "Busy")</span>':""}`:"· Busy"}</span>${mine?`<button class="x" data-act="delBusy" data-id="${esc(b.id)}" aria-label="Remove">✕</button>`:""}</div>`})}
+    items.push({s:b.start||"00:00",h:`<div class="ev busy"><span class="stripe"></span><span class="tm">${fRange(b.start,b.end)}</span><span style="flex:1;min-width:0">${avatar(b.uid,"xs")} <b>${esc(nick(b.uid))}</b> ${mine?`· ${esc(lab||"Busy")}${lab?'<span class="meta"> (others see "Busy")</span>':""}`:"· Busy"}</span>${mine?`${D.mine.some(m=>m.busyId===b.id)?`<span class="meta">📎${D.mine.filter(m=>m.busyId===b.id).length}</span>`:""}<button class="btn sm" data-act="openBusy" data-id="${esc(b.id)}">Open</button>`:""}</div>`})}
   items.sort((a,b)=>a.s.localeCompare(b.s));
   return items.length?`<div class="list" style="gap:8px">${items.map(i=>i.h).join("")}</div>`:`<div class="empty">Nothing on this day. Tap <b>Block my time</b> to mark yourself busy, so the guys see the clash before voting.</div>`;
 }
@@ -852,7 +908,7 @@ function momentCard(x,full){
   const nc=D.mcomments.filter(c=>c.momentId===x.id).length;
   return`<article class="moment"><div class="mh"><button class="prof-btn" data-act="person" data-id="${esc(x.by)}">${avatar(x.by,"sm")}<span><b>${esc(nick(x.by))}</b><br><span class="meta">${new Date(x.at).toLocaleTimeString("en-GB",{hour:"numeric",minute:"2-digit"})}${x.day!==TODAY()?" · "+fDate(x.day):""}</span></span></button><span style="flex:1"></span>
     <button class="x" data-act="saveMoment" data-id="${esc(x.id)}" aria-label="${saved?"Remove from memories":"Save to memories"}" aria-pressed="${saved}" style="${saved?"color:var(--sun)":""}">${saved?"🔖":"📑"}</button>${me?`<button class="x" data-act="delMoment" data-id="${esc(x.id)}" data-confirm="🗑️?" aria-label="Delete">✕</button>`:""}</div>
-    <div class="ph ${locked?"locked":""}"${locked||full?"":` data-act="openMoment" data-id="${esc(x.id)}" role="button" tabindex="0"`}><img src="${esc(x.src)}" alt="${esc(x.caption||"Moment")}" loading="lazy">${locked?`<div class="lock">🔒<br>Post your moment today to see ${esc(nick(x.by))}'s</div>`:""}</div>
+    <div class="ph ${locked?"locked":""}"${locked||full?"":` data-act="openMoment" data-id="${esc(x.id)}" role="button" tabindex="0"`}><img src="${esc(x.kind==="video"?x.poster:x.src)}" alt="${esc(x.caption||"Moment")}" loading="lazy">${x.kind==="video"&&!locked?`<button class="vplay" data-act="playVideo" data-key="moments:${esc(x.id)}" aria-label="Play video" style="border:0;background:none;width:100%">▶</button>`:""}${locked?`<div class="lock">🔒<br>Post your moment today to see ${esc(nick(x.by))}'s</div>`:""}</div>
     ${x.caption&&!locked?`<div class="cap">${esc(x.caption)}</div>`:""}
     ${locked?"":`<div class="reacts">${REACTS.map(e=>`<button class="rx" data-act="react" data-id="${esc(x.id)}" data-e="${e}" aria-pressed="${mine===e}">${e}${counts[e]?`<small>${counts[e]}</small>`:""}</button>`).join("")}${full?"":`<button class="rx" data-act="openMoment" data-id="${esc(x.id)}">💬<small>${nc||""}</small></button>`}</div>`}</article>`;
 }
@@ -882,10 +938,14 @@ VIEWS.money=()=>{
   ${ex.length?`<div class="list" style="gap:8px">${ex.map(expenseRow).join("")}</div>`:`<div class="empty">No expenses yet. Add the bill after a hangout and Yalla Guys works out who owes whom, in Dhs.</div>`}</div>
   ${D.settles.length?`<div class="sec"><h2>Payments</h2><div class="list" style="gap:8px">${[...D.settles].sort((a,b)=>b.at-a.at).slice(0,20).map(s=>`<div class="item"><span class="grow"><span class="t">${esc(nick(s.from))} paid ${esc(nick(s.to))}</span><br><span class="meta">${ago(s.at)}</span></span><span class="amt pos">${dhs(s.amount)}</span><button class="x" data-act="delSettle" data-id="${esc(s.id)}" data-confirm="Undo?" aria-label="Undo payment">✕</button></div>`).join("")}</div></div>`:""}`;
 };
+function exLeft(){const s=topS();if(s?.kind!=="expense")return;const b=$("#exLeft",s.el);if(!b)return;const a=parseFloat(val("exA"))||0,sum=$$("input[data-cu]",s.el).reduce((p,x)=>p+(parseFloat(x.value)||0),0),left=Math.round((a-sum)*100)/100;
+  b.innerHTML=`<span>Assigned ${dhs(sum)} of ${dhs(a)}</span><span style="color:${Math.abs(left)<.05?"var(--ok)":"var(--danger)"}">${Math.abs(left)<.05?"✓ Adds up":left>0?dhs(left)+" left":dhs(-left)+" over"}</span>`}
+function sharesOf(e){if(e.shares&&Object.keys(e.shares).length)return Object.fromEntries(Object.entries(e.shares).map(([u,a])=>[u,+a||0]).filter(([,a])=>a>0));
+  const sp=(e.split||[]).filter(Boolean),out={};sp.forEach(u=>out[u]=(+e.amount||0)/sp.length);return out}
 function expenseRow(e){
-  const p=planById(e.planId),sp=(e.split||[]),share=sp.length?(+e.amount||0)/sp.length:0;
+  const p=planById(e.planId),sh=sharesOf(e),sp=Object.keys(sh),share=sh[ME]||0;
   const me=sp.includes(ME)?(e.paidBy===ME?`you get back ${dhs((+e.amount||0)-share)}`:`your share ${dhs(share)}`):(e.paidBy===ME?`you get back ${dhs(+e.amount||0)}`:"not in this one");
-  return`<button class="item" data-act="editExpense" data-id="${esc(e.id)}" style="text-align:left;width:100%">${avatar(e.paidBy,"sm")}<span class="grow"><span class="t">${esc(e.title)}</span><br><span class="meta">${esc(nick(e.paidBy))} paid · split ${sp.length} ways${p?` · ${esc(p.title)}`:""} · ${esc(me)}</span></span><span class="amt">${dhs(e.amount)}</span></button>`;
+  return`<button class="item" data-act="editExpense" data-id="${esc(e.id)}" style="text-align:left;width:100%">${avatar(e.paidBy,"sm")}<span class="grow"><span class="t">${esc(e.title)}</span><br><span class="meta">${esc(nick(e.paidBy))} paid · ${e.shares?"split unevenly":"split "+sp.length+" ways"}${p?` · ${esc(p.title)}`:""} · ${esc(me)}</span></span><span class="amt">${dhs(e.amount)}</span></button>`;
 }
 
 /* ---------- maps ---------- */
@@ -1008,22 +1068,21 @@ function afterView(){
 
 /* ---------- sheets ---------- */
 const SHEETS={};
-let pushed=0,ignorePop=0;
+let histOn=false,ignorePop=0;
 function openSheet(kind,args={}){
-  const el=document.createElement("div");el.className="sheet"+(["photo","player","img"].includes(kind)?" lightbox":"");el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");
+  const el=document.createElement("div");el.className="sheet"+(["photo","player","img","camera"].includes(kind)?" lightbox":"");el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");
   el.innerHTML=`<div class="sheet-h wrap"><div class="in"></div></div><div class="sheet-b wrap"><div class="in top-in"></div><div class="in main-in"></div></div><div class="sheet-f wrap" hidden><div class="in"></div></div>`;
   const s={kind,args,el,state:SHEETS[kind].init?SHEETS[kind].init(args):{},parts:{}};stack.push(s);$("#sheets").appendChild(el);
   paintSheet(s,true);document.body.style.overflow="hidden";
-  try{history.pushState({yg:stack.length},"");pushed++}catch{}
+  if(!history.state?.yg){try{history.pushState({yg:1},"")}catch{}}
   return s;
 }
 function closeSheet(viaPop){
   const s=stack.pop();if(!s)return;s.el.remove();Object.values(s.mms||{}).forEach(m=>m.map?.remove());SHEETS[s.kind].destroy?.(s);
   if(!stack.length)document.body.style.overflow="";
-  if(!viaPop&&pushed>0){pushed--;ignorePop++;try{history.back()}catch{ignorePop--}}
   schedule();
 }
-window.addEventListener("popstate",()=>{if(ignorePop>0){ignorePop--;return}if(pushed>0)pushed--;if(stack.length)closeSheet(true)});
+window.addEventListener("popstate",()=>{if(stack.length){closeSheet(true);if(stack.length){try{history.pushState({yg:1},"")}catch{}}}});
 function paintSheet(s,first){
   const S=SHEETS[s.kind];const h=S.render(s);
   const parts={h:`<button class="back" data-act="close" aria-label="Back">${ICON.back}</button><h2>${h.title}</h2>${h.right||""}`,t:h.top||"",b:h.body,f:h.foot||""};
@@ -1064,7 +1123,7 @@ SHEETS.profile={
     </div>`,foot:`<button class="btn pri block" data-act="pfSave">Save</button>`}}
 };
 SHEETS.postMoment={
-  render(s){return{title:"New moment",body:`<div class="form"><div class="moment"><div class="ph"><img src="${esc(s.args.src)}" alt="Preview"></div></div>
+  render(s){const v=s.args.video;return{title:"New moment",body:`<div class="form"><div class="moment"><div class="ph">${v?`<video src="${esc(v.url||"")}" poster="${esc(v.poster)}" playsinline autoplay muted loop style="width:100%;height:100%;object-fit:cover"></video>`:`<img src="${esc(s.args.src)}" alt="Preview">`}</div></div>
     <label class="f">Caption (optional)<input class="inp" id="moCap" maxlength="140" placeholder="What's happening?"></label></div>`,foot:`<button class="btn pri block" data-act="postMoment" id="moBtn">Share with the guys</button>`}}
 };
 SHEETS.moment={live:true,
@@ -1116,7 +1175,7 @@ const haptic=(()=>{let lbl=null,last=0;return()=>{const t=performance.now();if(t
     if(!lbl){lbl=document.createElement("label");lbl.style.cssText="position:fixed;left:-99px;opacity:0;pointer-events:none";const i=document.createElement("input");i.type="checkbox";i.setAttribute("switch","");lbl.appendChild(i);document.body.appendChild(lbl)}lbl.click()}catch{}}})();
 function timelineDays(u){
   const days={},add=(d,k,v)=>{if(!d)return;(days[d]=days[d]||{plans:[],media:[],reels:[]})[k].push(v)};
-  for(const m of D.moments)if(m.by===u)add(m.day,"media",{thumb:m.src,act:`data-act="openMoment" data-id="${esc(m.id)}"`,t:m.at});
+  for(const m of D.moments)if(m.by===u)add(m.day,"media",{video:m.kind==="video",thumb:m.kind==="video"?m.poster:m.src,act:`data-act="openMoment" data-id="${esc(m.id)}"`,t:m.at});
   for(const p of visiblePlans()){const r=D.rsvps.find(x=>x.planId===p.id&&x.uid===u);if(!(p.by===u||(r&&r.going!=="out")))continue;
     if(p.final){const d=p.final.date;add(d,"plans",p);
       for(const m of albumOf(p.id))if(m.kind==="photo"||(m.kind==="video"&&m.poster))add(d,"media",{thumb:m.kind==="photo"?m.src:m.poster,video:m.kind==="video",act:m.kind==="photo"?`data-act="viewPhoto" data-id="${esc(m.id)}"`:`data-act="playVideo" data-key="media:${esc(m.id)}"`,t:m.at});
@@ -1149,7 +1208,7 @@ function buildTimeline(s){
     const d=month?null:pd(x.k);
     const lab=month?`<span class="dl">${pd(x.k+"-01").toLocaleDateString("en-GB",{month:"short"})}</span><span class="dn" style="font-size:18px">${x.k.slice(0,4)}</span>`:`<span class="dl">${isT?"Today":d.toLocaleDateString("en-GB",{weekday:"short"})}</span><span class="dn">${d.getDate()}</span>`;
     const icon=a.plans[0]?esc(a.plans[0].emoji||"📍"):a.media.length?"📸":"";
-    return`<button class="tslot ${month?"m":""} ${isT?"today":""} ${fut?"fut":""} ${n?"has":""}" data-i="${i}" data-act="tlGo"><span class="pin ${n?"":"dot"}">${n?`<span>${icon}</span>`:""}</span>${lab}</button>`}).join("");
+    return`<button class="tslot ${month?"m":""} ${isT?"today":""} ${fut?"fut":""} ${n?"has":""}" data-i="${i}" data-act="tlGo"><span class="pin ${n?"":"dot"}">${n?`<span>${icon}</span>`:""}</span><span class="ln"></span>${lab}</button>`}).join("");
   s.slots=slots;s.month=month;
   const sw=()=>strip.firstElementChild?.offsetWidth||76;
   const padIt=()=>{const p=Math.max(0,(strip.clientWidth-sw())/2);strip.style.paddingLeft=strip.style.paddingRight=p+"px"};padIt();
@@ -1178,16 +1237,16 @@ function tlDetail(s,i){
   const plans=[...new Map(a.plans.map(p=>[p.id,p])).values()];
   el.innerHTML=`<div class="tl-head"><h2>${esc(title)}</h2><span class="pill ${x.k>=(s.month?today.slice(0,7):today)?"set":"done"}">${esc(rel)}</span></div>
     ${plans.length?`<div class="list" style="gap:8px;margin-top:10px">${plans.map(p=>`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}"><span class="stripe" style="background:${p._proposed?"var(--sun)":hue(p.id)}"></span><span style="flex:1;min-width:0"><b>${esc(p.emoji||"")} ${esc(p.title)}</b><br><span class="meta">${p._proposed?"Proposed date · vote":p.final?`${s.month?fDate(p.final.date)+" · ":""}${fRange(p.final.start,p.final.end)}`:""}</span></span>${statusPill(p)}</button>`).join("")}</div>`:""}
-    ${a.media.length?`<div class="media-grid" style="margin-top:10px">${a.media.sort((p,q)=>q.t-p.t).map(m=>`<button ${m.act} style="position:relative"><img src="${esc(m.thumb)}" alt="" loading="lazy">${m.video?'<span class="vplay" style="font-size:22px">▶</span>':""}</button>`).join("")}</div>`:""}
-    ${!plans.length&&!a.media.length?`<div class="empty" style="margin-top:10px">${x.k>=(s.month?today.slice(0,7):today)?"Nothing planned yet. Make a plan!":"Nothing saved from this "+(s.month?"month":"day")+"."}</div>`:""}`;
+    ${!plans.length?`<div class="empty" style="margin-top:10px">${x.k>=(s.month?today.slice(0,7):today)&&!a.media.length?"Nothing planned yet. Make a plan!":(a.media.length?`📸 ${a.media.length} memor${a.media.length===1?"y":"ies"} · tap the photos above to open`:"Nothing saved from this "+(s.month?"month":"day")+".")}</div>`:""}`;
 }
+SHEETS.linkAdd={render(){return{title:"Add a link or reel",body:`<div class="form"><label class="f">Link<input class="inp" id="lkUrl" type="url" inputmode="url" placeholder="Instagram reel, TikTok, website…"></label><label class="f">Caption (optional)<input class="inp" id="lkCap"></label><div class="hint">🔒 Only you can see this.</div></div>`,foot:`<button class="btn pri block" data-act="linkSave">Add</button>`}}};
 /* person profile */
 SHEETS.person={live:true,
   render(s){const id=s.args.id,m=mem(id);if(!m)return{title:"Profile",body:`<div class="empty">This person isn't in the crew.</div>`};const me=id===ME;
     const mine=momentsBy(id),saved=me?D.moments.filter(x=>mySaved().includes(x.id)).sort((a,b)=>b.at-a.at):[];
     const plansIn=D.rsvps.filter(r=>r.uid===id&&r.going==="in").length;
     const bd=m.birthday?pd("2000-"+m.birthday).toLocaleDateString("en-GB",{day:"numeric",month:"long"}):"";
-    const grid=list=>`<div class="media-grid">${list.map(x=>`<button data-act="openMoment" data-id="${esc(x.id)}" aria-label="Moment from ${esc(fDate(x.day))}"><img src="${esc(x.src)}" alt="" loading="lazy"><span style="position:absolute;left:6px;bottom:5px;color:#fff;font-size:11px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.6)">${esc(fDate(x.day,{day:"numeric",month:"short"}))}</span></button>`).join("")}</div>`;
+    const grid=list=>`<div class="media-grid">${list.map(x=>`<button data-act="openMoment" data-id="${esc(x.id)}" aria-label="Moment from ${esc(fDate(x.day))}"><img src="${esc(x.kind==="video"?x.poster:x.src)}" alt="" loading="lazy"><span style="position:absolute;left:6px;bottom:5px;color:#fff;font-size:11px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.6)">${esc(fDate(x.day,{day:"numeric",month:"short"}))}</span></button>`).join("")}</div>`;
     const facts=[["🎂","Birthday",bd],["📍","Fav spot",m.spot],["🎵","On repeat",m.song]].filter(f=>f[2]);
     return{title:me?"My profile":esc(m.nick),right:me?`<button class="btn sm" data-act="settings" aria-label="Settings">⚙️</button><button class="btn sm" data-act="profile">Edit</button>`:"",body:`
       <div class="prof-hero">${(m.stickers||[]).length?`<div class="stickers">${m.stickers.map((e,i)=>`<span style="--r:${(i%2?1:-1)*(6+i*3)}deg">${e}</span>`).join("")}</div>`:""}
@@ -1207,7 +1266,7 @@ SHEETS.plan={live:true,
     const bg=cov?`background-image:url('${esc(cov)}')`:`background:linear-gradient(135deg,${hue(p.id)},color-mix(in srgb,${hue(p.id)} 50%,#000))`;
     const estTot=(p.est||[]).reduce((t,e)=>t+(+e.amount||0),0);
     const ex=D.expenses.filter(e=>e.planId===p.id),exTot=ex.reduce((t,e)=>t+(+e.amount||0),0);
-    const media=mediaOf(p.id),ideas=media.filter(m=>m.phase!=="memory"),mems=media.filter(m=>m.phase==="memory");
+    const media=mediaOf(p.id),ideas=media.filter(m=>m.phase!=="memory"&&m.phase!=="ticket"),mems=media.filter(m=>m.phase==="memory");
     const notes=D.notes.filter(n=>n.planId===p.id).sort((a,b)=>a.at-b.at);
     let when="";
     if(p.final){const d=pd(p.final.date);const cf=conflictsFor(p.final.date,p.final.start,p.final.end,p.id).filter(c=>g.includes(c.uid)||c.uid===ME);
@@ -1251,6 +1310,8 @@ SHEETS.plan={live:true,
       ${ridesHtml(p,s)}
       <div class="sec"><div class="between"><h2>Route</h2>${pts.length?`<a class="btn sm" href="${esc(gmapsUrl(stops))}" target="_blank" rel="noopener">Open in Google Maps</a>`:""}</div>
         ${stops.length?`${pts.length?`<div class="mini-map" id="mm-plan"></div>`:""}<div>${legs}</div>${pts.length>1?`<div class="item"><span class="grow"><b>Total drive</b><br><span class="meta">${route?"Road route without traffic. Google Maps shows live traffic.":"Rough estimate while the road route loads"}</span></span><span class="amt">${route?"":"~"}${tk.toFixed(0)} km · ${fMin(tm)}</span></div>`:""}`:`<div class="meta">No places yet. Tap Edit to add stops.</div>`}</div>
+      ${offerNearHtml(p)}
+      ${ticketsHtml(p)}
       <div class="sec"><div class="between"><h2>Mood board</h2><span class="row" style="gap:6px"><button class="btn sm" data-act="openBoard" data-id="${esc(p.id)}">⤢ Open</button><button class="btn sm pri" data-act="addMedia" data-id="${esc(p.id)}" data-ph="idea">+ Add</button></span></div><p class="hint" style="margin:0">Photos, notes, colours and links that set the vibe. Anyone can add.</p>
         ${ideas.filter(m=>!((m.kind==="reel"||m.kind==="link")&&embedUrl(m.url))).length?`<div class="board">${ideas.filter(m=>!((m.kind==="reel"||m.kind==="link")&&embedUrl(m.url))).map((m,i)=>boardItem(m,i)).join("")}</div>`:`<div class="empty" style="padding:18px">Empty board. Add outfit pics, the menu, colours for the dress code…</div>`}</div>
 
@@ -1277,7 +1338,7 @@ function reelsHtml(reels){return`<div class="reels">${reels.map(m=>{const u=embe
 const isReel=m=>(m.kind==="reel"||m.kind==="link")&&!!embedUrl(m.url);
 SHEETS.board={live:true,
   render(s){const p=planById(s.args.id);if(!p)return{title:"Mood board",body:""};
-    const ideas=mediaOf(p.id).filter(m=>m.phase!=="memory"),reels=ideas.filter(isReel),rest=ideas.filter(m=>!isReel(m));
+    const ideas=mediaOf(p.id).filter(m=>m.phase!=="memory"&&m.phase!=="ticket"),reels=ideas.filter(isReel),rest=ideas.filter(m=>!isReel(m));
     return{title:`🎨 ${esc(p.title)}`,right:`<button class="btn sm pri" data-act="addMedia" data-id="${esc(p.id)}" data-ph="idea">+ Add</button>`,
       top:reels.length?`<div class="sec" style="border:0;padding-top:4px"><h2>▶ Reels (${reels.length})</h2>${reelsHtml(reels)}</div>`:"",
       body:`<div class="sec" style="${reels.length?"":"border:0;padding-top:4px"}"><h2>📌 Board (${rest.length})</h2>${rest.length?`<div class="board">${rest.map((m,i)=>boardItem(m,i)).join("")}</div>`:`<div class="empty">Nothing pinned yet. Tap <b>+ Add</b> for photos, notes, colours or links.</div>`}</div>`}}
@@ -1299,7 +1360,7 @@ function albumHtml(p,mems,tile){
   const who=[...new Set(mems.map(m=>m.by))],today=p.final?.date===TODAY();
   return`<div class="sec" id="album" style="margin-top:12px"><div class="between"><h2>📸 Plan album</h2><span class="meta">${mems.length} item${mems.length===1?"":"s"}</span></div>
     ${today?`<div class="banner" style="margin:0;background:var(--accent-soft)">🎉 It's plan day! Add your pics as you go. They stay in this plan for everyone.</div>`:""}
-    <div class="grid2"><button class="btn pri" data-act="addMedia" data-id="${esc(p.id)}" data-ph="memory" style="min-height:52px">📷 Photos & videos</button><button class="btn" data-act="voice" data-ctx="album" data-id="${esc(p.id)}" style="min-height:52px">🎤 Voice note</button></div>
+    <div class="grid3" style="grid-template-columns:1fr 1fr 1fr"><button class="btn pri" data-act="camera" data-ctx="album" data-id="${esc(p.id)}" style="min-height:52px">📷 Camera</button><button class="btn" data-act="addMedia" data-id="${esc(p.id)}" data-ph="memory" style="min-height:52px">🖼️ Gallery</button><button class="btn" data-act="voice" data-ctx="album" data-id="${esc(p.id)}" style="min-height:52px">🎤 Voice note</button></div>
     ${mems.length?`<div class="media-grid">${mems.map(tile).join("")}</div><div class="row">${avStack(who,"xs",8)}<span class="meta">Shared by ${who.length} ${who.length===1?"person":"people"}</span></div>`:`<div class="meta">No photos yet. Be the first to add some.</div>`}</div>`;
 }
 /* ---------- rides: chauffeur requests, drivers, meetup spot ---------- */
@@ -1388,17 +1449,128 @@ async function setLoc(s,loc){
   else{const r=myRsvp(pid);const ride={...(r?.ride||{role:k==="pickup"?"rider":"driver",seats:3,at:now()})};if(k==="pickup")ride.pickup=loc;else ride.start=loc;await saveRsvp(pid,{ride})}
   if(topS()===s)closeSheet();toast("📍 Saved "+loc.name);
 }
+/* ---------- Entertainer offers ----------
+   Only outlets confirmed on public pages are built in; the crew adds the rest from their own Entertainer app. */
+const OFFER_CATS=[["food","🍽️","Food"],["cafe","☕","Cafés"],["fun","🎢","Things to do"],["beauty","💆","Beauty & spa"],["stay","🏨","Stays"]];
+const OFFER_SEED=[
+  {id:"seed-bww",name:"Buffalo Wild Wings",area:"The Beach, JBR",cat:"food",offer:"Buy 1 get 1 free wings",lat:25.0781,lng:55.1336,seed:true},
+  {id:"seed-egk",name:"Eat Greek Kouzina",area:"The Beach, JBR",cat:"food",offer:"Buy 1 main course, get 1 free",lat:25.0786,lng:55.1341,seed:true},
+  {id:"seed-dfc",name:"Dubai Festival City Mall",area:"Festival City",cat:"fun",offer:"Partner mall: Entertainer offers at participating outlets",lat:25.2220,lng:55.3530,seed:true}];
+const allOffers=()=>{const m=new Map(OFFER_SEED.map(o=>[o.id,o]));for(const o of D.offers||[])m.set(o.id,o);return[...m.values()].filter(o=>o.lat!=null)};
+const catOf=k=>OFFER_CATS.find(c=>c[0]===k)||OFFER_CATS[0];
+function offersNear(pt,km=1.5){if(!pt||pt.lat==null)return[];return allOffers().map(o=>({o,d:hav(pt,o)})).filter(x=>x.d<=km).sort((a,b)=>a.d-b.d)}
+const offerAt=pt=>offersNear(pt,.15)[0]?.o||null;
+function offersForStops(stops,km=1.5){const m=new Map();for(const st of stops||[])for(const x of offersNear(st,km)){const prev=m.get(x.o.id);if(!prev||x.d<prev.d)m.set(x.o.id,{...x,near:st.name})}return[...m.values()].sort((a,b)=>a.d-b.d)}
+function offerNearHtml(p){const list=offersForStops(p.stops);if(!list.length)return"";
+  return`<div class="sec"><div class="offer-near"><b>🏷️ Entertainer offers near this plan</b>${list.slice(0,6).map(x=>`<div class="between"><span style="min-width:0"><b>${esc(catOf(x.o.cat)[1])} ${esc(x.o.name)}</b><br><span class="meta">${esc(x.o.offer||"")} · ${fmtKm(x.d)} from ${esc(x.near||"a stop")}</span></span><button class="btn sm" data-act="offerStop" data-plan="${esc(p.id)}" data-id="${esc(x.o.id)}">+ Stop</button></div>`).join("")}<span class="hint">Check the offer is still in your Entertainer app before you go.</span></div></div>`}
+function offerRow(o,d){return`<div class="offer"><span class="oic">${esc(catOf(o.cat)[1])}</span><span style="flex:1;min-width:0"><b>${esc(o.name)}</b>${o.seed?' <span class="ebadge">✓ confirmed</span>':""}<br><span class="meta">${esc(o.offer||"Entertainer offer")} · ${esc(o.area||"")}${d!=null?" · "+fmtKm(d):""}</span></span>
+  <span class="row" style="gap:4px;flex-wrap:nowrap"><a class="btn sm" href="https://www.google.com/maps/search/?api=1&query=${o.lat},${o.lng}" target="_blank" rel="noopener" aria-label="Open in Google Maps">📍</a><button class="btn sm pri" data-act="offerPlan" data-id="${esc(o.id)}">Plan</button>${!o.seed&&o.by===ME?`<button class="x" data-act="offerDel" data-id="${esc(o.id)}" data-confirm="🗑️?" aria-label="Remove">✕</button>`:""}</span></div>`}
+function offersHtml(){
+  const q=(UI.offerQ||"").toLowerCase(),cat=UI.offerCat||"",me=MYPOS;
+  let list=allOffers().filter(o=>(!cat||o.cat===cat)&&(!q||(o.name+" "+(o.area||"")+" "+(o.offer||"")).toLowerCase().includes(q)));
+  list=list.map(o=>({o,d:me?hav(me,o):null})).sort((a,b)=>(a.d??1e9)-(b.d??1e9)||a.o.name.localeCompare(b.o.name));
+  return`<div class="banner" style="background:var(--sun-soft)">🏷️ <b>Entertainer offers</b> the crew has found. Add outlets from your Entertainer app so everyone sees them. Plans near any outlet get flagged automatically.</div>
+  <div class="row" style="flex-wrap:nowrap;margin-bottom:10px"><input class="inp" id="offerQ" type="search" placeholder="🔎 Search outlets" value="${esc(UI.offerQ||"")}"><button class="btn pri" data-act="offerAdd" style="flex:none">+ Add</button></div>
+  <div class="pchips" style="margin-bottom:10px"><button class="chip" data-act="offerCat" data-k="" aria-pressed="${!cat}">All</button>${OFFER_CATS.map(([k,e,l])=>`<button class="chip" data-act="offerCat" data-k="${k}" aria-pressed="${cat===k}">${e} ${l}</button>`).join("")}</div>
+  <div class="list" style="gap:8px">${list.map(x=>offerRow(x.o,x.d)).join("")||`<div class="empty">No outlets match. Tap <b>+ Add</b> to add one from your Entertainer app.</div>`}</div>`;
+}
+SHEETS.offerAdd={
+  init(){return{cat:"food",loc:null,res:[]}},
+  render(s){const st=s.state;return{title:"Add an Entertainer outlet",body:`<div class="form">
+    <label class="f">Outlet name<input class="inp" id="ofName" placeholder="e.g. Shake Shack"></label>
+    <div class="f">Category<div class="chips">${OFFER_CATS.map(([k,e,l])=>`<button class="chip" data-act="ofCat" data-k="${k}" aria-pressed="${st.cat===k}">${e} ${l}</button>`).join("")}</div></div>
+    <label class="f">The offer<input class="inp" id="ofOffer" placeholder="e.g. Buy 1 burger, get 1 free"></label>
+    <div class="f">Location${st.loc?`<div class="item"><span class="grow"><span class="t">📍 ${esc(st.loc.name)}</span><br><span class="meta">${esc(st.loc.sub||"")}</span></span><button class="x" data-act="ofLocClear" aria-label="Change location">✕</button></div>`:`<input class="inp" id="ofQ" type="search" placeholder="🔎 Search the outlet's location" autocomplete="off"><div id="ofRes"></div>`}</div>
+    </div>`,foot:`<button class="btn pri block" data-act="ofSave">Add outlet</button>`}}
+};
+/* ---------- tickets (plan tickets are shared; personal ones are private) ---------- */
+const TICKET_TYPES=[["🎟️","Ticket"],["✈️","Flight"],["🎫","Event"],["🏨","Booking"],["🧾","Voucher"]];
+function ticketRow(t,col){return`<button class="ticket" data-act="openTicket" data-col="${col}" data-id="${esc(t.id)}"><span class="tk-ic">${esc(t.icon||"🎟️")}</span><span style="flex:1;min-width:0"><b>${esc(t.title||"Ticket")}</b><br><span class="meta">${t.forUid?(t.forUid==="group"?"👥 Group ticket":"For "+esc(nick(t.forUid))):""}${t.file?" · 📎 "+(t.fileType==="pdf"?"PDF":"Image"):""}</span>${t.code?`<div class="tk-code">${esc(t.code)}</div>`:""}</span><span class="meta">›</span></button>`}
+function ticketsHtml(p){const ts=D.media.filter(m=>m.planId===p.id&&m.kind==="ticket").sort((a,b)=>a.at-b.at);
+  return`<div class="sec" id="tickets"><div class="between"><h2>🎟️ Tickets</h2><button class="btn sm" data-act="ticketAdd" data-scope="plan" data-id="${esc(p.id)}">+ Add</button></div>
+    ${ts.length?`<div class="list" style="gap:8px">${ts.map(t=>ticketRow(t,"media")).join("")}</div>`:`<div class="hint" style="margin:0">Keep everyone's tickets, booking codes and QR screenshots here.</div>`}</div>`}
+SHEETS.ticketAdd={
+  init(a){return{icon:"🎟️",forUid:a.scope==="plan"?"group":ME,file:null,fileType:"",fileName:""}},
+  render(s){const st=s.state,plan=s.args.scope==="plan";return{title:"Add a ticket",body:`<div class="form">
+    <div class="chips">${TICKET_TYPES.map(([e,l])=>`<button class="chip" data-act="tkIcon" data-v="${e}" aria-pressed="${st.icon===e}">${e} ${l}</button>`).join("")}</div>
+    <label class="f">Name<input class="inp" id="tkTitle" placeholder="e.g. Coldplay · Gate B, Seat 14"></label>
+    ${plan?`<label class="f">Who is it for?<select class="inp" id="tkFor"><option value="group">👥 Whole group</option>${D.members.map(m=>`<option value="${esc(m.id)}" ${m.id===ME?"selected":""}>${esc(nick(m.id))}</option>`).join("")}</select></label>`:""}
+    <label class="f">Code, booking reference or letters<textarea class="inp" id="tkCode" placeholder="e.g. ABX9 7KQ2 or the e-ticket number" style="min-height:70px"></textarea></label>
+    <div class="f">Ticket file (photo, screenshot, QR or PDF)${st.fileName?`<div class="item"><span class="grow t">${st.fileType==="pdf"?"📄":"🖼️"} ${esc(st.fileName)}</span><button class="x" data-act="tkFileClear" aria-label="Remove file">✕</button></div>`:`<button class="btn" data-act="tkFile">📎 Attach file</button>`}</div>
+    <label class="f">Notes (optional)<input class="inp" id="tkNote" placeholder="e.g. Doors open 7pm"></label>
+    ${plan?`<div class="hint">Everyone who can see this plan can see this ticket.</div>`:`<div class="hint">🔒 Only you can see this.</div>`}</div>`,foot:`<button class="btn pri block" data-act="tkSave" id="tkBtn">Save ticket</button>`}}
+};
+SHEETS.ticketView={live:true,
+  render(s){const t=(D[s.args.col]||[]).find(x=>x.id===s.args.id);if(!t)return{title:"Ticket",body:`<div class="empty">This ticket was removed.</div>`};
+    return{title:`${esc(t.icon||"🎟️")} ${esc(t.title||"Ticket")}`,body:`<div class="form">
+      ${t.forUid?`<div class="meta">${t.forUid==="group"?"👥 Group ticket":"For "+esc(nick(t.forUid))} · added by ${esc(nick(t.by))}</div>`:""}
+      ${t.code?`<div class="bigcode">${esc(t.code)}</div><button class="btn" data-act="tkCopy">📋 Copy code</button>`:""}
+      ${t.file&&t.fileType!=="pdf"?`<img id="tkImg" alt="Ticket" style="width:100%;border-radius:14px;background:#fff">`:""}
+      ${t.file&&t.fileType==="pdf"?`<button class="btn pri" data-act="tkOpenFile">📄 Open PDF</button>`:""}
+      ${t.note?`<div class="note"><p>${esc(t.note)}</p></div>`:""}
+      ${t.by===ME?`<button class="btn danger" data-act="tkDel" data-confirm="Tap again to delete">🗑️ Delete ticket</button>`:""}</div>`}},
+  after(s){const t=(D[s.args.col]||[]).find(x=>x.id===s.args.id),img=$("#tkImg",s.el);if(t&&img&&!img.src)mediaURL(t.file).then(u=>img.src=u).catch(()=>{})}
+};
+/* ---------- personal attachments on "Block my time" (private) ---------- */
+function myAttachHtml(busyId,pending){
+  const items=pending||D.mine.filter(m=>m.busyId===busyId).sort((a,b)=>a.at-b.at);
+  return`<div class="att-list">${items.map((m,i)=>{const del=`<button class="x" data-act="${pending?"bzAttDel":"mineDel"}" data-id="${pending?i:esc(m.id)}" aria-label="Remove">✕</button>`;
+    if(m.kind==="photo")return`<div class="item"><img src="${esc(m.src)}" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:10px"><span class="grow t">Photo</span>${del}</div>`;
+    if(m.kind==="ticket")return`<div class="row" style="flex-wrap:nowrap">${pending?`<div class="ticket"><span class="tk-ic">${esc(m.icon||"🎟️")}</span><span style="flex:1;min-width:0"><b>${esc(m.title||"Ticket")}</b>${m.code?`<div class="tk-code">${esc(m.code)}</div>`:""}</span></div>`:ticketRow(m,"mine")}${del}</div>`;
+    return`<div class="item"><span style="font-size:20px">${embedUrl(m.url)?"▶":"🔗"}</span><a class="grow t" href="${esc(m.url)}" target="_blank" rel="noopener" style="color:var(--fg);font-size:13px">${esc(m.caption||hostOf(m.url))}</a>${del}</div>`}).join("")}</div>
+    <div class="att-row"><button class="btn sm" data-act="bzAttPhoto" data-id="${esc(busyId||"")}">📷 Photo</button><button class="btn sm" data-act="ticketAdd" data-scope="mine" data-id="${esc(busyId||"")}">🎟️ Ticket</button><button class="btn sm" data-act="bzAttLink" data-id="${esc(busyId||"")}">🔗 Link / reel</button></div>`;
+}
+SHEETS.busyView={live:true,
+  render(s){const b=D.busy.find(x=>x.id===s.args.id);if(!b)return{title:"Removed",body:""};const items=D.mine.filter(m=>m.busyId===b.id),reels=items.filter(m=>m.kind==="link"&&embedUrl(m.url));
+    return{title:esc(myLabel(b)||"Busy"),body:`<div class="form">
+      <div class="when"><div class="cal-ic"><div class="m">${pd(b.date).toLocaleDateString("en-GB",{month:"short"})}</div><div class="dd">${pd(b.date).getDate()}</div></div><div><div class="d">${fDate(b.date,{weekday:"long"})}</div><div>${fRange(b.start,b.end)} · friends see “Busy”</div></div></div>
+      ${reels.length?reelsHtml(reels):""}
+      <div class="sec" style="border:0;padding-top:0"><h2>🔒 Your stuff</h2><div class="hint" style="margin:0">Only you can see these.</div>${myAttachHtml(b.id)}</div>
+      <button class="btn danger" data-act="delBusy" data-id="${esc(b.id)}" data-confirm="Tap again to remove">Remove this block</button></div>`}}
+};
+/* ---------- wishlist & to-do ---------- */
+const VIS={all:"🌍 Everyone",private:"🔒 Only me",invite:"👥 Invited"};
+function wishVisible(w){return w.vis==="all"||w.by===ME||(w.invited||[]).includes(ME)}
+function wishHtml(){
+  const t=UI.wishType||"wish",list=D.wishes.filter(w=>(w.type||"wish")===t&&wishVisible(w)).sort((a,b)=>(!!a.done-!!b.done)||Object.keys(b.likes||{}).length-Object.keys(a.likes||{}).length||b.at-a.at);
+  return`<div class="row" style="flex-wrap:nowrap;margin-bottom:12px"><div class="seg" style="flex:1"><button data-act="wishType" data-k="wish" aria-pressed="${t==="wish"}">✨ Wishlist</button><button data-act="wishType" data-k="todo" aria-pressed="${t==="todo"}">✅ To-do</button></div><button class="btn pri" data-act="wishAdd" style="flex:none">+ Add</button></div>
+  <div class="list" style="gap:10px">${list.map(wishCard).join("")||`<div class="empty"><h3>${t==="wish"?"Nothing on the wishlist yet":"No to-dos yet"}</h3>${t==="wish"?"Add things you want to do someday. When enough people are in, push it as a plan to vote on.":"Add things to sort out: book tickets, buy gifts, plan a trip."}</div>`}</div>`;
+}
+function wishCard(w){const likes=Object.keys(w.likes||{}),mine=likes.includes(ME),todo=w.type==="todo",pl=w.pushedPlanId&&planById(w.pushedPlanId);
+  return`<div class="wish ${w.done?"done":""}"><div class="between" style="align-items:flex-start"><div class="row" style="flex-wrap:nowrap;align-items:flex-start;min-width:0">${todo?`<input type="checkbox" id="wd-${esc(w.id)}" data-wish="${esc(w.id)}" ${w.done?"checked":""} style="width:22px;height:22px;accent-color:var(--accent);flex:none;margin-top:2px" aria-label="Done">`:`<span style="font-size:26px">${esc(w.emoji||"✨")}</span>`}<div style="min-width:0"><h3>${esc(w.title)}</h3><span class="meta">${esc(nick(w.by))} · ${ago(w.at)}</span></div></div><span class="vis">${VIS[w.vis]||VIS.all}</span></div>
+    ${w.note?`<p style="margin:0;white-space:pre-wrap;overflow-wrap:anywhere">${linkify(w.note)}</p>`:""}
+    ${w.src?`<img class="ph" src="${esc(w.src)}" alt="">`:""}
+    ${w.url?(embedUrl(w.url)?reelsHtml([{...w,kind:"reel",caption:""}]):`<a class="blink" href="${esc(w.url)}" target="_blank" rel="noopener" style="border-radius:12px">🔗 ${esc(hostOf(w.url))}</a>`):""}
+    ${w.vis==="invite"?`<div class="row">${avStack(w.invited||[],"xs",8)}</div>`:""}
+    <div class="row" style="gap:6px">${todo?"":`<button class="rx" data-act="wishLike" data-id="${esc(w.id)}" aria-pressed="${mine}">🙋 ${mine?"I'm in":"Me too"}${likes.length?`<small>${likes.length}</small>`:""}</button>`}
+      ${pl?`<button class="btn sm" data-act="openPlan" data-id="${esc(pl.id)}">📌 Plan made ›</button>`:`<button class="btn sm pri" data-act="wishPush" data-id="${esc(w.id)}">📌 Push as plan</button>`}
+      ${w.by===ME?`<button class="btn sm" data-act="wishEdit" data-id="${esc(w.id)}">Edit</button><button class="x" data-act="wishDel" data-id="${esc(w.id)}" data-confirm="🗑️?" aria-label="Delete">✕</button>`:""}</div>
+    ${likes.length&&!todo?`<div class="row" style="gap:4px">${avStack(likes,"xs",8)}<span class="meta">${likes.length} interested</span></div>`:""}</div>`}
+SHEETS.wishAdd={
+  init(a){const w=a.id?D.wishes.find(x=>x.id===a.id):null;return{type:w?.type||a.type||"wish",emoji:w?.emoji||"✨",vis:w?.vis||"all",invited:[...(w?.invited||[])],src:w?.src||""}},
+  render(s){const st=s.state,w=s.args.id?D.wishes.find(x=>x.id===s.args.id):null;return{title:w?"Edit":"Add to the list",body:`<div class="form">
+    <div class="seg"><button data-act="waType" data-k="wish" aria-pressed="${st.type==="wish"}">✨ Wishlist</button><button data-act="waType" data-k="todo" aria-pressed="${st.type==="todo"}">✅ To-do</button></div>
+    ${st.type==="wish"?`<div class="emo-pick">${["✨","🏝️","🎢","🍣","🏔️","🎤","🛥️","🏕️","✈️","🎨","🧗","🎳"].map(e=>`<button data-act="waEmoji" data-v="${e}" aria-pressed="${st.emoji===e}">${e}</button>`).join("")}</div>`:""}
+    <label class="f">${st.type==="wish"?"What do you want to do?":"To-do"}<input class="inp" id="waTitle" maxlength="80" value="${esc(w?.title||"")}" placeholder="${st.type==="wish"?"e.g. Skydive over the Palm":"e.g. Book the desert camp"}"></label>
+    <label class="f">Notes<textarea class="inp" id="waNote" placeholder="Details, price, best time…">${esc(w?.note||"")}</textarea></label>
+    <label class="f">Link or reel (optional)<input class="inp" id="waUrl" type="url" inputmode="url" value="${esc(w?.url||"")}" placeholder="https://www.instagram.com/reel/…"></label>
+    <div class="f">Photo (optional)${st.src?`<div class="item"><img src="${esc(st.src)}" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:10px"><span class="grow"></span><button class="x" data-act="waPhotoDel" aria-label="Remove photo">✕</button></div>`:`<button class="btn" data-act="waPhoto">📷 Add photo</button>`}</div>
+    <div class="f">Who can see it?<div class="seg">${Object.entries(VIS).map(([k,l])=>`<button data-act="waVis" data-k="${k}" aria-pressed="${st.vis===k}">${l}</button>`).join("")}</div></div>
+    ${st.vis==="invite"?`<div class="list" style="gap:6px">${D.members.filter(m=>m.id!==ME).map(m=>`<label class="check"><input type="checkbox" data-winv="${esc(m.id)}" ${st.invited.includes(m.id)?"checked":""}>${avatar(m.id,"xs")}<span style="color:var(--fg)">${esc(nick(m.id))}</span></label>`).join("")}</div>`:""}
+    </div>`,foot:`<button class="btn pri block" data-act="waSave">${w?"Save":"Add"}</button>`}}
+};
 /* plan editor */
 SHEETS.edit={
-  init(a){const p=a.id?planById(a.id):null;const cp=x=>JSON.parse(JSON.stringify(x||[]));return{emoji:p?.emoji||PLAN_EMOJIS[0],stops:cp(p?.stops),slots:cp(p?.slots),est:cp(p?.est),files:[],links:[],q:"",res:[],msg:"",loading:false,invited:a.chat?[...(D.chats.find(c=>c.id===a.chat)?.members||[])]:cp(p?.invited),chatId:a.chat||p?.chatId||""}},
+  init(a){const p=a.id?planById(a.id):null;const cp=x=>JSON.parse(JSON.stringify(x||[]));const pre=a.pre||{};return{emoji:p?.emoji||pre.emoji||PLAN_EMOJIS[0],stops:cp(p?.stops||pre.stops),slots:cp(p?.slots),est:cp(p?.est),files:[],links:[...(pre.links||[])],q:"",res:[],msg:"",loading:false,invited:a.chat?[...(D.chats.find(c=>c.id===a.chat)?.members||[])]:pre.invited?[...pre.invited]:cp(p?.invited),chatId:a.chat||p?.chatId||""}},
   render(s){const p=s.args.id?planById(s.args.id):null,st=s.state,hasPts=st.stops.some(x=>x.lat!=null);
     return{title:p?"Edit plan":"Make a plan",body:`<div class="form">
       <div class="emo-pick">${PLAN_EMOJIS.map(e=>`<button data-act="edEmoji" data-v="${e}" aria-pressed="${st.emoji===e}">${e}</button>`).join("")}</div>
-      <label class="f">What's the plan?<input class="inp" id="edTitle" maxlength="60" value="${esc(p?.title||"")}" placeholder="e.g. Desert camping at Al Qudra"></label>
-      <label class="f">Details<textarea class="inp" id="edDesc" placeholder="Vibe, what to bring, dress code, who's driving…">${esc(p?.desc||"")}</textarea></label>
+      <label class="f">What's the plan?<input class="inp" id="edTitle" maxlength="60" value="${esc(p?.title||s.args.pre?.title||"")}" placeholder="e.g. Desert camping at Al Qudra"></label>
+      <label class="f">Details<textarea class="inp" id="edDesc" placeholder="Vibe, what to bring, dress code, who's driving…">${esc(p?.desc||s.args.pre?.desc||"")}</textarea></label>
       <div class="sec"><h2>Places</h2><p class="hint" style="margin:0">Search any place or paste a Google Maps, Apple Maps or Waze link; it pins itself. Add more than one stop for a route with drive times.</p>
         ${hasPts?`<div class="mini-map" id="mm-edit" style="height:180px"></div>`:""}
         ${st.stops.map((x,i)=>`<div class="item"><span class="leg"><span class="n" style="background:var(--accent)">${i+1}</span></span><span class="grow"><span class="t">${esc(x.name||"Dropped pin")}</span>${x.addr?`<br><span class="meta">${esc(x.addr)}</span>`:""}</span>${i>0?`<button class="x" data-act="stopUp" data-i="${i}" aria-label="Move up">↑</button>`:""}<button class="x" data-act="stopDel" data-i="${i}" aria-label="Remove stop">✕</button></div>`).join("")}
+        ${(()=>{const near=offersForStops(st.stops).filter(x=>!st.stops.some(z=>z.name===x.o.name)).slice(0,4);return near.length?`<div class="offer-near"><b>🏷️ Entertainer offers near your stops</b>${near.map(x=>`<div class="between"><span style="min-width:0"><b>${esc(catOf(x.o.cat)[1])} ${esc(x.o.name)}</b><br><span class="meta">${esc(x.o.offer||"")} · ${fmtKm(x.d)} away</span></span><button class="btn sm" data-act="edOfferStop" data-id="${esc(x.o.id)}">+ Add</button></div>`).join("")}</div>`:""})()}
         <input class="inp" id="edQ" type="search" enterkeyhint="search" placeholder="🔎 Search a place or paste a maps link" autocomplete="off" autocorrect="off">
         <div id="edSugg">${edSugg(st)}</div>
         <button class="btn" data-act="stopPick">🗺️ Drop a pin on the map instead</button></div>
@@ -1426,7 +1598,7 @@ function edSugg(st){
   let h="";
   if(st.msg)h+=`<div class="banner" style="margin:0 0 8px">${st.msg}</div>`;
   if(st.loading)h+=`<div class="meta" style="padding:6px 2px">Searching…</div>`;
-  if(st.res.length)h+=`<div class="sugg">${st.res.map((x,i)=>`<button data-act="pickRes" data-i="${i}"><b>${esc(x.name)}</b>${x.sub?`<br><span class="meta">${esc(x.sub)}</span>`:""}</button>`).join("")}</div>`;
+  if(st.res.length)h+=`<div class="sugg">${st.res.map((x,i)=>`<button data-act="pickRes" data-i="${i}"><b>${esc(x.name)}</b>${offerAt(x)?' <span class="ebadge">🏷️ Entertainer</span>':offersNear(x,1).length?` <span class="ebadge">🏷️ ${offersNear(x,1).length} offer${offersNear(x,1).length>1?"s":""} nearby</span>`:""}${x.sub?`<br><span class="meta">${esc(x.sub)}</span>`:""}</button>`).join("")}</div>`;
   return h;
 }
 function paintSugg(s){const b=$("#edSugg",s.el);if(b)b.innerHTML=edSugg(s.state)}
@@ -1505,21 +1677,26 @@ SHEETS.busy={
     <div class="grid2"><label class="f">From<input class="inp" type="time" id="bzS" value="09:00"></label><label class="f">To<input class="inp" type="time" id="bzE" value="17:00"></label></div>
     <label class="check"><input type="checkbox" id="bzAll"> All day</label>
     <label class="f">What is it? (only you see this)<input class="inp" id="bzL" placeholder="e.g. Work shift, dentist, family dinner"></label>
+    <div class="f">🔒 Attach for yourself: photos, tickets, links or reels${myAttachHtml("",s.state.att||(s.state.att=[]))}</div>
     <label class="f">Repeat weekly<select class="inp" id="bzR"><option value="1">Just once</option><option value="4">Every week for 4 weeks</option><option value="8">Every week for 8 weeks</option><option value="12">Every week for 12 weeks</option></select></label>
     </div>`,foot:`<button class="btn pri block" data-act="bzSave">Save</button>`}}
 };
 /* expense */
-SHEETS.expense={
+SHEETS.expense={after(){exLeft()},
   init(a){const e=a.id?D.expenses.find(x=>x.id===a.id):null;const plan=e?.planId||a.plan||"";const going=plan?goingOf(plan):[];
-    return{split:e?[...e.split]:(going.length?[...new Set([...going,ME])]:D.members.map(m=>m.id)),paidBy:e?.paidBy||ME,plan}},
+    return{split:e?[...e.split]:(going.length?[...new Set([...going,ME])]:D.members.map(m=>m.id)),paidBy:e?.paidBy||ME,plan,mode:e?.shares?"custom":"equal"}},
   render(s){const e=s.args.id?D.expenses.find(x=>x.id===s.args.id):null,st=s.state;
     return{title:e?"Edit expense":"Add expense",body:`<div class="form">
       <label class="f">What was it?<input class="inp" id="exT" value="${esc(e?.title||"")}" placeholder="e.g. Dinner at Al Mallah"></label>
       <label class="f">Total amount (Dhs)<input class="inp" id="exA" type="number" inputmode="decimal" min="0" step="0.01" value="${e?esc(e.amount):""}" placeholder="0.00"></label>
       <label class="f">Paid by<select class="inp" id="exP">${D.members.map(m=>`<option value="${esc(m.id)}" ${st.paidBy===m.id?"selected":""}>${esc(nick(m.id))}</option>`).join("")}</select></label>
       <label class="f">For plan<select class="inp" id="exPl"><option value="">No plan</option>${D.plans.map(p=>`<option value="${esc(p.id)}" ${st.plan===p.id?"selected":""}>${esc(p.title)}</option>`).join("")}</select></label>
-      <div class="f"><div class="between">Split equally between<button class="btn sm ghost" data-act="exAll">Everyone</button></div>
-      ${D.members.map(m=>`<label class="check"><input type="checkbox" id="exS-${esc(m.id)}" data-uid="${esc(m.id)}" ${st.split.includes(m.id)?"checked":""}>${avatar(m.id,"xs")}<span style="color:var(--fg)">${esc(nick(m.id))}</span></label>`).join("")}</div>
+      <div class="f">How to split<div class="seg"><button data-act="exMode" data-k="equal" aria-pressed="${st.mode==="equal"}">Equally</button><button data-act="exMode" data-k="custom" aria-pressed="${st.mode==="custom"}">Uneven amounts</button></div></div>
+      ${st.mode==="equal"?`<div class="f"><div class="between">Split equally between<button class="btn sm ghost" data-act="exAll">Everyone</button></div>
+      ${D.members.map(m=>`<label class="check"><input type="checkbox" id="exS-${esc(m.id)}" data-uid="${esc(m.id)}" ${st.split.includes(m.id)?"checked":""}>${avatar(m.id,"xs")}<span style="color:var(--fg)">${esc(nick(m.id))}</span></label>`).join("")}</div>`
+      :`<div class="f"><div class="between">What each person owes (Dhs)<button class="btn sm ghost" data-act="exEven">Fill evenly</button></div>
+      ${D.members.map(m=>`<label class="check" style="justify-content:space-between">${avatar(m.id,"xs")}<span style="color:var(--fg);flex:1">${esc(nick(m.id))}</span><input class="inp exAmt" type="number" inputmode="decimal" min="0" step="0.01" id="exC-${esc(m.id)}" data-cu="${esc(m.id)}" value="${e?.shares?.[m.id]??""}" placeholder="0" style="width:110px;min-height:40px;text-align:right"></label>`).join("")}
+      <div class="between" id="exLeft" style="font-weight:700"></div></div>`}
       ${e?`<button class="btn danger" data-act="exDel" data-confirm="Tap again to delete">Delete expense</button>`:""}
       </div>`,foot:`<button class="btn pri block" data-act="exSave">${e?"Save":"Add expense"}</button>`}}
 };
@@ -1671,7 +1848,7 @@ function mediaHtml(col,it){
   if(it.kind==="voice")return`<div class="voice" data-vkey="${esc(key)}"><button class="vbtn" data-act="playVoice" data-key="${esc(key)}" aria-label="Play voice note">▶</button><span class="vbar"><i></i></span><span class="vtime">${fDur(it.dur)}</span></div>`;
   return"";
 }
-const attachBtns=(ctx,id)=>`<button class="att" data-act="attach" data-ctx="${ctx}" data-id="${esc(id)}" aria-label="Send photo or video">📎</button><button class="att" data-act="voice" data-ctx="${ctx}" data-id="${esc(id)}" aria-label="Record a voice note">🎤</button>`;
+const attachBtns=(ctx,id)=>`<button class="att" data-act="camera" data-ctx="${ctx}" data-id="${esc(id)}" aria-label="Open camera">📷</button><button class="att" data-act="attach" data-ctx="${ctx}" data-id="${esc(id)}" aria-label="Send photo or video">📎</button><button class="att" data-act="voice" data-ctx="${ctx}" data-id="${esc(id)}" aria-label="Record a voice note">🎤</button>`;
 SHEETS.msgMenu={
   render(s){const m=D.msgs.find(x=>x.id===s.args.id);if(!m)return{title:"Message",body:""};const canEdit=!m.kind||m.kind==="photo"||m.kind==="video";
     return{title:"Your message",body:`<div class="form">
@@ -1684,6 +1861,37 @@ SHEETS.msgMenu={
 SHEETS.msgEdit={
   render(s){const m=D.msgs.find(x=>x.id===s.args.id);return{title:"Edit message",body:`<div class="form"><textarea class="inp" id="meText" style="min-height:140px">${esc(m?.text||"")}</textarea><div class="hint">Everyone will see a small “edited” tag.</div></div>`,foot:`<button class="btn pri block" data-act="msgEditSave">Save</button>`}}
 };
+SHEETS.camera={
+  init(a){return{facing:"environment",mode:a.mode||"photo",shot:null,rec:false,err:""}},
+  render(s){const st=s.state,sh=st.shot;
+    const body=sh?`<div class="camx">${sh.kind==="photo"?`<img class="shot" src="${esc(sh.src)}" alt="Your photo">`:`<video class="shot" src="${esc(sh.url)}" playsinline autoplay loop controls></video>`}
+        <div class="cam-top"><button data-act="close" aria-label="Close">✕</button></div>
+        <div class="cam-bot"><div class="cam-row" style="gap:10px"><button class="btn" data-act="camRetake" style="flex:1;background:#222;color:#fff;border-color:#333">↺ Retake</button><button class="btn pri" data-act="camUse" style="flex:1.4">${s.args.ctx==="moment"?"Next ›":"Send ➤"}</button></div></div></div>`
+      :`<div class="camx">${st.err?`<div class="cam-msg">📷<br><br>${esc(st.err)}<br><br><button class="btn" data-act="camGallery">Pick from gallery instead</button></div>`:`<video id="camV" class="${st.facing==="user"?"mirror":""}" playsinline autoplay muted></video>`}
+        <div class="cam-top"><button data-act="close" aria-label="Close">✕</button>${st.rec?`<span class="cam-rec" id="camT">● 0:00 / 0:20</span>`:"<span></span>"}<span style="width:44px"></span></div>
+        <div class="cam-bot"><div class="cam-modes">${s.args.only==="photo"?"":`<button data-act="camMode" data-k="photo" aria-pressed="${st.mode==="photo"}">PHOTO</button><button data-act="camMode" data-k="video" aria-pressed="${st.mode==="video"}">VIDEO</button>`}</div>
+          <div class="cam-row"><button class="cam-flip" data-act="camGallery" aria-label="Pick from gallery">🖼️</button><button class="shutter ${st.mode==="video"?"vid":""} ${st.rec?"rec":""}" data-act="camShutter" aria-label="${st.mode==="video"?(st.rec?"Stop recording":"Start recording"):"Take photo"}"></button><button class="cam-flip" data-act="camFlip" aria-label="Switch camera">🔄</button></div></div></div>`;
+    return{title:"",body}},
+  after(s,first){if(!s.state.shot&&!s.state.err)camStart(s)},
+  destroy(s){camStop(s);if(s.state.shot?.url)URL.revokeObjectURL(s.state.shot.url)}
+};
+async function camStart(s){
+  const v=$("#camV",s.el);if(!v)return;
+  if(s.stream&&s.streamFacing===s.state.facing&&s.streamMode===s.state.mode){if(v.srcObject!==s.stream){v.srcObject=s.stream;v.play().catch(()=>{})}return}
+  camStop(s);
+  if(!navigator.mediaDevices?.getUserMedia){s.state.err="The camera isn't available here. Open Yalla Guys from your home screen or in Safari/Chrome.";return paintSheet(s)}
+  try{s.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:s.state.facing,width:{ideal:1280},height:{ideal:1280}},audio:s.state.mode==="video"});s.streamFacing=s.state.facing;s.streamMode=s.state.mode;
+    const vv=$("#camV",s.el);if(!vv||topS()!==s){camStop(s);return}vv.srcObject=s.stream;vv.play().catch(()=>{})}
+  catch(e){s.state.err=e?.name==="NotAllowedError"?"Allow the camera (and microphone for videos) for Yalla Guys in your phone settings.":"Couldn't start the camera.";paintSheet(s)}
+}
+function camStop(s){try{s.recorder?.state==="recording"&&s.recorder.stop()}catch{}clearInterval(s.recTimer);s.stream?.getTracks().forEach(t=>t.stop());s.stream=null}
+function camFrame(v,max,mirror){const k=Math.min(1,max/Math.max(v.videoWidth,v.videoHeight)),c=document.createElement("canvas");c.width=Math.round(v.videoWidth*k);c.height=Math.round(v.videoHeight*k);const g=c.getContext("2d");if(mirror){g.translate(c.width,0);g.scale(-1,1)}g.drawImage(v,0,0,c.width,c.height);return c}
+async function camDeliver(ctx,id,shot,caption){
+  if(ctx==="moment"){if(shot.kind==="photo")return openSheet("postMoment",{src:shot.src});return openSheet("postMoment",{video:shot})}
+  try{if(shot.kind==="photo"){await postItem(ctx,id,{kind:"photo",src:shot.src})}
+    else{const ref=await storeMedia(shot.blob,p=>toast(`Uploading video… ${Math.round(p*100)}%`));await postItem(ctx,id,{kind:"video",...ref,poster:shot.poster,dur:Math.round(shot.dur)})}
+    toast("Sent ✓")}catch(e){console.error(e);toast("Couldn't send that. Try again.")}
+}
 SHEETS.player={
   render(){return{title:`<span style="color:#fff">Video</span>`,body:`<div id="pl" style="display:grid;place-items:center;min-height:50dvh"><div class="spin"></div></div>`}},
   after(s,first){if(!first)return;const it=itemByKey(s.args.key);if(!it)return;
@@ -1696,6 +1904,7 @@ SHEETS.img={render(s){const it=itemByKey(s.args.key);return{title:`<span style="
 const val=id=>($("#"+CSS.escape(id))?.value||"").trim();
 const ACT={
   _:0,
+  async doUpdate(){toast("Updating…");try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const regs=await navigator.serviceWorker?.getRegistrations?.();for(const r of regs||[])await r.update().catch(()=>{})}catch{}location.replace(location.pathname+"?v="+Date.now())},
   hideInstall(){ls.set("yg-install-hide",true);render()},
   tab(d){UI.tab=d.k;ls.set("yg-tab",d.k);window.scrollTo(0,0);render()},
   close(){closeSheet()},
@@ -1712,10 +1921,13 @@ const ACT={
   pfPhoto(){const s=topS();pickPhotos(async fs=>{if(!fs[0])return;try{s.state.photo=await squarePhoto(fs[0],320);paintSheet(s)}catch{toast("Couldn't read that photo. Try another.")}},"#onePick")},
   pfPhotoDel(){const s=topS();s.state.photo="";paintSheet(s)},
   pfSticker(d){const s=topS(),a=s.state.stickers,i=a.indexOf(d.v);if(i>=0)a.splice(i,1);else if(a.length<8)a.push(d.v);else return toast("Max 8 stickers.");paintSheet(s)},
-  momentShot(){pickPhotos(fs=>ACT._momentFile(fs[0]),"#camPick")},
-  momentGallery(){pickPhotos(fs=>ACT._momentFile(fs[0]),"#onePick")},
-  async _momentFile(f){if(!f)return;try{const src=await storePhoto(f);if(!src)return toast("Couldn't read that photo.");openSheet("postMoment",{src})}catch{toast("Couldn't read that photo. Try another.")}},
-  async postMoment(){const s=topS();$("#moBtn",s.el).disabled=true;await Store.add("moments",{by:ME,at:now(),day:TODAY(),src:s.args.src,caption:val("moCap"),reacts:{}});closeSheet();UI.tab="moments";render();toast("Posted! Today's moments are unlocked 🔓")},
+  momentShot(){openSheet("camera",{ctx:"moment"})},
+  momentGallery(){ensureAC();pickPhotos(fs=>ACT._momentFile(fs[0]),"#mediaPick")},
+  async _momentFile(f){if(!f)return;if((f.type||"").startsWith("video/")){try{toast("Preparing video…");const v=await prepVideo(f,p=>toast(`Preparing video… ${Math.round(p*100)}%`));openSheet("postMoment",{video:{kind:"video",blob:v.blob,poster:v.poster,dur:v.dur,url:URL.createObjectURL(v.blob)}})}catch(e){toast(e?.message||"Couldn't read that video.")}return}
+    try{const src=await storePhoto(f);if(!src)return toast("Couldn't read that photo.");openSheet("postMoment",{src})}catch{toast("Couldn't read that photo. Try another.")}},
+  async postMoment(){const s=topS();$("#moBtn",s.el).disabled=true;const cap=val("moCap");
+    if(s.args.video){try{const v=s.args.video,ref=await storeMedia(v.blob,p=>toast(`Uploading… ${Math.round(p*100)}%`));await Store.add("moments",{by:ME,at:now(),day:TODAY(),kind:"video",...ref,poster:v.poster,dur:Math.round(v.dur),caption:cap,reacts:{}})}catch(e){console.error(e);$("#moBtn",s.el).disabled=false;return toast("Couldn't upload. Try again.")}}
+    else await Store.add("moments",{by:ME,at:now(),day:TODAY(),src:s.args.src,caption:cap,reacts:{}});closeSheet();UI.tab="moments";render();toast("Posted! Today's moments are unlocked 🔓")},
   async react(d){const x=D.moments.find(m=>m.id===d.id);if(!x)return;const cur=(x.reacts||{})[ME];await Store.upd("moments",d.id,{["reacts."+ME]:cur===d.e?(MODE==="demo"?DEL:firebase.firestore.FieldValue.delete()):d.e})},
   openMoment(d){openSheet("moment",{id:d.id})},
   async addComment(d){const el=$("#mcIn-"+CSS.escape(d.id));const t=(el?.value||"").trim();if(!t)return;el.value="";el.style.height="";await Store.add("mcomments",{momentId:d.id,by:ME,text:t.slice(0,500),at:now()})},
@@ -1757,6 +1969,7 @@ const ACT={
     const base={title,emoji:st.emoji,desc:val("edDesc"),stops:st.stops,slots:st.slots,est:st.est,invited,chatId:st.chatId||""};
     if(s.args.id){await Store.upd("plans",s.args.id,base);closeSheet();toast("Plan updated");return}
     const id=rid();await Store.set("plans",id,{...base,by:ME,at:now(),status:"poll",final:null});
+    if(s.args.wish)await Store.upd("wishes",s.args.wish,{pushedPlanId:id});
     if(st.chatId&&D.chats.some(c=>c.id===st.chatId))await Store.add("msgs",{chatId:st.chatId,by:ME,kind:"plan",planId:id,text:`📌 New plan: ${title}`,at:now()});
     await Store.set("rsvps",id+"__"+ME,{planId:id,uid:ME,going:"in",slots:st.slots.map(x=>x.id),at:now()});
     for(const [i,u] of st.links.entries())await Store.add("media",{planId:id,by:ME,at:now()+i,kind:linkKind(u),url:u,caption:"",phase:"idea"});
@@ -1813,12 +2026,81 @@ const ACT={
   mapMode(d){UI.mapMode=d.k;if(MAPS.main)MAPS.main.sig="";render()},
   async locMode(d){await Store.upd("members",ME,{locMode:d.k});lastLocPos=null;lastLocWrite=0;if(MYPOS)setTimeout(()=>writeLoc(MYPOS),300);toast(d.k==="approx"?"Friends see roughly where you are":"Friends see exactly where you are")},
   focusFriend(d){const m=mem(d.id);if(m?.loc&&MAPS.main?.map){MAPS.main.map.setView([m.loc.lat,m.loc.lng],15);window.scrollTo({top:0,behavior:"smooth"})}},
+  openBusy(d){openSheet("busyView",{id:d.id})},
+  bzAttPhoto(d){const s=topS();pickPhotos(async fs=>{for(const f of fs){const src=await storePhoto(f);if(!src)continue;const m={kind:"photo",src};if(d.id)await Store.add("mine",{...m,busyId:d.id,at:now()});else{s.state.att.push(m);paintSheet(s)}}},"#filePick")},
+  bzAttLink(d){openSheet("linkAdd",{busyId:d.id})},
+  bzAttDel(d){const s=topS();s.state.att.splice(+d.id,1);paintSheet(s)},
+  async mineDel(d){await Store.del("mine",d.id);toast("Removed")},
+  async linkSave(){const s=topS(),u=val("lkUrl");if(!validUrl(u))return toast("Paste a full link that starts with https://");const m={kind:"link",url:u,caption:val("lkCap")};
+    closeSheet();if(s.args.busyId)await Store.add("mine",{...m,busyId:s.args.busyId,at:now()});else{const b=stack.find(x=>x.kind==="busy");if(b){b.state.att.push(m);paintSheet(b)}}toast("Added")},
+  ticketAdd(d){openSheet("ticketAdd",{scope:d.scope,id:d.id})},
+  tkIcon(d){const s=topS();s.state.icon=d.v;paintSheet(s)},
+  tkFile(){const s=topS();const inp=document.createElement("input");inp.type="file";inp.accept="image/*,application/pdf";inp.onchange=()=>{const f=inp.files[0];if(!f)return;if(f.size>8e6)return toast("That file is over 8 MB.");s.state.file=f;s.state.fileType=/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name)?"pdf":"img";s.state.fileName=f.name;paintSheet(s)};inp.click()},
+  tkFileClear(){const s=topS();s.state.file=null;s.state.fileName="";paintSheet(s)},
+  async tkSave(){const s=topS(),st=s.state,title=val("tkTitle"),code=$("#tkCode",s.el).value.trim();if(!title&&!code&&!st.file)return toast("Add a name, a code or a file.");$("#tkBtn",s.el).disabled=true;
+    try{let file=null;if(st.file){if(st.fileType==="pdf")file=await storeMedia(st.file,p=>toast(`Uploading… ${Math.round(p*100)}%`));else{const img=await loadImg(st.file);let b=null;for(const[mx,q]of[[1800,.88],[1400,.82],[1100,.75]]){b=await compress(img,mx,q);if(b.size<900000)break}file=await storeMedia(b,p=>toast(`Uploading… ${Math.round(p*100)}%`))}}
+      const t={kind:"ticket",icon:st.icon,title:title||"Ticket",code,note:val("tkNote"),by:ME,at:now(),fileType:st.fileType||""};if(file)t.file=file;
+      if(s.args.scope==="plan")await Store.add("media",{...t,planId:s.args.id,phase:"ticket",forUid:val("tkFor")||"group"});
+      else if(s.args.id)await Store.add("mine",{...t,busyId:s.args.id});
+      else{closeSheet();const b=stack.find(x=>x.kind==="busy");if(b){b.state.att.push(t);paintSheet(b)}return toast("Ticket added")}
+      closeSheet();toast("Ticket saved 🎟️")}catch(e){console.error(e);$("#tkBtn",s.el).disabled=false;toast("Couldn't save the ticket.")}},
+  openTicket(d){openSheet("ticketView",{col:d.col,id:d.id})},
+  tkCopy(){const s=topS(),t=(D[s.args.col]||[]).find(x=>x.id===s.args.id);try{navigator.clipboard.writeText(t.code);toast("Copied")}catch{toast("Long-press the code to copy it")}},
+  async tkOpenFile(){const s=topS(),t=(D[s.args.col]||[]).find(x=>x.id===s.args.id);if(!t?.file)return;toast("Opening…");try{const u=await mediaURL(t.file);const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove()}catch{toast("Couldn't open the file.")}},
+  async tkDel(){const s=topS(),t=(D[s.args.col]||[]).find(x=>x.id===s.args.id);if(!t)return closeSheet();await Store.del(s.args.col,t.id);if(t.file?.blob&&MODE!=="demo")for(let i=0;i<t.file.blob.n;i++)FS.doc(`chunks/${t.file.blob.id}_${i}`).delete().catch(()=>{});closeSheet();toast("Ticket deleted")},
+  wishType(d){UI.wishType=d.k;render()},
+  wishAdd(){openSheet("wishAdd",{type:UI.wishType||"wish"})},
+  wishEdit(d){openSheet("wishAdd",{id:d.id})},
+  waType(d){const s=topS();s.state.type=d.k;paintSheet(s)},
+  waEmoji(d){const s=topS();s.state.emoji=d.v;paintSheet(s)},
+  waVis(d){const s=topS();s.state.vis=d.k;paintSheet(s)},
+  waPhoto(){const s=topS();pickPhotos(async fs=>{if(!fs[0])return;s.state.src=await storePhoto(fs[0])||"";paintSheet(s)},"#onePick")},
+  waPhotoDel(){const s=topS();s.state.src="";paintSheet(s)},
+  async waSave(){const s=topS(),st=s.state,title=val("waTitle");if(!title)return toast("Give it a name.");const url=val("waUrl");if(url&&!validUrl(url))return toast("That link doesn't look right.");
+    const invited=st.vis==="invite"?$$("input[data-winv]",s.el).filter(x=>x.checked).map(x=>x.dataset.winv):[];if(st.vis==="invite"&&!invited.length)return toast("Pick who to invite.");
+    const o={type:st.type,emoji:st.emoji,title,note:val("waNote"),url,src:st.src||"",vis:st.vis,invited:st.vis==="invite"?[ME,...invited]:[]};
+    if(s.args.id)await Store.upd("wishes",s.args.id,o);else await Store.add("wishes",{...o,by:ME,at:now(),likes:{},done:false});closeSheet();toast("Saved ✨")},
+  async wishLike(d){const w=D.wishes.find(x=>x.id===d.id);if(!w)return;const on=(w.likes||{})[ME];await Store.upd("wishes",d.id,{["likes."+ME]:on?(MODE==="demo"?DEL:firebase.firestore.FieldValue.delete()):true})},
+  async wishDel(d){await Store.del("wishes",d.id);toast("Deleted")},
+  wishPush(d){const w=D.wishes.find(x=>x.id===d.id);if(!w)return;const likes=Object.keys(w.likes||{});
+    const invited=w.vis==="private"?[ME]:w.vis==="invite"?[...new Set([...(w.invited||[]),...likes])]:[];
+    openSheet("edit",{wish:w.id,pre:{title:w.title,emoji:w.emoji&&w.emoji!=="✨"?w.emoji:"",desc:w.note||"",links:w.url?[w.url]:[],invited}})},
+  offerCat(d){UI.offerCat=d.k;render()},
+  offerAdd(){openSheet("offerAdd")},
+  ofCat(d){const s=topS();s.state.cat=d.k;paintSheet(s)},
+  ofLocClear(){const s=topS();s.state.loc=null;paintSheet(s)},
+  ofPick(d){const s=topS(),r=s.state.res[+d.i];if(!r)return;s.state.loc=r;if(!val("ofName"))$("#ofName",s.el).value=r.name;paintSheet(s)},
+  async ofSave(){const s=topS(),name=val("ofName");if(!name)return toast("Add the outlet name.");if(!s.state.loc)return toast("Search and pick the location.");
+    await Store.add("offers",{name,cat:s.state.cat,offer:val("ofOffer"),area:s.state.loc.sub||s.state.loc.name,lat:s.state.loc.lat,lng:s.state.loc.lng,by:ME,at:now()});closeSheet();toast("Outlet added 🏷️")},
+  async offerDel(d){await Store.del("offers",d.id);toast("Removed")},
+  offerPlan(d){const o=allOffers().find(x=>x.id===d.id);if(!o)return;openSheet("edit",{pre:{title:o.name,emoji:catOf(o.cat)[1],desc:"🏷️ Entertainer: "+(o.offer||""),stops:[{name:o.name,lat:o.lat,lng:o.lng,addr:o.area||""}]}})},
+  async offerStop(d){const p=planById(d.plan),o=allOffers().find(x=>x.id===d.id);if(!p||!o)return;await Store.upd("plans",p.id,{stops:[...(p.stops||[]),{name:o.name,lat:o.lat,lng:o.lng,addr:"🏷️ "+(o.offer||"Entertainer offer")}]});toast(`Added ${o.name} to the route`)},
+  edOfferStop(d){const s=topS(),o=allOffers().find(x=>x.id===d.id);if(o)addStop(s,{name:o.name,lat:o.lat,lng:o.lng,addr:"🏷️ "+(o.offer||"Entertainer offer")})},
   openBoard(d){openSheet("board",{id:d.id})},
   openAlbum(d){openSheet("plan",{id:d.id});setTimeout(()=>{$("#album",topS()?.el)?.scrollIntoView({behavior:"smooth"})},150)},
   addMedia(d){openSheet("media",{id:d.id,ph:d.ph,tab:d.tab})},
   attach(d){ensureAC();pickPhotos(fs=>{if(fs.length)sendFiles(d.ctx,d.id,fs)},"#mediaPick")},
   voice(d){ensureAC();startVoice(d.ctx,d.id)},
   recCancel(){stopVoice(false)},
+  camera(d){ensureAC();openSheet("camera",{ctx:d.ctx,id:d.id})},
+  camMode(d){const s=topS();if(s.state.rec)return;s.state.mode=d.k;paintSheet(s)},
+  camFlip(){const s=topS();if(s.state.rec)return;s.state.facing=s.state.facing==="user"?"environment":"user";paintSheet(s)},
+  camRetake(){const s=topS();if(s.state.shot?.url)URL.revokeObjectURL(s.state.shot.url);s.state.shot=null;paintSheet(s)},
+  camGallery(){const s=topS(),a={...s.args};closeSheet();if(a.ctx==="moment")ACT.momentGallery();else ACT.attach({ctx:a.ctx,id:a.id})},
+  async camUse(){const s=topS(),a={...s.args},shot=s.state.shot;if(!shot)return;s.state.shot=null;closeSheet();camDeliver(a.ctx,a.id,shot)},
+  async camShutter(){const s=topS(),v=$("#camV",s.el);if(!v||!s.stream||!v.videoWidth)return toast("Camera is starting…");const mirror=s.state.facing==="user";
+    if(s.state.mode==="photo"){haptic();let src="";for(const[mx,q]of[[1280,.78],[1000,.7],[800,.62]]){src=camFrame(v,mx,mirror).toDataURL("image/jpeg",q);if(src.length<340000)break}
+      camStop(s);s.state.shot={kind:"photo",src};return paintSheet(s)}
+    if(s.state.rec){s.recorder?.stop();return}
+    const mime=pickMime(["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4","video/webm;codecs=vp8,opus","video/webm"]);
+    if(!window.MediaRecorder)return toast("Video recording isn't supported here.");
+    const rec=new MediaRecorder(s.stream,mime?{mimeType:mime,videoBitsPerSecond:1400000,audioBitsPerSecond:64000}:{videoBitsPerSecond:1400000}),parts=[];s.recorder=rec;
+    rec.ondataavailable=e=>e.data.size&&parts.push(e.data);
+    const poster=camFrame(v,480,mirror).toDataURL("image/jpeg",.6),t0=now();
+    rec.onstop=()=>{clearInterval(s.recTimer);s.state.rec=false;const type=(rec.mimeType||mime||"video/webm").split(";")[0],blob=new Blob(parts,{type});camStop(s);
+      if(topS()!==s)return;s.state.shot={kind:"video",blob,poster,dur:(now()-t0)/1000,url:URL.createObjectURL(blob)};paintSheet(s)};
+    rec.start(500);haptic();s.state.rec=true;paintSheet(s);
+    s.recTimer=setInterval(()=>{const x=(now()-t0)/1000;const el=$("#camT",s.el);if(el)el.textContent=`● ${fDur(x)} / 0:20`;if(x>=20)rec.state==="recording"&&rec.stop()},250)},
   msgMenu(d,el,ev){if(ev?.target.closest("a,button,.voice"))return;openSheet("msgMenu",{chat:d.chat,id:d.id})},
   msgEdit(){const s=topS();const a={...s.args};closeSheet();setTimeout(()=>openSheet("msgEdit",a),0)},
   async msgEditSave(){const s=topS(),m=D.msgs.find(x=>x.id===s.args.id),t=$("#meText",s.el).value.trim();if(!m)return closeSheet();
@@ -1865,7 +2147,9 @@ const ACT={
   calDay(d){UI.calDay=d.d;if(d.d.slice(0,7)!==UI.calMonth)UI.calMonth=d.d.slice(0,7);render()},
   newBusy(d){openSheet("busy",{d:d.d})},
   async bzSave(){const date=val("bzD");if(!date)return toast("Pick a date.");const all=$("#bzAll").checked;const s=all?"":val("bzS"),e=all?"":val("bzE");const n=+val("bzR")||1;const label=val("bzL");
-    for(let i=0;i<n;i++){const d=pd(date);d.setDate(d.getDate()+7*i);const id=await Store.add("busy",{uid:ME,date:ymd(d),start:s,end:e,label:MODE==="demo"?label:"",at:now()});if(label&&MODE!=="demo")await Store.setLabel(id,label)}
+    const att=topS().state.att||[];
+    for(let i=0;i<n;i++){const d=pd(date);d.setDate(d.getDate()+7*i);const id=await Store.add("busy",{uid:ME,date:ymd(d),start:s,end:e,label:MODE==="demo"?label:"",at:now()});if(label&&MODE!=="demo")await Store.setLabel(id,label);
+      if(i===0)for(const [k,m] of att.entries())await Store.add("mine",{...m,busyId:id,at:now()+k})}
     closeSheet();toast(n>1?`Blocked ${n} weeks`:"Time blocked")},
   async delBusy(d){await Store.del("busy",d.id)},
   mapFilter(d){UI.mapFilter=d.k;render()},
@@ -1877,9 +2161,17 @@ const ACT={
   newExpense(d){openSheet("expense",{plan:d.plan||""})},
   editExpense(d){openSheet("expense",{id:d.id})},
   exAll(){$$("input[data-uid]",topS().el).forEach(x=>x.checked=true)},
-  async exSave(){const s=topS(),t=val("exT"),a=parseFloat(val("exA"));if(!t)return toast("What was it for?");if(!(a>0))return toast("Enter the total in Dhs.");const split=$$("input[data-uid]",s.el).filter(x=>x.checked).map(x=>x.dataset.uid);if(!split.length)return toast("Pick who's splitting it.");
-    const o={title:t,amount:Math.round(a*100)/100,paidBy:val("exP"),planId:val("exPl"),split};
-    if(s.args.id)await Store.upd("expenses",s.args.id,o);else await Store.add("expenses",{...o,at:now(),by:ME});closeSheet();toast(`Saved · ${dhs(o.amount/split.length)} each`)},
+  async exSave(){const s=topS(),t=val("exT"),a=parseFloat(val("exA"));if(!t)return toast("What was it for?");if(!(a>0))return toast("Enter the total in Dhs.");
+    let split,shares=null;
+    if(s.state.mode==="custom"){shares={};$$("input[data-cu]",s.el).forEach(x=>{const v=Math.round((parseFloat(x.value)||0)*100)/100;if(v>0)shares[x.dataset.cu]=v});split=Object.keys(shares);
+      const sum=Object.values(shares).reduce((p,q)=>p+q,0);if(!split.length)return toast("Enter what each person owes.");if(Math.abs(sum-a)>0.05)return toast(`Amounts add up to ${dhs(sum)}, not ${dhs(a)}.`)}
+    else{split=$$("input[data-uid]",s.el).filter(x=>x.checked).map(x=>x.dataset.uid);if(!split.length)return toast("Pick who's splitting it.")}
+    const o={title:t,amount:Math.round(a*100)/100,paidBy:val("exP"),planId:val("exPl"),split,shares:shares||(MODE==="demo"?null:firebase.firestore.FieldValue.delete())};
+    if(!s.args.id&&!shares)delete o.shares;
+    if(s.args.id)await Store.upd("expenses",s.args.id,o);else await Store.add("expenses",{...o,at:now(),by:ME});closeSheet();toast(shares?"Saved · split unevenly":`Saved · ${dhs(o.amount/split.length)} each`)},
+  exMode(d){const s=topS();s.state.mode=d.k;paintSheet(s);exLeft()},
+  exEven(){const s=topS(),a=parseFloat(val("exA"))||0,ins=$$("input[data-cu]",s.el),filled=ins.filter(x=>parseFloat(x.value)>0),use=filled.length?filled:ins,each=Math.floor(a/use.length*100)/100;
+    use.forEach((x,i)=>x.value=i===use.length-1?(Math.round((a-each*(use.length-1))*100)/100):each);exLeft()},
   async exDel(){const s=topS();await Store.del("expenses",s.args.id);closeSheet();toast("Expense deleted")},
   async settle(d){await Store.add("settles",{from:d.from,to:d.to,amount:+d.amt,at:now(),by:ME});toast(`Recorded ${dhs(+d.amt)} payment`)},
   async delSettle(d){await Store.del("settles",d.id)},
@@ -1893,12 +2185,18 @@ document.addEventListener("click",ev=>{
 });
 document.addEventListener("input",ev=>{
   const el=ev.target;
+  if(el.classList.contains("exAmt")||el.id==="exA")exLeft();
+  if(el.id==="offerQ"){UI.offerQ=el.value;clearTimeout(window._oq);window._oq=setTimeout(()=>{const p=el.selectionStart;render();const n=$("#offerQ");if(n){n.focus();try{n.setSelectionRange(p,p)}catch{}}},250)}
+  if(el.id==="ofQ"){const s=topS(),q=el.value.trim();clearTimeout(window._ofq);if(q.length<2){$("#ofRes",s.el).innerHTML="";return}
+    const paint=()=>{const b=$("#ofRes",s.el);if(b)b.innerHTML=s.state.res.length?`<div class="sugg">${s.state.res.map((x,i)=>`<button data-act="ofPick" data-i="${i}"><b>${esc(x.name)}</b>${x.sub?`<br><span class="meta">${esc(x.sub)}</span>`:""}</button>`).join("")}</div>`:""};
+    s.state.res=localSearch(q);paint();window._ofq=setTimeout(async()=>{try{const on=await onlineSearch(q);if(on){s.state.res=s.state.res.concat(on).slice(0,8);paint()}}catch{}},450)}
   if(el.id==="locQ"){const s=topS();const q=el.value.trim();clearTimeout(locTimer);if(q.length<2){s.state.res=[];$("#locRes",s.el).innerHTML="";return}if(/https?:|^-?\d+\.\d+\s*,/.test(q)){locSearch(s,q);return}s.state.res=localSearch(q);$("#locRes",s.el).innerHTML=locResHtml(s.state);locTimer=setTimeout(()=>locSearch(s,q),450)}
   if(el.id==="edQ"){const s=stack.find(x=>x.kind==="edit");if(s)handleQuery(s,el.value)}
   if(el.classList.contains("compose")){el.style.height="";el.style.height=Math.min(el.scrollHeight,120)+"px"}
 });
 document.addEventListener("change",ev=>{
   const el=ev.target;if(el.id==="moneyPlan"){UI.moneyPlan=el.value;render()}
+  if(el.dataset.wish){Store.upd("wishes",el.dataset.wish,{done:el.checked})}
   if(el.id==="shareLoc"){(async()=>{if(el.checked){if(!navigator.geolocation){el.checked=false;return toast("Location isn't available on this phone.")}
       navigator.geolocation.getCurrentPosition(async p=>{MYPOS={lat:p.coords.latitude,lng:p.coords.longitude};await Store.upd("members",ME,{shareLoc:true,locMode:mem(ME)?.locMode||"exact"});lastLocPos=null;lastLocWrite=0;setTimeout(()=>{writeLoc(MYPOS);syncLocWatch()},300);toast("📡 Sharing your location with the crew")},
         ()=>{el.checked=false;toast("Allow location for Yalla Guys to share it.")},{enableHighAccuracy:true,timeout:15000})}
@@ -1916,6 +2214,8 @@ document.addEventListener("keydown",ev=>{
   if(ev.key==="Escape"&&stack.length)closeSheet();
 });
 Store.init();
+async function checkUpdate(){try{if(location.protocol!=="https:")return;const r=await fetch("./index.html?u="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/APP_VERSION="([^"]+)"/);if(m&&m[1]!==APP_VERSION)$("#updBar").hidden=false}catch{}}
+setTimeout(checkUpdate,4000);setInterval(checkUpdate,5*6e4);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate()});
 async function notify(title,body,tag,data){
   if(!SET.notifyOn||!("Notification" in window)||Notification.permission!=="granted")return;
   try{const reg=await navigator.serviceWorker?.getRegistration();if(reg)await reg.showNotification(title,{body,tag,icon:"icon-192.png",badge:"icon-192.png",data});else new Notification(title,{body,tag})}catch{}
