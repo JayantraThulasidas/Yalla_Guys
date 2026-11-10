@@ -61,7 +61,8 @@ header.top{position:sticky;top:0;z-index:20;background:var(--bg);display:flex;al
 .stack{display:flex}.stack .av{margin-left:-7px;border:2px solid var(--surface)}.stack .av:first-child{margin-left:0}
 .banner{margin-block:4px 10px;padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:var(--fg);font-size:13px}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
-nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);height:var(--tabh)}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);height:var(--tabh)}
+nav.tabs button span:not(.badge){font-size:10.5px;letter-spacing:-.01em;white-space:nowrap}
 nav.tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:var(--muted);position:relative}
 nav.tabs button svg{width:24px;height:24px}
 nav.tabs button[aria-current="true"]{color:var(--accent)}
@@ -115,7 +116,8 @@ textarea.inp{min-height:84px;resize:vertical}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;min-height:36px;display:inline-flex;align-items:center;gap:6px}
 .chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
-.emo-pick{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.emo-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px;max-height:168px;overflow-y:auto;padding:2px;scrollbar-width:thin}
+.emo-pick button{width:100%!important}
 .emo-pick button{flex:none;width:46px;height:46px;font-size:24px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
 .emo-pick button[aria-pressed="true"]{border:2px solid var(--accent);background:var(--accent-soft)}
 .item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
@@ -502,6 +504,36 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 @keyframes flash{0%,60%{box-shadow:0 0 0 3px var(--sun)}100%{box-shadow:none}}
 .pdfopt{display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;border-radius:16px;border:2px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;cursor:pointer}
 .pdfopt[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+.shstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.shstats div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:2px}.shstats b{font-size:20px}.shstats span{font-size:11px;color:var(--muted);text-align:center}
+.wall{background:linear-gradient(135deg,#7F1D1D,#B91C1C);color:#fff;border-radius:18px;padding:12px 14px;margin:4px 0 12px;box-shadow:var(--shadow)}
+.wall-row{all:unset;display:flex;align-items:center;gap:8px;width:100%;padding:8px 0;border-top:1px solid rgba(255,255,255,.18);font-size:14px;cursor:pointer;box-sizing:border-box}
+.wall-row:first-of-type{border-top:0;margin-top:4px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px}
+.hchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.hchip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 10px;font-size:13px;font-weight:600;background:var(--surface2);border:1px solid var(--line)}
+.hchip.sm{padding:2px 7px;font-size:12px}
+.hchip.ok{background:color-mix(in srgb,var(--ok) 22%,var(--surface));border-color:color-mix(in srgb,var(--ok) 50%,transparent)}
+.hchip.bad{background:color-mix(in srgb,var(--danger) 20%,var(--surface));border-color:color-mix(in srgb,var(--danger) 45%,transparent)}
+.hchip .poke{border:0;background:var(--sun);color:#fff;border-radius:999px;font-size:12px;padding:1px 7px;margin-right:-5px}
+.hrow{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 12px;color:var(--fg);font:inherit;width:100%;text-align:left;box-sizing:border-box}
+.hrow.ok{border-color:color-mix(in srgb,var(--ok) 60%,transparent);background:color-mix(in srgb,var(--ok) 10%,var(--surface))}
+.hrow .he{font-size:26px;flex:none}.hrow b{display:block}
+.hbox{font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap}
+.hrow.ok .hbox{font-size:22px}
+.hbar{display:block;height:6px;border-radius:3px;background:var(--surface2);margin:5px 0 3px;overflow:hidden}.hbar i{display:block;height:100%;background:var(--ok);border-radius:3px}
+.hctl{display:flex;align-items:center;gap:4px;flex:none}.hnum{width:74px!important;text-align:center;padding:8px 4px!important}
+.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.heat .hd{aspect-ratio:1;border-radius:6px}
+.hdot{width:9px;height:9px;border-radius:50%;background:var(--surface2);display:inline-block}.hdot.ok{background:var(--ok)}.hdot.bad{background:var(--danger)}
+.ach{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px}
+.ach-i{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding:10px 6px;border-radius:14px;background:var(--surface);border:1px solid var(--line);opacity:.4;filter:grayscale(1)}
+.ach-i.on{opacity:1;filter:none;border-color:var(--sun);background:var(--sun-soft)}
+.ach-i .ae{font-size:28px}.ach-i b{font-size:12px}.ach-i .meta{font-size:10.5px;line-height:1.25}
+.hset{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 12px}
+.hset.on{border-color:var(--accent)}
+.hset-main{all:unset;display:flex;align-items:center;gap:10px;width:100%;cursor:pointer}
+.hset .hbox{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--accent-fg)}
+.hset.on .hbox{background:var(--accent);border-color:var(--accent)}
+.seg.sm button{padding:5px 10px;font-size:12px}
 .auth{max-width:440px;margin:0 auto;padding-block:8px 40px}
 .auth-hero{padding:28px 4px 22px}
 .auth-logo{font-family:var(--f-display);font-weight:800;font-size:46px;letter-spacing:-.03em;line-height:1}
@@ -556,7 +588,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.32";
+const APP_VERSION="2026-11-10.35";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -581,13 +613,14 @@ const PLAN_HUES=["#0B7A75","#C9661A","#6D4FC2","#C2372F","#2F6FB5","#7A8B1E","#B
 const hue=id=>{let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))>>>0;return PLAN_HUES[h%PLAN_HUES.length]};
 const MEMBER_COLORS=["#0B7A75","#C9661A","#6D4FC2","#C2372F","#2F6FB5","#5E7A12","#B5307A","#8A5A2B"];
 const EMOJIS=["😎","🦁","🐪","🦅","🌴","🔥","⚡️","🌙","🍉","🏄","🎧","🦊","🐬","🌵","🍩","👑"];
-const PLAN_EMOJIS=["🏖️","🏜️","🍽️","☕️","🎢","🏔️","🎤","🛥️","🎳","🏕️","⛳️","🛍️","🎬","🥙","🎉","🚗"];
+const PLAN_EMOJIS=["🏖️","🏜️","🍽️","☕️","🎢","🏔️","🎤","🛥️","🎳","🏕️","⛳️","🛍️","🎬","🥙","🎉","🚗","🍕","🍔","🍣","🌮","🥩","🍰","🧋","🍹","🥂","🍻","🎂","🎁","🎮","🎯","🎱","🏓","🎾","⚽️","🏀","🏐","🏊","🏄","🤿","🚤","⛵️","🏇","🐪","🦩","🐬","🏟️","🎡","🎠","🎭","🎨","🖼️","🎶","🎸","💃","🕺","🪩","🎆","🌙","🌅","🌴","🌊","🏝️","⛰️","🏞️","🔥","⛺️","🚙","🏍️","✈️","🚁","🛳️","🗺️","🧳","🏨","🕌","🛕","🧖","💅","💆","🧘","🏋️","🚴","🥾","📸","🎥","📚","🛒","🎓","💼","❤️","✨","🎈","👑","🦖","🛼"];
 const ICON={
  plans:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.6 6.3L21 9l-5 4.4L17.5 20 12 16.6 6.5 20 8 13.4 3 9l6.4-.7z"/></svg>',
  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>',
  map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/></svg>',
  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
  moments:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+ shame:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3c.5 3.5 5 5.5 5 10.5a5 5 0 0 1-10 0c0-2.2 1-3.6 2-4.6.3 1.6 1.2 2.6 2.2 2.8C10.8 9 11.4 6 12 3z"/></svg>',
  money:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v5M18 9.5v5"/></svg>',
  back:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
  send:'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5l18-8.5L3 3.5v6.6l12 1.9-12 1.9z"/></svg>',
@@ -667,7 +700,7 @@ function routeFor(stops){
 /* Delta sync: every phone keeps its own copy of the data (IndexedDB) and only downloads documents
    created or changed since its last visit. Writes stamp a "u" (updated) time; deletes leave a small
    tombstone so other phones can drop the item. A full refresh runs every 14 days as a safety net. */
-const DELTA=["plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers"];
+const DELTA=["plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers","checkins","pokes"];
 const FULL_EVERY=14*864e5,SKEW=5*6e4;
 const IDB={_db:null,
   open(){return this._db||(this._db=new Promise((res,rej)=>{const r=indexedDB.open("yg-cache-"+ME,1);r.onupgradeneeded=()=>{r.result.createObjectStore("docs",{keyPath:"k"});r.result.createObjectStore("meta")};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))},
@@ -699,7 +732,7 @@ async function deltaSync(path,key,apply,onErr){
   offs.push(FS.collection(path).where("at",">",since).onSnapshot(onSnap,onErr));
   return()=>offs.forEach(f=>f());
 }
-const COLS=["members","plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers"];
+const COLS=["members","plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers","checkins","pokes"];
 const D={chats:[],msgs:[],priv:{labels:{}},wishes:[],mine:[]};COLS.forEach(c=>D[c]=[]);
 let ME=null,MODE="loading",FS=null,AUTH=null,JOIN_ERR="";
 const unsubs=[];const msgSubs=new Map();const msgData=new Map();
@@ -762,7 +795,16 @@ const DEL={__del:true};
   get(){return D.members&&D.members.length?raw[k].filter(x=>D.members.some(m=>m.id===x.uid)):raw[k]},set(v){raw[k]=v||[]}});}
 const Demo={
   key:"yallaguys-demo-v1",
-  start(){MODE="demo";ME=ls.get("yg-actas","me-demo");Store.ready=true;const s=ls.get(Demo.key,null);if(s&&s.members){[...COLS,"chats","msgs","wishes","mine"].forEach(c=>D[c]=s[c]||[])}else Demo.seed();schedule()},
+  start(){MODE="demo";ME=ls.get("yg-actas","me-demo");Store.ready=true;const s=ls.get(Demo.key,null);if(s&&s.members){[...COLS,"chats","msgs","wishes","mine"].forEach(c=>D[c]=s[c]||[])}else Demo.seed();if(!D.members.some(m=>m.habits))Demo.seedShame();schedule()},
+  seedShame(){const P=id=>({...HABIT_PRESETS.find(h=>h.id===id),show:true,since:shameDay(12)});
+    const plan={"m-sara":["gym","water","protein"],"m-omar":["gym","supps","food"],"m-lina":["water","skincare","read"]};
+    for(const m of D.members)if(plan[m.id]){m.habits=plan[m.id].map(P);m.habitsSince=shameDay(12)}
+    const rnd=(i,k)=>((i*7+k*13)%10)/10;
+    for(const [uid,ids] of Object.entries(plan))for(let d=12;d>=0;d--){const ds=shameDay(d),v={};
+      ids.forEach((hid,k)=>{const h=HABIT_PRESETS.find(x=>x.id===hid),r=rnd(d+uid.length,k+1),hit=d===0?r<.5:r<(uid==="m-omar"?.6:.85);
+        if(!hit)return;v[hid]=h.type==="count"?h.goal+(hid==="steps"?1200:0):h.type==="log"?["Chicken & rice","Protein shake"]:true});
+      if(Object.keys(v).length)D.checkins.push({id:uid+"_"+ds,uid,date:ds,v,at:now()})}
+    D.pokes.push({id:"p-demo",from:"m-sara",to:"me-demo",hid:"join",date:TODAY(),at:now()});Demo.save()},
   save(){const o={};[...COLS,"chats","msgs","wishes","mine"].forEach(c=>o[c]=D[c]);ls.set(Demo.key,o)},
   set(c,id,obj){D[c]=D[c].filter(d=>d.id!==id).concat([{id,...obj}]);Demo.save();schedule()},
   upd(c,id,p){D[c]=D[c].map(d=>{if(d.id!==id)return d;const n=JSON.parse(JSON.stringify(d));for(const[k,v]of Object.entries(p)){const ks=k.split(".");let o=n;for(const x of ks.slice(0,-1))o=o[x]=o[x]||{};if(v===DEL)delete o[ks.at(-1)];else o[ks.at(-1)]=v}return n});Demo.save();schedule()},
@@ -929,9 +971,9 @@ function banners(){
   return installCard()+(MODE==="demo"?`<div class="banner"><b>Demo mode.</b> Changes stay on this phone and the people shown are examples. Add your Firebase settings to the file to share it with the guys (see the setup steps).</div>`:"");
 }
 function renderTabs(){
-  const tabs=[["plans","Plans"],["moments","Moments"],["cal","Calendar"],["chat","Chats"],["money","Money"]];
+  const tabs=[["plans","Plans"],["moments","Moments"],["cal","Calendar"],["chat","Chats"],["shame","Shame"],["money","Money"]];const sb=shameBadge();
   const un=myChats().reduce((n,c)=>n+unread(c),0);
-  $("#tabs").innerHTML=tabs.map(([k,l])=>`<button data-act="tab" data-k="${k}" aria-current="${UI.tab===k}">${ICON[k]}<span>${l}</span>${k==="chat"&&un?`<span class="badge">${un>9?"9+":un}</span>`:""}</button>`).join("");
+  $("#tabs").innerHTML=tabs.map(([k,l])=>`<button data-act="tab" data-k="${k}" aria-current="${UI.tab===k}">${ICON[k]}<span>${l}</span>${k==="chat"&&un?`<span class="badge">${un>9?"9+":un}</span>`:""}${k==="shame"&&sb?`<span class="badge">${sb}</span>`:""}</button>`).join("");
 }
 
 /* ---------- auth + join ---------- */
@@ -1905,7 +1947,8 @@ SHEETS.edit={
   init(a){const p=a.id?planById(a.id):null;const cp=x=>JSON.parse(JSON.stringify(x||[]));const pre=a.pre||{};return{past:p?.status==="done"&&!!p?.final,emoji:p?.emoji||pre.emoji||PLAN_EMOJIS[0],stops:cp(p?.stops||pre.stops),slots:cp(p?.slots),est:cp(p?.est),files:[],links:[...(pre.links||[])],q:"",res:[],msg:"",loading:false,invited:a.chat?[...(D.chats.find(c=>c.id===a.chat)?.members||[])]:pre.invited?[...pre.invited]:cp(p?.invited),chatId:a.chat||p?.chatId||""}},
   render(s){const p=s.args.id?planById(s.args.id):null,st=s.state,hasPts=st.stops.some(x=>x.lat!=null);
     return{title:p?"Edit plan":"Make a plan",body:`<div class="form">
-      <div class="emo-pick">${PLAN_EMOJIS.map(e=>`<button data-act="edEmoji" data-v="${e}" aria-pressed="${st.emoji===e}">${e}</button>`).join("")}</div>
+      <div class="emo-pick">${(PLAN_EMOJIS.includes(st.emoji)?PLAN_EMOJIS:[st.emoji,...PLAN_EMOJIS]).map(e=>`<button data-act="edEmoji" data-v="${esc(e)}" aria-pressed="${st.emoji===e}">${esc(e)}</button>`).join("")}</div>
+      <label class="f" style="margin-top:6px">Or type any emoji<input class="inp" id="edEmoCustom" maxlength="8" placeholder="Tap here and pick from your keyboard 🙂" style="font-size:18px"></label>
       <label class="f">What's the plan?<input class="inp" id="edTitle" maxlength="60" value="${esc(p?.title||s.args.pre?.title||"")}" placeholder="e.g. Desert camping at Al Qudra"></label>
       <label class="f">Details<textarea class="inp" id="edDesc" placeholder="Vibe, what to bring, dress code, who's driving…">${esc(p?.desc||s.args.pre?.desc||"")}</textarea></label>
       <div class="sec"><h2>Places</h2><p class="hint" style="margin:0">Search any place or paste a Google Maps, Apple Maps or Waze link; it pins itself. Add more than one stop for a route with drive times.</p>
@@ -2152,6 +2195,114 @@ SHEETS.calPdf={
       <div class="sec" style="margin:4px 0 0"><h2 style="font-size:15px">Include</h2>${tog("plans","👥 Group plans I'm going to")}${tog("mine","🙋 My blocked time (private details included)")}${tog("bday","🎂 Birthdays")}</div></div>`,
       foot:`<button class="btn pri block" data-act="pdfGo" id="pdfBtn">⬇ Download PDF</button>`}}
 };
+/* ---------- SHAME: daily check-ins, wall of shame, pokes, streaks ---------- */
+const HABIT_PRESETS=[
+  {id:"gym",emoji:"🏋️",name:"Gym",type:"check"},
+  {id:"water",emoji:"💧",name:"Water",type:"count",goal:8,unit:"glasses",step:1},{id:"supps",emoji:"💊",name:"Supplements",type:"check"},
+  {id:"food",emoji:"🥗",name:"Food log",type:"log"},{id:"sleep",emoji:"😴",name:"Sleep",type:"count",goal:8,unit:"hrs",step:1},
+  {id:"protein",emoji:"🍗",name:"Protein",type:"count",goal:120,unit:"g",step:10},{id:"nojunk",emoji:"🚫",name:"No junk food",type:"check"},
+  {id:"read",emoji:"📖",name:"Read",type:"check"},{id:"meditate",emoji:"🧘",name:"Meditate",type:"check"},
+  {id:"skincare",emoji:"🧴",name:"Skincare",type:"check"},{id:"study",emoji:"📚",name:"Study",type:"check"}];
+const habitsOf=uid=>(mem(uid)?.habits||[]).filter(h=>h.id!=="steps");
+const shownHabits=uid=>habitsOf(uid).filter(h=>h.show!==false);
+const ciOf=(uid,ds)=>D.checkins.find(c=>c.uid===uid&&c.date===ds);
+const hVal=(uid,ds,hid)=>ciOf(uid,ds)?.v?.[hid];
+const isDone=(h,v)=>h.type==="count"?(+v||0)>=(+h.goal||1):h.type==="log"?Array.isArray(v)&&v.length>0:!!v;
+const hLive=(h,ds)=>!h.since||h.since<=ds;
+const shameDay=d=>{const x=pd(TODAY());x.setDate(x.getDate()-d);return ymd(x)};
+function dayScore(uid,ds,hs){hs=(hs||shownHabits(uid)).filter(h=>hLive(h,ds));if(!hs.length)return null;return hs.filter(h=>isDone(h,hVal(uid,ds,h.id))).length/hs.length}
+function curStreak(uid,ok){let n=0,d=0;if(!ok(TODAY()))d=1;for(;d<800;d++){const ds=shameDay(d);if(ok(ds))n++;else break}return n}
+function bestStreak(uid,ok){const since=mem(uid)?.habitsSince;if(!since)return 0;let best=0,run=0;for(const ds of shameRange(since,TODAY())){if(ok(ds)){run++;best=Math.max(best,run)}else run=0}return best}
+function shameRange(a,b){const out=[],d=pd(a),e=pd(b);for(let i=0;d<=e&&i<800;i++){out.push(ymd(d));d.setDate(d.getDate()+1)}return out}
+const perfectOk=uid=>ds=>dayScore(uid,ds)===1;
+const habitOk=(uid,h)=>ds=>isDone(h,hVal(uid,ds,h.id));
+function missesOn(uid,ds){const m=mem(uid);if(!m?.habitsSince||m.habitsSince>ds)return[];return shownHabits(uid).filter(h=>hLive(h,ds)&&!isDone(h,hVal(uid,ds,h.id)))}
+const players=()=>D.members.filter(m=>(m.habits||[]).length);
+const pokesToMe=()=>D.pokes.filter(p=>p.to===ME&&p.date===TODAY()&&mem(p.from));
+function shameBadge(){if(!D.checkins)return 0;const mine=shownHabits(ME).length?missesOn(ME,TODAY()).length:0;return mine?mine:0}
+function shameCount(uid){const m=mem(uid);if(!m?.habitsSince)return 0;let n=0;for(const ds of shameRange(m.habitsSince,shameDay(1)))if(missesOn(uid,ds).length)n++;return n}
+function achievements(uid){const m=mem(uid);const hs=habitsOf(uid),since=m?.habitsSince;const all=since?shameRange(since,TODAY()):[];
+  const tot=hid=>all.filter(ds=>{const h=hs.find(x=>x.id===hid);return h&&isDone(h,hVal(uid,ds,hid))}).length;
+  const sum=hid=>all.reduce((t,ds)=>t+(+hVal(uid,ds,hid)||0),0);
+  const bp=bestStreak(uid,perfectOk(uid)),cp=curStreak(uid,perfectOk(uid)),water=hs.find(h=>h.id==="water");
+  const sentPokes=D.pokes.filter(p=>p.from===uid).length,shamed=shameCount(uid),recent=all.slice(-14);
+  return[
+    {e:"🌱",t:"First check-in",d:"Log anything once",ok:D.checkins.some(c=>c.uid===uid)},
+    {e:"🔥",t:"On fire",d:"3 perfect days in a row",ok:bp>=3},
+    {e:"⚡️",t:"Week warrior",d:"7 perfect days in a row",ok:bp>=7},
+    {e:"🏆",t:"Unstoppable",d:"30 perfect days in a row",ok:bp>=30},
+    {e:"💯",t:"Centurion",d:"100 perfect days in a row",ok:bp>=100},
+    {e:"🏋️",t:"Gym rat",d:"20 gym days",ok:tot("gym")>=20},
+    {e:"💧",t:"Hydro homie",d:"Water goal 7 days in a row",ok:!!water&&bestStreak(uid,habitOk(uid,water))>=7},
+    {e:"😇",t:"Saint",d:"14 days, never on the wall",ok:recent.length>=14&&recent.slice(0,-1).every(ds=>!missesOn(uid,ds).length)},
+    {e:"👉",t:"Poke master",d:"Poke the guys 10 times",ok:sentPokes>=10},
+    {e:"🫣",t:"Hall of fame… of shame",d:"On the wall 5 times",ok:shamed>=5},
+  ].map(a=>({...a,cur:a.t==="On fire"?cp:0}))}
+function habitChip(uid,h,ds,mine){const v=hVal(uid,ds,h.id),done=isDone(h,v);
+  const lab=h.type==="count"?`${(+v||0).toLocaleString()}/${(+h.goal||0).toLocaleString()}`:h.type==="log"?(Array.isArray(v)&&v.length?`${v.length} logged`:"—"):done?"Done":"—";
+  return`<span class="hchip ${done?"ok":ds<TODAY()?"bad":""}">${esc(h.emoji)} <span>${esc(lab)}</span>${!done&&!mine&&ds===TODAY()?`<button class="poke" data-act="poke" data-id="${esc(uid)}" data-h="${esc(h.id)}" aria-label="Poke about ${esc(h.name)}">👉</button>`:""}</span>`}
+function myHabitRow(h,ds){const v=hVal(ME,ds,h.id),done=isDone(h,v);
+  if(h.type==="check")return`<button class="hrow chk ${done?"ok":""}" data-act="hToggle" data-h="${esc(h.id)}"><span class="he">${esc(h.emoji)}</span><span class="grow"><b>${esc(h.name)}</b>${h.show===false?'<span class="meta"> · hidden</span>':""}</span><span class="hbox">${done?"✅":"Tap when done"}</span></button>`;
+  if(h.type==="count"){const n=+v||0,g=+h.goal||1,pc=Math.min(100,Math.round(n/g*100));
+    return`<div class="hrow ${done?"ok":""}"><span class="he">${esc(h.emoji)}</span><span class="grow"><b>${esc(h.name)}</b>${h.show===false?'<span class="meta"> · hidden</span>':""}<span class="hbar"><i style="width:${pc}%"></i></span><span class="meta">${n.toLocaleString()} / ${g.toLocaleString()} ${esc(h.unit||"")}${done?" ✅":""}</span></span>
+      <span class="hctl"><button class="btn sm" data-act="hStep" data-h="${esc(h.id)}" data-v="-1" aria-label="Less">−</button><input class="inp hnum" type="number" inputmode="numeric" min="0" id="hv-${esc(h.id)}-${ds}-${n}" data-hv="${esc(h.id)}" aria-label="${esc(h.name)}" value="${n||""}" placeholder="0"><button class="btn sm" data-act="hStep" data-h="${esc(h.id)}" data-v="1" aria-label="More">+</button></span></div>`}
+  const list=Array.isArray(v)?v:[];
+  return`<div class="hrow ${done?"ok":""}" style="flex-wrap:wrap"><span class="he">${esc(h.emoji)}</span><span class="grow"><b>${esc(h.name)}</b>${h.show===false?'<span class="meta"> · hidden</span>':""}<span class="meta" style="display:block">${list.length?list.length+" logged ✅":"Nothing logged yet"}</span></span>
+    <div style="flex-basis:100%;display:flex;flex-direction:column;gap:6px;margin-top:6px">${list.map((x,i)=>`<div class="item" style="padding:6px 10px"><span class="grow t" style="font-size:14px">${esc(x)}</span><button class="x" data-act="hLogDel" data-h="${esc(h.id)}" data-i="${i}" aria-label="Remove">✕</button></div>`).join("")}
+    <div class="row" style="flex-wrap:nowrap"><input class="inp" id="hl-${esc(h.id)}" placeholder="${h.id==="food"?"e.g. Chicken salad, 2 eggs…":"Add an entry"}" maxlength="120" style="flex:1;min-width:0"><button class="btn sm pri" data-act="hLogAdd" data-h="${esc(h.id)}">Add</button></div></div></div>`}
+VIEWS.shame=()=>{
+  const ds=UI.shameDay==="y"?shameDay(1):TODAY(),y=shameDay(1),mine=habitsOf(ME),ps=players();
+  const wall=ps.map(m=>({m,miss:missesOn(m.id,y)})).filter(x=>x.miss.length);
+  const pk=pokesToMe();
+  const head=`<div class="view-title"><h1>Shame</h1><span class="row" style="gap:6px;flex-wrap:nowrap">${mine.length&&curStreak(ME,perfectOk(ME))?`<span class="streak">🔥 ${curStreak(ME,perfectOk(ME))}</span>`:""}<button class="btn sm" data-act="habitSetup">${mine.length?"⚙️ Habits":"Set up"}</button></span></div>`;
+  const wallHtml=`<div class="wall"><div class="between"><b>🚨 Wall of Shame</b><span class="meta" style="color:inherit;opacity:.8">${esc(fDate(y,{weekday:"long",day:"numeric",month:"short"}))}</span></div>
+    ${wall.length?wall.map(x=>`<button class="wall-row" data-act="shamePerson" data-id="${esc(x.m.id)}">${avatar(x.m.id,"xs")}<span class="grow"><b>${esc(nick(x.m.id))}</b> didn't ${x.miss.map(h=>`${esc(h.emoji)} ${esc(h.name)}`).join(", ")}</span><span>🍅</span></button>`).join(""):`<div style="padding:6px 0 2px">${ps.length?"Nobody slacked yesterday. Respect 🫡":"Nobody's playing yet. Set up your habits and drag the guys in."}</div>`}</div>`;
+  const pokeHtml=pk.length?`<div class="banner" style="background:var(--sun-soft)">👉 <b>${[...new Set(pk.map(p=>nick(p.from)))].map(esc).join(", ")}</b> poked you about ${[...new Set(pk.map(p=>{const h=mine.find(x=>x.id===p.hid);return h?h.emoji+" "+h.name:p.hid==="join"?"joining Shame":"your habits"}))].map(esc).join(", ")}. Get moving!</div>`:"";
+  const meHtml=mine.length?`<div class="sec"><div class="between"><h2>My check-in</h2><div class="seg sm" style="width:auto"><button data-act="shameDaySet" data-k="t" aria-pressed="${UI.shameDay!=="y"}">Today</button><button data-act="shameDaySet" data-k="y" aria-pressed="${UI.shameDay==="y"}">Yesterday</button></div></div>
+      ${UI.shameDay==="y"?`<div class="hint" style="margin:0 0 8px">Forgot to log yesterday? Fix it here and you'll come off the wall.</div>`:""}
+      <div class="list" style="gap:8px">${mine.filter(h=>hLive(h,ds)).map(h=>myHabitRow(h,ds)).join("")}</div>
+</div>`
+    :`<div class="shoot" style="margin-top:12px"><div class="big"><b>Join the accountability crew</b><span style="opacity:.9;font-size:13px">Pick what you want to track: gym, water, supplements, food… Miss a day and you go on the Wall of Shame.</span><br><button class="btn sm" data-act="habitSetup" style="margin-top:10px">Pick my habits</button></div></div>`;
+  const board=`<div class="sec"><h2>The crew today</h2><div class="list" style="gap:8px">${D.members.map(m=>{const hs=shownHabits(m.id),me=m.id===ME;
+      if(!hs.length)return me?"":`<div class="item">${avatar(m.id,"sm")}<span class="grow"><b>${esc(m.nick)}</b><br><span class="meta">Not playing yet</span></span><button class="btn sm" data-act="poke" data-id="${esc(m.id)}" data-h="join">👉 Poke to join</button></div>`;
+      const sc=dayScore(m.id,TODAY(),hs),st=curStreak(m.id,perfectOk(m.id));
+      return`<div class="pcard"><button class="between" data-act="shamePerson" data-id="${esc(m.id)}" style="all:unset;display:flex;align-items:center;gap:10px;width:100%;cursor:pointer">${avatar(m.id,"sm")}<span class="grow"><b>${esc(nick(m.id))}</b><br><span class="meta">${sc===1?"All done today ✅":`${hs.filter(h=>hLive(h,TODAY())&&isDone(h,hVal(m.id,TODAY(),h.id))).length} of ${hs.filter(h=>hLive(h,TODAY())).length} done`}${st?` · 🔥 ${st}`:""}</span></span><span class="meta">History ›</span></button>
+        <div class="hchips">${hs.filter(h=>hLive(h,TODAY())).map(h=>habitChip(m.id,h,TODAY(),me)).join("")}</div></div>`}).join("")}</div></div>`;
+  return head+pokeHtml+wallHtml+meHtml+board};
+function shameHeat(uid){const out=[];for(let d=34;d>=0;d--){const ds=shameDay(d),m=mem(uid),sc=m?.habitsSince&&m.habitsSince<=ds?dayScore(uid,ds):null;
+    out.push(`<span class="hd" title="${esc(fDate(ds))}" style="background:${sc==null?"var(--surface2)":sc===1?"var(--ok)":sc>0?"var(--sun)":"var(--danger)"};${ds===TODAY()?"outline:2px solid var(--fg);outline-offset:1px":""}"></span>`)}return out.join("")}
+SHEETS.shamePerson={live:true,
+  render(s){const uid=s.args.id,m=mem(uid);if(!m)return{title:"Shame",body:""};const me=uid===ME,hs=me?habitsOf(uid):shownHabits(uid),ach=achievements(uid);
+    const days=[];for(let d=0;d<14;d++){const ds=shameDay(d);if(m.habitsSince&&ds>=m.habitsSince)days.push(ds)}
+    return{title:`${avatar(uid,"sm")} ${esc(nick(uid))}`,body:`
+      <div class="shstats"><div><b>🔥 ${curStreak(uid,perfectOk(uid))}</b><span>Streak</span></div><div><b>⭐️ ${bestStreak(uid,perfectOk(uid))}</b><span>Best streak</span></div><div><b>🍅 ${shameCount(uid)}</b><span>Days on the wall</span></div></div>
+      <div class="sec"><h2>Last 5 weeks</h2><div class="heat">${shameHeat(uid)}</div><div class="legend"><span><i style="background:var(--ok)"></i>All done</span><span><i style="background:var(--sun)"></i>Some</span><span><i style="background:var(--danger)"></i>None</span></div></div>
+      <div class="sec"><h2>Achievements</h2><div class="ach">${ach.map(a=>`<div class="ach-i ${a.ok?"on":""}" title="${esc(a.d)}"><span class="ae">${a.e}</span><b>${esc(a.t)}</b><span class="meta">${esc(a.d)}</span></div>`).join("")}</div></div>
+      <div class="sec"><h2>Streaks</h2><div class="list" style="gap:6px">${hs.map(h=>`<div class="item"><span style="font-size:22px">${esc(h.emoji)}</span><span class="grow"><b>${esc(h.name)}</b><br><span class="meta">Now 🔥 ${curStreak(uid,habitOk(uid,h))} · Best ${bestStreak(uid,habitOk(uid,h))}</span></span><span class="row" style="gap:3px">${[6,5,4,3,2,1,0].map(d=>{const ds=shameDay(d);const ok=isDone(h,hVal(uid,ds,h.id));return`<i class="hdot ${ok?"ok":hLive(h,ds)&&m.habitsSince&&ds>=m.habitsSince&&ds<TODAY()?"bad":""}"></i>`}).join("")}</span></div>`).join("")||`<div class="meta">No habits shown.</div>`}</div></div>
+      <div class="sec"><h2>History</h2><div class="list" style="gap:6px">${days.map(ds=>{const sc=dayScore(uid,ds,hs);return`<div class="item"><span style="width:84px;flex:none" class="meta"><b style="color:var(--fg)">${ds===TODAY()?"Today":esc(fDate(ds,{weekday:"short",day:"numeric",month:"short"}))}</b></span><span class="grow" style="display:flex;flex-wrap:wrap;gap:4px">${hs.filter(h=>hLive(h,ds)).map(h=>{const v=hVal(uid,ds,h.id),ok=isDone(h,v);return`<span class="hchip sm ${ok?"ok":ds<TODAY()?"bad":""}">${esc(h.emoji)}${h.type==="count"&&v?` ${(+v).toLocaleString()}`:""}${h.type==="log"&&Array.isArray(v)&&v.length?` ${v.length}`:""}</span>`}).join("")}</span><span>${sc===1?"✅":ds===TODAY()?"⏳":sc==null?"":"🍅"}</span></div>`}).join("")||`<div class="meta">No history yet.</div>`}</div>
+      ${me&&habitsOf(ME).some(h=>h.id==="food")?`<div class="hint">Tap a day above on the main Shame page (Today / Yesterday) to edit.</div>`:""}</div>`}}
+};
+SHEETS.habitSetup={
+  init(){const cur=habitsOf(ME);const list=HABIT_PRESETS.map(p=>{const c=cur.find(h=>h.id===p.id);return c?{...p,...c,on:true}:{...p,show:true,on:false}});
+    cur.filter(h=>!HABIT_PRESETS.some(p=>p.id===h.id)).forEach(h=>list.push({...h,on:true,custom:true}));return{list,nt:"check"}},
+  render(s){const st=s.state;
+    return{title:"My habits",body:`<div class="form"><p class="meta" style="margin:0">Pick what you track. 👁 = the crew sees it and you get shamed for missing it. Hidden ones are just for you (no shame, no pokes).</p>
+      <div class="list" style="gap:8px">${st.list.map((h,i)=>`<div class="hset ${h.on?"on":""}"><button class="hset-main" data-act="hsTog" data-i="${i}"><span style="font-size:24px">${esc(h.emoji)}</span><span class="grow" style="text-align:left"><b>${esc(h.name)}</b><span class="meta" style="display:block">${h.type==="count"?`Goal ${(+h.goal).toLocaleString()} ${esc(h.unit||"")}`:h.type==="log"?"Write what you had / did":"Done or not"}</span></span><span class="hbox">${h.on?"✓":""}</span></button>
+        ${h.on?`<div class="row" style="flex-wrap:nowrap;gap:8px;margin-top:8px">${h.type==="count"?`<label class="meta" style="display:flex;align-items:center;gap:6px;flex:1">Goal<input class="inp" type="number" inputmode="numeric" data-hgoal="${i}" value="${esc(h.goal)}" style="width:100px"></label>`:`<span style="flex:1"></span>`}<button class="btn sm" data-act="hsShow" data-i="${i}">${h.show!==false?"👁 Shown":"🙈 Hidden"}</button>${h.custom?`<button class="btn sm danger" data-act="hsDel" data-i="${i}" data-confirm="Remove?">✕</button>`:""}</div>`:""}</div>`).join("")}</div>
+      <div class="sec" style="margin:6px 0 0"><h2 style="font-size:15px">Add your own</h2>
+        <div class="row" style="flex-wrap:nowrap"><input class="inp" id="hnE" placeholder="🎯" maxlength="8" style="width:64px;text-align:center;font-size:20px"><input class="inp" id="hnN" placeholder="e.g. Creatine, Stretch, Duolingo" maxlength="30" style="flex:1;min-width:0"></div>
+        <div class="seg" style="margin-top:8px">${[["check","Done / not"],["count","Number + goal"],["log","Write a log"]].map(([k,l])=>`<button data-act="hsType" data-k="${k}" aria-pressed="${st.nt===k}">${l}</button>`).join("")}</div>
+        ${st.nt==="count"?`<div class="grid2" style="margin-top:8px"><label class="f">Daily goal<input class="inp" id="hnG" type="number" inputmode="numeric" placeholder="e.g. 5"></label><label class="f">Unit<input class="inp" id="hnU" placeholder="e.g. km, pages"></label></div>`:""}
+        <button class="btn block" data-act="hsAdd" style="margin-top:8px">+ Add habit</button></div></div>`,
+      foot:`<button class="btn pri block" data-act="hsSave">Save habits</button>`}}
+};
+async function saveCheckin(ds,hid,val){const id=`${ME}_${ds}`,c=ciOf(ME,ds),del=val===null||val===false||val===0||(Array.isArray(val)&&!val.length);try{haptic()}catch{}
+  if(MODE==="demo"){if(c)return Demo.upd("checkins",id,{["v."+hid]:del?DEL:val});return Demo.set("checkins",id,{uid:ME,date:ds,v:del?{}:{[hid]:val},at:now()})}
+  try{await FS.doc("checkins/"+id).set({uid:ME,date:ds,at:c?.at||now(),u:now(),v:{[hid]:del?firebase.firestore.FieldValue.delete():val}},{merge:true})}catch(e){Store.err(e)}}
+let POKE_SEEN=null;
+function checkPokes(){if(!D.pokes)return;if(POKE_SEEN===null){POKE_SEEN=new Set(D.pokes.map(p=>p.id));return}
+  for(const p of D.pokes){if(POKE_SEEN.has(p.id))continue;POKE_SEEN.add(p.id);if(p.to!==ME||p.date!==TODAY()||!mem(p.from))continue;
+    const h=habitsOf(ME).find(x=>x.id===p.hid);notify(`👉 ${nick(p.from)} poked you`,p.hid==="join"?"Join the Shame tab and start tracking 😤":`Did you do ${h?h.emoji+" "+h.name:"your habits"} today?`,"poke-"+p.id,{kind:"shame"})}}
 /* busy */
 SHEETS.busy={
   render(s){return{title:"Block my time",body:`<div class="form">
@@ -2283,6 +2434,7 @@ async function prepVideo(file,onProg){
   const out=new Blob(parts,{type:mime.split(";")[0]});if(out.size>25e6)throw new Error("That video is still too big. Try a shorter clip.");
   return{blob:out,poster,dur};
 }
+function keepGoals(s){$$("[data-hgoal]",s.el).forEach(i=>{const h=s.state.list[+i.dataset.hgoal];if(h&&+i.value>0){h.goal=+i.value;h.step=h.goal>=1000?1000:h.goal>=100?10:1}})}
 function heartPop(el){const b=el?.querySelector(".bub,.mediab")||el;if(!b)return;const h=document.createElement("span");h.className="hpop";h.textContent="❤️";b.style.position="relative";b.appendChild(h);setTimeout(()=>h.remove(),700)}
 function startReply(m){const s=stack.find(x=>x.kind==="chat"&&x.args.id===m.chatId);if(!s)return;s.state.reply={id:m.id,by:m.by,text:(msgLabel(m)||"").slice(0,90)};paintSheet(s);setTimeout(()=>$("#chatIn-"+CSS.escape(m.chatId),s.el)?.focus(),60)}
 function takeReply(cid){const s=stack.find(x=>x.kind==="chat"&&x.args.id===cid);const r=s?.state.reply;if(r){s.state.reply=null;paintSheet(s)}return r?{id:r.id,by:r.by,text:r.text}:null}
@@ -2542,6 +2694,25 @@ const ACT={
   busyRem(d){const all=ls.get("yg-remind-busy",{}),a=all[d.id]||[],m=+d.m,i=a.indexOf(m);if(i>=0)a.splice(i,1);else a.push(m);all[d.id]=a;ls.set("yg-remind-busy",all);paintSheet(topS());if(!SET.notifyOn)toast("Turn on notifications in ⚙️ Settings, or add it to your phone calendar")},
   busyIcs(d){const b=D.busy.find(x=>x.id===d.id);if(!b)return;const p=busyAsPlan(b),txt=icsFor(p,busyRemind(b.id).length?busyRemind(b.id):[60]);const a=document.createElement("a");a.href=/iPhone|iPad/i.test(navigator.userAgent)?"data:text/calendar;charset=utf-8,"+encodeURIComponent(txt):URL.createObjectURL(new Blob([txt],{type:"text/calendar"}));a.download=(p.title.replace(/[^\w]+/g,"-")||"plan")+".ics";document.body.appendChild(a);a.click();a.remove()},
   delAccount(){openSheet("delAccount")},
+  habitSetup(){openSheet("habitSetup")},
+  shamePerson(d){openSheet("shamePerson",{id:d.id})},
+  shameDaySet(d){UI.shameDay=d.k;render()},
+  hToggle(d){const ds=UI.shameDay==="y"?shameDay(1):TODAY();saveCheckin(ds,d.h,hVal(ME,ds,d.h)?null:true)},
+  hStep(d){const ds=UI.shameDay==="y"?shameDay(1):TODAY(),h=habitsOf(ME).find(x=>x.id===d.h);if(!h)return;const n=Math.max(0,(+hVal(ME,ds,d.h)||0)+(+d.v)*(+h.step||1));saveCheckin(ds,d.h,n||null)},
+  hLogAdd(d){const ds=UI.shameDay==="y"?shameDay(1):TODAY(),el=$("#hl-"+CSS.escape(d.h)),t=(el?.value||"").trim();if(!t)return toast("Type what you had first.");el.value="";const cur=hVal(ME,ds,d.h);saveCheckin(ds,d.h,[...(Array.isArray(cur)?cur:[]),t.slice(0,120)].slice(-30))},
+  hLogDel(d){const ds=UI.shameDay==="y"?shameDay(1):TODAY(),cur=[...(hVal(ME,ds,d.h)||[])];cur.splice(+d.i,1);saveCheckin(ds,d.h,cur.length?cur:null)},
+  async poke(d){if(d.id===ME)return;const id=`${ME}_${d.id}_${d.h}_${TODAY()}`;if(D.pokes.some(p=>p.id===id))return toast(`You already poked ${nick(d.id)} about that today 😏`);
+    await Store.set("pokes",id,{from:ME,to:d.id,hid:d.h,date:TODAY(),at:now()});try{haptic()}catch{}toast(`👉 Poked ${nick(d.id)}!`)},
+  hsTog(d){const s=topS();keepGoals(s);const h=s.state.list[+d.i];h.on=!h.on;paintSheet(s)},
+  hsShow(d){const s=topS();keepGoals(s);const h=s.state.list[+d.i];h.show=h.show===false;paintSheet(s)},
+  hsDel(d){const s=topS();keepGoals(s);s.state.list.splice(+d.i,1);paintSheet(s)},
+  hsType(d){const s=topS();keepGoals(s);s.state.nt=d.k;paintSheet(s)},
+  hsAdd(){const s=topS();keepGoals(s);const name=val("hnN");if(!name)return toast("Give it a name.");const nt=s.state.nt;
+    const h={id:"c"+Math.random().toString(36).slice(2,8),emoji:[...(val("hnE")||"🎯")].slice(0,4).join(""),name:name.slice(0,30),type:nt,show:true,on:true,custom:true};
+    if(nt==="count"){h.goal=Math.max(1,+val("hnG")||1);h.unit=val("hnU").slice(0,12);h.step=h.goal>=1000?1000:h.goal>=100?10:1}s.state.list.push(h);paintSheet(s)},
+  async hsSave(){const s=topS();keepGoals(s);const old=habitsOf(ME);
+    const hs=s.state.list.filter(h=>h.on).map(({on,custom,...h})=>{const o=old.find(x=>x.id===h.id);return{...h,since:o?.since||TODAY()}});
+    const m=mem(ME);await Store.upd("members",ME,{habits:hs,...(m?.habitsSince||!hs.length?{}:{habitsSince:TODAY()})});closeSheet();UI.tab="shame";render();toast(hs.length?"Habits saved. No slacking 😤":"Habits cleared")},
   calPdf(){openSheet("calPdf",{d:UI.calDay||TODAY()})},
   pdfSet(d,el){const s=topS();if(!s||s.kind!=="calPdf")return;if(el.type==="checkbox")s.state[d.k]=el.checked;else s.state[d.k]=d.v;paintSheet(s)},
   async pdfGo(){const s=topS(),st=s.state,btn=$("#pdfBtn",s.el);if(!st.plans&&!st.mine&&!st.bday)return toast("Tick at least one thing to include.");
@@ -2785,6 +2956,8 @@ document.addEventListener("change",ev=>{
   if(el.id==="actAs"){ls.set("yg-actas",el.value);ME=el.value;while(stack.length)closeSheet();render();toast(ME==="me-demo"?"Back to being you":"Now testing as "+(mem(ME)?.nick||"a friend"))}
   if(el.id==="exPl"){const s=topS();s.state.plan=el.value}
   if(el.id==="pdfD"&&el.value){const s=topS();s.state.d=el.value;paintSheet(s)}
+  if(el.dataset?.hv){const hid=el.dataset.hv,ds=UI.shameDay==="y"?shameDay(1):TODAY();saveCheckin(ds,hid,Math.max(0,Math.round(+el.value||0))||null)}
+  if(el.id==="edEmoCustom"){const v=[...(el.value||"").trim()].slice(0,4).join("");if(v){const s=topS();s.state.emoji=v;paintSheet(s)}}
   if(el.id==="bzAll"){["bzS","bzE"].forEach(i=>$("#"+i).disabled=el.checked)}
 });
 document.addEventListener("keydown",ev=>{
@@ -2811,6 +2984,7 @@ async function notify(title,body,tag,data){
 const SEEN={msgs:null,plans:null,moments:null,notes:null,media:null};
 function checkNotify(){
   if(!Store.ready||MODE==="loading"||MODE==="auth"||MODE==="join")return;
+  try{checkPokes()}catch{}
   for(const c of allMyChats()){const t=lastOtherAt(c.id);if(t&&Math.max((c.dv||{})[ME]||0,(c.rd||{})[ME]||0)<t)chatStamp(c.id,"dv",t)}
   const first=SEEN.msgs===null;
   if(first){SEEN.msgs=new Set(D.msgs.map(m=>m.id));SEEN.plans=new Set(visiblePlans().map(p=>p.id));SEEN.moments=new Set(D.moments.map(m=>m.id));SEEN.notes=new Set(D.notes.map(n=>n.id));SEEN.media=new Set(D.media.map(m=>m.id));return}
@@ -2844,7 +3018,7 @@ function checkReminders(){
 const _render=render;render=function(){_render();try{checkNotify();syncVoice()}catch(e){console.error(e)}};
 setInterval(checkReminders,30000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkReminders()});
 document.addEventListener("visibilitychange",()=>{const s=topS();if(!document.hidden&&s?.kind==="chat")chatStamp(s.args.id,"rd",lastOtherAt(s.args.id))});
-navigator.serviceWorker?.addEventListener("message",e=>{const d=e.data?.open;if(!d)return;if(d.kind==="chat")openSheet("chat",{id:d.id});else if(d.kind==="plan")openSheet("plan",{id:d.id});else if(d.kind==="moment")openSheet("moment",{id:d.id})});
+navigator.serviceWorker?.addEventListener("message",e=>{const d=e.data?.open;if(!d)return;if(d.kind==="chat")openSheet("chat",{id:d.id});else if(d.kind==="plan")openSheet("plan",{id:d.id});else if(d.kind==="moment")openSheet("moment",{id:d.id});else if(d.kind==="shame"){while(stack.length)closeSheet();UI.tab="shame";render()}});
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 </script>
