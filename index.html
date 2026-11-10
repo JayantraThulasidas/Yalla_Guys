@@ -439,6 +439,11 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .ebadge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;color:var(--sun);background:var(--sun-soft);border-radius:999px;padding:2px 8px;white-space:nowrap}
 .att-row{display:flex;gap:6px;flex-wrap:wrap}
 .att-list{display:flex;flex-direction:column;gap:8px}
+.halo{position:relative;width:200px;height:200px;display:grid;place-items:center;margin:10px 0 -6px}
+.halo>span:not(.av){position:absolute;font-size:28px;line-height:1;transform:translate(-50%,-50%) rotate(var(--r));animation:popIn .4s cubic-bezier(.2,.9,.3,1.4) both;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
+@keyframes popIn{from{opacity:0;transform:translate(-50%,-50%) rotate(var(--r)) scale(.3)}to{opacity:1;transform:translate(-50%,-50%) rotate(var(--r)) scale(1)}}
+@media (prefers-reduced-motion:reduce){.halo>span:not(.av){animation:none}}
+.dot-bday{background:#FF7AB8}
 .auth{max-width:440px;margin:0 auto;padding-block:8px 40px}
 .auth-hero{padding:28px 4px 22px}
 .auth-logo{font-family:var(--f-display);font-weight:800;font-size:46px;letter-spacing:-.03em;line-height:1}
@@ -493,7 +498,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.5";
+const APP_VERSION="2026-11-10.6";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -881,14 +886,18 @@ VIEWS.cal=()=>{
   const start=new Date(y,mo-1,1-startDow);const cells=[];
   for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);cells.push(d)}
   const rows=cells[35].getMonth()!==mo-1?35:42;
-  const dayInfo=ds=>({plan:visiblePlans().some(p=>p.final?.date===ds),poll:visiblePlans().some(p=>!p.final&&(p.slots||[]).some(s=>s.date===ds)),me:D.busy.some(b=>b.uid===ME&&b.date===ds),oth:D.busy.some(b=>b.uid!==ME&&b.date===ds)});
-  const grid=cells.slice(0,rows).map(d=>{const ds=ymd(d),i=dayInfo(ds);return`<button class="day ${d.getMonth()!==mo-1?"out":""} ${ds===TODAY()?"today":""}" data-act="calDay" data-d="${ds}" aria-pressed="${UI.calDay===ds}" aria-label="${fDate(ds,{weekday:"long",day:"numeric",month:"long"})}"><span class="dn">${d.getDate()}</span><span class="dots">${i.plan?'<i class="dot-plan"></i>':""}${i.poll?'<i class="dot-poll"></i>':""}${i.me?'<i class="dot-me"></i>':""}${i.oth?'<i class="dot-oth"></i>':""}</span></button>`}).join("");
+  const dayInfo=ds=>({bday:bdaysOn(ds).length,plan:visiblePlans().some(p=>p.final?.date===ds),poll:visiblePlans().some(p=>!p.final&&(p.slots||[]).some(s=>s.date===ds)),me:D.busy.some(b=>b.uid===ME&&b.date===ds),oth:D.busy.some(b=>b.uid!==ME&&b.date===ds)});
+  const grid=cells.slice(0,rows).map(d=>{const ds=ymd(d),i=dayInfo(ds);return`<button class="day ${d.getMonth()!==mo-1?"out":""} ${ds===TODAY()?"today":""}" data-act="calDay" data-d="${ds}" aria-pressed="${UI.calDay===ds}" aria-label="${fDate(ds,{weekday:"long",day:"numeric",month:"long"})}"><span class="dn">${d.getDate()}</span><span class="dots">${i.bday?'<i class="dot-bday"></i>':""}${i.plan?'<i class="dot-plan"></i>':""}${i.poll?'<i class="dot-poll"></i>':""}${i.me?'<i class="dot-me"></i>':""}${i.oth?'<i class="dot-oth"></i>':""}</span></button>`}).join("");
+  const nb=nextBday();
   return`<div class="view-title"><h1>Calendar</h1><button class="btn sm pri" data-act="newBusy" data-d="${UI.calDay}">Block my time</button></div>
+  ${nb?`<button class="item" data-act="calDay" data-d="${nb.date}" style="width:100%;text-align:left;margin-bottom:12px">${avatar(nb.m.id,"sm")}<span class="grow"><span class="t">🎂 ${nb.days===0?`It's ${esc(nb.m.id===ME?"your":nb.m.nick+"'s")} birthday today!`:`${esc(nb.m.id===ME?"Your":nb.m.nick+"'s")} birthday`}</span><br><span class="meta">${nb.days===0?"Go say happy birthday 🎉":nb.days===1?"Tomorrow · "+fDate(nb.date):`In ${nb.days} days · ${fDate(nb.date)}`}</span></span></button>`:""}
   <div class="cal"><div class="cal-h"><button class="back" data-act="calNav" data-n="-1" aria-label="Previous month">${ICON.back}</button><h2>${first.toLocaleDateString("en-GB",{month:"long",year:"numeric"})}</h2><button class="back" data-act="calNav" data-n="1" aria-label="Next month" style="transform:scaleX(-1)">${ICON.back}</button></div>
   <div class="cal-g">${["MON","TUE","WED","THU","FRI","SAT","SUN"].map(d=>`<div class="dow">${d}</div>`).join("")}${grid}</div>
-  <div class="legend"><span><i class="dot-plan"></i>Plan</span><span><i class="dot-poll"></i>Proposed date</span><span><i class="dot-me"></i>You're busy</span><span><i class="dot-oth"></i>Friend busy</span></div></div>
+  <div class="legend"><span><i class="dot-bday"></i>Birthday</span><span><i class="dot-plan"></i>Plan</span><span><i class="dot-poll"></i>Proposed date</span><span><i class="dot-me"></i>You're busy</span><span><i class="dot-oth"></i>Friend busy</span></div></div>
   <div class="sec" style="border:0;padding-top:18px"><h2>${fDate(UI.calDay,{weekday:"long",day:"numeric",month:"long"})}</h2>${agenda(UI.calDay)}</div>`;
 };
+const bdaysOn=ds=>D.members.filter(m=>m.birthday&&m.birthday===ds.slice(5));
+function nextBday(){let best=null;const t=pd(TODAY());for(const m of D.members){if(!m.birthday)continue;let d=pd(t.getFullYear()+"-"+m.birthday);if(isNaN(d))continue;if(d<t)d=pd((t.getFullYear()+1)+"-"+m.birthday);const days=Math.round((d-t)/864e5);if(!best||days<best.days)best={m,days,date:ymd(d)}}return best&&best.days<=31?best:null}
 function agenda(ds){
   const items=[];
   for(const p of visiblePlans()){
@@ -899,6 +908,7 @@ function agenda(ds){
   }
   for(const b of D.busy.filter(b=>b.date===ds)){const mine=b.uid===ME,lab=mine?myLabel(b):"";
     items.push({s:b.start||"00:00",h:`<div class="ev busy"><span class="stripe"></span><span class="tm">${fRange(b.start,b.end)}</span><span style="flex:1;min-width:0">${avatar(b.uid,"xs")} <b>${esc(nick(b.uid))}</b> ${mine?`· ${esc(lab||"Busy")}${lab?'<span class="meta"> (others see "Busy")</span>':""}`:"· Busy"}</span>${mine?`${D.mine.some(m=>m.busyId===b.id)?`<span class="meta">📎${D.mine.filter(m=>m.busyId===b.id).length}</span>`:""}<button class="btn sm" data-act="openBusy" data-id="${esc(b.id)}">Open</button>`:""}</div>`})}
+  for(const m of bdaysOn(ds))items.push({s:"00:00",h:`<div class="ev"><span class="stripe" style="background:#FF7AB8"></span><span class="tm">All day</span><span style="flex:1;min-width:0">${avatar(m.id,"xs")} <b>🎂 ${esc(m.id===ME?"Your":m.nick+"'s")} birthday</b></span>${m.id===ME?"":`<button class="btn sm" data-act="dm" data-id="${esc(m.id)}">Wish 🎉</button>`}</div>`});
   items.sort((a,b)=>a.s.localeCompare(b.s));
   return items.length?`<div class="list" style="gap:8px">${items.map(i=>i.h).join("")}</div>`:`<div class="empty">Nothing on this day. Tap <b>Block my time</b> to mark yourself busy, so the guys see the clash before voting.</div>`;
 }
@@ -1244,6 +1254,10 @@ function tlDetail(s,i){
     ${!plans.length?`<div class="empty" style="margin-top:10px">${x.k>=(s.month?today.slice(0,7):today)&&!a.media.length?"Nothing planned yet. Make a plan!":(a.media.length?`📸 ${a.media.length} memor${a.media.length===1?"y":"ies"} · tap the photos above to open`:"Nothing saved from this "+(s.month?"month":"day")+".")}</div>`:""}`;
 }
 SHEETS.linkAdd={render(){return{title:"Add a link or reel",body:`<div class="form"><label class="f">Link<input class="inp" id="lkUrl" type="url" inputmode="url" placeholder="Instagram reel, TikTok, website…"></label><label class="f">Caption (optional)<input class="inp" id="lkCap"></label><div class="hint">🔒 Only you can see this.</div></div>`,foot:`<button class="btn pri block" data-act="linkSave">Add</button>`}}};
+function stickerHalo(st,av){
+  if(!st.length)return av;const n=st.length,span=Math.min(170,n>1?(n-1)*30:0),start=270-span/2,R=82;
+  return`<div class="halo">${av}${st.map((e,i)=>{const a=(n>1?start+span*i/(n-1):270)*Math.PI/180;return`<span style="left:calc(50% + ${(Math.cos(a)*R).toFixed(1)}px);top:calc(50% + ${(Math.sin(a)*R).toFixed(1)}px);--r:${(((n>1?start+span*i/(n-1):270))+90).toFixed(0)}deg;animation-delay:${i*60}ms">${e}</span>`}).join("")}</div>`;
+}
 /* person profile */
 SHEETS.person={live:true,
   render(s){const id=s.args.id,m=mem(id);if(!m)return{title:"Profile",body:`<div class="empty">This person isn't in the crew.</div>`};const me=id===ME;
@@ -1253,8 +1267,7 @@ SHEETS.person={live:true,
     const grid=list=>`<div class="media-grid">${list.map(x=>`<button data-act="openMoment" data-id="${esc(x.id)}" aria-label="Moment from ${esc(fDate(x.day))}"><img src="${esc(x.kind==="video"?x.poster:x.src)}" alt="" loading="lazy"><span style="position:absolute;left:6px;bottom:5px;color:#fff;font-size:11px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.6)">${esc(fDate(x.day,{day:"numeric",month:"short"}))}</span></button>`).join("")}</div>`;
     const facts=[["🎂","Birthday",bd],["📍","Fav spot",m.spot],["🎵","On repeat",m.song]].filter(f=>f[2]);
     return{title:me?"My profile":esc(m.nick),right:me?`<button class="btn sm" data-act="settings" aria-label="Settings">⚙️</button><button class="btn sm" data-act="profile">Edit</button>`:"",body:`
-      <div class="prof-hero">${(m.stickers||[]).length?`<div class="stickers">${m.stickers.map((e,i)=>`<span style="--r:${(i%2?1:-1)*(6+i*3)}deg">${e}</span>`).join("")}</div>`:""}
-        ${avatar(id)}<h1>${esc(m.nick)}</h1>${m.vibe?`<span class="vibe">${esc(m.vibe)}</span>`:""}${m.bio?`<p style="margin:0;max-width:34ch;color:var(--muted)">${esc(m.bio)}</p>`:me?`<button class="btn sm ghost" data-act="profile">+ Add a bio, photo and cute stuff</button>`:""}
+      <div class="prof-hero">${stickerHalo(m.stickers||[],avatar(id))}<h1>${esc(m.nick)}</h1>${m.vibe?`<span class="vibe">${esc(m.vibe)}</span>`:""}${m.bio?`<p style="margin:0;max-width:34ch;color:var(--muted)">${esc(m.bio)}</p>`:me?`<button class="btn sm ghost" data-act="profile">+ Add a bio, photo and cute stuff</button>`:""}
         <div class="row" style="justify-content:center;margin-top:4px"><button class="btn" data-act="timeline" data-id="${esc(id)}">🕰️ Timeline</button>${me?"":`<button class="btn pri" data-act="dm" data-id="${esc(id)}">💬 Message</button>`}</div></div>
       <div class="stats" style="margin-top:14px"><div class="stat"><b>${streakOf(id)}🔥</b><span>day streak</span></div><div class="stat"><b>${mine.length}</b><span>moments</span></div><div class="stat"><b>${plansIn}</b><span>plans joined</span></div></div>
       ${facts.length||(m.likes||[]).length?`<div class="sec" style="border:0"><div class="facts">${facts.map(f=>`<div class="fact"><span style="font-size:22px">${f[0]}</span><span><span class="k">${f[1]}</span><br><b>${esc(f[2])}</b></span></div>`).join("")}</div>${(m.likes||[]).length?`<div class="tags">${m.likes.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`:""}</div>`:""}
@@ -2244,6 +2257,8 @@ function checkNotify(){
 }
 function checkReminders(){
   if(!Store.ready||!SET.notifyOn)return;const fired=ls.get("yg-fired",{});let ch=false;
+  for(const m of bdaysOn(TODAY())){const key="bday|"+m.id+"|"+TODAY();if(fired[key]||new Date().getHours()<8)continue;fired[key]=1;ch=true;
+    notify(m.id===ME?"🎂 Happy birthday!":`🎂 It's ${m.nick}'s birthday!`,m.id===ME?"The crew hopes you have the best day 🎉":"Send them some love 🎉","bday-"+m.id,null)}
   for(const p of visiblePlans()){if(!p.final)continue;const r=myRsvp(p.id);if(!(r&&r.going!=="out")&&p.by!==ME)continue;
     const start=new Date(p.final.date+"T"+(p.final.start||"09:00")).getTime();if(now()>start)continue;
     for(const m of remindFor(p.id)){const key=`${p.id}|${p.final.date}|${p.final.start}|${m}`;if(fired[key]||now()<start-m*6e4)continue;fired[key]=1;ch=true;
