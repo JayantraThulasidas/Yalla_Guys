@@ -554,7 +554,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.29";
+const APP_VERSION="2026-11-10.30";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2205,7 +2205,6 @@ SHEETS.msgMenu={
     if(!mine)return{title:esc(nick(m.by)),body:`<div class="form">${m.text?`<div class="note"><p>${esc(m.text.length>200?m.text.slice(0,200)+"…":m.text)}</p></div>`:`<div class="meta">${esc(msgLabel(m))}</div>`}
       <button class="btn pri block" data-act="msgLikeMenu">${(m.likes||{})[ME]?"💔 Unlike":"❤️ Like"}</button>${m.text?`<button class="btn block" data-act="msgCopy">📋 Copy text</button>`:""}<div class="hint">Tip: swipe a message right to reply · double-tap to ❤️</div></div>`};
     return{title:"Your message",body:`<div class="form">
-      <button class="btn block" data-act="msgLikeMenu">${(m.likes||{})[ME]?"💔 Unlike":"❤️ Like"}</button>
       ${m.text?`<div class="note"><p>${esc(m.text.length>200?m.text.slice(0,200)+"…":m.text)}</p></div>`:`<div class="meta">${esc(msgLabel(m))}</div>`}
       ${canEdit?`<button class="btn block" data-act="msgEdit">✏️ ${m.kind&&!m.text?"Add a caption":"Edit message"}</button>`:""}
       ${m.text?`<button class="btn block" data-act="msgCopy">📋 Copy text</button>`:""}
@@ -2515,7 +2514,7 @@ const ACT={
     rec.start(500);haptic();s.state.rec=true;paintSheet(s);
     s.recTimer=setInterval(()=>{const x=(now()-t0)/1000;const el=$("#camT",s.el);if(el)el.textContent=`● ${fDur(x)} / 0:20`;if(x>=20)rec.state==="recording"&&rec.stop()},250)},
   msgMenu(d,el,ev){if(ev?.target.closest("a,button,.voice")||Date.now()-(window.__swiped||0)<500)return;const t=Date.now(),tp=window.__tap;
-    if(tp&&tp.id===d.id&&t-tp.t<350){window.__tap=null;const m=D.msgs.find(x=>x.id===d.id);if(m&&!(m.likes||{})[ME])ACT.msgLike(d);heartPop(el);return}
+    if(tp&&tp.id===d.id&&t-tp.t<350){window.__tap=null;const m=D.msgs.find(x=>x.id===d.id);if(!m||m.by===ME)return;if(!(m.likes||{})[ME])ACT.msgLike(d);heartPop(el);return}
     window.__tap={id:d.id,t}},
   async msgLike(d){const m=D.msgs.find(x=>x.id===d.id);if(!m||m.deleted)return;const on=(m.likes||{})[ME];try{haptic()}catch{}
     await Store.updMsg(m.chatId,m.id,{["likes."+ME]:on?(MODE==="demo"?DEL:firebase.firestore.FieldValue.delete()):true})},
