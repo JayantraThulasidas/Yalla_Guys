@@ -505,6 +505,48 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .pdfopt{display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;border-radius:16px;border:2px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;cursor:pointer}
 .pdfopt[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
 .shstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.shstats div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:2px}.shstats b{font-size:20px}.shstats span{font-size:11px;color:var(--muted);text-align:center}
+.podcard{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:12px 0 10px;margin:4px 0 14px;overflow:hidden}
+.podtabs{display:flex;gap:6px;margin:0 12px;background:var(--surface2);border-radius:999px;padding:4px}
+.podtabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:8px 6px;border-radius:999px;white-space:nowrap}
+.podtabs button[aria-pressed="true"]{background:var(--bg);color:var(--fg);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.podswipe{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.podswipe::-webkit-scrollbar{display:none}
+.podslide{flex:0 0 100%;scroll-snap-align:start;padding:6px 14px 0;box-sizing:border-box;min-width:0}
+.podsub{text-align:center;font-size:12px;color:var(--muted);margin:4px 0 2px}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;padding-top:34px}
+.pod{all:unset;flex:1;max-width:112px;display:flex;flex-direction:column;align-items:center;cursor:pointer;min-width:0}
+.pav{position:relative;margin-bottom:6px}
+.pav .av{width:56px;height:56px;font-size:28px;margin:0!important;border:3px solid var(--surface)!important;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.pod.r1 .pav .av{width:70px;height:70px;font-size:34px}
+.pav .av.ghost{background:var(--surface2)!important;color:var(--muted);box-shadow:none}
+.hat{position:absolute;left:50%;pointer-events:none}
+.hat.crown{top:-30px;font-size:34px;transform:translateX(-50%) rotate(-14deg);filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+.hat.dunce{top:-44px;width:38px;height:48px;transform:translateX(-30%) rotate(16deg);filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+.pmed{position:absolute;right:-6px;bottom:-4px;font-size:22px}
+.pname{font-size:13px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:6px}
+.pblock{width:100%;border-radius:14px 14px 4px 4px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:8px;color:#fff;box-shadow:inset 0 -6px 0 rgba(0,0,0,.12)}
+.pod.r1 .pblock{height:112px}.pod.r2 .pblock{height:84px}.pod.r3 .pblock{height:66px}
+.fame .r1 .pblock{background:linear-gradient(#F5C84C,#D9A21B);color:#3B2A00}.fame .r2 .pblock{background:linear-gradient(#DDE3EA,#AEB8C4);color:#1F2933}.fame .r3 .pblock{background:linear-gradient(#E3A57A,#B87245);color:#3A1E0B}
+.shame .r1 .pblock{background:linear-gradient(#E0483C,#A61E16)}.shame .r2 .pblock{background:linear-gradient(#E87A6E,#C2463B)}.shame .r3 .pblock{background:linear-gradient(#EFA195,#D26B5F)}
+.prank{font-family:var(--f-display);font-size:26px;font-weight:800;line-height:1}
+.pscore{font-size:18px;font-weight:800;margin-top:4px;line-height:1}.punit{font-size:10.5px;font-weight:700;opacity:.85}
+.pod.r3 .prank{font-size:22px}.pod.r3 .pscore{font-size:15px;margin-top:2px}
+.pod-empty{text-align:center;padding:30px 10px 26px;color:var(--muted);font-weight:600}
+.podfoot{margin-top:12px;background:var(--surface2);border-radius:14px;padding:10px 12px;font-size:13px}
+.podfoot .wall-row{border-top:1px solid var(--line)}.podfoot .wall-row:first-of-type{border-top:0}
+.podnone{color:var(--muted);padding-top:6px}
+.poddots{display:flex;justify-content:center;gap:6px;margin-top:10px}.poddots i{width:7px;height:7px;border-radius:50%;background:var(--line)}.poddots i.on{background:var(--accent);width:18px;border-radius:4px}
+.scard{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px}
+.ring{--p:0;flex:none;width:96px;height:96px;border-radius:50%;background:conic-gradient(var(--ok) calc(var(--p)*1%),var(--surface2) 0);display:grid;place-items:center}
+.ring>span{width:74px;height:74px;border-radius:50%;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center}.ring b{font-size:22px;line-height:1}.ring span span{font-size:11px;color:var(--muted)}
+.avs{display:flex;flex-wrap:wrap;gap:3px}.avs .av{margin:0!important}
+.wbars{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+.wb{display:flex;flex-direction:column;align-items:center;gap:3px}.wbt{width:100%;height:80px;background:var(--surface2);border-radius:8px;display:flex;align-items:flex-end;overflow:hidden}.wbt i{display:block;width:100%;border-radius:8px 8px 0 0}
+.wbp{font-size:10.5px;font-weight:700}
+.stiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.stile{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:3px;min-width:0}.stile .se{font-size:22px}.stile .meta{font-size:11.5px}.stile b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stile .sv{font-size:13px;color:var(--muted);font-weight:700}
+.pc-head{all:unset;display:flex;align-items:center;gap:12px;width:100%;cursor:pointer;box-sizing:border-box}
+.mini-ring{--p:0;flex:none;width:44px;height:44px;border-radius:50%;background:conic-gradient(var(--ok) calc(var(--p)*1%),var(--surface2) 0);display:grid;place-items:center}.mini-ring .av{width:36px;height:36px;margin:0!important;border:0!important}
 .wall{background:linear-gradient(135deg,#7F1D1D,#B91C1C);color:#fff;border-radius:18px;padding:12px 14px;margin:4px 0 12px;box-shadow:var(--shadow)}
 .wall-row{all:unset;display:flex;align-items:center;gap:8px;width:100%;padding:8px 0;border-top:1px solid rgba(255,255,255,.18);font-size:14px;cursor:pointer;box-sizing:border-box}
 .wall-row:first-of-type{border-top:0;margin-top:4px}
@@ -588,7 +630,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.35";
+const APP_VERSION="2026-11-10.36";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1300,6 +1342,7 @@ function pastFilterHtml(){
 }
 function afterView(){
   try{syncLocWatch()}catch{}
+  const pw=$(".podswipe");if(pw)pw.scrollLeft=(UI.podSlide||0)*pw.clientWidth;
   if(UI.tab!=="plans"||UI.planFilter!=="map")return;
   const slot=$("#mapSlot");if(!slot)return;
   if(!MAPS.main){const el=document.createElement("div");el.className="map-full";MAPS.main={el};slot.appendChild(el);MAPS.main.map=baseMap(el);MAPS.main.layer=MAPS.main.map&&L.layerGroup().addTo(MAPS.main.map)}else slot.appendChild(MAPS.main.el);
@@ -2250,25 +2293,63 @@ function myHabitRow(h,ds){const v=hVal(ME,ds,h.id),done=isDone(h,v);
   return`<div class="hrow ${done?"ok":""}" style="flex-wrap:wrap"><span class="he">${esc(h.emoji)}</span><span class="grow"><b>${esc(h.name)}</b>${h.show===false?'<span class="meta"> · hidden</span>':""}<span class="meta" style="display:block">${list.length?list.length+" logged ✅":"Nothing logged yet"}</span></span>
     <div style="flex-basis:100%;display:flex;flex-direction:column;gap:6px;margin-top:6px">${list.map((x,i)=>`<div class="item" style="padding:6px 10px"><span class="grow t" style="font-size:14px">${esc(x)}</span><button class="x" data-act="hLogDel" data-h="${esc(h.id)}" data-i="${i}" aria-label="Remove">✕</button></div>`).join("")}
     <div class="row" style="flex-wrap:nowrap"><input class="inp" id="hl-${esc(h.id)}" placeholder="${h.id==="food"?"e.g. Chicken salad, 2 eggs…":"Add an entry"}" maxlength="120" style="flex:1;min-width:0"><button class="btn sm pri" data-act="hLogAdd" data-h="${esc(h.id)}">Add</button></div></div></div>`}
+const DUNCE=`<svg class="hat dunce" viewBox="0 0 40 50" aria-label="Dunce cap"><path d="M20 3 L36 44 Q20 51 4 44 Z" fill="#FFF7E0" stroke="#2B2B2B" stroke-width="2.2" stroke-linejoin="round"/><path d="M9 33 Q20 37 31 33" stroke="#C2372F" stroke-width="2" fill="none"/><text x="20" y="29" font-size="13" text-anchor="middle" font-weight="900" fill="#C2372F" font-family="Georgia,serif">D</text><circle cx="20" cy="4" r="3.6" fill="#C2372F" stroke="#2B2B2B" stroke-width="1.5"/></svg>`;
+const shameScore=uid=>{let n=0;for(let d=1;d<=7;d++)n+=missesOn(uid,shameDay(d)).length;return n};
+const fameScore=uid=>{const m=mem(uid);let n=0;for(let d=0;d<7;d++){const ds=shameDay(d);if(m?.habitsSince&&ds>=m.habitsSince)n+=shownHabits(uid).filter(h=>hLive(h,ds)&&isDone(h,hVal(uid,ds,h.id))).length}return n};
+function podium(kind){const fame=kind==="fame";
+  const list=players().map(m=>({uid:m.id,score:fame?fameScore(m.id):shameScore(m.id),st:curStreak(m.id,perfectOk(m.id))})).filter(x=>x.score>0)
+    .sort((a,b)=>b.score-a.score||(fame?b.st-a.st:a.st-b.st)).slice(0,3);
+  if(!list.length)return`<div class="pod-empty">${fame?"No check-ins this week yet. Be the first on the podium 👑":"Nobody slacked this week. Respect 🫡"}</div>`;
+  const spot=(x,r)=>{if(!x)return`<div class="pod r${r}"><div class="pav"><span class="av ghost">?</span></div><div class="pname">&nbsp;</div><div class="pblock"><span class="prank">${r}</span></div></div>`;
+    const hat=r===1?(fame?`<span class="hat crown">👑</span>`:DUNCE):`<span class="pmed">${fame?(r===2?"🥈":"🥉"):"🍅"}</span>`;
+    return`<button class="pod r${r}" data-act="shamePerson" data-id="${esc(x.uid)}"><div class="pav">${hat}${avatar(x.uid)}</div><div class="pname">${esc(nick(x.uid))}</div><div class="pblock"><span class="prank">${r}</span><span class="pscore">${x.score}</span><span class="punit">${fame?"done":x.score===1?"miss":"misses"}</span></div></button>`};
+  return`<div class="podium ${kind}">${spot(list[1],2)}${spot(list[0],1)}${spot(list[2],3)}</div>`}
+function crewStats(){const ps=players();if(!ps.length)return"";const T=TODAY();
+  const live=(uid,ds)=>{const m=mem(uid);return m?.habitsSince&&ds>=m.habitsSince?shownHabits(uid).filter(h=>hLive(h,ds)):[]};
+  const pct=ds=>{let a=0,b=0;for(const m of ps){const hs=live(m.id,ds);b+=hs.length;a+=hs.filter(h=>isDone(h,hVal(m.id,ds,h.id))).length}return b?Math.round(a/b*100):null};
+  const today=pct(T)??0;
+  const groups=new Map();for(const m of ps)for(const h of live(m.id,T)){const k=HABIT_PRESETS.some(p=>p.id===h.id)?h.id:(h.emoji+h.name.toLowerCase());
+    const g=groups.get(k)||{emoji:h.emoji,name:h.name,id:h.id,all:[],done:[]};g.all.push(m.id);if(isDone(h,hVal(m.id,T,h.id)))g.done.push(m.id);groups.set(k,g)}
+  const verb=g=>g.id==="gym"?"went":g.id==="water"?"hit their goal":g.id==="food"?"logged":"done";
+  const week=[6,5,4,3,2,1,0].map(d=>{const ds=shameDay(d);return{ds,p:pct(ds)}});
+  const top=(f,lab)=>{const r=ps.map(m=>({uid:m.id,v:f(m.id)})).sort((a,b)=>b.v-a.v)[0];return r&&r.v>0?r:null};
+  const cons=top(uid=>{let a=0,b=0;for(let d=0;d<7;d++){const ds=shameDay(d),hs=live(uid,ds);b+=hs.length;a+=hs.filter(h=>isDone(h,hVal(uid,ds,h.id))).length}return b?Math.round(a/b*100):0});
+  const strk=top(uid=>curStreak(uid,perfectOk(uid)));
+  const poked=top(uid=>D.pokes.filter(p=>p.to===uid&&p.date>=shameDay(6)).length);
+  let gymWeek=0;for(const m of ps){const h=shownHabits(m.id).find(x=>x.id==="gym");if(h)for(let d=0;d<7;d++)if(isDone(h,hVal(m.id,shameDay(d),"gym")))gymWeek++}
+  const tile=(e,lab,x,val)=>`<div class="stile"><span class="se">${e}</span><span class="meta">${lab}</span>${x?`<span class="row" style="gap:6px;flex-wrap:nowrap">${avatar(x.uid,"xs")}<b>${esc(nick(x.uid))}</b></span><span class="sv">${val}</span>`:`<b>${val}</b>`}</div>`;
+  return`<div class="sec"><h2>Crew stats</h2>
+    <div class="scard"><div class="ring" style="--p:${today}"><span><b>${today}%</b><span>today</span></span></div>
+      <div class="grow" style="min-width:0"><div class="list" style="gap:10px">${[...groups.values()].sort((a,b)=>b.all.length-a.all.length).map(g=>`<div><div class="between" style="gap:6px"><span style="font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(g.emoji)} ${esc(g.name)}</span><span class="meta" style="white-space:nowrap"><b style="color:var(--fg)">${g.done.length}/${g.all.length}</b> ${verb(g)}</span></div>
+        <div class="hbar" style="margin:5px 0 4px"><i style="width:${Math.round(g.done.length/g.all.length*100)}%"></i></div>${g.done.length?`<div class="avs">${g.done.map(u=>avatar(u,"xs")).join("")}</div>`:""}</div>`).join("")}</div></div></div>
+    <div class="scard" style="display:block;margin-top:10px"><div class="between"><b>This week</b><span class="meta">crew completion</span></div>
+      <div class="wbars">${week.map(w=>`<div class="wb"><div class="wbt"><i style="height:${w.p??0}%;background:${w.p==null?"var(--surface2)":w.p>=80?"var(--ok)":w.p>=40?"var(--sun)":"var(--danger)"}"></i></div><span class="meta">${w.ds===T?"Today":pd(w.ds).toLocaleDateString("en-GB",{weekday:"narrow"})}</span><span class="wbp">${w.p==null?"–":w.p+"%"}</span></div>`).join("")}</div></div>
+    <div class="stiles">${tile("🎯","Most consistent (7 days)",cons,cons?cons.v+"%":"—")}${tile("🔥","Longest streak",strk,strk?strk.v+" day"+(strk.v>1?"s":""):"—")}${tile("🏋️","Gym visits this week",null,gymWeek)}${tile("👉","Most poked (7 days)",poked,poked?poked.v+" poke"+(poked.v>1?"s":""):"—")}</div></div>`}
 VIEWS.shame=()=>{
-  const ds=UI.shameDay==="y"?shameDay(1):TODAY(),y=shameDay(1),mine=habitsOf(ME),ps=players();
+  const ds=UI.shameDay==="y"?shameDay(1):TODAY(),y=shameDay(1),mine=habitsOf(ME),ps=players(),slide=UI.podSlide||0;
   const wall=ps.map(m=>({m,miss:missesOn(m.id,y)})).filter(x=>x.miss.length);
-  const pk=pokesToMe();
-  const head=`<div class="view-title"><h1>Shame</h1><span class="row" style="gap:6px;flex-wrap:nowrap">${mine.length&&curStreak(ME,perfectOk(ME))?`<span class="streak">🔥 ${curStreak(ME,perfectOk(ME))}</span>`:""}<button class="btn sm" data-act="habitSetup">${mine.length?"⚙️ Habits":"Set up"}</button></span></div>`;
-  const wallHtml=`<div class="wall"><div class="between"><b>🚨 Wall of Shame</b><span class="meta" style="color:inherit;opacity:.8">${esc(fDate(y,{weekday:"long",day:"numeric",month:"short"}))}</span></div>
-    ${wall.length?wall.map(x=>`<button class="wall-row" data-act="shamePerson" data-id="${esc(x.m.id)}">${avatar(x.m.id,"xs")}<span class="grow"><b>${esc(nick(x.m.id))}</b> didn't ${x.miss.map(h=>`${esc(h.emoji)} ${esc(h.name)}`).join(", ")}</span><span>🍅</span></button>`).join(""):`<div style="padding:6px 0 2px">${ps.length?"Nobody slacked yesterday. Respect 🫡":"Nobody's playing yet. Set up your habits and drag the guys in."}</div>`}</div>`;
+  const perfect=ps.filter(m=>m.habitsSince&&m.habitsSince<=y&&dayScore(m.id,y)===1);
+  const pk=pokesToMe(),st=mine.length?curStreak(ME,perfectOk(ME)):0;
+  const head=`<div class="view-title"><h1>Shame</h1><span class="row" style="gap:6px;flex-wrap:nowrap">${st?`<span class="streak">🔥 ${st}</span>`:""}<button class="btn sm" data-act="habitSetup">${mine.length?"⚙️ Habits":"Set up"}</button></span></div>`;
   const pokeHtml=pk.length?`<div class="banner" style="background:var(--sun-soft)">👉 <b>${[...new Set(pk.map(p=>nick(p.from)))].map(esc).join(", ")}</b> poked you about ${[...new Set(pk.map(p=>{const h=mine.find(x=>x.id===p.hid);return h?h.emoji+" "+h.name:p.hid==="join"?"joining Shame":"your habits"}))].map(esc).join(", ")}. Get moving!</div>`:"";
+  const pod=`<div class="podcard"><div class="podtabs"><button data-act="podGo" data-k="0" aria-pressed="${slide===0}">🍅 Wall of Shame</button><button data-act="podGo" data-k="1" aria-pressed="${slide===1}">👑 Hall of Fame</button></div>
+    <div class="podswipe">
+      <div class="podslide shame"><div class="podsub">Most misses · last 7 days</div>${podium("shame")}
+        <div class="podfoot"><b>Yesterday</b> · ${esc(fDate(y,{weekday:"short",day:"numeric",month:"short"}))}${wall.length?wall.map(x=>`<button class="wall-row" data-act="shamePerson" data-id="${esc(x.m.id)}">${avatar(x.m.id,"xs")}<span class="grow"><b>${esc(nick(x.m.id))}</b> skipped ${x.miss.map(h=>`${esc(h.emoji)} ${esc(h.name)}`).join(", ")}</span><span>🍅</span></button>`).join(""):`<div class="podnone">${ps.length?"Clean sheet, nobody skipped anything.":"Nobody's playing yet. Set up your habits and drag the guys in."}</div>`}</div></div>
+      <div class="podslide fame"><div class="podsub">Most check-ins · last 7 days</div>${podium("fame")}
+        <div class="podfoot"><b>Perfect yesterday</b>${perfect.length?`<div class="avs" style="margin-top:8px">${perfect.map(m=>`<span class="row" style="gap:6px;flex-wrap:nowrap;margin-right:10px">${avatar(m.id,"xs")}<span>${esc(nick(m.id))}</span></span>`).join("")}</div>`:`<div class="podnone">Nobody had a perfect day yesterday.</div>`}</div></div>
+    </div><div class="poddots"><i class="${slide===0?"on":""}"></i><i class="${slide===1?"on":""}"></i></div></div>`;
   const meHtml=mine.length?`<div class="sec"><div class="between"><h2>My check-in</h2><div class="seg sm" style="width:auto"><button data-act="shameDaySet" data-k="t" aria-pressed="${UI.shameDay!=="y"}">Today</button><button data-act="shameDaySet" data-k="y" aria-pressed="${UI.shameDay==="y"}">Yesterday</button></div></div>
       ${UI.shameDay==="y"?`<div class="hint" style="margin:0 0 8px">Forgot to log yesterday? Fix it here and you'll come off the wall.</div>`:""}
-      <div class="list" style="gap:8px">${mine.filter(h=>hLive(h,ds)).map(h=>myHabitRow(h,ds)).join("")}</div>
-</div>`
-    :`<div class="shoot" style="margin-top:12px"><div class="big"><b>Join the accountability crew</b><span style="opacity:.9;font-size:13px">Pick what you want to track: gym, water, supplements, food… Miss a day and you go on the Wall of Shame.</span><br><button class="btn sm" data-act="habitSetup" style="margin-top:10px">Pick my habits</button></div></div>`;
-  const board=`<div class="sec"><h2>The crew today</h2><div class="list" style="gap:8px">${D.members.map(m=>{const hs=shownHabits(m.id),me=m.id===ME;
-      if(!hs.length)return me?"":`<div class="item">${avatar(m.id,"sm")}<span class="grow"><b>${esc(m.nick)}</b><br><span class="meta">Not playing yet</span></span><button class="btn sm" data-act="poke" data-id="${esc(m.id)}" data-h="join">👉 Poke to join</button></div>`;
-      const sc=dayScore(m.id,TODAY(),hs),st=curStreak(m.id,perfectOk(m.id));
-      return`<div class="pcard"><button class="between" data-act="shamePerson" data-id="${esc(m.id)}" style="all:unset;display:flex;align-items:center;gap:10px;width:100%;cursor:pointer">${avatar(m.id,"sm")}<span class="grow"><b>${esc(nick(m.id))}</b><br><span class="meta">${sc===1?"All done today ✅":`${hs.filter(h=>hLive(h,TODAY())&&isDone(h,hVal(m.id,TODAY(),h.id))).length} of ${hs.filter(h=>hLive(h,TODAY())).length} done`}${st?` · 🔥 ${st}`:""}</span></span><span class="meta">History ›</span></button>
-        <div class="hchips">${hs.filter(h=>hLive(h,TODAY())).map(h=>habitChip(m.id,h,TODAY(),me)).join("")}</div></div>`}).join("")}</div></div>`;
-  return head+pokeHtml+wallHtml+meHtml+board};
+      <div class="list" style="gap:8px">${mine.filter(h=>hLive(h,ds)).map(h=>myHabitRow(h,ds)).join("")}</div></div>`
+    :`<div class="shoot" style="margin-top:12px"><div class="big"><b>Join the accountability crew</b><span style="opacity:.9;font-size:13px">Pick what you want to track: gym, water, supplements, food… Miss a day and you end up on the Wall of Shame with a dunce cap.</span><br><button class="btn sm" data-act="habitSetup" style="margin-top:10px">Pick my habits</button></div></div>`;
+  const others=D.members.filter(m=>m.id!==ME);
+  const board=`<div class="sec"><h2>The crew today</h2><div class="list" style="gap:8px">${[mem(ME),...others].filter(Boolean).map(m=>{const hs=shownHabits(m.id).filter(h=>hLive(h,TODAY())),me=m.id===ME;
+      if(!hs.length)return me?"":`<div class="pcard row" style="flex-wrap:nowrap">${avatar(m.id)}<span class="grow"><b>${esc(m.nick)}</b><br><span class="meta">Not playing yet</span></span><button class="btn sm" data-act="poke" data-id="${esc(m.id)}" data-h="join">👉 Poke</button></div>`;
+      const n=hs.filter(h=>isDone(h,hVal(m.id,TODAY(),h.id))).length,stk=curStreak(m.id,perfectOk(m.id)),p=Math.round(n/hs.length*100);
+      return`<div class="pcard"><button data-act="shamePerson" data-id="${esc(m.id)}" class="pc-head"><span class="mini-ring" style="--p:${p}">${avatar(m.id)}</span><span class="grow" style="text-align:left;min-width:0"><b>${esc(nick(m.id))}</b><span class="meta" style="display:block">${n===hs.length?"All done today ✅":`${n} of ${hs.length} done`}${stk?` · 🔥 ${stk}`:""}</span></span><span class="meta">›</span></button>
+        <div class="hchips">${hs.map(h=>habitChip(m.id,h,TODAY(),me)).join("")}</div></div>`}).join("")}</div></div>`;
+  return head+pokeHtml+pod+meHtml+crewStats()+board};
 function shameHeat(uid){const out=[];for(let d=34;d>=0;d--){const ds=shameDay(d),m=mem(uid),sc=m?.habitsSince&&m.habitsSince<=ds?dayScore(uid,ds):null;
     out.push(`<span class="hd" title="${esc(fDate(ds))}" style="background:${sc==null?"var(--surface2)":sc===1?"var(--ok)":sc>0?"var(--sun)":"var(--danger)"};${ds===TODAY()?"outline:2px solid var(--fg);outline-offset:1px":""}"></span>`)}return out.join("")}
 SHEETS.shamePerson={live:true,
@@ -2434,6 +2515,8 @@ async function prepVideo(file,onProg){
   const out=new Blob(parts,{type:mime.split(";")[0]});if(out.size>25e6)throw new Error("That video is still too big. Try a shorter clip.");
   return{blob:out,poster,dur};
 }
+function podMark(){const i=UI.podSlide||0;$$(".podtabs button").forEach((b,k)=>b.setAttribute("aria-pressed",k===i));$$(".poddots i").forEach((b,k)=>b.classList.toggle("on",k===i))}
+document.addEventListener("scroll",e=>{const t=e.target;if(!t.classList?.contains("podswipe"))return;const i=Math.round(t.scrollLeft/Math.max(1,t.clientWidth));if(i!==(UI.podSlide||0)){UI.podSlide=i;podMark()}},true);
 function keepGoals(s){$$("[data-hgoal]",s.el).forEach(i=>{const h=s.state.list[+i.dataset.hgoal];if(h&&+i.value>0){h.goal=+i.value;h.step=h.goal>=1000?1000:h.goal>=100?10:1}})}
 function heartPop(el){const b=el?.querySelector(".bub,.mediab")||el;if(!b)return;const h=document.createElement("span");h.className="hpop";h.textContent="❤️";b.style.position="relative";b.appendChild(h);setTimeout(()=>h.remove(),700)}
 function startReply(m){const s=stack.find(x=>x.kind==="chat"&&x.args.id===m.chatId);if(!s)return;s.state.reply={id:m.id,by:m.by,text:(msgLabel(m)||"").slice(0,90)};paintSheet(s);setTimeout(()=>$("#chatIn-"+CSS.escape(m.chatId),s.el)?.focus(),60)}
@@ -2697,6 +2780,7 @@ const ACT={
   habitSetup(){openSheet("habitSetup")},
   shamePerson(d){openSheet("shamePerson",{id:d.id})},
   shameDaySet(d){UI.shameDay=d.k;render()},
+  podGo(d){const pw=$(".podswipe");UI.podSlide=+d.k;if(pw)pw.scrollTo({left:UI.podSlide*pw.clientWidth,behavior:"smooth"});podMark()},
   hToggle(d){const ds=UI.shameDay==="y"?shameDay(1):TODAY();saveCheckin(ds,d.h,hVal(ME,ds,d.h)?null:true)},
   hStep(d){const ds=UI.shameDay==="y"?shameDay(1):TODAY(),h=habitsOf(ME).find(x=>x.id===d.h);if(!h)return;const n=Math.max(0,(+hVal(ME,ds,d.h)||0)+(+d.v)*(+h.step||1));saveCheckin(ds,d.h,n||null)},
   hLogAdd(d){const ds=UI.shameDay==="y"?shameDay(1):TODAY(),el=$("#hl-"+CSS.escape(d.h)),t=(el?.value||"").trim();if(!t)return toast("Type what you had first.");el.value="";const cur=hVal(ME,ds,d.h);saveCheckin(ds,d.h,[...(Array.isArray(cur)?cur:[]),t.slice(0,120)].slice(-30))},
