@@ -663,10 +663,21 @@ body.has-fx::before{background:transparent}
 .ach-card b{font-family:var(--f-display);font-size:30px;line-height:1.1;text-shadow:0 2px 14px rgba(0,0,0,.45)}
 .ach-s{font-size:13.5px;opacity:.92;max-width:30ch;text-shadow:0 1px 8px rgba(0,0,0,.5)}
 .ach-sparks{position:absolute;left:50%;top:70px;width:0;height:0}
-.ach-sparks i{position:absolute;font-style:normal;font-size:var(--sz);color:#fff;text-shadow:0 0 10px var(--bc),0 0 4px #fff;opacity:0;animation:achspark 1.4s ease-out var(--dl) forwards}
+.ach-sparks i{position:absolute;font-style:normal;font-size:var(--sz);color:#fff;text-shadow:0 0 12px var(--bc),0 0 5px #fff;opacity:0;animation:achspark 1.5s cubic-bezier(.15,.7,.3,1) var(--dl) forwards}
+.ach-sparks i:nth-child(3n){color:color-mix(in srgb,var(--bc) 40%,#fff)}.ach-sparks i:nth-child(4n){color:#FFE08A}
+.ach-rain{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.ach-rain i{position:absolute;top:-30px;font-style:normal;font-size:var(--sz);color:#fff;text-shadow:0 0 10px var(--bc),0 0 3px #fff;opacity:0;animation:achrain var(--du) linear var(--dl) forwards}
+.ach-rain i:nth-child(odd){color:#FFE08A}.ach-rain i:nth-child(3n){color:color-mix(in srgb,var(--bc) 35%,#fff)}
+.ach-twinkle{position:absolute;left:50%;top:70px;width:0;height:0}
+.ach-twinkle i{position:absolute;font-style:normal;font-size:var(--sz);color:#fff;text-shadow:0 0 8px #fff,0 0 14px var(--bc);transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(0);animation:achtw 1s ease-in-out var(--dl) infinite}
+.ach-ring{position:absolute;left:50%;top:70px;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:3px solid color-mix(in srgb,var(--bc) 60%,#fff);opacity:0;animation:achring .9s ease-out .1s forwards;pointer-events:none}
+.ach-ring.r2{animation-delay:.4s;border-width:2px}
+@keyframes achrain{0%{opacity:0;transform:translate(0,0) rotate(0)}10%{opacity:1}100%{opacity:0;transform:translate(var(--sw),110vh) rotate(220deg)}}
+@keyframes achtw{0%,100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(0);opacity:0}50%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1) rotate(45deg);opacity:1}}
+@keyframes achring{0%{transform:scale(.6);opacity:.9}100%{transform:scale(2.6);opacity:0}}
 .achpop.bad .ach-k{background:rgba(0,0,0,.35)}
 @keyframes achpop{0%{transform:scale(.3) translateY(40px);opacity:0}100%{transform:none;opacity:1}}
-@keyframes achspark{0%{transform:translate(-50%,-50%) scale(.3);opacity:0}20%{opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1) rotate(90deg);opacity:0}}
+@keyframes achspark{0%{transform:translate(-50%,-50%) scale(.2);opacity:0}15%{opacity:1}70%{opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy) + 30px)) scale(1.1) rotate(var(--rot));opacity:0}}
 @keyframes achfade{from{opacity:0}}@keyframes achout{to{opacity:0;transform:translateY(20px)}}
 .podcard{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:12px 0 10px;margin:4px 0 14px;overflow:hidden}
 .podtabs{display:flex;gap:6px;margin:0 12px;background:var(--surface2);border-radius:999px;padding:4px}
@@ -793,7 +804,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-11.12";
+const APP_VERSION="2026-11-11.13";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2707,12 +2718,16 @@ function checkBadges(){if(!(MODE==="live"||MODE==="demo")||!Store.ready||!mem(ME
 function nextAch(){if(achBusy||!ACHQ.length)return;achBusy=true;const{b,lvl,up}=ACHQ.shift(),st=badgeState(b,ME);
   const tier=b.special?"One of one":b.tiers.length===1?"":TIER[lvl-1].n;
   const el=document.createElement("div");el.className="achpop"+(b.bad?" bad":"");el.style.setProperty("--bc",b.c);el.setAttribute("role","status");
-  const sparks=Array.from({length:18},(_,i)=>{const a=i/18*Math.PI*2+Math.random()*.3,d=90+Math.random()*90;return`<i style="--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d-40}px;--dl:${(Math.random()*.25).toFixed(2)}s;--sz:${10+Math.random()*12}px">${["✦","✧","★","✨"][i%4]}</i>`}).join("");
-  el.innerHTML=`<div class="ach-glow"></div><div class="ach-card" data-act="achOpen" data-id="${b.id}"><div class="ach-sparks">${sparks}</div>${badgePatch(b,st,true)}
+  const SYM=["✦","✧","★","✨","✦","⋆","✶","✷"],burst=(n,d0,d1,dl,sz)=>Array.from({length:n},(_,i)=>{const a=i/n*Math.PI*2+Math.random()*.4,d=d0+Math.random()*(d1-d0);
+      return`<i style="--dx:${(Math.cos(a)*d).toFixed(0)}px;--dy:${(Math.sin(a)*d-30).toFixed(0)}px;--dl:${(dl+Math.random()*.3).toFixed(2)}s;--sz:${(sz+Math.random()*sz).toFixed(0)}px;--rot:${Math.round(Math.random()*360)}deg">${SYM[i%SYM.length]}</i>`}).join("");
+  const sparks=burst(26,70,170,0,10)+burst(22,120,240,.35,8)+burst(16,40,110,.7,7);
+  const rain=Array.from({length:34},()=>`<i style="left:${(Math.random()*100).toFixed(1)}%;--dl:${(Math.random()*1.4).toFixed(2)}s;--du:${(1.4+Math.random()*1.2).toFixed(2)}s;--sz:${(8+Math.random()*12).toFixed(0)}px;--sw:${(Math.random()*60-30).toFixed(0)}px">${SYM[Math.floor(Math.random()*SYM.length)]}</i>`).join("");
+  const twinkle=Array.from({length:14},(_,i)=>{const a=i/14*Math.PI*2,r=78+Math.random()*26;return`<i style="--x:${(Math.cos(a)*r).toFixed(0)}px;--y:${(Math.sin(a)*r).toFixed(0)}px;--dl:${(.4+Math.random()*1.2).toFixed(2)}s;--sz:${(9+Math.random()*9).toFixed(0)}px">✦</i>`}).join("");
+  el.innerHTML=`<div class="ach-glow"></div><div class="ach-rain">${rain}</div><div class="ach-card" data-act="achOpen" data-id="${b.id}"><span class="ach-ring"></span><span class="ach-ring r2"></span><div class="ach-sparks">${sparks}</div><div class="ach-twinkle">${twinkle}</div>${badgePatch(b,st,true)}
     <span class="ach-k">${up?"⬆️ Leveled up":b.bad?"😬 Achievement unlocked…":"✨ New achievement unlocked"}</span><b>${esc(b.t)}</b><span class="ach-s">${tier?esc(tier)+" · ":""}${esc(b.d)}</span></div>`;
   document.body.appendChild(el);try{navigator.vibrate?.([30,40,60])}catch{}
   const close=()=>{if(!el.isConnected)return;el.classList.add("out");setTimeout(()=>{el.remove();achBusy=false;nextAch()},450)};
-  el.addEventListener("click",close);setTimeout(close,2600)}
+  el.addEventListener("click",close);setTimeout(close,3000)}
 SHEETS.badge={live:true,
   render(s){const b=BADGES.find(x=>x.id===s.args.id),uid=s.args.u;if(!b)return{title:"Badge",body:""};const st=badgeState(b,uid),me=uid===ME;
     const tierRows=b.tiers.length===1?"":b.tiers.map((t,i)=>`<div class="item"><span class="tdot" style="background:${TIER[i].c}"></span><span class="grow"><b>${TIER[i].n}</b><br><span class="meta">${t} ${esc(b.u)}</span></span><span>${st.n>=t?"✅":`<span class="meta">${t-st.n} to go</span>`}</span></div>`).join("");
