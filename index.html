@@ -594,8 +594,21 @@ body.has-fx::before{background:transparent}
 .gplay{flex:none;padding:8px 14px;border-radius:999px;background:var(--accent);color:var(--accent-fg);font-weight:800;font-size:13px}.gplay.done{background:var(--surface2);color:var(--ok);font-size:16px}
 .gpl{position:relative;display:inline-flex}.gpl i{position:absolute;top:-9px;left:-3px;font-size:10px;font-style:normal;transform:rotate(-20deg)}
 .gcard .avs{display:flex;align-items:center;gap:3px}
-.lbrow{display:flex;align-items:center;gap:10px;width:100%;padding:8px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;cursor:pointer;box-sizing:border-box}
-.lbrow.me{border-color:var(--accent)}.lbrank{width:26px;text-align:center;font-weight:800;font-size:16px;flex:none}.lbpts{font-size:18px}
+.lbrow{display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px 10px 10px;border-radius:18px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;cursor:pointer;box-sizing:border-box}
+.lbrow .av{width:40px;height:40px;font-size:20px;margin:0!important;border:0!important}
+.lbrow.me{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.lbrank{--m:var(--surface2);width:28px;height:28px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:13px;background:var(--m);color:var(--fg)}
+.lbrow.r1{background:linear-gradient(100deg,color-mix(in srgb,#F2C14E 16%,var(--surface)),var(--surface) 65%)}.lbrow.r1 .lbrank{--m:linear-gradient(135deg,#FFE08A,#D9A21B);color:#3B2A00}
+.lbrow.r2{background:linear-gradient(100deg,color-mix(in srgb,#C9D1D9 12%,var(--surface)),var(--surface) 65%)}.lbrow.r2 .lbrank{--m:linear-gradient(135deg,#F1F4F7,#9AA6B2);color:#1F2933}
+.lbrow.r3{background:linear-gradient(100deg,color-mix(in srgb,#D08C5B 14%,var(--surface)),var(--surface) 65%)}.lbrow.r3 .lbrank{--m:linear-gradient(135deg,#F0B98F,#B87245);color:#3A1E0B}
+.lbmid{flex:1;text-align:left;min-width:0;display:flex;flex-direction:column;gap:5px}.lbmid>b{font-size:15.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lbsub{font-size:12.5px;color:var(--muted)}
+.lbpills{display:flex;gap:6px;flex-wrap:nowrap}
+.lbpill{--pc:#2FA36B;display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:800;padding:3px 9px 3px 7px;border-radius:999px;background:color-mix(in srgb,var(--pc) 16%,transparent);color:color-mix(in srgb,var(--pc) 55%,#fff);white-space:nowrap}
+.lbpill i{width:8px;height:8px;border-radius:50%;background:var(--pc);box-shadow:0 0 6px var(--pc)}
+.lbkey{display:flex;gap:6px;flex-wrap:wrap;margin:-2px 0 10px}.lbkey .lbpill{font-size:11.5px;font-weight:700}
+.lbpill.p-est{--pc:#A855F7}.lbpill.p-deep{--pc:#EC4899}.lbpill.none{opacity:.45}
+.lbtot{flex:none;display:flex;flex-direction:column;align-items:flex-end;line-height:1}.lbtot b{font-size:24px;font-family:var(--f-display);font-weight:800}.lbtot i{font-style:normal;font-size:10.5px;color:var(--muted);font-weight:700;margin-top:2px;letter-spacing:.06em;text-transform:uppercase}
 .wgrid{display:flex;flex-direction:column;gap:6px;align-items:center;margin:8px 0 12px}.wrow{display:flex;gap:6px}
 .wt{width:min(14vw,58px);height:min(14vw,58px);border-radius:12px;border:2px solid var(--line);display:grid;place-items:center;font-size:26px;font-weight:800;text-transform:uppercase;background:var(--surface)}
 .wt.typed{border-color:var(--muted)}.wt.pop{animation:pop .12s}
@@ -751,7 +764,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-11.06";
+const APP_VERSION="2026-11-11.08";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2979,7 +2992,10 @@ VIEWS.games=()=>{const range=UI.gRange||"today",gf=UI.gGame||"";const board=game
   <div class="sec"><div class="between"><h2>🏆 Leaderboard</h2></div>
     <div class="seg" style="margin-bottom:8px">${[["today","Today"],["week","This week"],["all","All time"]].map(([k,l])=>`<button data-act="gRange" data-k="${k}" aria-pressed="${range===k}">${l}</button>`).join("")}</div>
     <div class="chips" style="margin-bottom:10px">${[["","All games"],...GAMES.map(g=>[g.id,g.e+" "+g.t])].map(([k,l])=>`<button class="chip" data-act="gGame" data-k="${k}" aria-pressed="${gf===k}">${l}</button>`).join("")}</div>
-    ${board.length?`<div class="list" style="gap:6px">${board.map((r,i)=>`<button class="lbrow ${r.uid===ME?"me":""}" data-act="person" data-id="${esc(r.uid)}"><span class="lbrank">${["🥇","🥈","🥉"][i]||i+1}</span>${avatar(r.uid,"sm")}<span class="grow" style="text-align:left;min-width:0"><b>${esc(nick(r.uid))}</b><span class="meta" style="display:block">${r.n} game${r.n>1?"s":""}${r.perfect?` · ${r.perfect} perfect`:""}${range==="today"&&!gf?" · "+GAMES.map(g=>{const x=gScore(g.id,r.uid);return x?g.e+" "+x.pts:""}).filter(Boolean).join("  "):""}</span></span><b class="lbpts">${r.pts}</b></button>`).join("")}</div>`:`<div class="empty" style="padding:20px">No scores yet${range==="today"?" today":""}. Play one!</div>`}</div>`};
+    ${range==="today"&&!gf&&board.length?`<div class="lbkey">${GAMES.map(g=>`<span class="lbpill p-${g.id}"><i></i>${g.t}</span>`).join("")}</div>`:""}
+    ${board.length?`<div class="list" style="gap:6px">${board.map((r,i)=>`<button class="lbrow ${r.uid===ME?"me":""} ${i<3?"top r"+(i+1):""}" data-act="person" data-id="${esc(r.uid)}"><span class="lbrank">${i+1}</span>${avatar(r.uid)}<span class="grow lbmid"><b>${esc(nick(r.uid))}</b>
+      ${range==="today"&&!gf?`<span class="lbpills">${GAMES.map(g=>{const x=gScore(g.id,r.uid);return`<span class="lbpill p-${g.id} ${x?"":"none"}" title="${g.t}"><i></i>${x?x.pts:"–"}</span>`}).join("")}</span>`:`<span class="lbsub">${r.n} game${r.n>1?"s":""} played${r.perfect?` · ${r.perfect} perfect`:""}</span>`}</span>
+      <span class="lbtot"><b>${r.pts}</b><i>pts</i></span></button>`).join("")}</div>`:`<div class="empty" style="padding:20px">No scores yet${range==="today"?" today":""}. Play one!</div>`}</div>`};
 /* --- daily word --- */
 function wEval(g,ans){const res=Array(5).fill("x"),a=ans.split(""),used=Array(5).fill(false);
   for(let i=0;i<5;i++)if(g[i]===a[i]){res[i]="g";used[i]=true}
