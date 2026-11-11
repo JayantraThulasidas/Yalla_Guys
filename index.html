@@ -639,6 +639,14 @@ body.has-fx::before{background:transparent}
 .ctile.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--surface))}
 .cops{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
 .cop{height:52px;border-radius:14px;border:0;background:var(--surface2);color:var(--fg);font-size:26px;font-weight:800}.cop.on{background:var(--accent);color:var(--accent-fg)}.cop:disabled{opacity:.4}
+.att-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.att-tiles.one{grid-template-columns:1fr}.att-tiles.one .att-tile{aspect-ratio:4/3}
+.att-tiles.two{grid-template-columns:1fr 1fr}
+.att-tile{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;background:var(--surface2);box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.att-tiles:not(.one):not(.two) .att-tile:first-child{grid-column:span 2;grid-row:span 2}
+.att-tile img{width:100%;height:100%;object-fit:cover;display:block}
+.att-tile .tile-open{all:unset;display:block;width:100%;height:100%;cursor:pointer}
+.att-tile .tile-x{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:12px;display:grid;place-items:center;backdrop-filter:blur(4px)}
 .podcard{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:12px 0 10px;margin:4px 0 14px;overflow:hidden}
 .podtabs{display:flex;gap:6px;margin:0 12px;background:var(--surface2);border-radius:999px;padding:4px}
 .podtabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:8px 6px;border-radius:999px;white-space:nowrap}
@@ -764,7 +772,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-11.08";
+const APP_VERSION="2026-11-11.09";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2105,8 +2113,10 @@ SHEETS.ticketView={live:true,
 /* ---------- personal attachments on "Block my time" (private) ---------- */
 function myAttachHtml(busyId,pending){
   const items=pending||D.mine.filter(m=>m.busyId===busyId).sort((a,b)=>a.at-b.at);
-  return`<div class="att-list">${items.map((m,i)=>{const del=`<button class="x" data-act="${pending?"bzAttDel":"mineDel"}" data-id="${pending?i:esc(m.id)}" aria-label="Remove">✕</button>`;
-    if(m.kind==="photo")return`<div class="item"><img src="${esc(m.src)}" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:10px"><span class="grow t">Photo</span>${del}</div>`;
+  const pics=items.map((m,i)=>({m,i})).filter(x=>x.m.kind==="photo");
+  const tiles=pics.length?`<div class="att-tiles ${pics.length===1?"one":pics.length===2||pics.length===4?"two":""}">${pics.map(({m,i})=>`<div class="att-tile">${pending?`<img src="${esc(m.src)}" alt="Photo">`:`<button class="tile-open" data-act="viewSrc" data-key="mine:${esc(m.id)}" aria-label="Open photo"><img src="${esc(m.src)}" alt="Photo" loading="lazy"></button>`}<button class="tile-x" data-act="${pending?"bzAttDel":"mineDel"}" data-id="${pending?i:esc(m.id)}" data-confirm="Remove?" aria-label="Remove photo">✕</button></div>`).join("")}</div>`:"";
+  return`${tiles}<div class="att-list">${items.map((m,i)=>{const del=`<button class="x" data-act="${pending?"bzAttDel":"mineDel"}" data-id="${pending?i:esc(m.id)}" aria-label="Remove">✕</button>`;
+    if(m.kind==="photo")return"";
     if(m.kind==="ticket")return`<div class="row" style="flex-wrap:nowrap">${pending?`<div class="ticket"><span class="tk-ic">${esc(m.icon||"🎟️")}</span><span style="flex:1;min-width:0"><b>${esc(m.title||"Ticket")}</b>${m.code?`<div class="tk-code">${esc(m.code)}</div>`:""}</span></div>`:ticketRow(m,"mine")}${del}</div>`;
     return`<div class="item"><span style="font-size:20px">${embedUrl(m.url)?"▶":"🔗"}</span><a class="grow t" href="${esc(m.url)}" target="_blank" rel="noopener" style="color:var(--fg);font-size:13px">${esc(m.caption||hostOf(m.url))}</a>${del}</div>`}).join("")}</div>
     <div class="att-row"><button class="btn sm" data-act="bzAttPhoto" data-id="${esc(busyId||"")}">📷 Photo</button><button class="btn sm" data-act="ticketAdd" data-scope="mine" data-id="${esc(busyId||"")}">🎟️ Ticket</button><button class="btn sm" data-act="bzAttLink" data-id="${esc(busyId||"")}">🔗 Link / reel</button></div>`;
