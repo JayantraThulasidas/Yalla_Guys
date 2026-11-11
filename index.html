@@ -654,6 +654,20 @@ body.has-fx::before{background:transparent}
 .lightbox .sheet-b .gslide img{width:100%;max-height:calc(100dvh - 170px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));object-fit:contain;border-radius:6px}
 .gdots{display:flex;justify-content:center;gap:6px;margin-top:14px}.gdots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);transition:all .2s}.gdots i.on{background:#fff;width:18px;border-radius:4px}
 .replybar.pop-in{animation:rbin .18s ease-out}@keyframes rbin{from{opacity:0;transform:translateY(6px)}}
+.achpop{position:fixed;inset:0;z-index:95;pointer-events:none;display:flex;align-items:flex-end;justify-content:center;padding-bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 30px);animation:achfade .35s ease-out}
+.achpop.out{animation:achout .45s ease-in forwards}
+.ach-glow{position:absolute;inset:0;background:radial-gradient(120% 65% at 50% 100%,color-mix(in srgb,var(--bc) 80%,transparent),color-mix(in srgb,var(--bc) 30%,transparent) 50%,transparent 80%),linear-gradient(to top,rgba(6,8,12,.92),rgba(6,8,12,.75) 45%,rgba(6,8,12,.35));backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.ach-card{pointer-events:auto;position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;color:#fff;padding:0 24px;animation:achpop .55s cubic-bezier(.2,1.6,.4,1) both}
+.ach-card .patch.big{margin:0 0 8px}
+.ach-k{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.18);backdrop-filter:blur(6px)}
+.ach-card b{font-family:var(--f-display);font-size:30px;line-height:1.1;text-shadow:0 2px 14px rgba(0,0,0,.45)}
+.ach-s{font-size:13.5px;opacity:.92;max-width:30ch;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.ach-sparks{position:absolute;left:50%;top:70px;width:0;height:0}
+.ach-sparks i{position:absolute;font-style:normal;font-size:var(--sz);color:#fff;text-shadow:0 0 10px var(--bc),0 0 4px #fff;opacity:0;animation:achspark 1.4s ease-out var(--dl) forwards}
+.achpop.bad .ach-k{background:rgba(0,0,0,.35)}
+@keyframes achpop{0%{transform:scale(.3) translateY(40px);opacity:0}100%{transform:none;opacity:1}}
+@keyframes achspark{0%{transform:translate(-50%,-50%) scale(.3);opacity:0}20%{opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1) rotate(90deg);opacity:0}}
+@keyframes achfade{from{opacity:0}}@keyframes achout{to{opacity:0;transform:translateY(20px)}}
 .podcard{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:12px 0 10px;margin:4px 0 14px;overflow:hidden}
 .podtabs{display:flex;gap:6px;margin:0 12px;background:var(--surface2);border-radius:999px;padding:4px}
 .podtabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:8px 6px;border-radius:999px;white-space:nowrap}
@@ -779,7 +793,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-11.11";
+const APP_VERSION="2026-11-11.12";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2682,6 +2696,23 @@ function badgesHtml(uid){const all=BADGES.map(b=>({b,st:badgeState(b,uid)})).fil
   return`<div class="sec"><div class="between"><h2>🏅 Badges</h2><span class="meta"><b style="color:var(--fg)">${got.length}</b> of ${all.length} earned</span></div>
     ${got.length?`<div class="bgrid">${got.map(cell).join("")}</div>`:`<div class="meta" style="margin-bottom:8px">No badges yet. Make a plan, post a moment or check in on Shame to earn the first one.</div>`}
     ${left.length?`<div class="meta" style="margin:12px 0 6px;font-weight:700">Still to earn</div><div class="bgrid">${shown.map(cell).join("")}</div>${left.length>4?`<button class="btn sm block" data-act="badgesMore" data-u="${esc(uid)}" style="margin-top:8px">${open?"Show less":`Show all ${left.length}`}</button>`:""}`:""}</div>`}
+/* achievement pop-up: celebrate new badges and level-ups */
+const ACHQ=[];let achBusy=false,achT=null;
+function checkBadges(){if(!(MODE==="live"||MODE==="demo")||!Store.ready||!mem(ME))return;clearTimeout(achT);achT=setTimeout(()=>{
+  const key="yg-badges-"+ME,seen=ls.get(key,null),now_={};
+  for(const b of BADGES){const st=badgeState(b,ME);now_[b.id]=st.lvl}
+  if(!seen){ls.set(key,now_);return}  // first run on this phone: remember silently
+  for(const b of BADGES){const was=seen[b.id]||0,is=now_[b.id]||0;if(is>was)ACHQ.push({b,lvl:is,up:was>0})}
+  ls.set(key,{...seen,...now_});if(ACHQ.length)nextAch()},1200)}
+function nextAch(){if(achBusy||!ACHQ.length)return;achBusy=true;const{b,lvl,up}=ACHQ.shift(),st=badgeState(b,ME);
+  const tier=b.special?"One of one":b.tiers.length===1?"":TIER[lvl-1].n;
+  const el=document.createElement("div");el.className="achpop"+(b.bad?" bad":"");el.style.setProperty("--bc",b.c);el.setAttribute("role","status");
+  const sparks=Array.from({length:18},(_,i)=>{const a=i/18*Math.PI*2+Math.random()*.3,d=90+Math.random()*90;return`<i style="--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d-40}px;--dl:${(Math.random()*.25).toFixed(2)}s;--sz:${10+Math.random()*12}px">${["✦","✧","★","✨"][i%4]}</i>`}).join("");
+  el.innerHTML=`<div class="ach-glow"></div><div class="ach-card" data-act="achOpen" data-id="${b.id}"><div class="ach-sparks">${sparks}</div>${badgePatch(b,st,true)}
+    <span class="ach-k">${up?"⬆️ Leveled up":b.bad?"😬 Achievement unlocked…":"✨ New achievement unlocked"}</span><b>${esc(b.t)}</b><span class="ach-s">${tier?esc(tier)+" · ":""}${esc(b.d)}</span></div>`;
+  document.body.appendChild(el);try{navigator.vibrate?.([30,40,60])}catch{}
+  const close=()=>{if(!el.isConnected)return;el.classList.add("out");setTimeout(()=>{el.remove();achBusy=false;nextAch()},450)};
+  el.addEventListener("click",close);setTimeout(close,2600)}
 SHEETS.badge={live:true,
   render(s){const b=BADGES.find(x=>x.id===s.args.id),uid=s.args.u;if(!b)return{title:"Badge",body:""};const st=badgeState(b,uid),me=uid===ME;
     const tierRows=b.tiers.length===1?"":b.tiers.map((t,i)=>`<div class="item"><span class="tdot" style="background:${TIER[i].c}"></span><span class="grow"><b>${TIER[i].n}</b><br><span class="meta">${t} ${esc(b.u)}</span></span><span>${st.n>=t?"✅":`<span class="meta">${t-st.n} to go</span>`}</span></div>`).join("");
@@ -3594,6 +3625,7 @@ const ACT={
 
   async planShowCrew(d){const p=planById(d.id);if(!p||p.by!==ME)return;await Store.upd("plans",p.id,{showCrew:!p.showCrew});toast(p.showCrew?"Only people who were there see it now":"👀 The crew can see this memory")},
   badge(d){openSheet("badge",{id:d.id,u:d.u})},
+  achOpen(d){openSheet("badge",{id:d.id,u:ME})},
   badgesMore(d){UI.badgesOpen=UI.badgesOpen===d.u?null:d.u;const s=topS();if(s)paintSheet(s)},
   proofAdd(d){const ds=UI.shameDay==="y"?shameDay(1):TODAY();ensureAC?.();pickPhotos(async fs=>{const f=fs[0];if(!f)return;try{toast("Preparing photo…");const src=await storePhoto(f);if(!src)return toast("Couldn't read that photo.");openSheet("proofPost",{src,hid:d.h,ds})}catch{toast("Couldn't read that photo. Try another.")}},"#onePick")},
   async proofSave(){const s=topS(),{src,hid,ds}=s.args,h=habitsOf(ME).find(x=>x.id===hid),cap=val("ppCap").slice(0,60);$("#ppBtn",s.el).disabled=true;
@@ -3893,6 +3925,7 @@ const SEEN={msgs:null,plans:null,moments:null,notes:null,media:null};
 function checkNotify(){
   if(!Store.ready||MODE==="loading"||MODE==="auth"||MODE==="join")return;
   try{checkPokes()}catch{}
+  try{checkBadges()}catch{}
   for(const c of allMyChats()){const t=lastOtherAt(c.id);if(t&&Math.max((c.dv||{})[ME]||0,(c.rd||{})[ME]||0)<t)chatStamp(c.id,"dv",t)}
   const first=SEEN.msgs===null;
   if(first){SEEN.msgs=new Set(D.msgs.map(m=>m.id));SEEN.plans=new Set(visiblePlans().map(p=>p.id));SEEN.moments=new Set(D.moments.map(m=>m.id));SEEN.notes=new Set(D.notes.map(n=>n.id));SEEN.media=new Set(D.media.map(m=>m.id));return}
