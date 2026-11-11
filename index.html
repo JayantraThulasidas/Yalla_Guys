@@ -656,13 +656,14 @@ body.has-fx::before{background:transparent}
 .replybar.pop-in{animation:rbin .18s ease-out}@keyframes rbin{from{opacity:0;transform:translateY(6px)}}
 .achpop{position:fixed;inset:0;z-index:95;pointer-events:none;display:flex;align-items:flex-end;justify-content:center;padding-bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 30px);animation:achfade .35s ease-out}
 .achpop.out{animation:achout .45s ease-in forwards}
-.ach-glow{position:absolute;inset:0;background:radial-gradient(120% 65% at 50% 100%,color-mix(in srgb,var(--bc) 80%,transparent),color-mix(in srgb,var(--bc) 30%,transparent) 50%,transparent 80%),linear-gradient(to top,rgba(6,8,12,.92),rgba(6,8,12,.75) 45%,rgba(6,8,12,.35));backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.ach-glow{position:absolute;inset:0;background:radial-gradient(120% 65% at 50% 100%,color-mix(in srgb,var(--bc) 80%,transparent),color-mix(in srgb,var(--bc) 30%,transparent) 50%,transparent 80%),linear-gradient(to top,rgba(6,8,12,.94),rgba(6,8,12,.8) 45%,rgba(6,8,12,.5))}
 .ach-card{pointer-events:auto;position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;color:#fff;padding:0 24px;animation:achpop .55s cubic-bezier(.2,1.6,.4,1) both}
 .ach-card .patch.big{margin:0 0 8px}
-.ach-k{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.18);backdrop-filter:blur(6px)}
+.ach-k{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.18)}
 .ach-card b{font-family:var(--f-display);font-size:30px;line-height:1.1;text-shadow:0 2px 14px rgba(0,0,0,.45)}
 .ach-s{font-size:13.5px;opacity:.92;max-width:30ch;text-shadow:0 1px 8px rgba(0,0,0,.5)}
 .ach-sparks{position:absolute;left:50%;top:70px;width:0;height:0}
+.ach-sparks i,.ach-rain i,.ach-twinkle i{will-change:transform,opacity}
 .ach-sparks i{position:absolute;font-style:normal;font-size:var(--sz);color:#fff;text-shadow:0 0 12px var(--bc),0 0 5px #fff;opacity:0;animation:achspark 1.5s cubic-bezier(.15,.7,.3,1) var(--dl) forwards}
 .ach-sparks i:nth-child(3n){color:color-mix(in srgb,var(--bc) 40%,#fff)}.ach-sparks i:nth-child(4n){color:#FFE08A}
 .ach-rain{position:absolute;inset:0;overflow:hidden;pointer-events:none}
@@ -804,7 +805,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-11.14";
+const APP_VERSION="2026-11-11.16";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1191,11 +1192,20 @@ function installCard(){
 function banners(){
   return installCard()+(MODE==="demo"?`<div class="banner"><b>Demo mode.</b> Changes stay on this phone and the people shown are examples. Add your Firebase settings to the file to share it with the guys (see the setup steps).</div>`:"");
 }
+// slide the tab bar so the chosen tab sits in the middle, showing the tabs either side of it
+function centerTab(k,smooth){const tb=$("#tabs"),b=tb&&$(`[data-k="${k}"]`,tb);if(!b)return;const left=b.offsetLeft+b.offsetWidth/2-tb.clientWidth/2;
+  tb.scrollTo({left:Math.max(0,Math.min(left,tb.scrollWidth-tb.clientWidth)),behavior:smooth?"smooth":"auto"})}
+let tabsInit=false;
+function tabsFirstShow(){if(tabsInit)return;const tb=$("#tabs");if(!tb||!tb.clientWidth)return;tabsInit=true;centerTab(UI.tab,false);
+  // once per phone: a quick peek so people see there are more tabs
+  if(!ls.get("yg-tabpeek",false)&&tb.scrollWidth>tb.clientWidth+10){ls.set("yg-tabpeek",true);const start=tb.scrollLeft;
+    setTimeout(()=>tb.scrollTo({left:tb.scrollWidth,behavior:"smooth"}),700);setTimeout(()=>tb.scrollTo({left:start,behavior:"smooth"}),1700)}}
 function renderTabs(){
   const tabs=[["plans","Plans"],["moments","Moments"],["cal","Calendar"],["chat","Chats"],["shame","Shame"],["money","Money"],["games","Games"]];const sb=shameBadge();
   const un=myChats().reduce((n,c)=>n+unread(c),0);
   const tb=$("#tabs"),sl=tb.scrollLeft;tb.innerHTML=tabs.map(([k,l])=>`<button data-act="tab" data-k="${k}" aria-current="${UI.tab===k}">${ICON[k]}<span>${l}</span>${k==="chat"&&un?`<span class="badge">${un>9?"9+":un}</span>`:""}${k==="shame"&&sb?`<span class="badge">${sb}</span>`:""}</button>`).join("");
   tb.scrollLeft=sl;
+  if(!tabsInit)requestAnimationFrame(tabsFirstShow);
 }
 
 
@@ -2929,10 +2939,13 @@ function runFx(cv,kind){const def=FX[kind];if(!def)return;const g=cv.getContext(
   const seed=()=>{const n=Math.round(def.n*Math.min(1.6,Math.max(.6,W*H/(390*780))));ps=Array.from({length:n},()=>def.init({},W,H,true))};
   const still=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   let ok=fit();if(ok)seed();let drawn=false;try{new ResizeObserver(()=>{if(fit()){if(!ps.length)seed();if(still&&drawn)requestAnimationFrame(frame)}}).observe(cv)}catch{}
-  const frame=now=>{if(!cv.isConnected||cv.dataset.k!==kind)return;const top=stack[stack.length-1]?.el,mine=cv.parentElement;
+  let lastTick=performance.now();cv.__alive=()=>lastTick;
+  const frame=now=>{lastTick=performance.now();if(!cv.isConnected||cv.dataset.k!==kind)return;const top=stack[stack.length-1]?.el,mine=cv.parentElement;
     if(document.hidden||!W||(top&&mine!==top&&!top.contains(mine))){last=now;return requestAnimationFrame(frame)}
-    const dt=Math.min(.05,(now-last)/1000),t=(now-t0)/1000;last=now;g.globalAlpha=1;g.clearRect(0,0,W,H);
-    def.pre?.(g,W,H,t,st,dt);for(const p of ps){def.step?.(p,dt,W,H,t);def.draw(g,p,t,W,H)}g.globalAlpha=1;def.post?.(g,W,H,t,st,dt);g.globalAlpha=1;drawn=true;
+    const dt=Math.min(.05,(now-last)/1000),t=(now-t0)/1000;last=now;
+    try{g.setTransform(Math.min(2,window.devicePixelRatio||1),0,0,Math.min(2,window.devicePixelRatio||1),0,0);g.globalAlpha=1;g.globalCompositeOperation="source-over";g.shadowBlur=0;g.clearRect(0,0,W,H);
+      def.pre?.(g,W,H,t,st,dt);for(const p of ps){def.step?.(p,dt,W,H,t);def.draw(g,p,t,W,H)}g.globalAlpha=1;def.post?.(g,W,H,t,st,dt);g.globalAlpha=1;drawn=true}
+    catch(e){try{g.restore()}catch{}g.globalAlpha=1;g.globalCompositeOperation="source-over"}
     if(!still)requestAnimationFrame(frame)};requestAnimationFrame(frame)}
 function mountFx(host,kind,fixed){if(!host)return;let cv=host.querySelector(":scope>canvas.bgfx");if(cv&&cv.dataset.k===(kind||""))return;cv?.remove();if(!kind||!FX[kind])return;
   cv=document.createElement("canvas");cv.className="bgfx"+(fixed?" fixed":"");cv.dataset.k=kind;cv.setAttribute("aria-hidden","true");host.prepend(cv);runFx(cv,kind)}
@@ -2972,6 +2985,7 @@ document.addEventListener("keydown",e=>{const s=topS();if(s?.kind!=="gWord"||e.m
 // leaving the app (home button, switching apps, locking the phone, closing it) stops the song
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&SONG.a){SONG.a.pause();SONG.paint()}});
 window.addEventListener("pagehide",()=>SONG.stop());
+document.addEventListener("visibilitychange",()=>{if(document.hidden)return;document.querySelectorAll("canvas.bgfx").forEach(cv=>{if(!cv.__alive)return;const t=cv.__alive;if(performance.now()-t()>1500){const host=cv.parentElement,k=cv.dataset.k,fixed=cv.classList.contains("fixed");cv.remove();mountFx(host,k,fixed)}})});
 window.addEventListener("blur",()=>{if(document.hidden&&SONG.a)SONG.a.pause()});
 SHEETS.stickerPick={
   render(s){const p=profS(),st=p?p.state:{stickers:[]};
@@ -3467,7 +3481,7 @@ const ACT={
   _:0,
   async doUpdate(){toast("Updating…");try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const regs=await navigator.serviceWorker?.getRegistrations?.();for(const r of regs||[])await r.update().catch(()=>{})}catch{}location.replace(location.pathname+"?v="+Date.now())},
   hideInstall(){ls.set("yg-install-hide",true);render()},
-  tab(d){UI.tab=d.k;ls.set("yg-tab",d.k);window.scrollTo(0,0);render();$(`#tabs [data-k="${d.k}"]`)?.scrollIntoView({inline:"nearest",block:"nearest",behavior:"smooth"})},
+  tab(d){UI.tab=d.k;ls.set("yg-tab",d.k);window.scrollTo(0,0);render();centerTab(d.k,true)},
   close(){closeSheet()},
   authTab(d){UI.authTab=d.k;render()},
   async forgot(){const em=val("auEmail");const err=$("#auErr");if(!em)return err.textContent="Type your email above first.";try{await AUTH.sendPasswordResetEmail(em);toast("Reset link sent. Check your email.")}catch(e){err.textContent=authMsg(e)}},
