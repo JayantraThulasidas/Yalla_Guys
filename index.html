@@ -565,7 +565,7 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .songcard{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,#1DB954 22%,var(--surface)),var(--surface));border:1px solid var(--line)}
 .sart{width:54px;height:54px;border-radius:10px;overflow:hidden;flex:none;display:grid;place-items:center;background:var(--surface2);font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,.3)}.sart img{width:100%;height:100%;object-fit:cover}
 .songcard .k{display:block;font-size:11px;color:var(--muted)}.songcard b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.songbtn{flex:none;width:42px;height:42px;border-radius:50%;border:0;background:#1DB954;color:#04140A;font-size:16px;font-weight:800}
+.songbtn{flex:none;width:42px;height:42px;border-radius:50%;border:0;background:#1DB954;color:#04140A;display:grid;place-items:center;padding:0}.songbtn svg{display:block}
 .songsp{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);color:var(--fg);text-decoration:none;font-weight:800}
 .eq{display:none;gap:2px;height:12px;align-items:flex-end;margin-top:3px}.eq i{width:3px;background:#1DB954;border-radius:1px;animation:eq 0.9s ease-in-out infinite}
 .eq i:nth-child(2){animation-delay:.2s}.eq i:nth-child(3){animation-delay:.4s}.eq i:nth-child(4){animation-delay:.1s}
@@ -804,7 +804,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-11.13";
+const APP_VERSION="2026-11-11.14";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1670,7 +1670,7 @@ SHEETS.settings={live:true,
     <div class="sec"><h2>Default plan reminders</h2><div class="chips">${REM_OPTS.map(([m,l])=>`<button class="chip" data-act="defRemind" data-m="${m}" aria-pressed="${SET.remind.includes(m)}">${l} before</button>`.replace("At start before","At start")).join("")}</div>
       <div class="hint">Used for every plan you're going to. You can change them per plan.</div></div>
     <div class="meta" style="text-align:center;margin:-4px 0 4px">App version ${APP_VERSION}</div>
-    <div class="sec"><h2>Profile songs</h2><label class="check"><input type="checkbox" id="profSongs" ${SET.profSongs!==false?"checked":""}> Play song previews when I open someone's profile</label></div>
+    <div class="sec"><h2>Profile songs</h2><label class="check"><input type="checkbox" id="profSongs" ${SET.profSongs!==false?"checked":""}> Play profile music</label><div class="hint">When this is off, songs don't start by themselves. Tap ▶ on someone's song to hear it.</div></div>
     <div class="sec"><h2>Background animation</h2><label class="check"><input type="checkbox" id="appFx" ${SET.appFx!==false?"checked":""}> Show my profile animation behind every page</label><div class="hint">${mem(ME)?.bgfx?"Change the animation in Edit profile.":"Pick one first in Edit profile → Animated background."}</div></div>
     ${MODE==="live"?`<div class="sec"><h2>Data</h2><button class="btn block" data-act="resync">🔄 Refresh everything</button><div class="hint">The app saves a copy on this phone and only downloads what's new, to keep things fast and free. Use this if something looks out of date.</div></div>`:""}
     ${MODE==="live"?`<div class="sec"><h2>Your user ID</h2><div class="row" style="flex-wrap:nowrap"><code style="flex:1;min-width:0;overflow-wrap:anywhere;font-size:12px;background:var(--surface2);padding:8px 10px;border-radius:10px;user-select:all;-webkit-user-select:all">${esc(ME)}</code><button class="btn sm" data-act="copyUid">Copy</button></div>${crewOwner()===ME?`<div class="hint">You're the crew owner, so you can remove people from their profile. Paste this ID into the Firebase rules once so it works.</div>`:""}</div>`:""}
@@ -2954,12 +2954,17 @@ async function resolveSong(text){text=String(text||"").trim();if(!text)return nu
   const it=j?.results?.[0];if(!it)return{songUrl:url,songTitle:q,songArt:art,songPreview:""};
   return{songUrl:url||it.trackViewUrl||"",songTitle:`${it.trackName} – ${it.artistName}`,songArt:art||(it.artworkUrl100||"").replace("100x100","300x300"),songPreview:it.previewUrl||""}}
 const SONG={a:null,uid:null,muted:false,
-  play(uid){const m=mem(uid);this.stop();if(!m?.songPreview||SET.profSongs===false||this.muted)return;try{const a=new Audio(m.songPreview);a.volume=.55;a.loop=true;this.a=a;this.uid=uid;a.play().then(()=>this.paint()).catch(()=>this.paint());a.onpause=a.onplay=()=>this.paint()}catch{}},
+  // the preview plays once; with "Play profile music" off it only plays when you tap ▶
+  load(uid){const m=mem(uid);this.stop();if(!m?.songPreview)return null;try{const a=new Audio(m.songPreview);a.volume=.55;a.loop=false;a.preload="auto";this.a=a;this.uid=uid;
+    a.onpause=a.onplay=()=>this.paint();a.onended=()=>{try{a.currentTime=0}catch{}this.paint()};return a}catch{return null}},
+  play(uid){const a=this.load(uid);if(!a||SET.profSongs===false||this.muted)return;a.play().then(()=>this.paint()).catch(()=>this.paint())},
   stop(){if(this.a){try{this.a.pause()}catch{}this.a=null}this.uid=null},
-  paint(){const b=document.querySelector(".songcard .songbtn");if(b){const on=this.a&&!this.a.paused;b.textContent=on?"⏸":"▶";b.closest(".songcard").classList.toggle("playing",!!on)}}};
+  paint(){const b=document.querySelector(".songcard .songbtn");if(b){const on=this.a&&!this.a.paused;b.innerHTML=on?SONG_ICON.pause:SONG_ICON.play;b.setAttribute("aria-label",on?"Pause":"Play");b.closest(".songcard").classList.toggle("playing",!!on)}}};
+const SONG_ICON={play:'<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.87l10.4-6.5a1 1 0 0 0 0-1.74L9.5 4.63A1 1 0 0 0 8 5.5z"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1.2"/><rect x="13.5" y="5" width="4" height="14" rx="1.2"/></svg>'};
 function songCard(m){if(!m.song)return"";const sp=spotifyTrack(m.song),title=m.songTitle||(sp?"Spotify song":m.song);if(!sp&&!m.songPreview)return"";
   return`<div class="songcard"><span class="sart">${m.songArt?`<img src="${esc(m.songArt)}" alt="">`:"🎵"}</span><span class="grow" style="min-width:0"><span class="k">🎵 On repeat</span><b>${esc(title)}</b><span class="eq"><i></i><i></i><i></i><i></i></span></span>
-    ${m.songPreview?`<button class="songbtn" data-act="songToggle" aria-label="Play or pause">▶</button>`:""}${m.songUrl||sp?`<a class="songsp" href="${esc(m.songUrl||m.song)}" target="_blank" rel="noopener" aria-label="Open in Spotify">↗</a>`:""}</div>`}
+    ${m.songPreview?`<button class="songbtn" data-act="songToggle" data-id="${esc(m.id)}" aria-label="Play">${SONG_ICON.play}</button>`:""}${m.songUrl||sp?`<a class="songsp" href="${esc(m.songUrl||m.song)}" target="_blank" rel="noopener" aria-label="Open in Spotify">↗</a>`:""}</div>`}
 SHEETS.person.init=a=>{SONG.play(a.id);return{}};
 SHEETS.person.destroy=()=>SONG.stop();
 document.addEventListener("keydown",e=>{const s=topS();if(s?.kind!=="gWord"||e.metaKey||e.ctrlKey||e.altKey)return;const k=e.key;
@@ -3505,7 +3510,7 @@ const ACT={
   pfFx(d){const p=profS();if(!p)return;p.state.bgfx=d.v;paintSheet(topS())},
   pickStickers(){openSheet("stickerPick")},
   pickFx(){openSheet("fxPick")},
-  songToggle(){const a=SONG.a;if(!a)return;if(a.paused){a.play().catch(()=>{});SONG.muted=false}else{a.pause();SONG.muted=true}SONG.paint()},
+  songToggle(d){let a=SONG.a;if(!a&&d?.id)a=SONG.load(d.id);if(!a)return;if(a.paused){a.play().then(()=>SONG.paint()).catch(()=>{});SONG.muted=false}else{a.pause();SONG.muted=true}SONG.paint()},
   async pfSave(){const n=val("pfNick");if(!n)return toast("Add a name first.");const s=topS(),bd=val("pfBday"),song=val("pfSong"),old=mem(ME)||{};let sg={};
     if(song!==(old.song||"")){if(!song)sg={songTitle:"",songArt:"",songPreview:"",songUrl:""};else{toast("Finding your song…");try{const r=await resolveSong(song);sg=r?{songTitle:r.songTitle||"",songArt:r.songArt||"",songPreview:r.songPreview||"",songUrl:r.songUrl||""}:{songTitle:"",songArt:"",songPreview:"",songUrl:""};if(!r?.songPreview)toast("Saved. Couldn't find a preview for that song.")}catch{}}}
     await Store.upd("members",ME,{nick:n.slice(0,24),emoji:s.state.emoji,color:s.state.color,photo:s.state.photo||"",bio:val("pfBio"),vibe:val("pfVibe"),birthday:bd?bd.slice(5):"",birthYear:bd?bd.slice(0,4):"",spot:val("pfSpot"),song:song,likes:val("pfLikes").split(",").map(x=>x.trim()).filter(Boolean).slice(0,10),stickers:s.state.stickers,bgfx:s.state.bgfx||"",...sg});closeSheet();toast("Profile saved")},
@@ -3905,7 +3910,7 @@ document.addEventListener("change",ev=>{
     else{await Store.upd("members",ME,{shareLoc:false,loc:MODE==="demo"?DEL:firebase.firestore.FieldValue.delete()});syncLocWatch();toast("👻 Location hidden")}})()}
   if(el.id?.startsWith("ridePartial-")){const pid=el.dataset.pid,r=myRsvp(pid);if(r?.ride)saveRsvp(pid,{ride:{...r.ride,partial:el.checked}})}
   if(["nMsgs","nPlans","nMoments"].includes(el.id)){SET[el.id]=el.checked;ls.set("yg-settings",SET)}
-  if(el.id==="profSongs"){SET.profSongs=el.checked;ls.set("yg-settings",SET);if(!el.checked)SONG.stop()}
+  if(el.id==="profSongs"){SET.profSongs=el.checked;ls.set("yg-settings",SET);if(!el.checked&&SONG.a){SONG.a.pause();SONG.paint()}}
   if(el.id==="appFx"){SET.appFx=el.checked;ls.set("yg-settings",SET);syncAppFx();for(const x of stack)sheetFx(x)}
   if(el.id==="actAs"){ls.set("yg-actas",el.value);ME=el.value;while(stack.length)closeSheet();render();toast(ME==="me-demo"?"Back to being you":"Now testing as "+(mem(ME)?.nick||"a friend"))}
   if(el.id==="exPl"){const s=topS();s.state.plan=el.value}
