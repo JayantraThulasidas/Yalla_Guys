@@ -653,6 +653,7 @@ body.has-fx::before{background:transparent}
 .gslide{flex:0 0 100%;scroll-snap-align:center;display:grid;place-items:center;padding:0 16px;box-sizing:border-box}
 .lightbox .sheet-b .gslide img{width:100%;max-height:calc(100dvh - 170px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));object-fit:contain;border-radius:6px}
 .gdots{display:flex;justify-content:center;gap:6px;margin-top:14px}.gdots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);transition:all .2s}.gdots i.on{background:#fff;width:18px;border-radius:4px}
+.replybar.pop-in{animation:rbin .18s ease-out}@keyframes rbin{from{opacity:0;transform:translateY(6px)}}
 .podcard{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:12px 0 10px;margin:4px 0 14px;overflow:hidden}
 .podtabs{display:flex;gap:6px;margin:0 12px;background:var(--surface2);border-radius:999px;padding:4px}
 .podtabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:8px 6px;border-radius:999px;white-space:nowrap}
@@ -778,7 +779,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-11.10";
+const APP_VERSION="2026-11-11.11";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -3270,8 +3271,15 @@ function podMark(){const i=UI.podSlide||0;$$(".podtabs button").forEach((b,k)=>b
 document.addEventListener("scroll",e=>{const t=e.target;if(!t.classList?.contains("podswipe"))return;const i=Math.round(t.scrollLeft/Math.max(1,t.clientWidth));if(i!==(UI.podSlide||0)){UI.podSlide=i;podMark()}},true);
 function keepGoals(s){$$("[data-hgoal]",s.el).forEach(i=>{const h=s.state.list[+i.dataset.hgoal];if(h&&+i.value>0){h.goal=+i.value;h.step=h.goal>=1000?1000:h.goal>=100?10:1}})}
 function heartPop(el){const b=el?.querySelector(".bub,.mediab")||el;if(!b)return;const h=document.createElement("span");h.className="hpop";h.textContent="❤️";b.style.position="relative";b.appendChild(h);setTimeout(()=>h.remove(),700)}
-function startReply(m){const s=stack.find(x=>x.kind==="chat"&&x.args.id===m.chatId);if(!s)return;s.state.reply={id:m.id,by:m.by,text:(msgLabel(m)||"").slice(0,90)};paintSheet(s);setTimeout(()=>$("#chatIn-"+CSS.escape(m.chatId),s.el)?.focus(),60)}
-function takeReply(cid){const s=stack.find(x=>x.kind==="chat"&&x.args.id===cid);const r=s?.state.reply;if(r){s.state.reply=null;paintSheet(s)}return r?{id:r.id,by:r.by,text:r.text}:null}
+// the reply bar is updated in place, so it shows straight away even while you're typing
+function syncReplyBar(s){const ta=$("#chatIn-"+CSS.escape(s.args.id),s.el);if(!ta)return;const col=ta.parentElement?.parentElement;if(!col)return;
+  let bar=col.querySelector(":scope>.replybar");const r=s.state.reply;
+  if(!r){bar?.remove();ta.placeholder="Message";return}
+  const html=`<span style="flex:1;min-width:0"><b>↩️ Replying to ${esc(r.by===ME?"yourself":nick(r.by))}</b><span>${esc(r.text)}</span></span><button class="x" data-act="replyClear" aria-label="Cancel reply">✕</button>`;
+  if(!bar){bar=document.createElement("div");bar.className="replybar pop-in";col.insertBefore(bar,col.firstChild)}bar.innerHTML=html;ta.placeholder="Write a reply…"}
+function startReply(m){const s=stack.find(x=>x.kind==="chat"&&x.args.id===m.chatId);if(!s)return;s.state.reply={id:m.id,by:m.by,text:(msgLabel(m)||"").slice(0,90)};paintSheet(s);syncReplyBar(s);
+  const ta=$("#chatIn-"+CSS.escape(m.chatId),s.el);if(ta&&document.activeElement!==ta)setTimeout(()=>ta.focus(),60)}
+function takeReply(cid){const s=stack.find(x=>x.kind==="chat"&&x.args.id===cid);const r=s?.state.reply;if(r){s.state.reply=null;paintSheet(s);syncReplyBar(s)}return r?{id:r.id,by:r.by,text:r.text}:null}
 async function postItem(ctx,id,payload){
   const base={by:ME,at:now(),text:"",...payload};
   if(ctx==="chat"){const rp=takeReply(id);return Store.add("msgs",{chatId:id,...base,...(rp?{replyTo:rp}:{})})}
@@ -3794,7 +3802,7 @@ const ACT={
   openChat(d){openSheet("chat",{id:d.id})},
   async send(d){const el=$("#chatIn-"+CSS.escape(d.id));const t=(el?.value||"").trim();if(!t)return;el.value="";el.style.height="";const rp=takeReply(d.id);await Store.add("msgs",{chatId:d.id,by:ME,text:t.slice(0,2000),at:now(),...(rp?{replyTo:rp}:{})})},
   msgReply(){const s=topS(),m=D.msgs.find(x=>x.id===s.args.id);closeSheet();if(m)startReply(m)},
-  replyClear(){const s=stack.find(x=>x.kind==="chat");if(s){s.state.reply=null;paintSheet(s)}},
+  replyClear(){const s=stack.find(x=>x.kind==="chat");if(s){s.state.reply=null;paintSheet(s);syncReplyBar(s);$("#chatIn-"+CSS.escape(s.args.id),s.el)?.focus()}},
   jumpMsg(d){const s=topS(),el=s&&$(`[data-mid="${CSS.escape(d.id)}"]`,s.el);if(!el)return toast("That message is too far back.");el.scrollIntoView({block:"center",behavior:"smooth"});el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash")},
   newExpense(d){openSheet("expense",{plan:d.plan||""})},
   editExpense(d){openSheet("expense",{id:d.id})},
