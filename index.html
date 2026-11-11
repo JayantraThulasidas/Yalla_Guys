@@ -647,6 +647,12 @@ body.has-fx::before{background:transparent}
 .att-tile img{width:100%;height:100%;object-fit:cover;display:block}
 .att-tile .tile-open{all:unset;display:block;width:100%;height:100%;cursor:pointer}
 .att-tile .tile-x{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:12px;display:grid;place-items:center;backdrop-filter:blur(4px)}
+.lightbox .sheet-b .in:has(.gal){padding-left:0;padding-right:0;max-width:none}
+.gal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;width:100%;align-items:center}
+.gal::-webkit-scrollbar{display:none}
+.gslide{flex:0 0 100%;scroll-snap-align:center;display:grid;place-items:center;padding:0 16px;box-sizing:border-box}
+.lightbox .sheet-b .gslide img{width:100%;max-height:calc(100dvh - 170px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));object-fit:contain;border-radius:6px}
+.gdots{display:flex;justify-content:center;gap:6px;margin-top:14px}.gdots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);transition:all .2s}.gdots i.on{background:#fff;width:18px;border-radius:4px}
 .podcard{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:12px 0 10px;margin:4px 0 14px;overflow:hidden}
 .podtabs{display:flex;gap:6px;margin:0 12px;background:var(--surface2);border-radius:999px;padding:4px}
 .podtabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:8px 6px;border-radius:999px;white-space:nowrap}
@@ -772,7 +778,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-11.09";
+const APP_VERSION="2026-11-11.10";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -3378,7 +3384,24 @@ SHEETS.player={
       .catch(()=>{const pl=$("#pl",s.el);if(pl)pl.innerHTML='<div class="empty">This video couldn\'t load. Check your connection.</div>'})},
   destroy(s){$("video",s.el)?.pause()}
 };
-SHEETS.img={render(s){const it=itemByKey(s.args.key);return{title:`<span style="color:#fff">${esc(it?nick(it.by):"")}</span>`,body:it?`<img src="${esc(it.src)}" alt="Photo">`:""}}};
+// photo viewer: swipe through every photo in the same group (e.g. all photos on a blocked time)
+function imgGroup(key){const it=itemByKey(key);if(!it)return{list:[],it:null};const col=key.slice(0,key.indexOf(":"));
+  if(col==="mine"&&it.busyId)return{it,list:D.mine.filter(m=>m.busyId===it.busyId&&m.kind==="photo"&&m.src).sort((a,b)=>a.at-b.at).map(m=>({key:"mine:"+m.id,src:m.src}))};
+  if(col==="msgs")return{it,list:D.msgs.filter(m=>m.chatId===it.chatId&&m.kind==="photo"&&m.src&&!m.deleted).sort((a,b)=>a.at-b.at).map(m=>({key:"msgs:"+m.id,src:m.src,by:m.by,at:m.at}))};
+  return{it,list:[{key,src:it.src,by:it.by,at:it.at}]}}
+function imgTitle(key){const it=itemByKey(key);if(!it)return"";const col=key.slice(0,key.indexOf(":"));
+  if(col==="mine"){const b=D.busy.find(x=>x.id===it.busyId);return b?`🔒 ${myLabel(b)||"Busy"} · ${fDate(b.date,{day:"numeric",month:"short"})}`:"🔒 Your photo"}
+  return it.by?`${nick(it.by)}${it.at?" · "+ago(it.at):""}`:"Photo"}
+SHEETS.img={
+  init(a){return{i:Math.max(0,imgGroup(a.key).list.findIndex(x=>x.key===a.key))}},
+  render(s){const g=imgGroup(s.args.key),list=g.list;if(!list.length)return{title:"",body:'<p style="color:#fff">Photo removed.</p>'};const cur=list[Math.min(s.state.i,list.length-1)];
+    return{title:`<span style="color:#fff" id="imgTitle">${esc(imgTitle(cur.key))}</span>`,right:list.length>1?`<span class="pill" id="imgCount" style="background:rgba(255,255,255,.12);color:#fff">${Math.min(s.state.i,list.length-1)+1} / ${list.length}</span>`:"",
+      body:`<div class="gal">${list.map(x=>`<div class="gslide"><img src="${esc(x.src)}" alt="Photo" draggable="false"></div>`).join("")}</div>${list.length>1?`<div class="gdots">${list.map((_,i)=>`<i class="${i===s.state.i?"on":""}"></i>`).join("")}</div>`:""}`}},
+  after(s,first){const gal=$(".gal",s.el);if(!gal)return;if(first||gal.dataset.i!==String(s.state.i)){gal.scrollLeft=s.state.i*gal.clientWidth;gal.dataset.i=s.state.i}
+    if(gal.dataset.bound)return;gal.dataset.bound=1;
+    gal.addEventListener("scroll",()=>{const i=Math.round(gal.scrollLeft/Math.max(1,gal.clientWidth));if(i===s.state.i)return;s.state.i=i;gal.dataset.i=i;const list=imgGroup(s.args.key).list,x=list[i];if(!x)return;
+      const t=$("#imgTitle",s.el),c=$("#imgCount",s.el);if(t)t.textContent=imgTitle(x.key);if(c)c.textContent=`${i+1} / ${list.length}`;$$(".gdots i",s.el).forEach((d,k)=>d.classList.toggle("on",k===i))},{passive:true})}
+};
 /* ---------- actions ---------- */
 const val=id=>($("#"+CSS.escape(id))?.value||"").trim();
 const ACT={
