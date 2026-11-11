@@ -684,6 +684,9 @@ body.has-fx::before{background:transparent}
 /* small round ✕ buttons grow into a red pill while waiting for the second tap */
 .tile-x.armed,.bdel.armed,.x.armed{width:auto!important;min-width:0;padding:0 11px!important;border-radius:999px!important;background:var(--danger)!important;color:#fff!important;font-size:12.5px!important;font-weight:800;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.35);animation:armpop .18s ease-out}
 @keyframes armpop{from{transform:scale(.85)}}
+.daychips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}.daychips::-webkit-scrollbar{display:none}
+.daychips .chip{flex:none;font-weight:600}.daychips .chip b{font-weight:800}
+.dcount{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:var(--accent-fg);font-size:11px;font-weight:800;padding:0 5px;margin-left:4px}
 .podcard{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:12px 0 10px;margin:4px 0 14px;overflow:hidden}
 .podtabs{display:flex;gap:6px;margin:0 12px;background:var(--surface2);border-radius:999px;padding:4px}
 .podtabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:8px 6px;border-radius:999px;white-space:nowrap}
@@ -809,7 +812,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-11.18";
+const APP_VERSION="2026-11-11.21";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1713,12 +1716,14 @@ function timelineDays(u){
   const boardOf=p=>albumOpen(p)?[]:mediaOf(p.id).filter(m=>m.phase!=="memory"&&m.phase!=="ticket"&&(m.kind==="photo"||m.kind==="note"||m.kind==="color")).map(m=>({thumb:m.kind==="photo"?m.src:"",color:m.color||"",text:m.kind==="note"?m.text:m.kind==="color"?(m.caption||m.color):"",t:m.at,plan:p.id}));
   if(u===ME)for(const b of D.busy.filter(x=>x.uid===ME)){const pics=D.mine.filter(m=>m.busyId===b.id&&m.kind==="photo");const tix=D.mine.filter(m=>m.busyId===b.id&&m.kind!=="photo");if(!pics.length&&!tix.length&&!myLabel(b))continue;
     add(b.date,"plans",{id:"busy:"+b.id,_busy:b.id,title:myLabel(b)||"Personal",emoji:"🔒",final:{date:b.date,start:b.start,end:b.end},status:b.date<TODAY()?"done":"set"});
-    for(const m of pics)add(b.date,"media",{thumb:m.src,act:`data-act="viewSrc" data-key="mine:${esc(m.id)}"`,t:m.at})}
+    for(const m of pics)add(b.date,"media",{thumb:m.src,act:`data-act="viewSrc" data-key="mine:${esc(m.id)}"`,t:m.at,own:true})}
   for(const p of visiblePlans()){const r=D.rsvps.find(x=>x.planId===p.id&&x.uid===u);if(!(p.by===u||(r&&r.going!=="out")))continue;
-    if(p.final){const d=p.final.date;for(const dd of dayList(p.final.date,endOf(p.final)))add(dd,"plans",p);for(const b of boardOf(p))add(d,"board",b);
-      for(const m of albumOf(p.id))if(m.kind==="photo"||(m.kind==="video"&&m.poster))add(d,"media",{thumb:m.kind==="photo"?m.src:m.poster,video:m.kind==="video",act:m.kind==="photo"?`data-act="viewPhoto" data-id="${esc(m.id)}"`:`data-act="playVideo" data-key="media:${esc(m.id)}"`,t:m.at});
+    if(p.final){const span=dayList(p.final.date,endOf(p.final)),bd=boardOf(p),al=albumOf(p.id).filter(m=>m.kind==="photo"||(m.kind==="video"&&m.poster));
+      for(const dd of span){add(dd,"plans",p);for(const b of bd)add(dd,"board",b);
+        for(const m of al)if(!byDay(p)||mDay(p,m)===dd)add(dd,"media",{thumb:m.kind==="photo"?m.src:m.poster,video:m.kind==="video",act:m.kind==="photo"?`data-act="viewPhoto" data-id="${esc(m.id)}"`:`data-act="playVideo" data-key="media:${esc(m.id)}"`,t:m.at})}
 }
     else for(const sl of p.slots||[]){add(sl.date,"plans",{...p,_proposed:sl});for(const b of boardOf(p))add(sl.date,"board",b)}}
+  for(const d of Object.values(days))d.plans.sort((a,b)=>(a._busy?1:0)-(b._busy?1:0));
   return days;
 }
 SHEETS.timeline={
@@ -1737,7 +1742,7 @@ function buildTimeline(s){
   if(month){const first=(keys[0]||today).slice(0,7)<today.slice(0,7)?(keys[0]||today).slice(0,7):ymd(new Date(new Date().getFullYear(),new Date().getMonth()-6,1)).slice(0,7);
     const lastKey=(keys[keys.length-1]||today).slice(0,7),endD=new Date(new Date().getFullYear(),new Date().getMonth()+6,1),end=lastKey>ymd(endD).slice(0,7)?lastKey:ymd(endD).slice(0,7);
     let [y,mo]=first.split("-").map(Number);for(;;){const k=`${y}-${pad(mo)}`;const agg={plans:[],media:[],reels:[],board:[]};for(const d of keys)if(d.startsWith(k)){const x=days[d];agg.plans.push(...x.plans);agg.media.push(...x.media);agg.reels.push(...x.reels);agg.board.push(...(x.board||[]))}
-      slots.push({k,agg});if(k>=end)break;mo++;if(mo>12){mo=1;y++}}}
+      const uq=arr=>[...new Map(arr.map(m=>[(m.thumb||"")+"|"+(m.text||"")+"|"+(m.color||"")+"|"+(m.t||""),m])).values()];agg.media=uq(agg.media);agg.board=uq(agg.board);slots.push({k,agg});if(k>=end)break;mo++;if(mo>12){mo=1;y++}}}
   else{const st=new Date(Math.min(pd(keys[0]||today),Date.now()-30*864e5)),en=new Date(Math.max(pd(keys[keys.length-1]||today),Date.now()+60*864e5));
     for(const d=new Date(st.getFullYear(),st.getMonth(),st.getDate());d<=en;d.setDate(d.getDate()+1)){const k=ymd(d);slots.push({k,agg:days[k]||{plans:[],media:[],reels:[],board:[]}})}}
   const curKey=month?today.slice(0,7):today;
@@ -1762,7 +1767,9 @@ function buildTimeline(s){
 }
 function tlFan(s,i){
   const fan=$("#tlFan",s.el),x=s.slots[i];if(!fan||!x)return;const a=x.agg,plans=[...new Map(a.plans.map(p=>[p.id,p])).values()];
-  const fromBoard=!a.media.length&&(a.board||[]).length,pics=[...(fromBoard?a.board:a.media)].sort((p,q)=>q.t-p.t).slice(0,3),pos=[[-14,-62],[0,0],[14,62]],use=pics.length===1?[pos[1]]:pics.length===2?[pos[0],pos[2]]:pos;
+  const upcoming=x.k>=(s.month?TODAY().slice(0,7):TODAY()),planMedia=a.media.filter(m=>!m.own),ownMedia=a.media.filter(m=>m.own),board=a.board||[];
+  const src=upcoming?(planMedia.length?planMedia:board.length?board:ownMedia):(a.media.length?a.media:board),fromBoard=src===board&&board.length>0;
+  const pics=[...src].sort((p,q)=>q.t-p.t).slice(0,3),pos=[[-14,-62],[0,0],[14,62]],use=pics.length===1?[pos[1]]:pics.length===2?[pos[0],pos[2]]:pos;
   fan.innerHTML=pics.map((m,k)=>`<span class="fp ${m.video?"v":""} ${m.thumb?"":"txt"}" style="${m.thumb?`background-image:url('${esc(m.thumb)}');`:`background:${esc(m.color||"#FFE58F")};`}--r:${use[k][0]}deg;--x:${use[k][1]}px;animation-delay:${k*45}ms">${m.thumb?"":`<span>${esc(m.text||"")}</span>`}</span>`).join("")+
     (plans.length||pics.length?`<span class="nm">${plans[0]?esc((plans[0].emoji||"")+" "+plans[0].title)+(plans.length>1?` +${plans.length-1}`:""):`${a.media.length} memor${a.media.length===1?"y":"ies"}`}${fromBoard?`<br><span style="font-weight:600;font-size:11px;color:var(--muted)">🎨 Mood board · tap to open</span>`:""}</span>`:"");
   fan.style.pointerEvents=plans.length||pics.length?"auto":"none";s.fanTarget={plan:plans[0]||null,media:a.media,board:!!fromBoard};
@@ -1831,14 +1838,19 @@ async function saveFiles(files){
 }
 SHEETS.album={live:true,
   init(){return{style:"polaroid"}},
-  render(s){const p=planById(s.args.id);if(!p)return{title:"Album",body:""};const items=albumOf(p.id).filter(m=>m.kind==="photo"||m.kind==="video");
+  render(s){const p=planById(s.args.id);if(!p)return{title:"Album",body:""};const all=albumOf(p.id).filter(m=>m.kind==="photo"||m.kind==="video");
+    const daily=byDay(p),sel=daily?albumDaySel(p):null,items=daily?all.filter(m=>mDay(p,m)===sel):all;
+    const tripUI=isTrip(p)?`<div class="seg" style="margin:0"><button data-act="albumMode" data-id="${esc(p.id)}" data-k="bulk" aria-pressed="${!daily}">🧳 Whole trip</button><button data-act="albumMode" data-id="${esc(p.id)}" data-k="daily" aria-pressed="${daily}">🗓️ By day</button></div>
+      ${daily?`<div class="chips daychips">${tripDays(p).map((d,i)=>{const n=all.filter(m=>mDay(p,m)===d).length;return`<button class="chip" data-act="albumDay" data-id="${esc(p.id)}" data-d="${d}" aria-pressed="${d===sel}"><b>Day ${i+1}</b>&nbsp;${esc(fDate(d,{weekday:"short",day:"numeric"}))}${n?` <span class="dcount">${n}</span>`:""}</button>`}).join("")}</div>
+        <div class="hint" style="margin:-4px 0 0">New pics go on <b style="color:var(--fg)">${esc(fDate(sel,{weekday:"long",day:"numeric",month:"short"}))}</b>. Each day shows its own pics on the timeline.</div>`
+      :`<div class="hint" style="margin:-4px 0 0">One set of pics for the whole trip, shown on every day of it in the timeline.</div>`}`:"";
     return{title:`📸 ${esc(p.title)}`,right:`<button class="btn sm pri" data-act="albumAll">⬇ All</button>`,
-      top:`<div class="form" style="gap:10px"><div class="collage-styles">${COLLAGE_STYLES.map(([k,l])=>`<button class="chip" data-act="collageStyle" data-k="${k}" aria-pressed="${s.state.style===k}">${l}</button>`).join("")}</div>
+      top:`<div class="form" style="gap:10px">${tripUI}<div class="collage-styles">${COLLAGE_STYLES.map(([k,l])=>`<button class="chip" data-act="collageStyle" data-k="${k}" aria-pressed="${s.state.style===k}">${l}</button>`).join("")}</div>
         <div class="collage-wrap ${s.state.style==="film"?"film":""}"><img class="collage" id="collageImg" alt="Collage of the plan's photos"></div>${s.state.style==="film"?`<div class="hint" style="margin:-4px 0 0;text-align:center">↕ Scroll the film strip</div>`:""}
         <div class="grid2"><button class="btn pri" data-act="collageSave">⬇ Save collage</button><button class="btn" data-act="addMedia" data-id="${esc(p.id)}" data-ph="memory">＋ Add pics</button></div></div>`,
-      body:`<div class="sec"><div class="between"><h2>All ${items.length}</h2><span class="meta">Tap ⬇ to save one</span></div>
+      body:`<div class="sec"><div class="between"><h2>${daily?`Day ${tripDays(p).indexOf(sel)+1} · ${items.length}`:`All ${items.length}`}</h2><span class="meta">Tap ⬇ to save one</span></div>${daily&&!items.length?`<div class="empty" style="padding:18px">No pics for this day yet. Tap ＋ Add pics.</div>`:""}
         <div class="mosaic">${items.map((m,i)=>`<div class="mt ${i%7===0?"big":i%5===3?"tall":""}"><button style="all:unset;display:block;width:100%;height:100%;cursor:pointer" ${m.kind==="photo"?`data-act="viewPhoto" data-id="${esc(m.id)}"`:`data-act="playVideo" data-key="media:${esc(m.id)}"`}><img src="${esc(m.kind==="video"?m.poster:m.src)}" alt="" loading="lazy">${m.kind==="video"?'<span class="vplay">▶</span>':""}</button><span class="who">${avatar(m.by,"xs")}</span><button class="dl" data-act="saveOne" data-id="${esc(m.id)}" aria-label="Save">⬇</button></div>`).join("")}</div></div>`}},
-  after(s,first){const p=planById(s.args.id);if(!p)return;const items=albumOf(p.id).filter(m=>m.kind==="photo"||m.kind==="video");
+  after(s,first){const p=planById(s.args.id);if(!p)return;const items=albumOf(p.id).filter(m=>(m.kind==="photo"||m.kind==="video")&&(!byDay(p)||mDay(p,m)===albumDaySel(p)));
     const sig=s.state.style+"|"+items.map(m=>m.id).join();if(s.cSig!==sig){s.cSig=sig;makeCollage(p,items,s.state.style).then(b=>{if(!b)return;s.collage=new File([b],`${safeName(p.title)}-collage.jpg`,{type:"image/jpeg"});if(s.cUrl)URL.revokeObjectURL(s.cUrl);s.cUrl=URL.createObjectURL(b);const im=$("#collageImg",s.el);if(im)im.src=s.cUrl})}
     else{const im=$("#collageImg",s.el);if(im&&s.cUrl&&!im.src)im.src=s.cUrl}
     const fsig=items.map(m=>m.id).join();if(s.fSig!==fsig){s.fSig=fsig;s.files={};items.forEach((m,i)=>itemFile(m,`${safeName(p.title)}-${i+1}`).then(f=>{s.files[m.id]=f}).catch(()=>{}))}},
@@ -2004,7 +2016,7 @@ function albumHtml(p,mems,tile){
   return`<div class="sec" id="album" style="margin-top:12px"><div class="between"><h2>📸 Plan album</h2><span class="meta">${mems.length} item${mems.length===1?"":"s"}</span></div>
     ${today?`<div class="banner" style="margin:0;background:var(--accent-soft)">🎉 It's plan day! Add your pics as you go. They stay in this plan for everyone.</div>`:""}
     <div class="grid3" style="grid-template-columns:1fr 1fr 1fr"><button class="btn pri" data-act="camera" data-ctx="album" data-id="${esc(p.id)}" style="min-height:52px">📷 Camera</button><button class="btn" data-act="addMedia" data-id="${esc(p.id)}" data-ph="memory" style="min-height:52px">🖼️ Gallery</button><button class="btn" data-act="voice" data-ctx="album" data-id="${esc(p.id)}" style="min-height:52px">🎤 Voice note</button></div>
-    <div class="hint" style="margin:0">You can add ${Math.max(0,albumLeft(p.id))} more of your ${ALBUM_MAX} photos/videos.</div>
+    <div class="hint" style="margin:0">You can add ${Math.max(0,albumLeft(p.id))} more of your ${ALBUM_MAX} photos/videos${byDay(p)?` for <b style="color:var(--fg)">Day ${tripDays(p).indexOf(albumDaySel(p))+1} (${esc(fDate(albumDaySel(p),{weekday:"short",day:"numeric",month:"short"}))})</b>. Change the day in View album`:""}.</div>
     ${mems.length?`<button class="btn block" data-act="viewAlbum" data-id="${esc(p.id)}" style="min-height:50px;justify-content:space-between"><span>🖼️ View album & collage</span><span class="meta">${mems.length} ›</span></button>
       <div class="media-grid">${mems.slice(0,6).map(tile).join("")}</div><div class="row">${avStack(who,"xs",8)}<span class="meta">Shared by ${who.length} ${who.length===1?"person":"people"}</span></div>`:`<div class="meta">No photos yet. Be the first to add some.</div>`}</div>`;
 }
@@ -2319,7 +2331,8 @@ SHEETS.media={
 SHEETS.photo={live:true,
   render(s){const m=D.media.find(x=>x.id===s.args.id);if(!m)return{title:"",body:'<p style="color:#fff">Photo removed.</p>'};
     return{title:`<span style="color:#fff">${esc(nick(m.by))} · ${ago(m.at)}</span>`,body:`<img src="${esc(m.src)}" alt="${esc(m.caption||"Photo")}">${m.caption?`<p style="color:#fff">${esc(m.caption)}</p>`:""}
-      <div class="row" style="margin-top:12px"><button class="btn sm pri" data-act="saveOne" data-id="${esc(m.id)}">⬇ Save</button>${m.planId?`<button class="btn sm" data-act="setCover" data-id="${esc(m.id)}">Use as cover</button>`:""}${m.by===ME?`<button class="btn sm danger" data-act="delMedia" data-id="${esc(m.id)}" data-confirm="Tap again to delete">Delete</button>`:""}</div>`}}
+      <div class="row" style="margin-top:12px"><button class="btn sm pri" data-act="saveOne" data-id="${esc(m.id)}">⬇ Save</button>${m.planId?`<button class="btn sm" data-act="setCover" data-id="${esc(m.id)}">Use as cover</button>`:""}</div>${(()=>{const pl=planById(m.planId);if(!pl||!byDay(pl)||m.phase!=="memory"||m.by!==ME)return"";const cur=mDay(pl,m);
+      return`<div style="margin-top:12px"><div class="meta" style="color:#bbb;margin-bottom:6px">Which day is this from?</div><div class="chips daychips" style="margin:0">${tripDays(pl).map((d,i)=>`<button class="chip" data-act="photoDay" data-id="${esc(m.id)}" data-d="${d}" aria-pressed="${d===cur}"><b>Day ${i+1}</b>&nbsp;${esc(fDate(d,{weekday:"short",day:"numeric"}))}</button>`).join("")}</div>`})()}<div>${m.by===ME?`<button class="btn sm danger" data-act="delMedia" data-id="${esc(m.id)}" data-confirm="Tap again to delete">Delete</button>`:""}</div>`}}
 };
 /* ---------- calendar PDF (itinerary / schedule) ---------- */
 const PDF_W=1240,PDF_H=1754,PM=84,INK="#111827",MUTE="#6B7280",LINE="#E5E7EB",BRAND="#0B7A75";
@@ -3354,10 +3367,17 @@ async function postItem(ctx,id,payload){
   if(ctx==="chat"){const rp=takeReply(id);return Store.add("msgs",{chatId:id,...base,...(rp?{replyTo:rp}:{})})}
   if(ctx==="note"){const s=stack.find(x=>x.kind==="plan"&&x.args.id===id);const rt=s?.state.replyTo||"";if(s){s.state.replyTo="";paintSheet(s)}return Store.add("notes",{planId:id,replyTo:rt,likes:{},...base})}
   if(ctx==="mc")return Store.add("mcomments",{momentId:id,...base});
-  if(ctx==="album")return Store.add("media",{planId:id,phase:"memory",caption:"",...base});
+  if(ctx==="album"){const p=planById(id),extra=byDay(p)?{day:albumDaySel(p)}:{};return Store.add("media",{planId:id,phase:"memory",caption:"",...base,...extra})}
 }
 const ALBUM_MAX=5;
-const albumLeft=pid=>ALBUM_MAX-D.media.filter(m=>m.planId===pid&&m.phase==="memory"&&m.by===ME&&(m.kind==="photo"||m.kind==="video")).length;
+const tripDays=p=>p?.final?dayList(p.final.date,endOf(p.final)):[];
+const isTrip=p=>tripDays(p).length>1;
+const byDay=p=>isTrip(p)&&p.albumMode==="daily";
+const mDay=(p,m)=>{const ds=tripDays(p);if(m.day&&ds.includes(m.day))return m.day;const d=ymd(new Date(m.at));return ds.includes(d)?d:ds[0]};
+const albumDaySel=p=>{const ds=tripDays(p),v=(UI.albumDay||{})[p.id];return ds.includes(v)?v:(ds.includes(TODAY())?TODAY():ds[0])};
+// 5 per person per plan, or 5 per person per day when the album is sorted by day
+const albumLeft=pid=>{const p=planById(pid),sel=byDay(p)?albumDaySel(p):null;
+  return ALBUM_MAX-D.media.filter(m=>m.planId===pid&&m.phase==="memory"&&m.by===ME&&(m.kind==="photo"||m.kind==="video")&&(!sel||mDay(p,m)===sel)).length};
 async function sendFiles(ctx,id,files){
   if(ctx==="album"){const left=albumLeft(id);if(left<=0)return toast(`You've added your ${ALBUM_MAX} pics for this plan. Delete one to add another.`);
     if(files.length>left){toast(`Only ${left} more allowed (${ALBUM_MAX} per person). Adding the first ${left}.`);files=files.slice(0,left)}}
@@ -3630,6 +3650,9 @@ const ACT={
   habitSetup(){openSheet("habitSetup")},
   shamePerson(d){openSheet("shamePerson",{id:d.id})},
   shameDaySet(d){UI.shameDay=d.k;render()},
+  async albumMode(d){const p=planById(d.id);if(!p)return;await Store.upd("plans",p.id,{albumMode:d.k});toast(d.k==="daily"?"🗓️ Pics are sorted by day now":"🧳 One album for the whole trip")},
+  async photoDay(d){await Store.upd("media",d.id,{day:d.d});toast("Moved to "+fDate(d.d,{weekday:"long",day:"numeric",month:"short"}))},
+  albumDay(d){UI.albumDay=UI.albumDay||{};UI.albumDay[d.id]=d.d;const s=topS();if(s)paintSheet(s)},
   playGame(d){const k={word:"gWord",est:"gEst",deep:"gDeep"}[d.g];if(k)openSheet(k)},
   gRange(d){UI.gRange=d.k;render()},
   gGame(d){UI.gGame=d.k;render()},
