@@ -751,7 +751,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-11.04";
+const APP_VERSION="2026-11-11.05";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2560,6 +2560,14 @@ const ridesBy=(uid,role)=>D.rsvps.filter(r=>r.uid===uid&&r.ride?.role===role&&D.
 function bestMomentStreak(uid){const days=[...new Set(momentsBy(uid).map(m=>m.day))].sort();let best=0,run=0,prev=null;for(const d of days){if(prev){const x=pd(prev);x.setDate(x.getDate()+1);run=ymd(x)===d?run+1:1}else run=1;best=Math.max(best,run);prev=d}return best}
 function habitDays(uid,hid){const h=(uid===ME?habitsOf(uid):shownHabits(uid)).find(x=>x.id===hid);if(!h)return 0;return D.checkins.filter(c=>c.uid===uid&&isDone(h,c.v?.[hid])).length}
 function cleanDays(uid){const m=mem(uid);if(!m?.habitsSince)return 0;let n=0;for(const ds of shameRange(m.habitsSince,shameDay(1)))if(dayScore(uid,ds)!=null&&!missesOn(uid,ds).length)n++;return n}
+// per-answer details from saved game scores (puzzles are rebuilt from the date)
+const _gmemo=new Map();const gDayCached=ds=>{if(!_gmemo.has(ds))_gmemo.set(ds,gameDay(ds));return _gmemo.get(ds)};
+const _dmemo=new Map();const dcDayCached=ds=>{if(!_dmemo.has(ds))_dmemo.set(ds,dcToday(ds));return _dmemo.get(ds)};
+const myScores=(u,g)=>D.scores.filter(x=>x.uid===u&&x.game===g);
+const wordGuesses=x=>{const m=String(x.label||"").match(/^(\d)\/6/);return m?+m[1]:0};
+function estAnswerPts(u){const out=[];for(const x of myScores(u,"est")){const qs=gDayCached(x.date).est;(x.raw||[]).forEach((g,i)=>{if(qs[i])out.push({g,a:qs[i][2],pts:estPts(g,qs[i][2])})})}return out}
+function deepAnswers(u){const out=[];for(const x of myScores(u,"deep")){const ps=dcDayCached(x.date);(x.raw||[]).forEach((t,i)=>{const p=ps[i];if(!p)return;const it=dcMatch(p,t),r=dcScore(p,it);out.push({t,tier:r.tier?r.tier[2]:null})})}return out}
+function gameBestStreak(u){const days=[...new Set(D.scores.filter(x=>x.uid===u).map(x=>x.date))].sort();let best=0,run=0,prev=null;for(const d of days){if(prev){const x=pd(prev);x.setDate(x.getDate()+1);run=ymd(x)===d?run+1:1}else run=1;best=Math.max(best,run);prev=d}return best}
 const CREATOR_ID="VawnWAZOxmZPaLgcJdwHYavrqGp2";
 const owesCount=u=>D.members.filter(m=>m.id!==u&&pairLedger(u,m.id).net>0.5).length;
 const kmFromDubai=(la,ln)=>{const R=6371,d=x=>x*Math.PI/180,a=Math.sin(d(la-25.2048)/2)**2+Math.cos(d(25.2048))*Math.cos(d(la))*Math.sin(d(ln-55.2708)/2)**2;return 2*R*Math.asin(Math.sqrt(a))};
@@ -2609,6 +2617,22 @@ const BADGES=[
  {id:"quick",cat:"Plans",e:"⏱️",t:"Quick draw",u:"votes within an hour",d:"Vote fast when a plan drops",c:"#1C7ED6",tiers:[3,10,25],f:u=>D.rsvps.filter(r=>r.uid===u&&(r.slots||[]).length&&(()=>{const p=D.plans.find(x=>x.id===r.planId);return p&&p.by!==u&&r.at-p.at<36e5})()).length},
  {id:"gamer",cat:"Games",e:"🎮",t:"Daily gamer",u:"daily games played",d:"Play the daily games",c:"#6741D9",tiers:[5,30,100],f:u=>D.scores.filter(x=>x.uid===u).length},
  {id:"brain",cat:"Games",e:"🧠",t:"Big brain",u:"perfect scores",d:"Score 100 in a daily game",c:"#D6336C",tiers:[1,10,30],f:u=>D.scores.filter(x=>x.uid===u&&x.pts>=100).length},
+ {id:"wordwiz",cat:"Games",e:"🔤",t:"Word wizard",u:"Daily Words in 3 guesses or fewer",d:"Crack the word fast",c:"#2FA36B",tiers:[1,10,30],f:u=>myScores(u,"word").filter(x=>{const n=wordGuesses(x);return n>=1&&n<=3}).length},
+ {id:"holeinone",cat:"Games",e:"🎯",t:"Hole in one",u:"",d:"Get the Daily Word on your first guess",c:"#E8590C",tiers:[1],f:u=>myScores(u,"word").some(x=>wordGuesses(x)===1)?1:0},
+ {id:"sniper",cat:"Games",e:"🔭",t:"Sniper",u:"Guesstimates within 5%",d:"Guess scarily close",c:"#7048E8",tiers:[1,5,15],f:u=>estAnswerPts(u).filter(x=>x.g>0&&Math.abs(x.g/x.a-1)<=.05).length},
+ {id:"legendary",cat:"Games",e:"💎",t:"Obscure king",u:"Legendary Deep Cuts answers",d:"Name things nobody else would",c:"#A970FF",tiers:[1,5,20],f:u=>deepAnswers(u).filter(x=>x.tier==="Legendary").length},
+ {id:"triple",cat:"Games",e:"⚡️",t:"Triple threat",u:"days you played all 3 games",d:"Word, Guesstimate and Deep Cuts on the same day",c:"#F59F00",tiers:[3,15,50],f:u=>{const by={};D.scores.filter(x=>x.uid===u).forEach(x=>(by[x.date]=by[x.date]||new Set()).add(x.game));return Object.values(by).filter(s=>["word","est","deep"].every(g=>s.has(g))).length}},
+ {id:"gstreak",cat:"Games",e:"🔁",t:"Daily habit",u:"days in a row playing (best)",d:"Play every single day",c:"#1C7ED6",tiers:[3,7,30],f:u=>gameBestStreak(u)},
+ {id:"crowd",cat:"Chats",e:"🌟",t:"Crowd pleaser",u:"❤️ on your messages",d:"Send messages people double-tap",c:"#FAB005",tiers:[5,25,100],f:u=>D.msgs.filter(m=>m.by===u).reduce((t,m)=>t+Object.values(m.likes||{}).filter(Boolean).length,0)},
+ {id:"hearty",cat:"Chats",e:"❤️‍🔥",t:"Heart giver",u:"messages you ❤️'d",d:"Spread the love",c:"#E03131",tiers:[10,50,200],f:u=>D.msgs.filter(m=>m.likes&&m.likes[u]).length},
+ {id:"early",cat:"Moments",e:"🐓",t:"Early riser",u:"moments before 8am",d:"Post while everyone's asleep",c:"#F76707",tiers:[3,10,30],f:u=>momentsBy(u).filter(m=>new Date(m.at).getHours()<8).length},
+ {id:"showoff",cat:"Memories",e:"🖼️",t:"Show-off",u:"memories shared with the crew",d:"Display your memories to everyone",c:"#C2255C",tiers:[1,3,8],f:u=>D.plans.filter(p=>p.by===u&&p.showCrew).length},
+ {id:"aesthetic",cat:"Life",e:"💅",t:"Aesthetic",u:"",d:"Animated background, 8 stickers and a profile song",c:"#D6336C",tiers:[1],f:u=>{const m=mem(u);return m&&m.bgfx&&(m.stickers||[]).length>=8&&m.songPreview?1:0}},
+ {id:"wordflop",cat:"Hall of shame",e:"🫠",t:"Word flop",u:"Daily Words you didn't get",d:"Six guesses and still nothing",c:"#5C6774",bad:1,tiers:[1,5,15],f:u=>myScores(u,"word").filter(x=>String(x.label||"").startsWith("X")).length},
+ {id:"frozen",cat:"Hall of shame",e:"🥶",t:"Frozen",u:"Deep Cuts prompts timed out",d:"25 seconds and nothing came out",c:"#4DABF7",bad:1,tiers:[1,5,15],f:u=>deepAnswers(u).filter(x=>!x.t).length},
+ {id:"basic",cat:"Hall of shame",e:"🥱",t:"So basic",u:"Basic-tier Deep Cuts answers",d:"Said the first thing everyone thinks of",c:"#868E96",bad:1,tiers:[3,10,30],f:u=>deepAnswers(u).filter(x=>x.tier==="Basic").length},
+ {id:"wayoff",cat:"Hall of shame",e:"🤡",t:"Wildly off",u:"Guesstimates that scored 0",d:"Not even close",c:"#F03E3E",bad:1,tiers:[1,5,15],f:u=>estAnswerPts(u).filter(x=>x.pts===0).length},
+ {id:"wanted",cat:"Hall of shame",e:"🚨",t:"Most wanted",u:"pokes you've received",d:"The crew keeps chasing you",c:"#C92A2A",bad:1,tiers:[5,20,60],f:u=>D.pokes.filter(p=>p.to===u).length},
  {id:"broke",cat:"Hall of shame",e:"💸",t:"Owes everyone money",u:"people you owe right now",d:"Pay your friends back 😭",c:"#C92A2A",bad:1,tiers:[2,3,5],f:u=>owesCount(u)},
  {id:"ghost",cat:"Hall of shame",e:"👻",t:"Ghost",u:"plans you said no to",d:"Never comes out",c:"#495057",bad:1,tiers:[3,10,25],f:u=>D.rsvps.filter(r=>r.uid===u&&r.going==="out").length},
  {id:"maybe",cat:"Hall of shame",e:"🤷",t:"Professional maybe",u:"plans left on maybe",d:"Commit for once",c:"#868E96",bad:1,tiers:[3,8,20],f:u=>D.rsvps.filter(r=>r.uid===u&&r.going==="maybe").length},
