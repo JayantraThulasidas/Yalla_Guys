@@ -226,7 +226,8 @@ textarea.inp{min-height:84px;resize:vertical}
 .msg.me .bub{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 .msg .who{font-size:11px;color:var(--muted);font-weight:600;padding:0 6px}
 .daysep{align-self:center;font-size:11px;font-weight:700;color:var(--muted);padding:10px 0 4px;letter-spacing:.06em;text-transform:uppercase}
-.compose{flex:1;min-width:0;border:1px solid var(--line);border-radius:22px;padding:10px 14px;font-size:16px;min-height:44px;max-height:120px;background:var(--bg);resize:none}
+.compose{flex:1;min-width:0;border:1px solid var(--line);border-radius:22px;padding:10px 14px;font-size:16px;line-height:1.4;min-height:44px;max-height:190px;background:var(--bg);resize:none;overflow-y:hidden;scrollbar-width:none;transition:height .12s ease}
+.compose::-webkit-scrollbar{display:none}
 .send{flex:none;width:44px;height:44px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center}
 /* money */
 .money-hero{padding:18px;border-radius:18px;background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
@@ -808,7 +809,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-11.17";
+const APP_VERSION="2026-11-11.18";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -3913,7 +3914,7 @@ document.addEventListener("input",ev=>{
     s.state.res=localSearch(q);paint();window._ofq=setTimeout(async()=>{try{const on=await onlineSearch(q);if(on){s.state.res=s.state.res.concat(on).slice(0,8);paint()}}catch{}},450)}
   if(el.id==="locQ"){const s=topS();const q=el.value.trim();clearTimeout(locTimer);if(q.length<2){s.state.res=[];$("#locRes",s.el).innerHTML="";return}if(/https?:|^-?\d+\.\d+\s*,/.test(q)){locSearch(s,q);return}s.state.res=localSearch(q);$("#locRes",s.el).innerHTML=locResHtml(s.state);locTimer=setTimeout(()=>locSearch(s,q),450)}
   if(el.id==="edQ"){const s=stack.find(x=>x.kind==="edit");if(s)handleQuery(s,el.value)}
-  if(el.classList.contains("compose")){el.style.height="";el.style.height=Math.min(el.scrollHeight,120)+"px"}
+  if(el.classList.contains("compose")){el.style.height="";const bd=el.offsetHeight-el.clientHeight;el.style.height=Math.min(el.scrollHeight+bd,190)+"px";el.style.overflowY=el.scrollHeight+bd>190?"auto":"hidden"}
 });
 document.addEventListener("change",ev=>{
   const el=ev.target;if(el.id==="moneyPlan"){UI.moneyPlan=el.value;render()}
