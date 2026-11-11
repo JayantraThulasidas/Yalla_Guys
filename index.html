@@ -61,8 +61,9 @@ header.top{position:sticky;top:0;z-index:20;background:var(--bg);display:flex;al
 .stack{display:flex}.stack .av{margin-left:-7px;border:2px solid var(--surface)}.stack .av:first-child{margin-left:0}
 .banner{margin-block:4px 10px;padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:var(--fg);font-size:13px}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
-nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);height:var(--tabh)}
-nav.tabs button span:not(.badge){font-size:10.5px;letter-spacing:-.01em;white-space:nowrap}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(7,1fr);height:var(--tabh)}
+nav.tabs button span:not(.badge){font-size:10px;letter-spacing:-.02em;white-space:nowrap}
+nav.tabs button svg{width:23px!important;height:23px!important}
 nav.tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:var(--muted);position:relative}
 nav.tabs button svg{width:24px;height:24px}
 nav.tabs button[aria-current="true"]{color:var(--accent)}
@@ -577,6 +578,51 @@ body.has-fx::before{background:transparent}
 #sheets .sheet>canvas.bgfx~.sheet-h{background:color-mix(in srgb,var(--bg) 80%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .fxprev{position:relative;height:130px;border-radius:16px;background:var(--bg);border:1px solid var(--line);overflow:hidden;display:grid;place-items:center;margin:6px 0 4px}
 .fxprev>span{position:relative;z-index:1;font-size:12px;color:var(--muted);font-weight:700}
+.crewshare{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;cursor:pointer;box-sizing:border-box}
+.crewshare>span:first-child{font-size:22px}
+.crewshare .sw{flex:none;width:44px;height:26px;border-radius:999px;background:var(--surface2);position:relative;transition:background .2s}
+.crewshare .sw i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s}
+.crewshare[aria-pressed="true"] .sw{background:var(--accent)}.crewshare[aria-pressed="true"] .sw i{left:21px}
+.gcard{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border-radius:20px;border:1px solid var(--line);color:var(--fg);font:inherit;cursor:pointer;box-sizing:border-box;background:var(--surface)}
+.gcard.g-word{background:linear-gradient(135deg,color-mix(in srgb,#22C55E 18%,var(--surface)),var(--surface) 70%)}
+.gcard.g-est{background:linear-gradient(135deg,color-mix(in srgb,#A855F7 20%,var(--surface)),var(--surface) 70%)}
+.gcard.g-crunch{background:linear-gradient(135deg,color-mix(in srgb,#F59E0B 20%,var(--surface)),var(--surface) 70%)}
+.gcard .ge{font-size:34px;flex:none}.gcard b{font-size:16px}
+.gplay{flex:none;padding:8px 14px;border-radius:999px;background:var(--accent);color:var(--accent-fg);font-weight:800;font-size:13px}.gplay.done{background:var(--surface2);color:var(--ok);font-size:16px}
+.gpl{position:relative;display:inline-flex}.gpl i{position:absolute;top:-9px;left:-3px;font-size:10px;font-style:normal;transform:rotate(-20deg)}
+.gcard .avs{display:flex;align-items:center;gap:3px}
+.lbrow{display:flex;align-items:center;gap:10px;width:100%;padding:8px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;cursor:pointer;box-sizing:border-box}
+.lbrow.me{border-color:var(--accent)}.lbrank{width:26px;text-align:center;font-weight:800;font-size:16px;flex:none}.lbpts{font-size:18px}
+.wgrid{display:flex;flex-direction:column;gap:6px;align-items:center;margin:8px 0 12px}.wrow{display:flex;gap:6px}
+.wt{width:min(14vw,58px);height:min(14vw,58px);border-radius:12px;border:2px solid var(--line);display:grid;place-items:center;font-size:26px;font-weight:800;text-transform:uppercase;background:var(--surface)}
+.wt.typed{border-color:var(--muted);animation:pop .1s}
+.wt.wg,.kb.wg{background:#2FA36B;border-color:#2FA36B;color:#fff}.wt.wy,.kb.wy{background:#D9A21B;border-color:#D9A21B;color:#fff}.wt.wx,.kb.wx{background:#3A444F;border-color:#3A444F;color:#C9D1D9}
+.wt.wg,.wt.wy,.wt.wx{animation:wflip .45s both}
+@keyframes wflip{0%{transform:rotateX(90deg)}100%{transform:none}}@keyframes pop{50%{transform:scale(1.08)}}
+.wrow.shake{animation:shake .35s}@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.kbd{display:flex;flex-direction:column;gap:6px;width:100%}.kbr{display:flex;gap:4px;justify-content:center}
+.kb{flex:1;max-width:44px;height:50px;border:0;border-radius:8px;background:var(--surface2);color:var(--fg);font:inherit;font-weight:800;text-transform:uppercase;font-size:15px;padding:0}
+.kb.wide{max-width:66px;flex:1.5;font-size:12px}
+.gres{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:12px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}.gres b{font-size:18px}
+.estq{text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:6px}.estq h2{font-size:22px;line-height:1.25}
+.estrev{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 10px}.estrev>div{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center}.estrev b{display:block;font-size:22px}
+.estbar{height:10px;border-radius:5px;background:var(--surface2);overflow:hidden;margin-bottom:6px}.estbar i{display:block;height:100%;background:linear-gradient(90deg,#A855F7,#EC4899)}
+.dcintro{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:10px}.dcintro p{max-width:30ch;color:var(--muted)}
+.dcgem{font-size:64px;filter:drop-shadow(0 6px 18px rgba(169,112,255,.5))}
+.dctiers{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;margin:6px 0}
+.dctiers span{display:flex;flex-direction:column;align-items:center;padding:8px 4px;border-radius:12px;border:1px solid color-mix(in srgb,var(--tc) 50%,transparent);background:color-mix(in srgb,var(--tc) 14%,var(--surface));font-size:11.5px;font-weight:700}
+.dctiers b{font-size:18px;color:var(--tc)}
+.dctimer{height:8px;border-radius:4px;background:var(--surface2);overflow:hidden;margin-top:14px}.dctimer i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#A970FF,#FF6FB1);transform-origin:left;animation:dct linear forwards}
+@keyframes dct{to{transform:scaleX(0)}}
+.dcres{margin-top:14px;padding:16px;border-radius:18px;text-align:center;display:flex;flex-direction:column;gap:4px;border:2px solid var(--tc);background:color-mix(in srgb,var(--tc) 12%,var(--surface))}
+.dcres>b{font-size:26px}.dctier{margin-top:4px;font-weight:800;font-size:18px;color:var(--tc)}
+.gcard.g-deep{background:linear-gradient(135deg,color-mix(in srgb,#A970FF 22%,var(--surface)),var(--surface) 70%)}
+.ctarget{text-align:center;margin:6px 0 14px}.ctarget b{display:block;font-size:56px;font-family:var(--f-display);line-height:1;color:var(--accent)}
+.ctiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ctile{height:64px;border-radius:16px;border:2px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;font-size:24px;font-weight:800}
+.ctile.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--surface))}
+.cops{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.cop{height:52px;border-radius:14px;border:0;background:var(--surface2);color:var(--fg);font-size:26px;font-weight:800}.cop.on{background:var(--accent);color:var(--accent-fg)}.cop:disabled{opacity:.4}
 .podcard{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:12px 0 10px;margin:4px 0 14px;overflow:hidden}
 .podtabs{display:flex;gap:6px;margin:0 12px;background:var(--surface2);border-radius:999px;padding:4px}
 .podtabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:8px 6px;border-radius:999px;white-space:nowrap}
@@ -585,7 +631,7 @@ body.has-fx::before{background:transparent}
 .podswipe::-webkit-scrollbar{display:none}
 .podslide{flex:0 0 100%;scroll-snap-align:start;padding:6px 14px 0;box-sizing:border-box;min-width:0}
 .podsub{text-align:center;font-size:12px;color:var(--muted);margin:4px 0 2px}
-.podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;padding-top:34px}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;padding-top:46px}
 .pod{all:unset;flex:1;max-width:112px;display:flex;flex-direction:column;align-items:center;cursor:pointer;min-width:0}
 .pav{position:relative;margin-bottom:6px}
 .pav .av{width:56px;height:56px;font-size:28px;margin:0!important;border:3px solid var(--surface)!important;box-shadow:0 4px 12px rgba(0,0,0,.3)}
@@ -593,7 +639,7 @@ body.has-fx::before{background:transparent}
 .pav .av.ghost{background:var(--surface2)!important;color:var(--muted);box-shadow:none}
 .hat{position:absolute;left:50%;pointer-events:none}
 .hat.crown{top:-27px;left:-4px;font-size:34px;transform:rotate(-24deg);transform-origin:center;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
-.hat.dunce{top:-44px;width:38px;height:48px;transform:translateX(-30%) rotate(16deg);filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+.hat.dunce{top:-40px;left:-2px;width:38px;height:48px;transform:rotate(-24deg);transform-origin:center;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
 .pmed{position:absolute;right:-6px;bottom:-4px;font-size:22px}
 .pname{font-size:13px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:6px}
 .pblock{width:100%;border-radius:14px 14px 4px 4px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:8px;color:#fff;box-shadow:inset 0 -6px 0 rgba(0,0,0,.12)}
@@ -702,7 +748,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-10.50";
+const APP_VERSION="2026-11-11.03";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -734,6 +780,7 @@ const ICON={
  map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/></svg>',
  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
  moments:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+ games:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10a4 4 0 0 1 4 4v2.5a3 3 0 0 1-5.4 1.8L14.5 15h-5l-1.1 1.3A3 3 0 0 1 3 14.5V12a4 4 0 0 1 4-4z"/><path d="M8 10.5v3M6.5 12h3"/><circle cx="15.5" cy="11" r=".6" fill="currentColor"/><circle cx="17" cy="12.8" r=".6" fill="currentColor"/></svg>',
  shame:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3c.5 3.5 5 5.5 5 10.5a5 5 0 0 1-10 0c0-2.2 1-3.6 2-4.6.3 1.6 1.2 2.6 2.2 2.8C10.8 9 11.4 6 12 3z"/></svg>',
  money:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v5M18 9.5v5"/></svg>',
  back:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
@@ -814,7 +861,7 @@ function routeFor(stops){
 /* Delta sync: every phone keeps its own copy of the data (IndexedDB) and only downloads documents
    created or changed since its last visit. Writes stamp a "u" (updated) time; deletes leave a small
    tombstone so other phones can drop the item. A full refresh runs every 14 days as a safety net. */
-const DELTA=["plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers","checkins","pokes"];
+const DELTA=["plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers","checkins","pokes","scores"];
 const FULL_EVERY=14*864e5,SKEW=5*6e4;
 const IDB={_db:null,
   open(){return this._db||(this._db=new Promise((res,rej)=>{const r=indexedDB.open("yg-cache-"+ME,1);r.onupgradeneeded=()=>{r.result.createObjectStore("docs",{keyPath:"k"});r.result.createObjectStore("meta")};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))},
@@ -846,7 +893,7 @@ async function deltaSync(path,key,apply,onErr){
   offs.push(FS.collection(path).where("at",">",since).onSnapshot(onSnap,onErr));
   return()=>offs.forEach(f=>f());
 }
-const COLS=["members","plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers","checkins","pokes"];
+const COLS=["members","plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers","checkins","pokes","scores"];
 const D={chats:[],msgs:[],priv:{labels:{}},wishes:[],mine:[]};COLS.forEach(c=>D[c]=[]);
 let ME=null,MODE="loading",FS=null,AUTH=null,JOIN_ERR="";
 const unsubs=[];const msgSubs=new Map();const msgData=new Map();
@@ -909,7 +956,9 @@ const DEL={__del:true};
   get(){return D.members&&D.members.length?raw[k].filter(x=>D.members.some(m=>m.id===x.uid)):raw[k]},set(v){raw[k]=v||[]}});}
 const Demo={
   key:"yallaguys-demo-v1",
-  start(){MODE="demo";ME=ls.get("yg-actas","me-demo");Store.ready=true;const s=ls.get(Demo.key,null);if(s&&s.members){[...COLS,"chats","msgs","wishes","mine"].forEach(c=>D[c]=s[c]||[])}else Demo.seed();if(!D.members.some(m=>m.habits))Demo.seedShame();schedule()},
+  start(){MODE="demo";ME=ls.get("yg-actas","me-demo");Store.ready=true;const s=ls.get(Demo.key,null);if(s&&s.members){[...COLS,"chats","msgs","wishes","mine"].forEach(c=>D[c]=s[c]||[])}else Demo.seed();if(!D.members.some(m=>m.habits))Demo.seedShame();if(!(D.scores||[]).length)Demo.seedGames();schedule()},
+  seedGames(){const ids=["word","est","deep"];for(const u of ["m-sara","m-omar","m-lina"])for(let d=6;d>=0;d--)for(const g of ids){if((u.length+d+g.length)%4===0)continue;const ds=shameDay(d),pts=[100,90,75,60,45,88,72,64,96,30][(u.charCodeAt(2)+d*3+g.length)%10];
+    D.scores.push({id:`${g}_${ds}_${u}`,game:g,date:ds,uid:u,pts,label:g==="word"?`${W_PTS.indexOf(pts)+1||"X"}/6`:g==="deep"?`${pts*3}/300`:"3 questions",at:now()})}Demo.save()},
   seedShame(){const P=id=>({...HABIT_PRESETS.find(h=>h.id===id),show:true,since:shameDay(12)});
     const plan={"m-sara":["gym","water","protein"],"m-omar":["gym","supps","food"],"m-lina":["water","skincare","read"]};
     for(const m of D.members)if(plan[m.id]){m.habits=plan[m.id].map(P);m.habitsSince=shameDay(12)}
@@ -985,6 +1034,8 @@ const albumOf=pid=>D.media.filter(m=>m.planId===pid&&m.phase==="memory").sort((a
 const albumThumbs=pid=>albumOf(pid).filter(m=>m.kind==="photo"||(m.kind==="video"&&m.poster)).slice(-4).map(m=>m.kind==="photo"?m.src:m.poster);
 const canSee=p=>!(p.invited||[]).length||p.invited.includes(ME)||p.by===ME;
 const visiblePlans=()=>D.plans.filter(canSee);
+const partOf=p=>p.by===ME||(p.invited||[]).includes(ME)||["in","maybe"].includes(myRsvp(p.id)?.going);
+const memoryPlans=()=>D.plans.filter(p=>(canSee(p)&&partOf(p))||(p.showCrew&&p.status!=="cancelled"));
 const rsvpsOf=pid=>D.rsvps.filter(r=>r.planId===pid);
 const myRsvp=pid=>D.rsvps.find(r=>r.planId===pid&&r.uid===ME);
 const goingOf=pid=>rsvpsOf(pid).filter(r=>r.going==="in").map(r=>r.uid);
@@ -1085,7 +1136,7 @@ function banners(){
   return installCard()+(MODE==="demo"?`<div class="banner"><b>Demo mode.</b> Changes stay on this phone and the people shown are examples. Add your Firebase settings to the file to share it with the guys (see the setup steps).</div>`:"");
 }
 function renderTabs(){
-  const tabs=[["plans","Plans"],["moments","Moments"],["cal","Calendar"],["chat","Chats"],["shame","Shame"],["money","Money"]];const sb=shameBadge();
+  const tabs=[["plans","Plans"],["moments","Moments"],["cal","Calendar"],["chat","Chats"],["shame","Shame"],["money","Money"],["games","Games"]];const sb=shameBadge();
   const un=myChats().reduce((n,c)=>n+unread(c),0);
   $("#tabs").innerHTML=tabs.map(([k,l])=>`<button data-act="tab" data-k="${k}" aria-current="${UI.tab===k}">${ICON[k]}<span>${l}</span>${k==="chat"&&un?`<span class="badge">${un>9?"9+":un}</span>`:""}${k==="shame"&&sb?`<span class="badge">${sb}</span>`:""}</button>`).join("");
 }
@@ -1131,7 +1182,7 @@ document.addEventListener("submit",async ev=>{
 const VIEWS={};
 VIEWS.plans=()=>{
   const all=visiblePlans(),f=UI.planFilter;
-  let list=all.filter(p=>{const s=planStatus(p);return f==="active"?(s==="poll"||s==="set"):(s==="past"||s==="done")});
+  let list=(f==="active"?all:memoryPlans()).filter(p=>{const s=planStatus(p);return f==="active"?(s==="poll"||s==="set"):(s==="past"||s==="done")});
   list.sort((a,b)=>{const da=a.final?.date||a.slots?.[0]?.date||"9",db=b.final?.date||b.slots?.[0]?.date||"9";return f==="active"?da.localeCompare(db):db.localeCompare(da)});
   const voting=all.filter(p=>planStatus(p)==="poll"&&!(myRsvp(p.id)?.slots||[]).length).length;
   return`<div class="view-title"><h1>Plans</h1>${voting?`<span class="pill vote">${voting} need${voting>1?"":"s"} your vote</span>`:""}</div>
@@ -1147,7 +1198,7 @@ function planCard(p){
   const bg=cov?`background-image:url('${esc(cov)}')`:`background:linear-gradient(135deg,${hue(p.id)},color-mix(in srgb,${hue(p.id)} 55%,#000))`;
   return`<button class="pcard" data-act="openPlan" data-id="${esc(p.id)}">
     <div class="cover" style="${bg}"><span class="emo">${esc(p.emoji||"📍")}</span></div>
-    <div class="body"><div class="between"><h3>${esc(p.title)}</h3>${statusPill(p)}</div>
+    <div class="body"><div class="between"><h3>${esc(p.title)}</h3>${statusPill(p)}</div>${p.showCrew&&!partOf(p)?`<span class="meta" style="font-size:12px">👀 Shared with the crew by ${esc(nick(p.by))}</span>`:""}
     ${albumOpen(p)&&albumThumbs(p.id).length?`<div class="thumbs">${albumThumbs(p.id).map(u=>`<img src="${esc(u)}" alt="" loading="lazy">`).join("")}</div>`:""}
     <div class="meta">${esc(when)}${(p.stops||[]).length?` · ${p.stops.length} stop${p.stops.length>1?"s":""}`:""}${estTot?` · ~${dhs(estTot)} pp`:""}${(c=>c?` · 💬 ${c}`:"")(D.notes.filter(n=>n.planId===p.id).length)}</div>
     <div class="between"><div class="row">${g.length?avStack(g)+`<span class="meta">${g.length} going</span>`:`<span class="meta">No one in yet</span>`}</div>${st==="poll"&&!(myRsvp(p.id)?.slots||[]).length?'<span class="pill vote">Vote</span>':albumOpen(p)?`<span class="pill set">📸 ${albumOf(p.id).length||"Add pics"}</span>`:""}</div></div></button>`;
@@ -1404,7 +1455,7 @@ function syncLocWatch(){
 }
 document.addEventListener("visibilitychange",syncLocWatch);
 /* ---------- "Been there" map filters ---------- */
-function pastPlans(){return visiblePlans().filter(p=>["past","done"].includes(planStatus(p))&&p.final&&(p.stops||[]).some(s=>s.lat!=null))}
+function pastPlans(){return memoryPlans().filter(p=>["past","done"].includes(planStatus(p))&&p.final&&(p.stops||[]).some(s=>s.lat!=null))}
 function pastMatch(p){const f=p.final;if(!f)return false;if(UI.pastDay)return covers(f,UI.pastDay);if(UI.pastMonth)return dayList(f.date,endOf(f)).some(d=>d.startsWith(UI.pastMonth));return true}
 function pastFilterHtml(){
   const days=[...new Set(pastPlans().flatMap(p=>dayList(p.final.date,endOf(p.final))))].sort().reverse(),months=[...new Set(days.map(d=>d.slice(0,7)))];
@@ -1810,7 +1861,8 @@ SHEETS.plan={live:true,
     const reels=media.filter(m=>(m.kind==="reel"||m.kind==="link")&&embedUrl(m.url));
     return{title:esc(p.title),right:`<button class="btn sm" data-act="editPlan" data-id="${esc(p.id)}">Edit</button>`,top:`
       <div class="hero" style="${bg}"><span class="emo">${esc(p.emoji||"📍")}</span></div>
-      <div style="padding-top:12px;display:flex;flex-direction:column;gap:6px"><div class="row">${statusPill(p)}<span class="meta">by ${esc(nick(p.by))}</span></div>${p.desc?`<p style="margin:0;white-space:pre-wrap;overflow-wrap:anywhere">${esc(p.desc)}</p>`:""}
+      <div style="padding-top:12px;display:flex;flex-direction:column;gap:6px"><div class="row">${statusPill(p)}<span class="meta">by ${esc(nick(p.by))}</span></div>
+      ${["past","done"].includes(st)&&p.by===ME?`<button class="crewshare" data-act="planShowCrew" data-id="${esc(p.id)}" aria-pressed="${!!p.showCrew}"><span>👀</span><span class="grow" style="text-align:left"><b>Display to crew</b><span class="meta" style="display:block">${p.showCrew?"Everyone can see this memory. It won't go on their timeline.":"Only people who were part of it see it in Memories."}</span></span><span class="sw"><i></i></span></button>`:p.showCrew&&!partOf(p)?`<div class="meta">👀 ${esc(nick(p.by))} shared this memory with the crew</div>`:""}${p.desc?`<p style="margin:0;white-space:pre-wrap;overflow-wrap:anywhere">${esc(p.desc)}</p>`:""}
         <button class="btn block" data-act="openBoard" data-id="${esc(p.id)}" style="margin-top:6px;min-height:50px;justify-content:space-between"><span>🎨 Mood board</span><span class="meta">${ideas.length} item${ideas.length===1?"":"s"} ›</span></button></div>
       ${reels.length?`<div class="sec" style="margin-top:12px"><div class="between"><h2>Reels</h2><button class="btn sm" data-act="addMedia" data-id="${esc(p.id)}" data-ph="idea" data-tab="link">+ Add</button></div>
         ${reelsHtml(reels)}
@@ -2550,6 +2602,8 @@ const BADGES=[
  {id:"party",cat:"Plans",e:"🥳",t:"Party starter",u:"plans with 4+ going",d:"Make plans the whole crew shows up to",c:"#E8590C",tiers:[1,3,10],f:u=>D.plans.filter(p=>p.by===u&&new Set([p.by,...goingOf(p.id)]).size>=4).length},
  {id:"roadtrip",cat:"Plans",e:"🛣️",t:"Road tripper",u:"trips 80km+ from Dubai",d:"Go far",c:"#5F3DC4",tiers:[1,3,8],f:u=>attendedBy(u).filter(p=>(p.stops||[]).some(x=>x.lat!=null&&kmFromDubai(+x.lat,+x.lng)>=80)).length},
  {id:"quick",cat:"Plans",e:"⏱️",t:"Quick draw",u:"votes within an hour",d:"Vote fast when a plan drops",c:"#1C7ED6",tiers:[3,10,25],f:u=>D.rsvps.filter(r=>r.uid===u&&(r.slots||[]).length&&(()=>{const p=D.plans.find(x=>x.id===r.planId);return p&&p.by!==u&&r.at-p.at<36e5})()).length},
+ {id:"gamer",cat:"Games",e:"🎮",t:"Daily gamer",u:"daily games played",d:"Play the daily games",c:"#6741D9",tiers:[5,30,100],f:u=>D.scores.filter(x=>x.uid===u).length},
+ {id:"brain",cat:"Games",e:"🧠",t:"Big brain",u:"perfect scores",d:"Score 100 in a daily game",c:"#D6336C",tiers:[1,10,30],f:u=>D.scores.filter(x=>x.uid===u&&x.pts>=100).length},
  {id:"broke",cat:"Hall of shame",e:"💸",t:"Owes everyone money",u:"people you owe right now",d:"Pay your friends back 😭",c:"#C92A2A",bad:1,tiers:[2,3,5],f:u=>owesCount(u)},
  {id:"ghost",cat:"Hall of shame",e:"👻",t:"Ghost",u:"plans you said no to",d:"Never comes out",c:"#495057",bad:1,tiers:[3,10,25],f:u=>D.rsvps.filter(r=>r.uid===u&&r.going==="out").length},
  {id:"maybe",cat:"Hall of shame",e:"🤷",t:"Professional maybe",u:"plans left on maybe",d:"Commit for once",c:"#868E96",bad:1,tiers:[3,8,20],f:u=>D.rsvps.filter(r=>r.uid===u&&r.going==="maybe").length},
@@ -2803,6 +2857,8 @@ function songCard(m){if(!m.song)return"";const sp=spotifyTrack(m.song),title=m.s
     ${m.songPreview?`<button class="songbtn" data-act="songToggle" aria-label="Play or pause">▶</button>`:""}${m.songUrl||sp?`<a class="songsp" href="${esc(m.songUrl||m.song)}" target="_blank" rel="noopener" aria-label="Open in Spotify">↗</a>`:""}</div>`}
 SHEETS.person.init=a=>{SONG.play(a.id);return{}};
 SHEETS.person.destroy=()=>SONG.stop();
+document.addEventListener("keydown",e=>{const s=topS();if(s?.kind!=="gWord"||e.metaKey||e.ctrlKey||e.altKey)return;const k=e.key;
+  if(/^[a-zA-Z]$/.test(k)){e.preventDefault();ACT.wKey({k:k.toLowerCase()})}else if(k==="Enter"){e.preventDefault();ACT.wKey({k:"enter"})}else if(k==="Backspace"){e.preventDefault();ACT.wKey({k:"back"})}});
 // leaving the app (home button, switching apps, locking the phone, closing it) stops the song
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&SONG.a){SONG.a.pause();SONG.paint()}});
 window.addEventListener("pagehide",()=>SONG.stop());
@@ -2824,6 +2880,197 @@ SHEETS.fxPick={
   after(s){const p=profS();mountFx($("#fxBig",s.el),p?p.state.bgfx:"")},
   destroy(){const p=profS();if(p)paintSheet(p)}
 };
+/* ---------- GAMES: three daily puzzles, same for everyone, with leaderboards ---------- */
+function seedRng(str){let h=1779033703^str.length;for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19}
+  return()=>{h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);h^=h>>>16;return(h>>>0)/4294967296}}
+const shuffled=(arr,seed)=>{const r=seedRng(seed),a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const dayNum=ds=>Math.round(pd(ds).getTime()/864e5);
+const GWORDS=("about above actor acute admit adopt adult after again agent agree ahead alarm album alert alike alive allow alone along alter angel anger angle angry apart apple apply arena argue arise aside asset audio avoid award aware bacon badge baker basic beach beard beast begin being below bench berry birth black blade blame blank blast blend bless blind block bloom board bonus boost booth brain brake brand brave bread break brick bride brief bring broad brown brush buddy build bunch burst cabin cable camel candy canoe cargo carry catch cause chain chair chalk charm chart chase cheap check cheek cheer chess chest chief child chill choir claim class clean clear click cliff climb clock close cloud coach coast cocoa color comet coral couch count court cover crane crash crazy cream crisp crowd crown crumb crust curve cycle daily dance delay delta dense depth diary dizzy dodge donut draft drama dream dress drift drink drive eager eagle early earth eight elbow elder empty enjoy enter entry equal error essay event every exact exist extra fable faith fancy feast fence ferry fever field fifty final flame flash fleet float flour fluid focus force forge forth found frame fresh front frost fruit funny giant glass globe glory grace grade grain grand grape graph grass great green greet group guard guess guest guide habit happy heart heavy hello hobby honey honor horse hotel house human humor ideal image index inner input issue jelly jewel joint judge juice karak kayak knife label laser later laugh layer learn lemon level light limit lucky lunch magic major mango maple march match medal metal minor model money month motor mount mouse mouth movie music noble noise north novel ocean offer olive onion opera orbit order other outer owner paint panel panic paper party pasta peace peach pearl pedal phone photo piano pilot pitch pizza place plain plane plant plate point polar power press price pride prime prize proof proud queen quick quiet quote radio rally ranch range rapid reach ready relax reply rider right river roast robot rocky round route royal rugby salad sauce scale scene score scout sense serve seven shade shake shape share shark sharp sheep shelf shell shine shirt shock shoot shore short shout skate skill slice slide smart smile smoke snack snake solar solid sound south space spare spark speed spend spice spoon sport squad stack staff stage stair stamp stand start steam steel stick still stone storm story stove sugar sunny super sweet swift swing table taste teach thank theme thick thing think tiger toast token topic torch total touch tough tower trace track trade trail train treat trend trial tribe trick truck truly trust truth twist uncle under union unity upper urban usual valid value video visit vital vivid vocal voice waste watch water whale wheat wheel white whole world worry worth write youth zebra").split(" ").filter(w=>w.length===5);
+const EST_QS=[
+ ["How tall is the Burj Khalifa?","metres",828,"It has 163 floors."],["How many bones are in an adult human body?","bones",206,"Babies are born with around 300."],
+ ["How many keys are on a standard piano?","keys",88,"52 white and 36 black."],["How many countries are members of the UN?","countries",193,""],
+ ["How tall is Mount Everest?","metres",8849,"Measured again in 2020."],["How far is the Moon from Earth on average?","km",384400,""],
+ ["How many seconds are in a day?","seconds",86400,""],["How many Earth days is one year on Mars?","days",687,""],
+ ["What's the boiling point of water at sea level in Fahrenheit?","°F",212,""],["How fast does sound travel in air at 20°C?","metres per second",343,""],
+ ["In what year was the UAE formed?","year",1971,"On 2 December, now National Day."],["In what year did the Burj Al Arab open?","year",1999,""],
+ ["How tall is the Eiffel Tower, to the tip?","metres",330,""],["How many squares are on a chessboard?","squares",64,""],
+ ["How many hearts does an octopus have?","hearts",3,""],["How many teeth does an adult usually have, wisdom teeth included?","teeth",32,""],
+ ["How many vertebrae are in a giraffe's neck?","vertebrae",7,"The same number as in yours."],["How long is a marathon?","metres",42195,""],
+ ["In what year did the first iPhone come out?","year",2007,""],["How many stripes are on the US flag?","stripes",13,""],
+ ["How tall is the Statue of Liberty, pedestal included?","metres",93,""],["What's the diameter of the Earth?","km",12742,""],
+ ["How fast does light travel?","km per second",299792,""],["How many minutes are in a week?","minutes",10080,""],
+ ["How many hours are in a (non-leap) year?","hours",8760,""],["How many teams play at the 2026 FIFA World Cup?","teams",48,""],
+ ["How many cards are in a deck, without jokers?","cards",52,""],["How many elements are on the periodic table?","elements",118,""],
+ ["How many stars are on the EU flag?","stars",12,""],["In what year did Expo 2020 Dubai actually open?","year",2021,"It was delayed a year."],
+ ["In what year did The Dubai Mall open?","year",2008,""],["How many letters are in the Arabic alphabet?","letters",28,""],
+ ["How long is the Great Wall of China, all branches included?","km",21196,""],["How many time zones does Russia have?","time zones",11,""],
+ ["How many bones are in one human hand?","bones",27,""],["Roughly how many people live on Earth?","billion people",8.1,""],
+ ["How tall is the Big Ben clock tower?","metres",96,""],["How far is the penalty spot from the goal line?","metres",11,""],
+ ["How long is an Olympic swimming pool?","metres",50,""],["How many countries are in Africa?","countries",54,""],
+ ["In what year did the Titanic sink?","year",1912,""],["In what year did humans first land on the Moon?","year",1969,""],
+ ["How many floors does the Burj Khalifa have?","floors",163,""],["How deep is the deepest part of the ocean?","metres",10935,"The Challenger Deep, Mariana Trench."],
+ ["How many US states are there?","states",50,""],["How tall is the Dubai Frame?","metres",150,""],
+ ["How long is the Dubai Metro Red Line?","km",52,""],["What's a cheetah's top speed?","km/h",110,""],
+ ["About how many languages are spoken in the world?","languages",7000,""],["How many years did Queen Elizabeth II reign?","years",70,""],
+ ["How many litres of blood are in an adult body?","litres",5,""],["How many players are on the pitch for one football team?","players",11,""],
+ ["How many moons does Jupiter have (confirmed, 2024)?","moons",95,""],["How hot is the surface of the Sun?","°C",5500,""],
+ ["How long is the Nile?","km",6650,""],["How many hours does a Dubai–London flight take?","hours",7.5,""],
+ ["How many sides does a 50 fils coin have?","sides",7,"The UAE 50 fils coin is a heptagon."],["How many islands make up the Maldives?","islands",1192,""],
+ ["How many grams of sugar are in a 330ml can of Coca-Cola?","grams",35,""],["How many hours does a sloth sleep per day, roughly?","hours",15,""],
+];
+function gameDay(ds){ds=ds||TODAY();const n=dayNum(ds);
+  const word=shuffled(GWORDS,"yg-words")[((n%GWORDS.length)+GWORDS.length)%GWORDS.length];
+  const order=shuffled(EST_QS.map((_,i)=>i),"yg-est"),k=((n*3)%order.length+order.length)%order.length,est=[0,1,2].map(i=>EST_QS[order[(k+i)%order.length]]);
+  return{word,est,crunch:crunchPuzzle(ds)}}
+function crunchPuzzle(ds){const r=seedRng("yg-crunch-"+ds),ri=(a,b)=>a+Math.floor(r()*(b-a+1));
+  for(let tries=0;tries<800;tries++){const big=shuffled([25,50,75,100],"b"+ds+tries).slice(0,2),nums=[ri(1,10),ri(1,10),ri(1,10),ri(1,10),...big];
+    let pool=[...nums],last=null;const steps=ri(3,4);let ok=true;
+    for(let st=0;st<steps;st++){if(pool.length<2){ok=false;break}const i=ri(0,pool.length-1);let j=ri(0,pool.length-2);if(j>=i)j++;const a=pool[i],b=pool[j],op=["+","-","×","÷"][ri(0,3)];
+      let v=null;if(op==="+")v=a+b;else if(op==="-")v=a>b?a-b:null;else if(op==="×")v=(a>1&&b>1)?a*b:null;else v=(b>1&&a%b===0)?a/b:null;
+      if(v==null){st--;if(++tries>790)break;continue}pool=pool.filter((_,x)=>x!==i&&x!==j);pool.push(v);last=v}
+    if(ok&&last>=101&&last<=999)return{nums:shuffled(nums,"o"+ds),target:last}}
+  return{nums:[2,4,7,9,25,50],target:357}}
+const GAMES=[{id:"word",e:"🔤",t:"Daily Word",d:"Guess the 5-letter word in 6 tries"},{id:"est",e:"🧠",t:"Guesstimate",d:"3 questions. How close can you get?"},{id:"deep",e:"💎",t:"Deep Cuts",d:"3 prompts, 25s each. The rarer your answer, the more points"}];
+const gScore=(g,u,ds)=>D.scores.find(x=>x.game===g&&x.uid===u&&x.date===(ds||TODAY()));
+const gSave=(g,o)=>Store.set("scores",`${g}_${TODAY()}_${ME}`,{game:g,date:TODAY(),uid:ME,at:now(),...o});
+const gLocal=(g)=>ls.get(`yg-g-${g}-${TODAY()}`,null),gLocalSet=(g,v)=>ls.set(`yg-g-${g}-${TODAY()}`,v);
+function untilMidnight(){const n=new Date(),m=new Date(n);m.setHours(24,0,0,0);const mins=Math.max(0,Math.round((m-n)/6e4));return`${Math.floor(mins/60)}h ${mins%60}m`}
+function gamesBoard(range,game){const from=range==="today"?TODAY():range==="week"?shameDay(6):"0000";
+  const rows={};for(const sc of D.scores){if(sc.date<from||sc.date>TODAY()||!mem(sc.uid)||(game&&sc.game!==game))continue;const r=rows[sc.uid]=rows[sc.uid]||{uid:sc.uid,pts:0,n:0,perfect:0};r.pts+=sc.pts||0;r.n++;if(sc.pts>=100)r.perfect++}
+  return Object.values(rows).sort((a,b)=>b.pts-a.pts||b.perfect-a.perfect)}
+function gStreak(u){let n=0,d=D.scores.some(x=>x.uid===u&&x.date===TODAY())?0:1;for(;d<400;d++){if(D.scores.some(x=>x.uid===u&&x.date===shameDay(d)))n++;else break}return n}
+VIEWS.games=()=>{const range=UI.gRange||"today",gf=UI.gGame||"";const board=gamesBoard(range,gf),st=gStreak(ME);
+  const card=g=>{const mine=gScore(g.id,ME),who=D.scores.filter(x=>x.game===g.id&&x.date===TODAY()&&mem(x.uid)).sort((a,b)=>b.pts-a.pts);
+    return`<button class="gcard g-${g.id}" data-act="playGame" data-g="${g.id}"><span class="ge">${g.e}</span><span class="grow" style="min-width:0;text-align:left"><b>${g.t}</b><span class="meta" style="display:block">${mine?`You scored <b style="color:var(--fg)">${mine.pts}</b>${mine.label?` · ${esc(mine.label)}`:""}`:g.d}</span>
+      ${who.length?`<span class="avs" style="margin-top:6px">${who.slice(0,6).map((x,i)=>`<span class="gpl">${i===0?'<i>👑</i>':""}${avatar(x.uid,"xs")}</span>`).join("")}<span class="meta" style="margin-left:4px">${who.length} played</span></span>`:""}</span>
+      <span class="gplay ${mine?"done":""}">${mine?"✓":"Play"}</span></button>`};
+  return`<div class="view-title"><h1>Games</h1>${st?`<span class="streak">🎮 ${st}</span>`:""}</div>
+  <div class="meta" style="margin:-6px 0 12px">New puzzles in ${untilMidnight()}. Everyone gets the same ones.</div>
+  <div class="list" style="gap:10px">${GAMES.map(card).join("")}</div>
+  <div class="sec"><div class="between"><h2>🏆 Leaderboard</h2></div>
+    <div class="seg" style="margin-bottom:8px">${[["today","Today"],["week","This week"],["all","All time"]].map(([k,l])=>`<button data-act="gRange" data-k="${k}" aria-pressed="${range===k}">${l}</button>`).join("")}</div>
+    <div class="chips" style="margin-bottom:10px">${[["","All games"],...GAMES.map(g=>[g.id,g.e+" "+g.t])].map(([k,l])=>`<button class="chip" data-act="gGame" data-k="${k}" aria-pressed="${gf===k}">${l}</button>`).join("")}</div>
+    ${board.length?`<div class="list" style="gap:6px">${board.map((r,i)=>`<button class="lbrow ${r.uid===ME?"me":""}" data-act="person" data-id="${esc(r.uid)}"><span class="lbrank">${["🥇","🥈","🥉"][i]||i+1}</span>${avatar(r.uid,"sm")}<span class="grow" style="text-align:left;min-width:0"><b>${esc(nick(r.uid))}</b><span class="meta" style="display:block">${r.n} game${r.n>1?"s":""}${r.perfect?` · ${r.perfect} perfect`:""}${range==="today"&&!gf?" · "+GAMES.map(g=>{const x=gScore(g.id,r.uid);return x?g.e+" "+x.pts:""}).filter(Boolean).join("  "):""}</span></span><b class="lbpts">${r.pts}</b></button>`).join("")}</div>`:`<div class="empty" style="padding:20px">No scores yet${range==="today"?" today":""}. Play one!</div>`}</div>`};
+/* --- daily word --- */
+function wEval(g,ans){const res=Array(5).fill("x"),a=ans.split(""),used=Array(5).fill(false);
+  for(let i=0;i<5;i++)if(g[i]===a[i]){res[i]="g";used[i]=true}
+  for(let i=0;i<5;i++)if(res[i]!=="g"){const j=a.findIndex((c,k)=>c===g[i]&&!used[k]);if(j>=0){res[i]="y";used[j]=true}}return res}
+const W_PTS=[100,90,75,60,45,30];
+SHEETS.gWord={live:true,
+  init(){const l=gLocal("word")||{guesses:[]};return{guesses:l.guesses||[],cur:""}},
+  render(s){const ans=gameDay().word,st=s.state,done=!!gScore("word",ME)||st.guesses.includes(ans)||st.guesses.length>=6,won=st.guesses.includes(ans);
+    const ks={};st.guesses.forEach(g=>wEval(g,ans).forEach((r,i)=>{const c=g[i],o=ks[c];if(r==="g"||(r==="y"&&o!=="g")||(!o))ks[c]=r}));
+    const rows=Array.from({length:6},(_,i)=>{const g=st.guesses[i],cur=i===st.guesses.length&&!done?st.cur:"";const ev=g?wEval(g,ans):null;
+      return`<div class="wrow ${s.shake&&i===st.guesses.length?"shake":""}">${Array.from({length:5},(_,k)=>`<span class="wt ${ev?"w"+ev[k]:cur[k]?"typed":""}" style="${ev?`animation-delay:${k*.12}s`:""}">${esc((g||cur)[k]||"")}</span>`).join("")}</div>`}).join("");
+    const kb=["qwertyuiop","asdfghjkl","Ezxcvbnm<"].map(r=>`<div class="kbr">${[...r].map(c=>c==="E"?`<button class="kb wide" data-act="wKey" data-k="enter">Enter</button>`:c==="<"?`<button class="kb wide" data-act="wKey" data-k="back" aria-label="Delete">⌫</button>`:`<button class="kb ${ks[c]?"w"+ks[c]:""}" data-act="wKey" data-k="${c}">${c}</button>`).join("")}</div>`).join("");
+    const grid=st.guesses.map(g=>wEval(g,ans).map(r=>r==="g"?"🟩":r==="y"?"🟨":"⬛").join("")).join("\n");
+    return{title:"🔤 Daily Word",body:`<div class="wgrid">${rows}</div>
+      ${done?`<div class="gres">${won?`<b>🎉 Got it in ${st.guesses.indexOf(ans)+1}!</b>`:`<b>The word was <span style="text-transform:uppercase;color:var(--accent)">${esc(ans)}</span></b>`}<span class="meta">${won?W_PTS[st.guesses.indexOf(ans)]:0} points · new word in ${untilMidnight()}</span>
+        <div class="row" style="justify-content:center;margin-top:8px"><button class="btn sm" data-act="gShare" data-t="${esc(`Yalla Word ${won?st.guesses.indexOf(ans)+1:"X"}/6\n${grid}`)}">📤 Share</button><button class="btn sm pri" data-act="close">Leaderboard</button></div></div>`:""}`,
+      foot:done?"":`<div class="kbd">${kb}</div>`}}
+};
+async function wFinish(s){const ans=gameDay().word,st=s.state,won=st.guesses.includes(ans),n=won?st.guesses.indexOf(ans)+1:0;
+  await gSave("word",{pts:won?W_PTS[n-1]:0,label:won?`${n}/6`:"X/6",grid:st.guesses.map(g=>wEval(g,ans).join("")).join(",")})}
+/* --- guesstimate --- */
+const estPts=(g,a)=>{if(!(g>0))return 0;const e=Math.abs(Math.log10(g/a));return Math.max(0,Math.round(100-e*140))};
+const fmtN=n=>Number(n).toLocaleString("en-GB",{maximumFractionDigits:2});
+SHEETS.gEst={live:true,
+  init(){const l=gLocal("est")||{ans:[]};return{ans:l.ans||[],reveal:null}},
+  render(s){const qs=gameDay().est,st=s.state,done=st.ans.length>=3&&st.reveal==null;
+    if(st.reveal!=null){const[q,u,a,f]=qs[st.reveal],g=st.ans[st.reveal],p=estPts(g,a);
+      return{title:"🧠 Guesstimate",body:`<div class="estq"><span class="meta">Question ${st.reveal+1} of 3</span><h2>${esc(q)}</h2></div>
+        <div class="estrev"><div><span class="meta">You said</span><b>${fmtN(g)}</b></div><div><span class="meta">Answer</span><b style="color:var(--accent)">${fmtN(a)}</b></div></div>
+        <div class="estbar"><i style="width:${p}%"></i></div><div class="between"><b style="font-size:22px">${p} pts</b><span class="meta">${esc(u)}</span></div>${f?`<p class="meta" style="margin-top:8px">💡 ${esc(f)}</p>`:""}`,
+        foot:`<button class="btn pri block" data-act="estNext">${st.reveal<2?"Next question":"See my score"}</button>`}}
+    if(done){const tot=Math.round(st.ans.reduce((t,g,i)=>t+estPts(g,qs[i][2]),0)/3),others=D.scores.filter(x=>x.game==="est"&&x.date===TODAY()&&x.uid!==ME&&mem(x.uid));
+      return{title:"🧠 Guesstimate",body:`<div class="gres"><b style="font-size:36px">${tot}</b><span class="meta">points today · new questions in ${untilMidnight()}</span></div>
+        <div class="list" style="gap:8px;margin-top:12px">${qs.map(([q,u,a],i)=>`<div class="item" style="flex-direction:column;align-items:stretch;gap:4px"><b style="font-size:14px">${esc(q)}</b><span class="meta">Answer <b style="color:var(--fg)">${fmtN(a)} ${esc(u)}</b> · you ${fmtN(st.ans[i])} (${estPts(st.ans[i],a)})${others.map(o=>o.raw?.[i]!=null?` · ${esc(nick(o.uid))} ${fmtN(o.raw[i])}`:"").join("")}</span></div>`).join("")}</div>`,
+        foot:`<button class="btn pri block" data-act="close">Leaderboard</button>`}}
+    const[q,u]=qs[st.ans.length];
+    return{title:"🧠 Guesstimate",body:`<div class="estq"><span class="meta">Question ${st.ans.length+1} of 3</span><h2>${esc(q)}</h2><span class="pill" style="background:var(--surface2)">in ${esc(u)}</span></div>
+      <input class="inp" id="estIn" type="number" inputmode="decimal" placeholder="Your best guess" style="font-size:24px;text-align:center;margin-top:14px">
+      <p class="meta" style="text-align:center;margin-top:8px">Closer = more points. Half or double the answer still scores well.</p>`,
+      foot:`<button class="btn pri block" data-act="estLock">Lock it in</button>`}},
+  after(s,first){if(first)setTimeout(()=>$("#estIn",s.el)?.focus(),150)}
+};
+/* --- number crunch --- */
+SHEETS.gCrunch={live:true,
+  init(){const pz=gameDay().crunch,l=gLocal("crunch");return l||{tiles:pz.nums.map((v,i)=>({id:i,v})),hist:[],sel:null,op:null,nid:6}},
+  render(s){const pz=gameDay().crunch,st=s.state,sc=gScore("crunch",ME),best=Math.min(...st.tiles.map(t=>Math.abs(t.v-pz.target))),bestTile=st.tiles.find(t=>Math.abs(t.v-pz.target)===best);
+    if(sc)return{title:"🔢 Number Crunch",body:`<div class="ctarget"><span class="meta">Target</span><b>${pz.target}</b></div><div class="gres"><b>${sc.pts===100?"🎯 Bang on!":"You got "+esc(sc.label||"")}</b><span class="meta">${sc.pts} points · new puzzle in ${untilMidnight()}</span></div>`,foot:`<button class="btn pri block" data-act="close">Leaderboard</button>`};
+    return{title:"🔢 Number Crunch",body:`<div class="ctarget"><span class="meta">Make this number</span><b>${pz.target}</b></div>
+      <div class="ctiles">${st.tiles.map(t=>`<button class="ctile ${st.sel===t.id?"on":""}" data-act="cTile" data-id="${t.id}">${t.v}</button>`).join("")}</div>
+      <div class="cops">${["+","-","×","÷"].map(o=>`<button class="cop ${st.op===o?"on":""}" data-act="cOp" data-k="${o}" ${st.sel==null?"disabled":""}>${o==="-"?"−":o}</button>`).join("")}</div>
+      <div class="row" style="justify-content:center;margin-top:10px"><button class="btn sm" data-act="cUndo" ${st.hist.length?"":"disabled"}>↩ Undo</button><button class="btn sm" data-act="cReset" ${st.hist.length?"":"disabled"}>Reset</button></div>
+      <p class="meta" style="text-align:center;margin-top:10px">Tap a number, an operation, then another number. Each number can be used once. Closest so far: <b style="color:var(--fg)">${bestTile.v}</b> (${best===0?"exact!":best+" off"})</p>`,
+      foot:`<button class="btn pri block" data-act="cSubmit">Lock in ${bestTile.v}</button>`}}
+};
+async function cFinish(v){const pz=gameDay().crunch,d=Math.abs(v-pz.target),pts=d===0?100:Math.max(0,100-d*4);await gSave("crunch",{pts,label:d===0?"exact":`${v} (${d} off)`,raw:[v]})}
+/* --- Deep Cuts: name something, rarer valid answers score more --- */
+const DC_LISTS={
+ africa:["country in Africa","Egypt;South Africa;Nigeria;Kenya;Morocco;Ethiopia;Ghana;Algeria;Tunisia;Libya;Sudan;Uganda;Tanzania;Zimbabwe;Senegal;Cameroon;Somalia;Rwanda;Madagascar;Angola;Ivory Coast|cote divoire|cote d ivoire;Zambia;Mozambique;Namibia;Botswana;Mali;Congo|republic of the congo|congo brazzaville;Democratic Republic of the Congo|drc|dr congo|congo kinshasa;Niger;Chad;Mauritius;Sierra Leone;Liberia;South Sudan;Eritrea;Malawi;Burkina Faso;Benin;Togo;Gabon;Guinea;Mauritania;Seychelles;Cape Verde|cabo verde;Gambia|the gambia;Lesotho;Eswatini|swaziland;Djibouti;Burundi;Central African Republic|car;Equatorial Guinea;Guinea-Bissau|guinea bissau;Comoros;Sao Tome and Principe|sao tome"],
+ europe:["country in Europe","France;Germany;Italy;Spain;United Kingdom|uk|britain|great britain|england;Portugal;Netherlands|holland;Greece;Switzerland;Sweden;Norway;Ireland;Belgium;Russia;Poland;Austria;Denmark;Finland;Turkey|turkiye;Ukraine;Czech Republic|czechia;Hungary;Croatia;Iceland;Romania;Serbia;Bulgaria;Slovakia;Slovenia;Luxembourg;Monaco;Malta;Cyprus;Estonia;Latvia;Lithuania;Albania;Bosnia and Herzegovina|bosnia;Montenegro;North Macedonia|macedonia;Moldova;Belarus;Andorra;Liechtenstein;San Marino;Vatican City|vatican|holy see;Kosovo"],
+ asia:["country in Asia","China;India;Japan;South Korea|korea;United Arab Emirates|uae|emirates;Saudi Arabia|ksa;Thailand;Indonesia;Pakistan;Vietnam;Philippines;Malaysia;Singapore;Qatar;Iran;Iraq;Israel;Afghanistan;Bangladesh;Sri Lanka;Nepal;North Korea;Kuwait;Oman;Bahrain;Jordan;Lebanon;Syria;Yemen;Mongolia;Kazakhstan;Uzbekistan;Cambodia;Myanmar|burma;Laos;Maldives;Bhutan;Taiwan;Brunei;Timor-Leste|east timor|timor leste;Kyrgyzstan;Tajikistan;Turkmenistan;Georgia;Armenia;Azerbaijan;Palestine"],
+ states:["US state","California;Texas;Florida;New York;Hawaii;Alaska;Nevada;Washington;Arizona;Illinois;Georgia;Colorado;Massachusetts;Michigan;Ohio;Pennsylvania;New Jersey;Virginia;North Carolina;Tennessee;Louisiana;Oregon;Utah;Kentucky;Minnesota;Missouri;Alabama;Indiana;Wisconsin;Maryland;South Carolina;Oklahoma;Kansas;Connecticut;Mississippi;Arkansas;Iowa;Nebraska;Montana;Idaho;New Mexico;Maine;Vermont;New Hampshire;Rhode Island;Delaware;West Virginia;Wyoming;North Dakota;South Dakota"],
+ elements:["chemical element","Hydrogen;Oxygen;Carbon;Gold;Silver;Iron;Helium;Nitrogen;Copper;Sodium;Calcium;Aluminium|aluminum;Lead;Zinc;Uranium;Platinum;Mercury;Chlorine;Potassium;Magnesium;Silicon;Neon;Lithium;Titanium;Sulfur|sulphur;Phosphorus;Tin;Nickel;Cobalt;Fluorine;Iodine;Argon;Radium;Plutonium;Chromium;Tungsten;Manganese;Boron;Beryllium;Krypton;Xenon;Radon;Arsenic;Cadmium;Bismuth;Barium;Strontium;Caesium|cesium;Francium;Rubidium;Selenium;Bromine;Germanium;Gallium;Indium;Antimony;Tellurium;Polonium;Astatine;Scandium;Vanadium;Zirconium;Niobium;Molybdenum;Technetium;Ruthenium;Rhodium;Palladium;Hafnium;Tantalum;Rhenium;Osmium;Iridium;Thallium;Yttrium;Lanthanum;Cerium;Praseodymium;Neodymium;Promethium;Samarium;Europium;Gadolinium;Terbium;Dysprosium;Holmium;Erbium;Thulium;Ytterbium;Lutetium;Actinium;Thorium;Protactinium;Neptunium;Americium;Curium;Berkelium;Californium;Einsteinium;Fermium;Mendelevium;Nobelium;Lawrencium;Rutherfordium;Dubnium;Seaborgium;Bohrium;Hassium;Meitnerium;Darmstadtium;Roentgenium;Copernicium;Nihonium;Flerovium;Moscovium;Livermorium;Tennessine;Oganesson"],
+ fruits:["fruit","Apple;Banana;Orange;Mango;Strawberry;Grape;Watermelon;Pineapple;Cherry;Peach;Pear;Lemon;Kiwi;Blueberry;Raspberry;Coconut;Pomegranate;Papaya;Lime;Plum;Melon;Apricot;Avocado;Fig;Date;Grapefruit;Blackberry;Guava;Lychee|litchi;Passion fruit;Nectarine;Tangerine;Mandarin;Cranberry;Dragon fruit|pitaya;Jackfruit;Durian;Persimmon;Quince;Gooseberry;Mulberry;Kumquat;Starfruit|carambola;Rambutan;Mangosteen;Longan;Clementine;Cantaloupe;Honeydew;Olive;Tomato;Elderberry;Boysenberry;Loquat;Feijoa;Tamarind;Soursop|guanabana;Cherimoya|custard apple;Pomelo;Yuzu;Ackee;Breadfruit;Physalis;Jabuticaba;Acai;Sapodilla;Plantain;Currant;Damson;Salak|snake fruit"],
+ veg:["vegetable","Potato;Carrot;Onion;Broccoli;Cucumber;Lettuce;Spinach;Cabbage;Pepper|bell pepper|capsicum;Corn;Peas;Garlic;Cauliflower;Mushroom;Eggplant|aubergine;Zucchini|courgette;Pumpkin;Celery;Beetroot|beet;Sweet potato;Radish;Kale;Asparagus;Okra;Leek;Green beans|beans;Brussels sprouts;Artichoke;Turnip;Parsnip;Squash;Bok choy|pak choi;Chard;Fennel;Rocket|arugula;Watercress;Kohlrabi;Rutabaga|swede;Cassava;Yam;Taro;Endive;Radicchio;Celeriac;Jicama;Daikon;Chayote;Lotus root;Bamboo shoot;Salsify;Samphire"],
+ cars:["car brand","Toyota;BMW;Mercedes|mercedes benz;Ford;Honda;Nissan;Audi;Ferrari;Lamborghini;Tesla;Porsche;Volkswagen|vw;Chevrolet|chevy;Hyundai;Kia;Lexus;Land Rover|range rover;Jeep;Mazda;Rolls-Royce|rolls royce;Bentley;Bugatti;Mitsubishi;Subaru;Volvo;Jaguar;Maserati;Aston Martin;McLaren;Peugeot;Renault;Fiat;Cadillac;Dodge;GMC;Infiniti;Genesis;Mini;Suzuki;Skoda;Seat;Citroen;Alfa Romeo;Lotus;Pagani;Koenigsegg;Lincoln;Chrysler;Buick;Opel;Dacia;Polestar;BYD;Geely;Chery;Haval;MG;Cupra;Lucid;Rivian;Ram;Isuzu;Daihatsu;Lada;Tata;Mahindra;Proton;Perodua;Saab;Smart;Alpine;Rimac;Lancia;Hummer;Pontiac;Holden"],
+ dogs:["dog breed","Labrador|lab|labrador retriever;German Shepherd;Golden Retriever;Bulldog;Poodle;Chihuahua;Husky|siberian husky;Beagle;Pug;Rottweiler;Dachshund|sausage dog;Boxer;Shih Tzu;Pomeranian;Doberman;Great Dane;Border Collie;Yorkshire Terrier|yorkie;Corgi;Dalmatian;French Bulldog|frenchie;Cocker Spaniel;Maltese;Bichon Frise;Saint Bernard;Chow Chow;Shiba Inu;Akita;Pit Bull|pitbull;Greyhound;Jack Russell;Labradoodle;Cavalier King Charles Spaniel|cavalier;Bernese Mountain Dog;Australian Shepherd;Samoyed;Newfoundland;Basset Hound;Bloodhound;Whippet;Weimaraner;Vizsla;Schnauzer;Mastiff;Shar Pei;Afghan Hound;Saluki;Basenji;Papillon;Havanese;Lhasa Apso;Pekingese;Bull Terrier;Staffordshire Bull Terrier|staffy;Irish Setter;Collie;Old English Sheepdog;Alaskan Malamute|malamute;Belgian Malinois|malinois;Cane Corso;Rhodesian Ridgeback;Borzoi;Komondor;Puli;Xoloitzcuintli;Leonberger;Bedlington Terrier;Otterhound"],
+ instruments:["musical instrument","Piano;Guitar;Drums;Violin;Flute;Trumpet;Saxophone;Cello;Bass|bass guitar;Harp;Clarinet;Ukulele;Keyboard;Trombone;Accordion;Harmonica;Tuba;Oboe;Xylophone;Banjo;Tambourine;Triangle;Viola;Organ;Bagpipes;Double bass;French horn|horn;Bassoon;Mandolin;Sitar;Oud;Tabla;Darbuka;Piccolo;Cymbals;Bongos;Marimba;Harpsichord;Recorder;Synthesizer|synth;Kazoo;Didgeridoo;Castanets;Glockenspiel;Timpani;Steel drum|steelpan;Theremin;Lute;Zither;Balalaika;Koto;Shamisen;Erhu;Kalimba;Djembe;Cajon;Qanun;Ney;Hang drum|handpan;Bouzouki;Dulcimer;Cornet;Euphonium;Sousaphone;Celesta;Vibraphone"],
+ sports:["Summer Olympic sport","Swimming;Athletics|track and field|running;Football|soccer;Basketball;Tennis;Gymnastics;Boxing;Cycling;Volleyball;Rowing;Diving;Wrestling;Judo;Weightlifting;Fencing;Archery;Sailing;Table tennis|ping pong;Badminton;Hockey|field hockey;Handball;Taekwondo;Shooting;Equestrian|horse riding;Canoeing|kayaking;Triathlon;Water polo;Surfing;Skateboarding;Rugby|rugby sevens;Golf;Climbing|sport climbing;Breaking|breakdancing;Modern pentathlon;Beach volleyball;Karate;Baseball;Softball;Artistic swimming|synchronised swimming;Trampoline;BMX"],
+ capitals:["European capital city","Paris;London;Rome;Berlin;Madrid;Amsterdam;Athens;Lisbon;Vienna;Dublin;Brussels;Moscow;Prague;Stockholm;Oslo;Copenhagen;Warsaw;Budapest;Helsinki;Bern;Kyiv|kiev;Reykjavik;Bucharest;Belgrade;Sofia;Zagreb;Bratislava;Ljubljana;Tallinn;Riga;Vilnius;Luxembourg;Monaco;Valletta;Nicosia;Tirana;Sarajevo;Podgorica;Skopje;Chisinau;Minsk;Andorra la Vella;Vaduz;San Marino;Vatican City;Pristina"],
+ languages:["language","English;Arabic;Spanish;French;Hindi;Mandarin|chinese;Urdu;German;Japanese;Russian;Portuguese;Italian;Korean;Turkish;Bengali|bangla;Tagalog|filipino;Malayalam;Tamil;Persian|farsi;Dutch;Greek;Swahili;Punjabi;Telugu;Gujarati;Marathi;Kannada;Indonesian;Malay;Thai;Vietnamese;Hebrew;Polish;Swedish;Ukrainian;Cantonese;Nepali;Sinhala;Pashto;Kurdish;Somali;Amharic;Hausa;Yoruba;Zulu;Afrikaans;Czech;Hungarian;Finnish;Norwegian;Danish;Romanian;Serbian;Croatian;Irish|gaelic;Welsh;Latin;Icelandic;Basque;Catalan;Maltese;Mongolian;Khmer;Lao;Burmese;Tibetan;Esperanto;Hawaiian;Maori;Quechua;Navajo;Latvian;Lithuanian;Estonian;Albanian;Armenian;Georgian;Kazakh;Uzbek"],
+ dinos:["dinosaur","Tyrannosaurus|t rex|trex|tyrannosaurus rex;Triceratops;Velociraptor|raptor;Stegosaurus;Brachiosaurus;Spinosaurus;Ankylosaurus;Diplodocus;Allosaurus;Parasaurolophus;Iguanodon;Apatosaurus;Brontosaurus;Pachycephalosaurus;Carnotaurus;Dilophosaurus;Gallimimus;Compsognathus;Giganotosaurus;Argentinosaurus;Therizinosaurus;Baryonyx;Oviraptor;Deinonychus;Microraptor;Utahraptor;Maiasaura;Protoceratops;Styracosaurus;Edmontosaurus;Archaeopteryx;Coelophysis;Herrerasaurus;Mamenchisaurus;Plateosaurus;Suchomimus;Kentrosaurus;Troodon;Megalosaurus"],
+ currency:["currency","Dollar;Euro;Pound|pound sterling;Dirham;Yen;Rupee;Riyal;Dinar;Yuan|renminbi;Franc;Peso;Ruble|rouble;Won;Lira;Real;Rand;Krona;Baht;Ringgit;Dong;Shekel;Naira;Rupiah;Zloty;Forint;Krone;Lev;Leu;Kwacha;Cedi;Shilling;Birr;Taka;Kyat;Tenge;Lari;Manat;Som;Hryvnia;Lempira;Colon;Quetzal;Guarani;Boliviano;Sol;Bolivar;Rial;Afghani;Ouguiya;Pula;Dalasi;Loti;Lilangeni;Metical;Kip;Riel;Tugrik;Paanga;Vatu"],
+};
+const dcNorm=t=>String(t||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/&/g," and ").replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim().replace(/^the /,"");
+const DC={};for(const[k,[noun,raw]]of Object.entries(DC_LISTS))DC[k]={noun,items:raw.split(";").map((e,i)=>{const[name,...al]=e.split("|");return{name,rank:i,keys:[name,...al].map(dcNorm)}})};
+const DC_TIERS=[[.1,10,"Basic","#8A94A6"],[.25,25,"Mainstream","#4C9AFF"],[.45,40,"Niche","#38C6A6"],[.65,60,"Deep cut","#A970FF"],[.85,80,"Hidden gem","#FF6FB1"],[1.01,100,"Legendary","#FFC23C"]];
+function lev(a,b){if(Math.abs(a.length-b.length)>2)return 9;const d=Array.from({length:a.length+1},(_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;
+  for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+function dcPrompts(){const out=[];for(const[k,c]of Object.entries(DC)){out.push({id:k,cat:k,q:`Name a ${c.noun}`,items:c.items});
+    if(c.items.length>=35){const by={};c.items.forEach(it=>{const L=it.name[0].toUpperCase();(by[L]=by[L]||[]).push(it)});
+      for(const[L,its]of Object.entries(by))if(its.length>=5)out.push({id:k+"-"+L,cat:k,q:`Name a ${c.noun} starting with ${L}`,items:its,letter:L})}}return out}
+const DC_POOL=dcPrompts();
+function dcToday(ds){ds=ds||TODAY();const order=shuffled(DC_POOL.map((_,i)=>i),"yg-deep"),n=dayNum(ds),out=[],cats=new Set();
+  for(let k=0;out.length<3&&k<order.length;k++){const p=DC_POOL[order[((n*3+k)%order.length+order.length)%order.length]];if(cats.has(p.cat))continue;cats.add(p.cat);out.push(p)}return out}
+function dcMatch(p,ans){const a=dcNorm(ans);if(!a)return null;if(p.letter&&a[0]!==p.letter.toLowerCase())return null;
+  let it=p.items.find(x=>x.keys.includes(a));if(!it&&a.length>=4)it=p.items.find(x=>x.keys.some(k=>k.length>=4&&lev(a,k)<=(k.length>=8?2:1)));return it||null}
+function dcScore(p,it){if(!it)return{pts:0,tier:null};const r=p.items.indexOf(it)/Math.max(1,p.items.length-1),t=DC_TIERS.find(t=>r<t[0])||DC_TIERS[5];return{pts:t[1],tier:t}}
+const DC_SECS=25;
+SHEETS.gDeep={live:true,
+  init(){const l=gLocal("deep")||{ans:[],start:null};const st={ans:l.ans||[],start:l.start||null,reveal:null,intro:!(l.ans||[]).length&&!l.start};
+    if(st.start&&now()-st.start>DC_SECS*1000&&st.ans.length<3){st.ans.push({t:""});st.start=null;st.reveal=st.ans.length-1;gLocalSet("deep",{ans:st.ans,start:null});if(st.ans.length>=3)setTimeout(()=>dcFinish(st),0)}return st},
+  render(s){const ps=dcToday(),st=s.state,sc=gScore("deep",ME);
+    if(st.intro&&!sc)return{title:"💎 Deep Cuts",body:`<div class="dcintro"><div class="dcgem">💎</div><h2>Be obscure.</h2><p>3 prompts. 25 seconds each. Obvious answers barely score; rare but valid answers score big.</p>
+      <div class="dctiers">${DC_TIERS.map(t=>`<span style="--tc:${t[3]}"><b>${t[1]}</b>${t[2]}</span>`).join("")}</div><p class="meta">One answer per prompt. Typos are forgiven.</p></div>`,
+      foot:`<button class="btn pri block" data-act="dcStart">Start · 3 prompts</button>`};
+    if(st.reveal!=null){const p=ps[st.reveal],a=st.ans[st.reveal],it=dcMatch(p,a.t),r=dcScore(p,it),common=p.items.slice(0,3).map(x=>x.name),deep=p.items.slice(-2).map(x=>x.name);
+      const crew=D.scores.filter(x=>x.game==="deep"&&x.date===TODAY()&&x.uid!==ME&&mem(x.uid)&&x.raw?.[st.reveal]);const same=it?crew.filter(x=>dcNorm(x.raw[st.reveal])===dcNorm(it.name)||dcMatch(p,x.raw[st.reveal])===it).length:0;
+      return{title:"💎 Deep Cuts",body:`<div class="estq"><span class="meta">Prompt ${st.reveal+1} of 3</span><h2>${esc(p.q)}</h2></div>
+        <div class="dcres" style="--tc:${r.tier?r.tier[3]:"var(--danger)"}"><span class="meta">You said</span><b>${esc(a.t||"(nothing)")}</b>${it&&dcNorm(it.name)!==dcNorm(a.t)?`<span class="meta">counted as ${esc(it.name)}</span>`:""}
+          <div class="dctier">${r.tier?`${r.tier[2]} · +${r.pts}`:a.t?"Not on our list · 0":"Time's up · 0"}</div>${it&&crew.length&&!same?`<span class="meta">🦄 Nobody else in the crew said it</span>`:""}</div>
+        <p class="meta" style="margin-top:12px">Most common: <b style="color:var(--fg)">${common.map(esc).join(", ")}</b><br>Deep cuts: <b style="color:var(--fg)">${deep.map(esc).join(", ")}</b></p>`,
+        foot:`<button class="btn pri block" data-act="dcNext">${st.reveal<2?"Next prompt":"See my score"}</button>`}}
+    if(sc||st.ans.length>=3){const tot=st.ans.reduce((t,a,i)=>t+dcScore(ps[i],dcMatch(ps[i],a.t)).pts,0),others=D.scores.filter(x=>x.game==="deep"&&x.date===TODAY()&&x.uid!==ME&&mem(x.uid));
+      return{title:"💎 Deep Cuts",body:`<div class="gres"><span class="meta">Today's obscurity score</span><b style="font-size:40px">${sc?.raw2??tot}<span class="meta" style="font-size:16px"> / 300</span></b><span class="meta">New prompts in ${untilMidnight()}</span></div>
+        <div class="list" style="gap:8px;margin-top:12px">${ps.map((p,i)=>{const a=st.ans[i]||{t:sc?.raw?.[i]||""},it=dcMatch(p,a.t),r=dcScore(p,it);return`<div class="item" style="flex-direction:column;align-items:stretch;gap:4px"><b style="font-size:14px">${esc(p.q)}</b>
+          <span class="meta">You: <b style="color:${r.tier?r.tier[3]:"var(--danger)"}">${esc(a.t||"—")}</b> ${r.tier?`(${r.tier[2]}, ${r.pts})`:"(0)"}${others.map(o=>o.raw?.[i]?` · ${esc(nick(o.uid))}: ${esc(o.raw[i])}`:"").join("")}</span></div>`}).join("")}</div>`,
+        foot:`<div class="row" style="flex-wrap:nowrap;gap:8px;width:100%"><button class="btn" data-act="gShare" data-t="${esc(`Deep Cuts ${sc?.raw2??tot}/300 💎\n${ps.map((p,i)=>{const r=dcScore(p,dcMatch(p,(st.ans[i]||{t:sc?.raw?.[i]}).t));return r.tier?["⬜","🟦","🟩","🟪","🩷","🟨"][DC_TIERS.indexOf(r.tier)]:"⬛"}).join("")}`)}">📤 Share</button><button class="btn pri block" data-act="close">Leaderboard</button></div>`}}
+    const i=st.ans.length,p=ps[i],left=st.start?Math.max(0,DC_SECS-(now()-st.start)/1000):DC_SECS;
+    return{title:"💎 Deep Cuts",body:`<div class="estq"><span class="meta">Prompt ${i+1} of 3</span><h2>${esc(p.q)}</h2></div>
+      <div class="dctimer"><i style="animation-duration:${left}s"></i></div><div class="meta" style="text-align:center" id="dcLeft">${Math.ceil(left)}s</div>
+      <input class="inp" id="dcIn" autocomplete="off" autocapitalize="words" enterkeyhint="done" placeholder="Something rare…" style="font-size:22px;text-align:center;margin-top:12px">
+      <p class="meta" style="text-align:center;margin-top:8px">Rarer = more points. Must be a real ${esc(DC[p.cat].noun)}.</p>`,
+      foot:`<button class="btn pri block" data-act="dcLock">Lock it in</button>`}},
+  after(s){clearInterval(s.dcT);const st=s.state;if(st.intro||st.reveal!=null||st.ans.length>=3||gScore("deep",ME))return;const inp=$("#dcIn",s.el);if(inp&&document.activeElement!==inp)setTimeout(()=>inp.focus(),80);
+    s.dcT=setInterval(()=>{if(!s.el.isConnected)return clearInterval(s.dcT);const left=DC_SECS-(now()-st.start)/1000,el=$("#dcLeft",s.el);if(el)el.textContent=Math.max(0,Math.ceil(left))+"s";if(left<=0){clearInterval(s.dcT);ACT.dcLock({timeout:1})}},250)},
+  destroy(s){clearInterval(s.dcT)}
+};
+async function dcFinish(st){const ps=dcToday(),tot=st.ans.reduce((t,a,i)=>t+dcScore(ps[i],dcMatch(ps[i],a.t)).pts,0);
+  await gSave("deep",{pts:Math.round(tot/3),raw2:tot,label:`${tot}/300`,raw:st.ans.map(a=>a.t||"")})}
+document.addEventListener("keydown",e=>{const s=topS();if(s?.kind==="gDeep"&&e.key==="Enter"&&e.target?.id==="dcIn"){e.preventDefault();ACT.dcLock({})}});
 /* busy */
 SHEETS.busy={
   render(s){return{title:"Block my time",body:`<div class="form">
@@ -3225,6 +3472,35 @@ const ACT={
   habitSetup(){openSheet("habitSetup")},
   shamePerson(d){openSheet("shamePerson",{id:d.id})},
   shameDaySet(d){UI.shameDay=d.k;render()},
+  playGame(d){const k={word:"gWord",est:"gEst",deep:"gDeep"}[d.g];if(k)openSheet(k)},
+  gRange(d){UI.gRange=d.k;render()},
+  gGame(d){UI.gGame=d.k;render()},
+  async gShare(d){const t=d.t+"\nyalla guys 🎮";try{if(navigator.share){await navigator.share({text:t});return}}catch(e){if(e?.name==="AbortError")return}try{await navigator.clipboard.writeText(t);toast("Copied. Paste it in the group chat!")}catch{toast(t)}},
+  async wKey(d){const s=topS();if(s?.kind!=="gWord")return;const st=s.state,ans=gameDay().word;if(gScore("word",ME)||st.guesses.includes(ans)||st.guesses.length>=6)return;
+    if(d.k==="back"){st.cur=st.cur.slice(0,-1);return paintSheet(s)}
+    if(d.k==="enter"){if(st.cur.length<5){s.shake=1;paintSheet(s);s.shake=0;return toast("5 letters, please")}st.guesses.push(st.cur);st.cur="";gLocalSet("word",{guesses:st.guesses});
+      try{haptic()}catch{}paintSheet(s);if(st.guesses.includes(ans)||st.guesses.length>=6)await wFinish(s);return}
+    if(/^[a-z]$/.test(d.k)&&st.cur.length<5){st.cur+=d.k;paintSheet(s)}},
+  async estLock(){const s=topS(),v=parseFloat(val("estIn"));if(!(v>0))return toast("Type a number above 0.");const st=s.state;st.ans.push(v);st.reveal=st.ans.length-1;gLocalSet("est",{ans:st.ans});
+    if(st.ans.length>=3){const qs=gameDay().est;await gSave("est",{pts:Math.round(st.ans.reduce((t,g,i)=>t+estPts(g,qs[i][2]),0)/3),label:"3 questions",raw:st.ans})}paintSheet(s)},
+  estNext(){const s=topS();s.state.reveal=null;paintSheet(s)},
+  async cTile(d){const s=topS(),st=s.state,id=+d.id;if(st.sel==null||st.op==null||st.sel===id){st.sel=st.sel===id?null:id;st.op=null;return paintSheet(s)}
+    const a=st.tiles.find(t=>t.id===st.sel),b=st.tiles.find(t=>t.id===id);let v=null;
+    if(st.op==="+")v=a.v+b.v;else if(st.op==="-")v=a.v-b.v;else if(st.op==="×")v=a.v*b.v;else if(st.op==="÷")v=b.v&&a.v%b.v===0?a.v/b.v:null;
+    if(v==null||v<=0){toast(st.op==="÷"?"That doesn't divide evenly":"Numbers must stay above 0");st.op=null;return paintSheet(s)}
+    st.hist.push(JSON.stringify(st.tiles));st.tiles=st.tiles.filter(t=>t.id!==a.id&&t.id!==b.id);const nt={id:st.nid++,v};st.tiles.push(nt);st.sel=nt.id;st.op=null;gLocalSet("crunch",st);try{haptic()}catch{}
+    if(v===gameDay().crunch.target){paintSheet(s);toast("🎯 Bang on!");await cFinish(v);return}paintSheet(s)},
+  dcStart(){const s=topS();s.state.intro=false;s.state.start=now();gLocalSet("deep",{ans:s.state.ans,start:s.state.start});paintSheet(s)},
+  async dcLock(d){const s=topS();if(s?.kind!=="gDeep")return;const st=s.state;if(st.intro||st.reveal!=null||st.ans.length>=3)return;clearInterval(s.dcT);
+    const t=d?.timeout&&!val("dcIn")?"":(val("dcIn")||"").trim().slice(0,40);st.ans.push({t});document.activeElement?.blur?.();st.reveal=st.ans.length-1;st.start=null;gLocalSet("deep",{ans:st.ans,start:null});try{haptic()}catch{}
+    if(st.ans.length>=3)await dcFinish(st);paintSheet(s)},
+  dcNext(){const s=topS(),st=s.state;st.reveal=null;if(st.ans.length<3){st.start=now();gLocalSet("deep",{ans:st.ans,start:st.start})}paintSheet(s)},
+  cOp(d){const s=topS();if(s.state.sel==null)return;s.state.op=d.k;paintSheet(s)},
+  cUndo(){const s=topS(),st=s.state;if(!st.hist.length)return;st.tiles=JSON.parse(st.hist.pop());st.sel=null;st.op=null;gLocalSet("crunch",st);paintSheet(s)},
+  cReset(){const s=topS(),st=s.state;if(!st.hist.length)return;st.tiles=JSON.parse(st.hist[0]);st.hist=[];st.sel=null;st.op=null;gLocalSet("crunch",st);paintSheet(s)},
+  async cSubmit(){const s=topS(),pz=gameDay().crunch,b=[...s.state.tiles].sort((x,y)=>Math.abs(x.v-pz.target)-Math.abs(y.v-pz.target))[0];await cFinish(b.v);paintSheet(s)},
+
+  async planShowCrew(d){const p=planById(d.id);if(!p||p.by!==ME)return;await Store.upd("plans",p.id,{showCrew:!p.showCrew});toast(p.showCrew?"Only people who were there see it now":"👀 The crew can see this memory")},
   badge(d){openSheet("badge",{id:d.id,u:d.u})},
   badgesMore(d){UI.badgesOpen=UI.badgesOpen===d.u?null:d.u;const s=topS();if(s)paintSheet(s)},
   proofAdd(d){const ds=UI.shameDay==="y"?shameDay(1):TODAY();ensureAC?.();pickPhotos(async fs=>{const f=fs[0];if(!f)return;try{toast("Preparing photo…");const src=await storePhoto(f);if(!src)return toast("Couldn't read that photo.");openSheet("proofPost",{src,hid:d.h,ds})}catch{toast("Couldn't read that photo. Try another.")}},"#onePick")},
