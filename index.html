@@ -680,6 +680,9 @@ body.has-fx::before{background:transparent}
 @keyframes achpop{0%{transform:scale(.3) translateY(40px);opacity:0}100%{transform:none;opacity:1}}
 @keyframes achspark{0%{transform:translate(-50%,-50%) scale(.2);opacity:0}15%{opacity:1}70%{opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy) + 30px)) scale(1.1) rotate(var(--rot));opacity:0}}
 @keyframes achfade{from{opacity:0}}@keyframes achout{to{opacity:0;transform:translateY(20px)}}
+/* small round ✕ buttons grow into a red pill while waiting for the second tap */
+.tile-x.armed,.bdel.armed,.x.armed{width:auto!important;min-width:0;padding:0 11px!important;border-radius:999px!important;background:var(--danger)!important;color:#fff!important;font-size:12.5px!important;font-weight:800;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.35);animation:armpop .18s ease-out}
+@keyframes armpop{from{transform:scale(.85)}}
 .podcard{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:12px 0 10px;margin:4px 0 14px;overflow:hidden}
 .podtabs{display:flex;gap:6px;margin:0 12px;background:var(--surface2);border-radius:999px;padding:4px}
 .podtabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:8px 6px;border-radius:999px;white-space:nowrap}
@@ -805,7 +808,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-11.16";
+const APP_VERSION="2026-11-11.17";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1983,7 +1986,7 @@ SHEETS.board={live:true,
 };
 const canRemove=m=>m.by===ME||planById(m.planId)?.by===ME;
 function boardItem(m,i){
-  const del=canRemove(m)?`<button class="bdel" data-act="delItem" data-id="${esc(m.id)}" data-confirm="🗑️" aria-label="Remove">✕</button>`:"";
+  const del=canRemove(m)?`<button class="bdel" data-act="delItem" data-id="${esc(m.id)}" data-confirm="🗑️ Remove?" aria-label="Remove">✕</button>`:"";
   if(m.kind==="photo")return`<div class="bphoto"><button data-act="viewPhoto" data-id="${esc(m.id)}" style="all:unset;display:block;width:100%;cursor:pointer"><img src="${esc(m.src)}" alt="${esc(m.caption||"Photo")}" loading="lazy"></button>${del}</div>`;
   if(m.kind==="note")return`<div class="bnote" style="background:${esc(m.color||NOTE_COLORS[0])};--r:${(i%3-1)*1.2}deg">${esc(m.text)}<small>${esc(nick(m.by))}</small>${del}</div>`;
   if(m.kind==="color")return`<div class="bcolor" style="background:${esc(m.color)}"><span>${esc((m.caption||m.color).toUpperCase())}</span>${del}</div>`;
@@ -2156,7 +2159,7 @@ SHEETS.ticketView={live:true,
 function myAttachHtml(busyId,pending){
   const items=pending||D.mine.filter(m=>m.busyId===busyId).sort((a,b)=>a.at-b.at);
   const pics=items.map((m,i)=>({m,i})).filter(x=>x.m.kind==="photo");
-  const tiles=pics.length?`<div class="att-tiles ${pics.length===1?"one":pics.length===2||pics.length===4?"two":""}">${pics.map(({m,i})=>`<div class="att-tile">${pending?`<img src="${esc(m.src)}" alt="Photo">`:`<button class="tile-open" data-act="viewSrc" data-key="mine:${esc(m.id)}" aria-label="Open photo"><img src="${esc(m.src)}" alt="Photo" loading="lazy"></button>`}<button class="tile-x" data-act="${pending?"bzAttDel":"mineDel"}" data-id="${pending?i:esc(m.id)}" data-confirm="Remove?" aria-label="Remove photo">✕</button></div>`).join("")}</div>`:"";
+  const tiles=pics.length?`<div class="att-tiles ${pics.length===1?"one":pics.length===2||pics.length===4?"two":""}">${pics.map(({m,i})=>`<div class="att-tile">${pending?`<img src="${esc(m.src)}" alt="Photo">`:`<button class="tile-open" data-act="viewSrc" data-key="mine:${esc(m.id)}" aria-label="Open photo"><img src="${esc(m.src)}" alt="Photo" loading="lazy"></button>`}<button class="tile-x" data-act="${pending?"bzAttDel":"mineDel"}" data-id="${pending?i:esc(m.id)}" data-confirm="🗑️ Remove?" aria-label="Remove photo">✕</button></div>`).join("")}</div>`:"";
   return`${tiles}<div class="att-list">${items.map((m,i)=>{const del=`<button class="x" data-act="${pending?"bzAttDel":"mineDel"}" data-id="${pending?i:esc(m.id)}" aria-label="Remove">✕</button>`;
     if(m.kind==="photo")return"";
     if(m.kind==="ticket")return`<div class="row" style="flex-wrap:nowrap">${pending?`<div class="ticket"><span class="tk-ic">${esc(m.icon||"🎟️")}</span><span style="flex:1;min-width:0"><b>${esc(m.title||"Ticket")}</b>${m.code?`<div class="tk-code">${esc(m.code)}</div>`:""}</span></div>`:ticketRow(m,"mine")}${del}</div>`;
@@ -3895,7 +3898,7 @@ const ACT={
 document.addEventListener("click",ev=>{
   if(!AUDIO._u){AUDIO._u=1;try{AUDIO.src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";AUDIO.play().catch(()=>{})}catch{}}
   const el=ev.target.closest("[data-act]");if(!el)return;const fn=ACT[el.dataset.act];if(!fn)return;
-  if(el.dataset.confirm){if(!el._armed){el._armed=true;const o=el.innerHTML;el.textContent=el.dataset.confirm;setTimeout(()=>{el._armed=false;if(el.isConnected)el.innerHTML=o},3000);return}}
+  if(el.dataset.confirm){if(!el._armed){el._armed=true;const o=el.innerHTML;el.textContent=el.dataset.confirm;el.classList.add("armed");setTimeout(()=>{el._armed=false;if(el.isConnected){el.innerHTML=o;el.classList.remove("armed")}},3000);return}}
   if(el.tagName==="A"&&el.getAttribute("href")==="#")ev.preventDefault();
   if(el.tagName!=="A"&&ev.target.closest("a"))ev.preventDefault();
   const r=fn(el.dataset,el,ev);if(r&&r.catch)r.catch(e=>{console.error(e);toast("Something went wrong. Try again.")});
