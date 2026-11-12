@@ -752,6 +752,30 @@ body.has-fx::before{background:transparent}
 .shdesc{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
 .shstars{display:inline-flex;gap:1px;font-size:13px;line-height:1}.shstars i{font-style:normal;color:var(--line)}.shstars i.on{color:#F2C14E}.shstars i.half{background:linear-gradient(90deg,#F2C14E 50%,var(--line) 50%);-webkit-background-clip:text;background-clip:text;color:transparent}.shstars.lg{font-size:20px}
 .shpick{display:flex;justify-content:center;gap:6px}.shpick button{border:0;background:none;font-size:34px;line-height:1;color:var(--line);cursor:pointer;padding:2px 4px;transition:transform .12s}.shpick button.on{color:#F2C14E}.shpick button:active{transform:scale(1.25)}
+.gav.pic{padding:0;overflow:hidden;background:none}.gav.pic img{width:100%;height:100%;object-fit:cover;display:block}
+.gav.big{width:64px;height:64px;font-size:30px;border-radius:18px;flex:none}
+.hdic{width:28px!important;height:28px!important;min-width:28px;border-radius:9px;object-fit:cover;flex:none;display:block}
+.shplay{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-fg);font:inherit;font-weight:800;font-size:14px;padding:8px 16px 8px 12px;cursor:pointer}.shplay svg{display:block}
+.shhero.still .shart.song.big{animation-play-state:paused}
+.phone{position:relative;max-width:340px;margin:0 auto;border-radius:40px;padding:12px 16px 16px;border:3px solid color-mix(in srgb,var(--accent) 55%,#2a313a);
+  background:radial-gradient(120% 60% at 15% 0%,color-mix(in srgb,var(--accent) 55%,transparent),transparent 70%),radial-gradient(110% 55% at 100% 100%,color-mix(in srgb,var(--accent) 40%,transparent),transparent 70%),linear-gradient(180deg,#10151c,#07090d);
+  box-shadow:0 0 0 2px #05070a,0 18px 40px rgba(0,0,0,.5),0 0 26px color-mix(in srgb,var(--accent) 18%,transparent)}
+.phbar{display:flex;align-items:center;justify-content:space-between;color:#fff;font-size:12.5px;padding:2px 8px 16px}.phbar b{font-weight:800;min-width:44px}
+.phnotch{width:74px;height:20px;border-radius:999px;background:#05070a}
+.phsig{display:flex;align-items:flex-end;gap:2px;min-width:44px;justify-content:flex-end}.phsig i{width:3px;background:#fff;border-radius:1px}.phsig i:nth-child(1){height:5px}.phsig i:nth-child(2){height:8px}.phsig i:nth-child(3){height:11px}
+.phsig em{width:20px;height:10px;border:1.5px solid #fff;border-radius:3px;margin-left:5px;background:linear-gradient(90deg,#fff 70%,transparent 70%);background-clip:content-box;padding:1px}
+.phgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 8px;min-height:300px;align-content:start}
+.appcell{position:relative;border:0;background:none;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;font:inherit;transition:transform .12s}.appcell:active{transform:scale(.9)}
+.appi{position:relative;display:block;width:82%;aspect-ratio:1;border-radius:24%;background:#1a2028;box-shadow:0 4px 10px rgba(0,0,0,.45)}
+.appi>img,.appbg{position:absolute;inset:0;width:100%;height:100%;border-radius:24%;object-fit:cover;display:grid;place-items:center;color:#fff}.appbg svg{width:56%;height:56%}
+.appi::after{content:"";position:absolute;inset:0;border-radius:24%;background:linear-gradient(160deg,rgba(255,255,255,.22),transparent 45%);pointer-events:none}
+.appi.series{box-shadow:-4px -4px 0 -1px #6b7480,-4px -4px 0 0 #0a0d11,-8px -8px 0 -2px #454d58,-8px -8px 0 -1px #0a0d11,0 4px 10px rgba(0,0,0,.45);margin-top:6px;margin-left:6px;width:76%}
+.appi.song>img{border-radius:50%;inset:9%;width:82%;height:82%;box-shadow:0 0 0 2px #0a0a0a}.appi.song{background:repeating-radial-gradient(circle,#0c0c0d 0 1.5px,#1e1f22 1.5px 3px)}
+.appk{position:absolute;right:-12%;bottom:-12%;width:44%;height:44%;border-radius:50%;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;box-shadow:0 0 0 2px #0b0e13;z-index:2}.appk svg{width:66%;height:66%}
+.applbl{max-width:100%;color:#fff;font-size:10.5px;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.apprate{position:absolute;left:0;top:-7px;font-style:normal;font-size:9.5px;font-weight:800;background:#0B0F14;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 60%,transparent);border-radius:999px;padding:0 5px;z-index:3}
+.addapp{display:grid;place-items:center;background:rgba(255,255,255,.1);border:2px dashed rgba(255,255,255,.5);color:#fff;font-size:24px;font-weight:300;box-shadow:none}.addapp::after{display:none}
+.phdots{display:flex;justify-content:center;gap:6px;margin-top:18px}.phdots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35)}.phdots i.on{background:#fff}
 .podcard{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:12px 0 10px;margin:4px 0 14px;overflow:hidden}
 .podtabs{display:flex;gap:6px;margin:0 12px;background:var(--surface2);border-radius:999px;padding:4px}
 .podtabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:8px 6px;border-radius:999px;white-space:nowrap}
@@ -880,7 +904,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-12.16";
+const APP_VERSION="2026-11-12.20";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1197,7 +1221,7 @@ function settlePlan(bal){
 }
 const chatOther=c=>c.dm?(c.members||[]).find(u=>u!==ME)||ME:null;
 const chatName=c=>c.dm?nick(chatOther(c)):(c.name||"Chat");
-const chatIcon=(c,big)=>c.dm?avatar(chatOther(c),"",big?"width:46px;height:46px;font-size:22px":""):`<span class="gav">${esc(c.emoji||"💬")}</span>`;
+const chatIcon=(c,big)=>c.dm?avatar(chatOther(c),"",big?"width:46px;height:46px;font-size:22px":""):`<span class="gav${c.icon?" pic":""}">${c.icon?`<img src="${esc(c.icon)}" alt="">`:esc(c.emoji||"💬")}</span>`;
 const momentsBy=u=>D.moments.filter(m=>m.by===u).sort((a,b)=>b.at-a.at);
 const postedToday=u=>D.moments.some(m=>m.by===u&&m.day===TODAY());
 function streakOf(u){const days=new Set(momentsBy(u).map(m=>m.day));let d=new Date();if(!days.has(ymd(d)))d.setDate(d.getDate()-1);let n=0;while(days.has(ymd(d))){n++;d.setDate(d.getDate()-1)}return n}
@@ -3311,31 +3335,57 @@ function shelfArt(x,big){const k=SHELF_KINDS[x.kind]?x.kind:"book",[e]=SHELF_KIN
   return`<span class="shart ${k} ${big?"big":""}"><span class="shface">${face}</span></span>`}
 async function coverPhoto(file,kind){const img=await loadImg(file),w=300,h=kind==="song"?300:450,c=document.createElement("canvas");c.width=w;c.height=h;
   const sc=Math.max(w/img.naturalWidth,h/img.naturalHeight),sw=w/sc,sh=h/sc;c.getContext("2d").drawImage(img,(img.naturalWidth-sw)/2,(img.naturalHeight-sh)/2,sw,sh,0,0,w,h);return toDataURL(await new Promise(r=>c.toBlob(r,"image/jpeg",.8)))}
+const STUFF_GLY={movie:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3.5"/><path d="M10.2 9.3v5.4l4.8-2.7z" fill="currentColor"/></svg>',
+  series:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.5H18a3 3 0 0 1 3 3V15"/><rect x="3" y="8.5" width="14.5" height="11.5" rx="3"/><path d="M8.8 11.9v4.7l4.1-2.35z" fill="currentColor"/></svg>',
+  song:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17.5V6l10-2v11.5"/><circle cx="6.5" cy="17.5" r="2.5" fill="currentColor"/><circle cx="16.5" cy="15.5" r="2.5" fill="currentColor"/></svg>',
+  book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.6C10 5.1 7 4.6 4 5.1v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-13c-3-.5-6 0-8 1.5zM12 6.6v13"/></svg>'};
+/* phone layout: every item is an app icon, the cover is the icon and a little badge says what kind it is */
+function stuffApp(x){const k=SHELF_KINDS[x.kind]?x.kind:"book",h=hue(x.id||x.title||"x");
+  return`<span class="appi ${k}">${x.cover?`<img src="${esc(x.cover)}" alt="" loading="lazy">`:`<span class="appbg" style="background:linear-gradient(150deg,${h},color-mix(in srgb,${h} 40%,#0d1117))">${STUFF_GLY[k]}</span>`}${x.cover?`<i class="appk">${STUFF_GLY[k]}</i>`:""}</span>`}
+// the choice is kept in memory first, so the switch still works when the phone has no room left to save it
+let STUFF_VIEW=null;const stuffViewNow=()=>(STUFF_VIEW||(STUFF_VIEW=ls.get("yg-stuff-view","shelf")==="phone"?"phone":"shelf"));
+try{localStorage.removeItem("yg-av3shots")}catch{}
 SHEETS.shelf={live:true,
-  render(s){const c=D.chats.find(x=>x.id===s.args.id),items=shelfOf(s.args.id),full=items.length>=SHELF_MAX,rows=[];
-    const cells=items.map(x=>{const a=shelfAvg(x.id);return`<button class="shi" data-act="shelfItem" data-id="${esc(x.id)}" aria-label="${esc(SHELF_KINDS[x.kind]?.[1]||"Item")}: ${esc(x.title)}">${shelfArt(x)}${a?`<em class="shrate">★ ${a.toFixed(1)}</em>`:""}</button>`});
-    if(!full)cells.push(`<button class="shi shadd" data-act="shelfAdd" data-id="${esc(s.args.id)}" aria-label="Add to the shelf"><span>+</span></button>`);
-    for(let i=0;i<Math.max(cells.length,8);i+=4)rows.push(cells.slice(i,i+4));
-    return{title:`📚 ${esc(c?.name||"Group")} shelf`,right:`<span class="pill ${full?"warn":"set"}">${items.length}/${SHELF_MAX}</span>`,
-      body:`<div class="shelfwall">${rows.map(r=>`<div class="shelfrow">${r.join("")}</div>`).join("")}</div>
+  render(s){const c=D.chats.find(x=>x.id===s.args.id),items=shelfOf(s.args.id),full=items.length>=SHELF_MAX,rows=[],view=stuffViewNow();let main;
+    if(view==="phone"){const d=new Date(),tm=`${d.getHours()}:${pad(d.getMinutes())}`;
+      const apps=items.map(x=>{const a=shelfAvg(x.id);return`<button class="appcell" data-act="shelfItem" data-id="${esc(x.id)}" aria-label="${esc(SHELF_KINDS[x.kind]?.[1]||"Item")}: ${esc(x.title)}">${stuffApp(x)}${a?`<em class="apprate">★ ${a.toFixed(1)}</em>`:""}<span class="applbl">${esc(x.title)}</span></button>`});
+      if(!full)apps.push(`<button class="appcell" data-act="shelfAdd" data-id="${esc(s.args.id)}" aria-label="Add stuff"><span class="appi addapp">+</span><span class="applbl">Add</span></button>`);
+      main=`<div class="phone"><div class="phbar"><b>${tm}</b><i class="phnotch"></i><span class="phsig"><i></i><i></i><i></i><em></em></span></div><div class="phgrid">${apps.join("")}</div><div class="phdots"><i class="on"></i><i></i></div></div>`}
+    else{const cells=items.map(x=>{const a=shelfAvg(x.id);return`<button class="shi" data-act="shelfItem" data-id="${esc(x.id)}" aria-label="${esc(SHELF_KINDS[x.kind]?.[1]||"Item")}: ${esc(x.title)}">${shelfArt(x)}${a?`<em class="shrate">★ ${a.toFixed(1)}</em>`:""}</button>`});
+      if(!full)cells.push(`<button class="shi shadd" data-act="shelfAdd" data-id="${esc(s.args.id)}" aria-label="Add stuff"><span>+</span></button>`);
+      for(let i=0;i<Math.max(cells.length,8);i+=4)rows.push(cells.slice(i,i+4));
+      main=`<div class="shelfwall">${rows.map(r=>`<div class="shelfrow">${r.join("")}</div>`).join("")}</div>`}
+    return{title:`🗂️ ${esc(c?.name||"Group")} stuff`,right:`<span class="pill ${full?"warn":"set"}">${items.length}/${SHELF_MAX}</span>`,
+      body:`<div class="seg" style="margin-bottom:14px"><button data-act="stuffView" data-k="shelf" aria-pressed="${view==="shelf"}">📚 Shelf</button><button data-act="stuffView" data-k="phone" aria-pressed="${view==="phone"}">📱 Phone</button></div>${main}
         <div class="hint" style="text-align:center;margin-top:14px">${items.length?"Tap anything to see who added it, read reviews and rate it.":"Nothing here yet. Add a book, movie, series or song the group should check out."}</div>`,
-      foot:full?`<div class="hint" style="margin:0;text-align:center;flex:1">The shelf is full (${SHELF_MAX}). Remove something to add more.</div>`:`<button class="btn pri block" data-act="shelfAdd" data-id="${esc(s.args.id)}">+ Add to the shelf</button>`}}};
+      foot:full?`<div class="hint" style="margin:0;text-align:center;flex:1">Stuff is full (${SHELF_MAX}). Remove something to add more.</div>`:`<button class="btn pri block" data-act="shelfAdd" data-id="${esc(s.args.id)}">+ Add stuff</button>`}}};
+/* song previews on the shelf: starts when the record is opened, stops when you leave */
+const SHPLAY={a:null,id:null,on(id){return!!(this.a&&this.id===id&&!this.a.paused)},
+  start(x){this.stop();if(!x?.songPreview)return;try{SONG.stop()}catch{}try{const a=new Audio(x.songPreview);a.volume=.6;this.a=a;this.id=x.id;a.onplay=a.onpause=()=>this.paint();a.onended=()=>{try{a.currentTime=0}catch{}this.paint()};a.play().catch(()=>this.paint())}catch{}},
+  toggle(x){if(this.a&&this.id===x.id){if(this.a.paused)this.a.play().catch(()=>{});else this.a.pause()}else this.start(x)},
+  stop(){if(this.a){try{this.a.pause()}catch{}this.a=null}this.id=null},
+  paint(){const s=stack.find(k=>k.kind==="shelfItem");if(!s)return;const h=$(".shhero",s.el),b=$(".shplay",s.el),on=this.on(s.args.id);if(h)h.classList.toggle("still",!on);if(b){b.innerHTML=(on?SONG_ICON.pause:SONG_ICON.play)+`<span>${on?"Pause":"Play preview"}</span>`;b.setAttribute("aria-label",(on?"Pause":"Play")+" preview")}}};
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&SHPLAY.a){SHPLAY.a.pause();SHPLAY.paint()}});window.addEventListener("pagehide",()=>SHPLAY.stop());
 SHEETS.shelfAdd={
   init(){return{kind:"book",cover:""}},
-  render(s){const st=s.state,[e,l,who]=SHELF_KINDS[st.kind];return{title:"Add to the shelf",body:`<div class="form">
+  render(s){const st=s.state,[e,l,who]=SHELF_KINDS[st.kind];return{title:"Add stuff",body:`<div class="form">
     <div class="seg">${Object.entries(SHELF_KINDS).map(([k,[em,lb]])=>`<button data-act="shKind" data-k="${k}" aria-pressed="${st.kind===k}">${em} ${lb}</button>`).join("")}</div>
     <div class="shaddtop"><button class="shcoverbtn" data-act="shCover" aria-label="${st.cover?"Change cover":"Add cover"}">${st.cover?shelfArt({kind:st.kind,cover:st.cover,id:"new"},1):`<span class="shart ${st.kind} big"><span class="shface"><span class="shnocover empty"><b>+</b><span>Add cover</span></span></span></span>`}</button>
       <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:10px"><label class="f">${l} title<input class="inp" id="shTitle" maxlength="80" placeholder="${st.kind==="song"?"e.g. Blinding Lights":st.kind==="book"?"e.g. The Alchemist":"e.g. Interstellar"}"></label>
         <label class="f">${who} (optional)<input class="inp" id="shBy" maxlength="60"></label>${st.cover?`<button class="btn sm danger" data-act="shCoverDel" style="align-self:flex-start">Remove cover</button>`:""}</div></div>
+    ${st.kind==="song"?`<label class="f">Spotify link (optional)<input class="inp" id="shUrl" type="url" inputmode="url" maxlength="300" placeholder="https://open.spotify.com/track/…"><span class="meta" style="font-weight:400">Paste a song link and a 30-second preview plays when someone taps the record. Title and cover fill in by themselves if you leave them empty.</span></label>`:""}
     <label class="f">Why should the group check it out?<textarea class="inp" id="shDesc" maxlength="600" rows="4" placeholder="A few words. You can paste links too."></textarea></label>
-    </div>`,foot:`<button class="btn pri block" data-act="shSave">Put it on the shelf</button>`}}};
+    </div>`,foot:`<button class="btn pri block" data-act="shSave">Add it</button>`}}};
 SHEETS.shelfItem={live:true,
+  after(s,first){if(first){const x=D.shelf.find(i=>i.id===s.args.id);if(x?.kind==="song"&&x.songPreview)SHPLAY.start(x)}},
+  destroy(){SHPLAY.stop()},
   init(a){const mine=D.sreviews.find(r=>r.itemId===a.id&&r.by===ME);return{rating:mine?.rating||0}},
-  render(s){const x=D.shelf.find(i=>i.id===s.args.id);if(!x)return{title:"Shelf",body:`<div class="empty">This was taken off the shelf.</div>`};
+  render(s){const x=D.shelf.find(i=>i.id===s.args.id);if(!x)return{title:"Stuff",body:`<div class="empty">This was removed.</div>`};
     const [e,l]=SHELF_KINDS[x.kind]||SHELF_KINDS.book,revs=shelfRevs(x.id),avg=shelfAvg(x.id),mine=revs.find(r=>r.by===ME),c=D.chats.find(h=>h.id===x.chatId),canDel=x.by===ME||c?.by===ME,st=s.state;
     return{title:`${e} ${l}`,right:canDel?`<button class="btn sm danger" data-act="shDel" data-id="${esc(x.id)}" data-confirm="Remove?">Remove</button>`:"",
-      body:`<div class="shhero">${shelfArt(x,1)}
+      body:`<div class="shhero ${x.kind==="song"&&x.songPreview&&!SHPLAY.on(x.id)?"still":""}">${shelfArt(x,1)}
         <h1>${esc(x.title)}</h1>${x.who?`<div class="meta" style="font-size:14px">${esc(x.who)}</div>`:""}
+        ${x.kind==="song"&&(x.songPreview||x.songUrl)?`<div class="row" style="gap:10px;justify-content:center">${x.songPreview?`<button class="shplay" data-act="shPlay" data-id="${esc(x.id)}" aria-label="${SHPLAY.on(x.id)?"Pause":"Play"} preview">${SHPLAY.on(x.id)?SONG_ICON.pause:SONG_ICON.play}<span>${SHPLAY.on(x.id)?"Pause":"Play preview"}</span></button>`:""}${x.songUrl?`<a class="btn sm" href="${esc(x.songUrl)}" target="_blank" rel="noopener">Open in Spotify ↗</a>`:""}</div>${x.songPreview?"":`<div class="meta">No preview is available for this song.</div>`}`:""}
         <div class="row" style="gap:8px;justify-content:center">${starsHtml(avg,"lg")}<span class="meta">${avg?`${avg.toFixed(1)} · ${revs.filter(r=>r.rating>0).length} rating${revs.filter(r=>r.rating>0).length===1?"":"s"}`:"No ratings yet"}</span></div>
         <button class="prof-btn" data-act="person" data-id="${esc(x.by)}" style="gap:6px;font-size:13px">${avatar(x.by,"xs")}<span class="meta">Added by <b style="color:var(--fg)">${esc(x.by===ME?"you":nick(x.by))}</b> · ${ago(x.at)}</span></button></div>
       ${x.desc?`<div class="card shdesc">${linkify(x.desc)}</div>`:""}
@@ -3378,9 +3428,10 @@ SHEETS.expense={after(){exLeft()},
 };
 /* new chat */
 SHEETS.newChat={
-  init(){return{emoji:"💬"}},
+  init(){return{emoji:"💬",icon:""}},
   render(s){return{title:"New group chat",body:`<div class="form">
-    <div class="emo-pick">${["💬","🔥","🌴","🏖️","🍽️","⚽️","🎮","🎉","🚗","👑"].map(e=>`<button data-act="ncEmoji" data-v="${e}" aria-pressed="${s.state.emoji===e}">${e}</button>`).join("")}</div>
+    <div class="row" style="gap:12px;align-items:center"><span class="gav big${s.state.icon?" pic":""}">${s.state.icon?`<img src="${esc(s.state.icon)}" alt="">`:esc(s.state.emoji)}</span><button class="btn sm" data-act="ncPhoto">📷 ${s.state.icon?"Change photo":"Use a photo"}</button>${s.state.icon?`<button class="btn sm danger" data-act="ncPhotoDel">Remove</button>`:""}</div>
+    <div class="emo-pick">${CHAT_EMOJIS.map(e=>`<button data-act="ncEmoji" data-v="${e}" aria-pressed="${!s.state.icon&&s.state.emoji===e}">${e}</button>`).join("")}</div>
     <label class="f">Group name<input class="inp" id="ncN" maxlength="40" placeholder="e.g. Brunch squad"></label>
     <div class="f">Who's in it? Only they can read it.
     ${D.members.filter(m=>m.id!==ME).map(m=>`<label class="check"><input type="checkbox" id="ncM-${esc(m.id)}" data-uid="${esc(m.id)}">${avatar(m.id,"xs")}<span style="color:var(--fg)">${esc(nick(m.id))}</span></label>`).join("")||'<span class="meta">Nobody else has joined yet. Send the guys the link and crew code first.</span>'}</div>
@@ -3395,7 +3446,7 @@ SHEETS.chat={live:true,
       const rq=m.replyTo?D.msgs.find(x=>x.id===m.replyTo.id):null;
       html+=`<div class="msg ${me?"me":""}" data-mid="${esc(m.id)}"${m.kind!=="plan"?` data-act="msgMenu" data-chat="${esc(c.id)}" data-id="${esc(m.id)}"`:""}>${me||c.dm?"":`<span class="who">${esc(nick(m.by))}</span>`}${m.replyTo?`<button class="quote" data-act="jumpMsg" data-id="${esc(m.replyTo.id)}"><b>${esc(m.replyTo.by===ME?"You":nick(m.replyTo.by))}</b><span>${esc(rq?(rq.deleted?"Message deleted":msgLabel(rq)):m.replyTo.text||"")}</span></button>`:""}${m.kind==="plan"&&planById(m.planId)?(pl=>`<button class="plan-msg" data-act="openPlan" data-id="${esc(pl.id)}"><span class="k">📌 New plan</span><b style="font-size:16px">${esc(pl.emoji||"")} ${esc(pl.title)}</b><span class="meta">${pl.final?esc(fDate(pl.final.date)+" · "+fRange(pl.final.start,pl.final.end)):`${(pl.slots||[]).length} dates to vote on`} · tap to open</span></button>`)(planById(m.planId)):`${m.kind?`<div class="bub mediab">${mediaHtml("msgs",m)}${m.text?`<div>${linkify(m.text)}</div>`:""}</div>`:`<div class="bub">${linkify(m.text)}</div>`}`}${Object.values(m.likes||{}).filter(Boolean).length?(n=>`<button class="mlike" data-act="msgLikes" data-id="${esc(m.id)}" aria-label="Liked by ${n}">❤️${n>1?`<b>${n}</b>`:""}</button>`)(Object.values(m.likes).filter(Boolean).length):""}${me&&rc?`<span class="stamp">${m.edited?"edited · ":""}${msgTime(m.at)} ${TICK[rc]}</span>`:m.edited?`<span class="edited">edited</span>`:""}${me&&rc&&m.id===lastMine?`<span class="rcpt">${rc==="seen"?(c.dm?"Seen":chatOthers(c).length===1?"Seen by "+esc(nick(chatOthers(c)[0])):"Seen by everyone"):rc==="dlv"?"Delivered":(!c.dm&&seenBy(c,m).length?"Seen by "+seenBy(c,m).map(u=>esc(nick(u))).join(", "):"Sent")}</span>`:""}</div>`});
     const plan=c.planId?planById(c.planId):null;
-    return{title:c.dm?`<button class="prof-btn" data-act="person" data-id="${esc(chatOther(c))}">${avatar(chatOther(c),"sm")} ${esc(chatName(c))}</button>`:`${esc(c.emoji||"💬")} ${esc(c.name)}`,right:`${c.dm?"":`<button class="btn sm" data-act="shelf" data-id="${esc(c.id)}" aria-label="Group shelf">📚 Shelf</button>`}<button class="btn sm" data-act="newPlanInChat" data-id="${esc(c.id)}">+ Plan</button><button class="btn sm" data-act="chatMenu" data-id="${esc(c.id)}" aria-label="Chat options">⋯</button>`,body:`${plan?`<button class="ev" data-act="openPlan" data-id="${esc(plan.id)}" style="margin-bottom:10px"><span class="stripe" style="background:${hue(plan.id)}"></span><span style="flex:1">Plan: <b>${esc(plan.title)}</b></span>${statusPill(plan)}</button>`:""}<div class="msgs">${html||'<div class="empty">Say hi 👋</div>'}</div>`,
+    return{title:c.dm?`<button class="prof-btn" data-act="person" data-id="${esc(chatOther(c))}">${avatar(chatOther(c),"sm")} ${esc(chatName(c))}</button>`:`<button class="prof-btn" data-act="chatMenu" data-id="${esc(c.id)}" style="gap:8px;min-width:0;max-width:100%;overflow:hidden">${c.icon?`<img class="hdic" src="${esc(c.icon)}" alt="">`:esc(c.emoji||"💬")} <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.name)}</span></button>`,right:`${c.dm?"":`<button class="btn sm" data-act="shelf" data-id="${esc(c.id)}" aria-label="Group stuff">🗂️ Stuff</button>`}<button class="btn sm" data-act="newPlanInChat" data-id="${esc(c.id)}">+ Plan</button><button class="btn sm" data-act="chatMenu" data-id="${esc(c.id)}" aria-label="Chat options">⋯</button>`,body:`${plan?`<button class="ev" data-act="openPlan" data-id="${esc(plan.id)}" style="margin-bottom:10px"><span class="stripe" style="background:${hue(plan.id)}"></span><span style="flex:1">Plan: <b>${esc(plan.title)}</b></span>${statusPill(plan)}</button>`:""}<div class="msgs">${html||'<div class="empty">Say hi 👋</div>'}</div>`,
       foot:`<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">${s.state.reply?`<div class="replybar"><span style="flex:1;min-width:0"><b>↩️ Replying to ${esc(s.state.reply.by===ME?"yourself":nick(s.state.reply.by))}</b><span>${esc(s.state.reply.text)}</span></span><button class="x" data-act="replyClear" aria-label="Cancel reply">✕</button></div>`:""}
         <div style="display:flex;gap:4px;align-items:flex-end">${attachBtns("chat",s.args.id)}<textarea class="compose" id="chatIn-${esc(s.args.id)}" rows="1" placeholder="${s.state.reply?"Write a reply…":"Message"}" enterkeyhint="send"></textarea><button class="send" data-act="send" data-id="${esc(s.args.id)}" aria-label="Send">${ICON.send}</button></div></div>`}},
   after(s,first){markSeen(s.args.id);if(!document.hidden)chatStamp(s.args.id,"rd",lastOtherAt(s.args.id));const b=$(".sheet-b",s.el);const n=chatMsgs(s.args.id).length;if(first||n!==s.n){b.scrollTop=b.scrollHeight}s.n=n;renderTabs()}
@@ -3596,7 +3647,15 @@ async function camDeliver(ctx,id,shot,caption){
     else{const ref=await storeMedia(shot.blob,p=>toast(`Uploading video… ${Math.round(p*100)}%`));await postItem(ctx,id,{kind:"video",...ref,poster:shot.poster,dur:Math.round(shot.dur)})}
     toast("Sent ✓")}catch(e){console.error(e);toast("Couldn't send that. Try again.")}
 }
-SHEETS.chatMenu={render(s){const c=D.chats.find(x=>x.id===s.args.id),arch=archivedIds().includes(s.args.id);return{title:esc(c?chatName(c):"Chat"),body:`<div class="form">
+const CHAT_EMOJIS=["💬","🔥","🌴","🏖️","🍽️","⚽️","🎮","🎉","🚗","👑","🏋️","🎬","📚","✈️","☕","🎵","🏕️","💸"];
+SHEETS.chatMenu={live:true,render(s){const c=D.chats.find(x=>x.id===s.args.id),arch=archivedIds().includes(s.args.id);if(!c)return{title:"Chat",body:""};
+  const grp=!c.dm,out=grp?D.members.filter(m=>!(c.members||[]).includes(m.id)):[];return{title:esc(chatName(c)),body:`<div class="form">
+  ${grp?`<div class="f">Group icon
+    <div class="row" style="gap:12px;align-items:center"><span class="gav big${c.icon?" pic":""}">${c.icon?`<img src="${esc(c.icon)}" alt="">`:esc(c.emoji||"💬")}</span><button class="btn sm" data-act="cgPhoto" data-id="${esc(c.id)}">📷 ${c.icon?"Change photo":"Use a photo"}</button>${c.icon?`<button class="btn sm danger" data-act="cgPhotoDel" data-id="${esc(c.id)}">Remove</button>`:""}</div>
+    <div class="emo-pick" style="margin-top:8px">${CHAT_EMOJIS.map(e=>`<button data-act="cgEmoji" data-id="${esc(c.id)}" data-v="${e}" aria-pressed="${!c.icon&&(c.emoji||"💬")===e}">${e}</button>`).join("")}</div></div>
+  <label class="f">Group name<span class="row" style="gap:8px"><input class="inp" id="cgName" maxlength="40" value="${esc(c.name||"")}" style="flex:1;min-width:0"><button class="btn" data-act="cgRename" data-id="${esc(c.id)}">Save</button></span></label>
+  <div class="f">In this group · ${(c.members||[]).length}<div class="list" style="gap:6px">${(c.members||[]).map(u=>`<button class="check" data-act="person" data-id="${esc(u)}" style="border:0;background:none;text-align:left;font:inherit;padding:4px 0;cursor:pointer">${avatar(u,"xs")}<span style="color:var(--fg)">${esc(u===ME?"You":nick(u))}</span>${u===c.by?`<span class="pill set" style="margin-left:auto">Creator</span>`:""}</button>`).join("")}</div></div>
+  <div class="f">Add people${out.length?`<div class="list" style="gap:6px">${out.map(m=>`<label class="check"><input type="checkbox" id="cgA-${esc(m.id)}" data-add="${esc(m.id)}">${avatar(m.id,"xs")}<span style="color:var(--fg)">${esc(nick(m.id))}</span></label>`).join("")}</div><button class="btn pri" data-act="cgAdd" data-id="${esc(c.id)}" style="margin-top:8px">+ Add to group</button><span class="meta" style="font-weight:400">New people can read the whole chat, including older messages.</span>`:`<span class="meta" style="font-weight:400">Everyone in the crew is already in this group.</span>`}</div>`:""}
   <button class="btn block" data-act="chatArchive" data-id="${esc(s.args.id)}">📦 ${arch?"Unarchive chat":"Archive chat"}</button>
   <div class="hint" style="margin:0">${arch?"Moves it back to your chat list.":"Hides it from your chat list. Only for you; others still see it."}</div>
   <div class="hint">Tip: tap any message you sent to edit or delete it.</div></div>`}}};
@@ -3793,19 +3852,24 @@ const ACT={
   shamePerson(d){openSheet("shamePerson",{id:d.id})},
   shameDaySet(d){UI.shameDay=d.k;render()},
   shelf(d){openSheet("shelf",{id:d.id})},
-  shelfAdd(d){if(shelfOf(d.id).length>=SHELF_MAX)return toast(`The shelf is full (${SHELF_MAX}). Remove something first.`);openSheet("shelfAdd",{chat:d.id})},
+  shelfAdd(d){if(shelfOf(d.id).length>=SHELF_MAX)return toast(`Stuff is full (${SHELF_MAX}). Remove something first.`);openSheet("shelfAdd",{chat:d.id})},
   shelfItem(d){openSheet("shelfItem",{id:d.id})},
   shKind(d){const s=topS();s.state.kind=d.k;s.state.cover="";paintSheet(s)},
   shCover(){const s=topS();pickPhotos(async fs=>{if(!fs[0])return;try{s.state.cover=await coverPhoto(fs[0],s.state.kind);paintSheet(s)}catch{toast("Couldn't read that picture. Try another.")}},"#onePick")},
   shCoverDel(){const s=topS();s.state.cover="";paintSheet(s)},
-  async shSave(){const s=topS(),t=val("shTitle");if(!t)return toast("Give it a title first.");if(shelfOf(s.args.chat).length>=SHELF_MAX)return toast("The shelf is full.");
-    await Store.add("shelf",{chatId:s.args.chat,kind:s.state.kind,title:t.slice(0,80),who:val("shBy").slice(0,60),desc:val("shDesc").slice(0,600),cover:s.state.cover||"",by:ME,at:now()});closeSheet();toast(`${SHELF_KINDS[s.state.kind][0]} On the shelf`);try{haptic()}catch{}},
+  async shSave(){const s=topS();let t=val("shTitle"),who=val("shBy"),cover=s.state.cover||"";const url=s.state.kind==="song"?val("shUrl"):"",desc=val("shDesc");
+    if(!t&&!url)return toast("Give it a title first.");if(url&&!spotifyTrack(url))return toast("That doesn't look like a Spotify song link. It should contain open.spotify.com/track/");if(shelfOf(s.args.chat).length>=SHELF_MAX)return toast("Stuff is full.");if(s.busy)return;s.busy=true;
+    let sg={};if(url){toast("Finding the song…");try{const r=await resolveSong(url);if(r){sg={songUrl:r.songUrl||url,songPreview:r.songPreview||""};const[tt,ar]=(r.songTitle||"").split(" – ");if(!t&&tt&&tt!=="Spotify song")t=tt;if(!who&&ar)who=ar;if(!cover&&r.songArt)cover=r.songArt}}catch{}if(!sg.songUrl)sg={songUrl:url,songPreview:""}}
+    s.busy=false;if(!t)return toast("Couldn't read the song name. Type a title and try again.");
+    await Store.add("shelf",{chatId:s.args.chat,kind:s.state.kind,title:t.slice(0,80),who:who.slice(0,60),desc:desc.slice(0,600),cover,...sg,by:ME,at:now()});closeSheet();toast(`${SHELF_KINDS[s.state.kind][0]} Added to Stuff`);try{haptic()}catch{}},
+  stuffView(d){STUFF_VIEW=d.k==="phone"?"phone":"shelf";ls.set("yg-stuff-view",STUFF_VIEW);const s=stack.find(x=>x.kind==="shelf")||topS();if(s)paintSheet(s);try{haptic()}catch{}},
+  shPlay(d){const x=D.shelf.find(i=>i.id===d.id);if(x)SHPLAY.toggle(x)},
   shStar(d){const s=topS(),v=+d.v;s.state.rating=s.state.rating===v?0:v;paintSheet(s);try{haptic()}catch{}},
   async shRevSave(d){const s=topS(),t=val("shRev-"+d.id).slice(0,500),r=s.state.rating||0;if(!t&&!r)return toast("Tap the stars or write a few words first.");
     const mine=D.sreviews.find(x=>x.itemId===d.id&&x.by===ME);document.activeElement?.blur?.();
     if(mine)await Store.upd("sreviews",mine.id,{text:t,rating:r,at:now()});else await Store.add("sreviews",{itemId:d.id,by:ME,text:t,rating:r,at:now()});toast(mine?"Review updated":"Review posted")},
   async shRevDel(d){await Store.del("sreviews",d.id);const s=topS();if(s?.kind==="shelfItem"){s.state.rating=0;const el=$("#shRev-"+CSS.escape(s.args.id),s.el);if(el)el.value="";paintSheet(s)}},
-  async shDel(d){for(const r of shelfRevs(d.id))await Store.del("sreviews",r.id);await Store.del("shelf",d.id);if(topS()?.kind==="shelfItem")closeSheet();toast("Taken off the shelf")},
+  async shDel(d){for(const r of shelfRevs(d.id))await Store.del("sreviews",r.id);await Store.del("shelf",d.id);if(topS()?.kind==="shelfItem")closeSheet();toast("Removed from Stuff")},
 
   async albumMode(d){const p=planById(d.id);if(!p)return;await Store.upd("plans",p.id,{albumMode:d.k});toast(d.k==="daily"?"🗓️ Pics are sorted by day now":"🧳 One album for the whole trip")},
   async photoDay(d){await Store.upd("media",d.id,{day:d.d});toast("Moved to "+fDate(d.d,{weekday:"long",day:"numeric",month:"short"}))},
@@ -4047,8 +4111,16 @@ const ACT={
   async delBusy(d){await Store.del("busy",d.id)},
   mapFilter(d){UI.mapFilter=d.k;render()},
   newChat(){openSheet("newChat")},
-  ncEmoji(d){topS().state.emoji=d.v;paintSheet(topS())},
-  async ncSave(){const s=topS(),n=val("ncN");const ids=$$("input[data-uid]",s.el).filter(x=>x.checked).map(x=>x.dataset.uid);if(!n)return toast("Name the group.");if(!ids.length)return toast("Pick at least one friend.");const id=await Store.add("chats",{name:n,emoji:s.state.emoji,members:[ME,...ids],by:ME,at:now(),planId:""});closeSheet();openSheet("chat",{id})},
+  ncEmoji(d){const s=topS();s.state.emoji=d.v;s.state.icon="";paintSheet(s)},
+  ncPhoto(){const s=topS();pickPhotos(async fs=>{if(!fs[0])return;try{s.state.icon=await squarePhoto(fs[0],160);paintSheet(s)}catch{toast("Couldn't read that photo. Try another.")}},"#onePick")},
+  ncPhotoDel(){const s=topS();s.state.icon="";paintSheet(s)},
+  async cgEmoji(d){await Store.upd("chats",d.id,{emoji:d.v,icon:""});try{haptic()}catch{}},
+  cgPhoto(d){pickPhotos(async fs=>{if(!fs[0])return;try{await Store.upd("chats",d.id,{icon:await squarePhoto(fs[0],160)});toast("Group icon updated")}catch{toast("Couldn't read that photo. Try another.")}},"#onePick")},
+  async cgPhotoDel(d){await Store.upd("chats",d.id,{icon:""})},
+  async cgRename(d){const n=val("cgName");if(!n)return toast("Give the group a name.");document.activeElement?.blur?.();await Store.upd("chats",d.id,{name:n.slice(0,40)});toast("Group renamed")},
+  async cgAdd(d){const s=topS(),c=D.chats.find(x=>x.id===d.id);if(!c)return;const ids=$$("input[data-add]",s.el).filter(x=>x.checked).map(x=>x.dataset.add).filter(u=>!c.members.includes(u));if(!ids.length)return toast("Tick who to add first.");
+    await Store.upd("chats",d.id,{members:[...c.members,...ids]});toast(`Added ${ids.map(nick).join(", ")}`);try{haptic()}catch{}},
+  async ncSave(){const s=topS(),n=val("ncN");const ids=$$("input[data-uid]",s.el).filter(x=>x.checked).map(x=>x.dataset.uid);if(!n)return toast("Name the group.");if(!ids.length)return toast("Pick at least one friend.");const id=await Store.add("chats",{name:n,emoji:s.state.emoji,icon:s.state.icon||"",members:[ME,...ids],by:ME,at:now(),planId:""});closeSheet();openSheet("chat",{id})},
   openChat(d){openSheet("chat",{id:d.id})},
   async send(d){const el=$("#chatIn-"+CSS.escape(d.id));const t=(el?.value||"").trim();if(!t)return;el.value="";el.style.height="";const rp=takeReply(d.id);await Store.add("msgs",{chatId:d.id,by:ME,text:t.slice(0,2000),at:now(),...(rp?{replyTo:rp}:{})})},
   msgReply(){const s=topS(),m=D.msgs.find(x=>x.id===s.args.id);closeSheet();if(m)startReply(m)},
