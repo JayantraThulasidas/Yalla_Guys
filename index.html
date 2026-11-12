@@ -904,7 +904,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-12.20";
+const APP_VERSION="2026-11-12.21";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -3355,8 +3355,8 @@ SHEETS.shelf={live:true,
       if(!full)cells.push(`<button class="shi shadd" data-act="shelfAdd" data-id="${esc(s.args.id)}" aria-label="Add stuff"><span>+</span></button>`);
       for(let i=0;i<Math.max(cells.length,8);i+=4)rows.push(cells.slice(i,i+4));
       main=`<div class="shelfwall">${rows.map(r=>`<div class="shelfrow">${r.join("")}</div>`).join("")}</div>`}
-    return{title:`🗂️ ${esc(c?.name||"Group")} stuff`,right:`<span class="pill ${full?"warn":"set"}">${items.length}/${SHELF_MAX}</span>`,
-      body:`<div class="seg" style="margin-bottom:14px"><button data-act="stuffView" data-k="shelf" aria-pressed="${view==="shelf"}">📚 Shelf</button><button data-act="stuffView" data-k="phone" aria-pressed="${view==="phone"}">📱 Phone</button></div>${main}
+    return{title:`🗂️ ${esc(c?.name||"Group")} stuff`,right:`<button class="btn sm" data-act="stuffView" data-k="${view==="phone"?"shelf":"phone"}" aria-label="Change layout to ${view==="phone"?"shelf":"phone screen"}">${view==="phone"?"📚":"📱"} Layout</button><span class="pill ${full?"warn":"set"}">${items.length}/${SHELF_MAX}</span>`,
+      body:`${main}
         <div class="hint" style="text-align:center;margin-top:14px">${items.length?"Tap anything to see who added it, read reviews and rate it.":"Nothing here yet. Add a book, movie, series or song the group should check out."}</div>`,
       foot:full?`<div class="hint" style="margin:0;text-align:center;flex:1">Stuff is full (${SHELF_MAX}). Remove something to add more.</div>`:`<button class="btn pri block" data-act="shelfAdd" data-id="${esc(s.args.id)}">+ Add stuff</button>`}}};
 /* song previews on the shelf: starts when the record is opened, stops when you leave */
