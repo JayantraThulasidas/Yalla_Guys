@@ -904,7 +904,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-12.21";
+const APP_VERSION="2026-11-12.22";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -4206,7 +4206,8 @@ function runSplash(){if(window.__splashed)return;window.__splashed=true;
   el.dataset.on="1";el.querySelector(".sp-wheel").innerHTML=`<span class="sp-strip">${strip.map((c,i)=>`<span ${i===s1?'class="me" ':""}style="color:${c}">Guys</span>`).join("")}</span>`;
   el.insertAdjacentHTML("beforeend",`<div class="sp-glow" style="--g:${mine}"></div>`);
   const done=()=>{if(!el.isConnected)return;el.classList.add("out");setTimeout(()=>el.remove(),420)};
-  el.addEventListener("click",done);
+  // tapping does not skip: a tap is what lets the phone start vibrating, so it answers with a little buzz instead
+  el.addEventListener("pointerdown",()=>{try{haptic()}catch{}});
   if(still||!el.animate){el.querySelector(".sp-strip").style.transform=`translateY(-${s1*1.15}em)`;el.classList.add("locked");setTimeout(done,700);return}
   // "Yalla" slides in crisply, letter by letter
   const word=el.querySelector(".sp-word"),ya=el.querySelector(".sp-yalla");
