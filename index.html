@@ -720,7 +720,7 @@ body.has-fx::before{background:transparent}
 .splash::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(var(--bg) 4%,color-mix(in srgb,var(--bg) 70%,transparent) 18%,transparent 38%,transparent 62%,color-mix(in srgb,var(--bg) 70%,transparent) 82%,var(--bg) 96%)}
 .sp-glow{position:absolute;width:70vmin;height:70vmin;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--g) 35%,transparent),transparent 65%);opacity:0;transition:opacity .5s}
 .splash.locked .sp-glow{opacity:1}
-.shelfwall{border-radius:18px;padding:18px 12px 6px;background:linear-gradient(180deg,#0B0F14,#141A21);border:1.5px solid color-mix(in srgb,var(--accent) 55%,transparent);box-shadow:0 0 22px color-mix(in srgb,var(--accent) 16%,transparent),inset 0 14px 34px rgba(0,0,0,.45)}
+.shelfwall{display:flex;flex-direction:column;justify-content:space-between;min-height:calc(100dvh - 224px);border-radius:18px;padding:18px 12px 6px;background:linear-gradient(180deg,#0B0F14,#141A21);border:1.5px solid color-mix(in srgb,var(--accent) 55%,transparent);box-shadow:0 0 22px color-mix(in srgb,var(--accent) 16%,transparent),inset 0 14px 34px rgba(0,0,0,.45)}
 .shelfrow{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:end;min-height:112px;padding:0 6px 13px;margin-bottom:22px}
 .shelfrow::after{content:"";position:absolute;left:-4px;right:-4px;bottom:0;height:13px;border-radius:3px;background:linear-gradient(180deg,#323B46,#1D242C 55%,#12171D);box-shadow:0 8px 14px rgba(0,0,0,.55),inset 0 2px 0 var(--accent),0 -1px 10px color-mix(in srgb,var(--accent) 30%,transparent)}
 .shelfrow::before{content:"";position:absolute;left:14px;right:14px;bottom:-12px;height:12px;background:linear-gradient(90deg,#0A0D11 0 10px,transparent 10px calc(100% - 10px),#0A0D11 calc(100% - 10px));clip-path:polygon(0 0,100% 0,calc(100% - 4px) 100%,calc(100% - 10px) 100%,calc(100% - 10px) 0,10px 0,10px 100%,4px 100%)}
@@ -757,14 +757,14 @@ body.has-fx::before{background:transparent}
 .hdic{width:28px!important;height:28px!important;min-width:28px;border-radius:9px;object-fit:cover;flex:none;display:block}
 .shplay{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-fg);font:inherit;font-weight:800;font-size:14px;padding:8px 16px 8px 12px;cursor:pointer}.shplay svg{display:block}
 .shhero.still .shart.song.big{animation-play-state:paused}
-.phone{position:relative;max-width:340px;margin:0 auto;border-radius:40px;padding:12px 16px 16px;border:3px solid color-mix(in srgb,var(--accent) 55%,#2a313a);
+.phone{position:relative;display:flex;flex-direction:column;min-height:calc(100dvh - 224px);max-width:380px;margin:0 auto;border-radius:40px;padding:12px 16px 16px;border:3px solid color-mix(in srgb,var(--accent) 55%,#2a313a);
   background:radial-gradient(120% 60% at 15% 0%,color-mix(in srgb,var(--accent) 55%,transparent),transparent 70%),radial-gradient(110% 55% at 100% 100%,color-mix(in srgb,var(--accent) 40%,transparent),transparent 70%),linear-gradient(180deg,#10151c,#07090d);
   box-shadow:0 0 0 2px #05070a,0 18px 40px rgba(0,0,0,.5),0 0 26px color-mix(in srgb,var(--accent) 18%,transparent)}
 .phbar{display:flex;align-items:center;justify-content:space-between;color:#fff;font-size:12.5px;padding:2px 8px 16px}.phbar b{font-weight:800;min-width:44px}
 .phnotch{width:74px;height:20px;border-radius:999px;background:#05070a}
 .phsig{display:flex;align-items:flex-end;gap:2px;min-width:44px;justify-content:flex-end}.phsig i{width:3px;background:#fff;border-radius:1px}.phsig i:nth-child(1){height:5px}.phsig i:nth-child(2){height:8px}.phsig i:nth-child(3){height:11px}
 .phsig em{width:20px;height:10px;border:1.5px solid #fff;border-radius:3px;margin-left:5px;background:linear-gradient(90deg,#fff 70%,transparent 70%);background-clip:content-box;padding:1px}
-.phgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 8px;min-height:300px;align-content:start}
+.phgrid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:20px 8px;align-content:start}
 .appcell{position:relative;border:0;background:none;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;font:inherit;transition:transform .12s}.appcell:active{transform:scale(.9)}
 .appi{position:relative;display:block;width:82%;aspect-ratio:1;border-radius:24%;background:#1a2028;box-shadow:0 4px 10px rgba(0,0,0,.45)}
 .appi>img,.appbg{position:absolute;inset:0;width:100%;height:100%;border-radius:24%;object-fit:cover;display:grid;place-items:center;color:#fff}.appbg svg{width:56%;height:56%}
@@ -904,7 +904,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-12.22";
+const APP_VERSION="2026-11-12.23";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -3353,11 +3353,11 @@ SHEETS.shelf={live:true,
       main=`<div class="phone"><div class="phbar"><b>${tm}</b><i class="phnotch"></i><span class="phsig"><i></i><i></i><i></i><em></em></span></div><div class="phgrid">${apps.join("")}</div><div class="phdots"><i class="on"></i><i></i></div></div>`}
     else{const cells=items.map(x=>{const a=shelfAvg(x.id);return`<button class="shi" data-act="shelfItem" data-id="${esc(x.id)}" aria-label="${esc(SHELF_KINDS[x.kind]?.[1]||"Item")}: ${esc(x.title)}">${shelfArt(x)}${a?`<em class="shrate">★ ${a.toFixed(1)}</em>`:""}</button>`});
       if(!full)cells.push(`<button class="shi shadd" data-act="shelfAdd" data-id="${esc(s.args.id)}" aria-label="Add stuff"><span>+</span></button>`);
-      for(let i=0;i<Math.max(cells.length,8);i+=4)rows.push(cells.slice(i,i+4));
+      for(let i=0;i<Math.max(cells.length,16);i+=4)rows.push(cells.slice(i,i+4));
       main=`<div class="shelfwall">${rows.map(r=>`<div class="shelfrow">${r.join("")}</div>`).join("")}</div>`}
     return{title:`🗂️ ${esc(c?.name||"Group")} stuff`,right:`<button class="btn sm" data-act="stuffView" data-k="${view==="phone"?"shelf":"phone"}" aria-label="Change layout to ${view==="phone"?"shelf":"phone screen"}">${view==="phone"?"📚":"📱"} Layout</button><span class="pill ${full?"warn":"set"}">${items.length}/${SHELF_MAX}</span>`,
       body:`${main}
-        <div class="hint" style="text-align:center;margin-top:14px">${items.length?"Tap anything to see who added it, read reviews and rate it.":"Nothing here yet. Add a book, movie, series or song the group should check out."}</div>`,
+        <div class="hint" style="text-align:center;margin:10px 0 0">${items.length?"Tap anything to see who added it, read reviews and rate it.":"Nothing here yet. Add a book, movie, series or song the group should check out."}</div>`,
       foot:full?`<div class="hint" style="margin:0;text-align:center;flex:1">Stuff is full (${SHELF_MAX}). Remove something to add more.</div>`:`<button class="btn pri block" data-act="shelfAdd" data-id="${esc(s.args.id)}">+ Add stuff</button>`}}};
 /* song previews on the shelf: starts when the record is opened, stops when you leave */
 const SHPLAY={a:null,id:null,on(id){return!!(this.a&&this.id===id&&!this.a.paused)},
