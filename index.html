@@ -707,6 +707,9 @@ body.has-fx::before{background:transparent}
 .splash.out{opacity:0;pointer-events:none}
 .sp-word{position:relative;z-index:1;display:flex;align-items:baseline;font-family:var(--f-display);font-weight:800;font-size:clamp(46px,15vw,72px);letter-spacing:-.03em;color:var(--fg);line-height:1}
 .sp-yalla{display:inline-block;margin-right:.18em;transform-origin:left bottom}.sp-yalla i{display:inline-block;font-style:normal;will-change:transform}
+#splash0 .sp-yalla i{animation:spIn .52s cubic-bezier(.2,.9,.25,1) both}#splash0 .sp-yalla i:nth-child(2){animation-delay:45ms}#splash0 .sp-yalla i:nth-child(3){animation-delay:90ms}#splash0 .sp-yalla i:nth-child(4){animation-delay:135ms}#splash0 .sp-yalla i:nth-child(5){animation-delay:180ms}
+@keyframes spIn{0%{transform:translateX(110vw)}80%{transform:translateX(-.07em)}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){#splash0 .sp-yalla i{animation:none}}
 .sp-ring{position:absolute;z-index:3;width:34vmin;height:34vmin;border-radius:50%;border:3px solid var(--g);box-shadow:0 0 24px var(--g),inset 0 0 24px var(--g);pointer-events:none}
 .sp-spark{position:absolute;z-index:3;pointer-events:none;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%)}.sp-spark.dot{clip-path:none;border-radius:50%;scale:.45}
 .splash.locked .sp-strip>span.me{text-shadow:0 0 28px currentColor}
@@ -717,6 +720,38 @@ body.has-fx::before{background:transparent}
 .splash::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(var(--bg) 4%,color-mix(in srgb,var(--bg) 70%,transparent) 18%,transparent 38%,transparent 62%,color-mix(in srgb,var(--bg) 70%,transparent) 82%,var(--bg) 96%)}
 .sp-glow{position:absolute;width:70vmin;height:70vmin;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--g) 35%,transparent),transparent 65%);opacity:0;transition:opacity .5s}
 .splash.locked .sp-glow{opacity:1}
+.shelfwall{border-radius:18px;padding:18px 12px 6px;background:linear-gradient(180deg,#0B0F14,#141A21);border:1.5px solid color-mix(in srgb,var(--accent) 55%,transparent);box-shadow:0 0 22px color-mix(in srgb,var(--accent) 16%,transparent),inset 0 14px 34px rgba(0,0,0,.45)}
+.shelfrow{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:end;min-height:112px;padding:0 6px 13px;margin-bottom:22px}
+.shelfrow::after{content:"";position:absolute;left:-4px;right:-4px;bottom:0;height:13px;border-radius:3px;background:linear-gradient(180deg,#323B46,#1D242C 55%,#12171D);box-shadow:0 8px 14px rgba(0,0,0,.55),inset 0 2px 0 var(--accent),0 -1px 10px color-mix(in srgb,var(--accent) 30%,transparent)}
+.shelfrow::before{content:"";position:absolute;left:14px;right:14px;bottom:-12px;height:12px;background:linear-gradient(90deg,#0A0D11 0 10px,transparent 10px calc(100% - 10px),#0A0D11 calc(100% - 10px));clip-path:polygon(0 0,100% 0,calc(100% - 4px) 100%,calc(100% - 10px) 100%,calc(100% - 10px) 0,10px 0,10px 100%,4px 100%)}
+.shi{position:relative;border:0;background:none;padding:0;cursor:pointer;display:block;min-width:0;transition:transform .15s}.shi:active{transform:translateY(-4px) scale(1.03)}
+.shart{position:relative;display:block;width:100%}.shface{position:relative;display:block;width:100%;aspect-ratio:2/3;border-radius:3px 6px 6px 3px;overflow:hidden;background:var(--surface);box-shadow:3px 4px 10px rgba(0,0,0,.55)}
+.shface img{width:100%;height:100%;object-fit:cover;display:block}
+.shart.book .shface::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.38),rgba(255,255,255,.28) 5%,rgba(0,0,0,.18) 9%,transparent 14%,transparent 94%,rgba(0,0,0,.2));pointer-events:none}
+.shart.book .shface{box-shadow:3px 4px 10px rgba(0,0,0,.55),inset -3px 0 0 #f1ece2,inset -4px 0 0 rgba(0,0,0,.25)}
+/* movie: a frame of film with sprocket holes down both sides */
+.shart.movie,.shart.series{box-sizing:border-box;padding:.1px 0;border-radius:5px;background:#0B0D10;box-shadow:3px 4px 10px rgba(0,0,0,.55),0 0 0 1px color-mix(in srgb,var(--accent) 45%,#2a313a)}
+.shart.movie::before,.shart.movie::after,.shart.series::before,.shart.series::after{content:"";position:absolute;top:5%;bottom:5%;width:9%;background:repeating-linear-gradient(180deg,#E9EEF2 0 9%,transparent 9% 16.6%);border-radius:1px;opacity:.92}
+.shart.movie::before,.shart.series::before{left:4%}.shart.movie::after,.shart.series::after{right:4%}
+.shart.movie .shface,.shart.series .shface{width:66%;margin:7% auto;border-radius:2px;box-shadow:none}
+/* series: the same frame with more episodes stacked behind it */
+.shart.series{width:86%;margin:14% 0 0 14%;box-shadow:-5px -5px 0 -1px #59626E,-5px -5px 0 0 #0B0D10,-10px -10px 0 -1px #3B434E,-10px -10px 0 0 #0B0D10,3px 4px 10px rgba(0,0,0,.55),0 0 0 1px color-mix(in srgb,var(--accent) 45%,#2a313a)}
+/* song: a vinyl record with the cover as its label */
+.shart.song{aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:conic-gradient(from 20deg,rgba(255,255,255,.16),transparent 12%,transparent 38%,rgba(255,255,255,.14) 50%,transparent 62%,transparent 88%,rgba(255,255,255,.16)),repeating-radial-gradient(circle,#0C0C0D 0 1.5px,#1E1F22 1.5px 3px);box-shadow:3px 4px 10px rgba(0,0,0,.6),0 0 0 1.5px color-mix(in srgb,var(--accent) 60%,#000)}
+.shart.song .shface{width:46%;aspect-ratio:1;border-radius:50%;box-shadow:0 0 0 2px #0a0a0a,0 0 0 3px color-mix(in srgb,var(--accent) 70%,#000)}
+.shart.song::after{content:"";position:absolute;left:50%;top:50%;width:7%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:#0B0F14;box-shadow:0 0 0 1.5px rgba(255,255,255,.5);z-index:2}
+.shart.song.big{animation:shspin 9s linear infinite}@keyframes shspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.shart.song.big{animation:none}}
+.shart.song .shnocover span{display:none}.shart.song .shnocover b{font-size:13px}.shart.song.big .shnocover b{font-size:26px}
+.shnocover{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:100%;height:100%;padding:5px;color:#fff;text-align:center}.shnocover b{font-size:20px}.shnocover span{font-size:9.5px;font-weight:800;line-height:1.15;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.shnocover.empty{background:var(--surface2);color:var(--muted);border:2px dashed var(--line)}.shart.big .shnocover b{font-size:34px}.shart.big .shnocover span{font-size:13px}
+.shrate{position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);font-style:normal;font-size:10px;font-weight:800;background:#0B0F14;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 60%,transparent);border-radius:999px;padding:1px 6px;white-space:nowrap;z-index:3;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.shadd{aspect-ratio:2/3;border:2px dashed color-mix(in srgb,var(--accent) 60%,transparent);border-radius:8px;display:grid;place-items:center;color:var(--accent);font-size:26px;font-weight:300}
+.shaddtop{display:flex;gap:14px;align-items:flex-start}.shcoverbtn{border:0;background:none;padding:0;cursor:pointer;flex:none}.shaddtop .shcoverbtn{width:104px}
+.shhero{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:6px 0 14px}.shhero .shart{width:150px}.shhero .shart.song{width:200px}.shhero .shart.series{width:150px;margin:20px 0 0 20px}.shaddtop .shart.series{margin:12px 0 0 12px}.shhero h1{margin:8px 0 0;font-family:var(--f-display);font-size:24px;line-height:1.15;overflow-wrap:anywhere}
+.shdesc{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+.shstars{display:inline-flex;gap:1px;font-size:13px;line-height:1}.shstars i{font-style:normal;color:var(--line)}.shstars i.on{color:#F2C14E}.shstars i.half{background:linear-gradient(90deg,#F2C14E 50%,var(--line) 50%);-webkit-background-clip:text;background-clip:text;color:transparent}.shstars.lg{font-size:20px}
+.shpick{display:flex;justify-content:center;gap:6px}.shpick button{border:0;background:none;font-size:34px;line-height:1;color:var(--line);cursor:pointer;padding:2px 4px;transition:transform .12s}.shpick button.on{color:#F2C14E}.shpick button:active{transform:scale(1.25)}
 .podcard{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:12px 0 10px;margin:4px 0 14px;overflow:hidden}
 .podtabs{display:flex;gap:6px;margin:0 12px;background:var(--surface2);border-radius:999px;padding:4px}
 .podtabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:8px 6px;border-radius:999px;white-space:nowrap}
@@ -801,6 +836,9 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none}
 </style>
 </head>
 <body>
+<script>try{var _m=(JSON.parse(localStorage.getItem("yg-settings")||"{}")||{}).mode;if(_m==="dark"||_m==="light")document.documentElement.dataset.theme=_m}catch(e){}</script>
+<div class="splash" id="splash0" aria-hidden="true"><div class="sp-word"><span class="sp-yalla"><i>Y</i><i>a</i><i>l</i><i>l</i><i>a</i></span><span class="sp-wheel"></span></div></div>
+<script>setTimeout(function(){var e=document.getElementById("splash0");if(e&&!e.dataset.on){e.remove();window.__splashed=true}},7000)</script>
 <div class="app">
   <header class="top wrap">
     <div class="brand">Yalla<span>Guys</span></div>
@@ -842,7 +880,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-12.13";
+const APP_VERSION="2026-11-12.16";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -955,7 +993,7 @@ function routeFor(stops){
 /* Delta sync: every phone keeps its own copy of the data (IndexedDB) and only downloads documents
    created or changed since its last visit. Writes stamp a "u" (updated) time; deletes leave a small
    tombstone so other phones can drop the item. A full refresh runs every 14 days as a safety net. */
-const DELTA=["plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers","checkins","pokes","scores"];
+const DELTA=["plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers","checkins","pokes","scores","shelf","sreviews"];
 const FULL_EVERY=14*864e5,SKEW=5*6e4;
 const IDB={_db:null,
   open(){return this._db||(this._db=new Promise((res,rej)=>{const r=indexedDB.open("yg-cache-"+ME,1);r.onupgradeneeded=()=>{r.result.createObjectStore("docs",{keyPath:"k"});r.result.createObjectStore("meta")};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))},
@@ -987,7 +1025,7 @@ async function deltaSync(path,key,apply,onErr){
   offs.push(FS.collection(path).where("at",">",since).onSnapshot(onSnap,onErr));
   return()=>offs.forEach(f=>f());
 }
-const COLS=["members","plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers","checkins","pokes","scores"];
+const COLS=["members","plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers","checkins","pokes","scores","shelf","sreviews"];
 const D={chats:[],msgs:[],priv:{labels:{}},wishes:[],mine:[]};COLS.forEach(c=>D[c]=[]);
 let ME=null,MODE="loading",FS=null,AUTH=null,JOIN_ERR="";
 const unsubs=[];const msgSubs=new Map();const msgData=new Map();
@@ -3263,6 +3301,49 @@ SHEETS.gDeep={live:true,
 async function dcFinish(st){const ps=dcToday(),tot=st.ans.reduce((t,a,i)=>t+dcScore(ps[i],dcMatch(ps[i],a.t)).pts,0);
   await gSave("deep",{pts:Math.round(tot/3),raw2:tot,label:`${tot}/300`,raw:st.ans.map(a=>a.t||"")})}
 document.addEventListener("keydown",e=>{const s=topS();if(s?.kind==="gDeep"&&e.key==="Enter"&&e.target?.id==="dcIn"){e.preventDefault();ACT.dcLock({})}});
+/* ---------- group shelf: books, movies, series and songs a group chat recommends ---------- */
+const SHELF_MAX=20,SHELF_KINDS={book:["📖","Book","Author"],movie:["🎬","Movie","Director or year"],series:["📺","Series","Network or year"],song:["🎵","Song","Artist"]};
+const shelfOf=cid=>D.shelf.filter(x=>x.chatId===cid).sort((a,b)=>a.at-b.at),shelfRevs=id=>D.sreviews.filter(r=>r.itemId===id).sort((a,b)=>a.at-b.at);
+const shelfAvg=id=>{const r=shelfRevs(id).filter(x=>x.rating>0);return r.length?r.reduce((a,x)=>a+x.rating,0)/r.length:0};
+const starsHtml=(n,cls="")=>`<span class="shstars ${cls}" aria-label="${n?n.toFixed(1)+" out of 5":"No rating"}">${[1,2,3,4,5].map(i=>`<i class="${n>=i-.25?"on":n>=i-.75?"half":""}">★</i>`).join("")}</span>`;
+function shelfArt(x,big){const k=SHELF_KINDS[x.kind]?x.kind:"book",[e]=SHELF_KINDS[k],h=hue(x.id||x.title||"x");
+  const face=x.cover?`<img src="${esc(x.cover)}" alt="" loading="lazy">`:`<span class="shnocover" style="background:linear-gradient(150deg,${h},color-mix(in srgb,${h} 45%,#10151b))"><b>${e}</b><span>${esc(x.title||"")}</span></span>`;
+  return`<span class="shart ${k} ${big?"big":""}"><span class="shface">${face}</span></span>`}
+async function coverPhoto(file,kind){const img=await loadImg(file),w=300,h=kind==="song"?300:450,c=document.createElement("canvas");c.width=w;c.height=h;
+  const sc=Math.max(w/img.naturalWidth,h/img.naturalHeight),sw=w/sc,sh=h/sc;c.getContext("2d").drawImage(img,(img.naturalWidth-sw)/2,(img.naturalHeight-sh)/2,sw,sh,0,0,w,h);return toDataURL(await new Promise(r=>c.toBlob(r,"image/jpeg",.8)))}
+SHEETS.shelf={live:true,
+  render(s){const c=D.chats.find(x=>x.id===s.args.id),items=shelfOf(s.args.id),full=items.length>=SHELF_MAX,rows=[];
+    const cells=items.map(x=>{const a=shelfAvg(x.id);return`<button class="shi" data-act="shelfItem" data-id="${esc(x.id)}" aria-label="${esc(SHELF_KINDS[x.kind]?.[1]||"Item")}: ${esc(x.title)}">${shelfArt(x)}${a?`<em class="shrate">★ ${a.toFixed(1)}</em>`:""}</button>`});
+    if(!full)cells.push(`<button class="shi shadd" data-act="shelfAdd" data-id="${esc(s.args.id)}" aria-label="Add to the shelf"><span>+</span></button>`);
+    for(let i=0;i<Math.max(cells.length,8);i+=4)rows.push(cells.slice(i,i+4));
+    return{title:`📚 ${esc(c?.name||"Group")} shelf`,right:`<span class="pill ${full?"warn":"set"}">${items.length}/${SHELF_MAX}</span>`,
+      body:`<div class="shelfwall">${rows.map(r=>`<div class="shelfrow">${r.join("")}</div>`).join("")}</div>
+        <div class="hint" style="text-align:center;margin-top:14px">${items.length?"Tap anything to see who added it, read reviews and rate it.":"Nothing here yet. Add a book, movie, series or song the group should check out."}</div>`,
+      foot:full?`<div class="hint" style="margin:0;text-align:center;flex:1">The shelf is full (${SHELF_MAX}). Remove something to add more.</div>`:`<button class="btn pri block" data-act="shelfAdd" data-id="${esc(s.args.id)}">+ Add to the shelf</button>`}}};
+SHEETS.shelfAdd={
+  init(){return{kind:"book",cover:""}},
+  render(s){const st=s.state,[e,l,who]=SHELF_KINDS[st.kind];return{title:"Add to the shelf",body:`<div class="form">
+    <div class="seg">${Object.entries(SHELF_KINDS).map(([k,[em,lb]])=>`<button data-act="shKind" data-k="${k}" aria-pressed="${st.kind===k}">${em} ${lb}</button>`).join("")}</div>
+    <div class="shaddtop"><button class="shcoverbtn" data-act="shCover" aria-label="${st.cover?"Change cover":"Add cover"}">${st.cover?shelfArt({kind:st.kind,cover:st.cover,id:"new"},1):`<span class="shart ${st.kind} big"><span class="shface"><span class="shnocover empty"><b>+</b><span>Add cover</span></span></span></span>`}</button>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:10px"><label class="f">${l} title<input class="inp" id="shTitle" maxlength="80" placeholder="${st.kind==="song"?"e.g. Blinding Lights":st.kind==="book"?"e.g. The Alchemist":"e.g. Interstellar"}"></label>
+        <label class="f">${who} (optional)<input class="inp" id="shBy" maxlength="60"></label>${st.cover?`<button class="btn sm danger" data-act="shCoverDel" style="align-self:flex-start">Remove cover</button>`:""}</div></div>
+    <label class="f">Why should the group check it out?<textarea class="inp" id="shDesc" maxlength="600" rows="4" placeholder="A few words. You can paste links too."></textarea></label>
+    </div>`,foot:`<button class="btn pri block" data-act="shSave">Put it on the shelf</button>`}}};
+SHEETS.shelfItem={live:true,
+  init(a){const mine=D.sreviews.find(r=>r.itemId===a.id&&r.by===ME);return{rating:mine?.rating||0}},
+  render(s){const x=D.shelf.find(i=>i.id===s.args.id);if(!x)return{title:"Shelf",body:`<div class="empty">This was taken off the shelf.</div>`};
+    const [e,l]=SHELF_KINDS[x.kind]||SHELF_KINDS.book,revs=shelfRevs(x.id),avg=shelfAvg(x.id),mine=revs.find(r=>r.by===ME),c=D.chats.find(h=>h.id===x.chatId),canDel=x.by===ME||c?.by===ME,st=s.state;
+    return{title:`${e} ${l}`,right:canDel?`<button class="btn sm danger" data-act="shDel" data-id="${esc(x.id)}" data-confirm="Remove?">Remove</button>`:"",
+      body:`<div class="shhero">${shelfArt(x,1)}
+        <h1>${esc(x.title)}</h1>${x.who?`<div class="meta" style="font-size:14px">${esc(x.who)}</div>`:""}
+        <div class="row" style="gap:8px;justify-content:center">${starsHtml(avg,"lg")}<span class="meta">${avg?`${avg.toFixed(1)} · ${revs.filter(r=>r.rating>0).length} rating${revs.filter(r=>r.rating>0).length===1?"":"s"}`:"No ratings yet"}</span></div>
+        <button class="prof-btn" data-act="person" data-id="${esc(x.by)}" style="gap:6px;font-size:13px">${avatar(x.by,"xs")}<span class="meta">Added by <b style="color:var(--fg)">${esc(x.by===ME?"you":nick(x.by))}</b> · ${ago(x.at)}</span></button></div>
+      ${x.desc?`<div class="card shdesc">${linkify(x.desc)}</div>`:""}
+      <div class="sec"><h2>Reviews${revs.length?` · ${revs.length}`:""}</h2>${revs.length?revs.map(r=>`<div class="note">${avatar(r.by,"xs")}<div style="flex:1;min-width:0"><div class="meta"><b style="color:var(--fg)">${esc(nick(r.by))}</b> · ${ago(r.at)}</div>${r.rating?starsHtml(r.rating):""}${r.text?`<p style="white-space:pre-wrap">${linkify(r.text)}</p>`:""}</div>${r.by===ME?`<button class="x" data-act="shRevDel" data-id="${esc(r.id)}" data-confirm="Delete?" aria-label="Delete my review">✕</button>`:""}</div>`).join(""):`<div class="hint" style="margin:0">No reviews yet. Be the first.</div>`}</div>
+      <div class="sec"><h2>${mine?"Your review":"Rate and review"}</h2><div class="card" style="display:flex;flex-direction:column;gap:10px">
+        <div class="shpick" role="radiogroup" aria-label="Your rating">${[1,2,3,4,5].map(i=>`<button data-act="shStar" data-v="${i}" role="radio" aria-checked="${st.rating===i}" aria-label="${i} star${i>1?"s":""}" class="${st.rating>=i?"on":""}">★</button>`).join("")}</div>
+        <textarea class="inp" id="shRev-${esc(x.id)}" maxlength="500" rows="3" placeholder="What did you think? (optional)">${esc(mine?.text||"")}</textarea>
+        <button class="btn pri" data-act="shRevSave" data-id="${esc(x.id)}">${mine?"Update review":"Post review"}</button></div></div>`}}};
 /* busy */
 SHEETS.busy={
   render(s){return{title:"Block my time",body:`<div class="form">
@@ -3314,7 +3395,7 @@ SHEETS.chat={live:true,
       const rq=m.replyTo?D.msgs.find(x=>x.id===m.replyTo.id):null;
       html+=`<div class="msg ${me?"me":""}" data-mid="${esc(m.id)}"${m.kind!=="plan"?` data-act="msgMenu" data-chat="${esc(c.id)}" data-id="${esc(m.id)}"`:""}>${me||c.dm?"":`<span class="who">${esc(nick(m.by))}</span>`}${m.replyTo?`<button class="quote" data-act="jumpMsg" data-id="${esc(m.replyTo.id)}"><b>${esc(m.replyTo.by===ME?"You":nick(m.replyTo.by))}</b><span>${esc(rq?(rq.deleted?"Message deleted":msgLabel(rq)):m.replyTo.text||"")}</span></button>`:""}${m.kind==="plan"&&planById(m.planId)?(pl=>`<button class="plan-msg" data-act="openPlan" data-id="${esc(pl.id)}"><span class="k">📌 New plan</span><b style="font-size:16px">${esc(pl.emoji||"")} ${esc(pl.title)}</b><span class="meta">${pl.final?esc(fDate(pl.final.date)+" · "+fRange(pl.final.start,pl.final.end)):`${(pl.slots||[]).length} dates to vote on`} · tap to open</span></button>`)(planById(m.planId)):`${m.kind?`<div class="bub mediab">${mediaHtml("msgs",m)}${m.text?`<div>${linkify(m.text)}</div>`:""}</div>`:`<div class="bub">${linkify(m.text)}</div>`}`}${Object.values(m.likes||{}).filter(Boolean).length?(n=>`<button class="mlike" data-act="msgLikes" data-id="${esc(m.id)}" aria-label="Liked by ${n}">❤️${n>1?`<b>${n}</b>`:""}</button>`)(Object.values(m.likes).filter(Boolean).length):""}${me&&rc?`<span class="stamp">${m.edited?"edited · ":""}${msgTime(m.at)} ${TICK[rc]}</span>`:m.edited?`<span class="edited">edited</span>`:""}${me&&rc&&m.id===lastMine?`<span class="rcpt">${rc==="seen"?(c.dm?"Seen":chatOthers(c).length===1?"Seen by "+esc(nick(chatOthers(c)[0])):"Seen by everyone"):rc==="dlv"?"Delivered":(!c.dm&&seenBy(c,m).length?"Seen by "+seenBy(c,m).map(u=>esc(nick(u))).join(", "):"Sent")}</span>`:""}</div>`});
     const plan=c.planId?planById(c.planId):null;
-    return{title:c.dm?`<button class="prof-btn" data-act="person" data-id="${esc(chatOther(c))}">${avatar(chatOther(c),"sm")} ${esc(chatName(c))}</button>`:`${esc(c.emoji||"💬")} ${esc(c.name)}`,right:`<button class="btn sm" data-act="newPlanInChat" data-id="${esc(c.id)}">+ Plan</button><button class="btn sm" data-act="chatMenu" data-id="${esc(c.id)}" aria-label="Chat options">⋯</button>`,body:`${plan?`<button class="ev" data-act="openPlan" data-id="${esc(plan.id)}" style="margin-bottom:10px"><span class="stripe" style="background:${hue(plan.id)}"></span><span style="flex:1">Plan: <b>${esc(plan.title)}</b></span>${statusPill(plan)}</button>`:""}<div class="msgs">${html||'<div class="empty">Say hi 👋</div>'}</div>`,
+    return{title:c.dm?`<button class="prof-btn" data-act="person" data-id="${esc(chatOther(c))}">${avatar(chatOther(c),"sm")} ${esc(chatName(c))}</button>`:`${esc(c.emoji||"💬")} ${esc(c.name)}`,right:`${c.dm?"":`<button class="btn sm" data-act="shelf" data-id="${esc(c.id)}" aria-label="Group shelf">📚 Shelf</button>`}<button class="btn sm" data-act="newPlanInChat" data-id="${esc(c.id)}">+ Plan</button><button class="btn sm" data-act="chatMenu" data-id="${esc(c.id)}" aria-label="Chat options">⋯</button>`,body:`${plan?`<button class="ev" data-act="openPlan" data-id="${esc(plan.id)}" style="margin-bottom:10px"><span class="stripe" style="background:${hue(plan.id)}"></span><span style="flex:1">Plan: <b>${esc(plan.title)}</b></span>${statusPill(plan)}</button>`:""}<div class="msgs">${html||'<div class="empty">Say hi 👋</div>'}</div>`,
       foot:`<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">${s.state.reply?`<div class="replybar"><span style="flex:1;min-width:0"><b>↩️ Replying to ${esc(s.state.reply.by===ME?"yourself":nick(s.state.reply.by))}</b><span>${esc(s.state.reply.text)}</span></span><button class="x" data-act="replyClear" aria-label="Cancel reply">✕</button></div>`:""}
         <div style="display:flex;gap:4px;align-items:flex-end">${attachBtns("chat",s.args.id)}<textarea class="compose" id="chatIn-${esc(s.args.id)}" rows="1" placeholder="${s.state.reply?"Write a reply…":"Message"}" enterkeyhint="send"></textarea><button class="send" data-act="send" data-id="${esc(s.args.id)}" aria-label="Send">${ICON.send}</button></div></div>`}},
   after(s,first){markSeen(s.args.id);if(!document.hidden)chatStamp(s.args.id,"rd",lastOtherAt(s.args.id));const b=$(".sheet-b",s.el);const n=chatMsgs(s.args.id).length;if(first||n!==s.n){b.scrollTop=b.scrollHeight}s.n=n;renderTabs()}
@@ -3711,6 +3792,21 @@ const ACT={
   habitSetup(){openSheet("habitSetup")},
   shamePerson(d){openSheet("shamePerson",{id:d.id})},
   shameDaySet(d){UI.shameDay=d.k;render()},
+  shelf(d){openSheet("shelf",{id:d.id})},
+  shelfAdd(d){if(shelfOf(d.id).length>=SHELF_MAX)return toast(`The shelf is full (${SHELF_MAX}). Remove something first.`);openSheet("shelfAdd",{chat:d.id})},
+  shelfItem(d){openSheet("shelfItem",{id:d.id})},
+  shKind(d){const s=topS();s.state.kind=d.k;s.state.cover="";paintSheet(s)},
+  shCover(){const s=topS();pickPhotos(async fs=>{if(!fs[0])return;try{s.state.cover=await coverPhoto(fs[0],s.state.kind);paintSheet(s)}catch{toast("Couldn't read that picture. Try another.")}},"#onePick")},
+  shCoverDel(){const s=topS();s.state.cover="";paintSheet(s)},
+  async shSave(){const s=topS(),t=val("shTitle");if(!t)return toast("Give it a title first.");if(shelfOf(s.args.chat).length>=SHELF_MAX)return toast("The shelf is full.");
+    await Store.add("shelf",{chatId:s.args.chat,kind:s.state.kind,title:t.slice(0,80),who:val("shBy").slice(0,60),desc:val("shDesc").slice(0,600),cover:s.state.cover||"",by:ME,at:now()});closeSheet();toast(`${SHELF_KINDS[s.state.kind][0]} On the shelf`);try{haptic()}catch{}},
+  shStar(d){const s=topS(),v=+d.v;s.state.rating=s.state.rating===v?0:v;paintSheet(s);try{haptic()}catch{}},
+  async shRevSave(d){const s=topS(),t=val("shRev-"+d.id).slice(0,500),r=s.state.rating||0;if(!t&&!r)return toast("Tap the stars or write a few words first.");
+    const mine=D.sreviews.find(x=>x.itemId===d.id&&x.by===ME);document.activeElement?.blur?.();
+    if(mine)await Store.upd("sreviews",mine.id,{text:t,rating:r,at:now()});else await Store.add("sreviews",{itemId:d.id,by:ME,text:t,rating:r,at:now()});toast(mine?"Review updated":"Review posted")},
+  async shRevDel(d){await Store.del("sreviews",d.id);const s=topS();if(s?.kind==="shelfItem"){s.state.rating=0;const el=$("#shRev-"+CSS.escape(s.args.id),s.el);if(el)el.value="";paintSheet(s)}},
+  async shDel(d){for(const r of shelfRevs(d.id))await Store.del("sreviews",r.id);await Store.del("shelf",d.id);if(topS()?.kind==="shelfItem")closeSheet();toast("Taken off the shelf")},
+
   async albumMode(d){const p=planById(d.id);if(!p)return;await Store.upd("plans",p.id,{albumMode:d.k});toast(d.k==="daily"?"🗓️ Pics are sorted by day now":"🧳 One album for the whole trip")},
   async photoDay(d){await Store.upd("media",d.id,{day:d.d});toast("Moved to "+fDate(d.d,{weekday:"long",day:"numeric",month:"short"}))},
   albumDay(d){UI.albumDay=UI.albumDay||{};UI.albumDay[d.id]=d.d;const s=topS();if(s)paintSheet(s)},
@@ -4032,25 +4128,29 @@ document.addEventListener("keydown",ev=>{
 function runSplash(){if(window.__splashed)return;window.__splashed=true;
   const dk=darkNow(),pick=c=>c[dk?1:0],mine=pick(ACCENTS[SET.accent]||ACCENTS.teal),all=Object.values(ACCENTS).map(pick).filter(c=>c!==mine);
   const n=all.length,strip=[...all,...all,...all,...all,...all,mine,...all,...all],s0=n,s1=5*n,still=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-  const el=document.createElement("div");el.className="splash";el.setAttribute("aria-hidden","true");
-  el.innerHTML=`<div class="sp-word"><span class="sp-yalla">${[..."Yalla"].map(ch=>`<i>${ch}</i>`).join("")}</span><span class="sp-wheel"><span class="sp-strip">${strip.map((c,i)=>`<span ${i===s1?'class="me" ':""}style="color:${c}">Guys</span>`).join("")}</span></span></div><div class="sp-glow" style="--g:${mine}"></div>`;
-  document.body.appendChild(el);
+  // the splash shell is already in the page so it paints the instant the app opens; here we add the wheel
+  let el=document.getElementById("splash0");const early=!!el;
+  if(!el){el=document.createElement("div");el.className="splash";el.setAttribute("aria-hidden","true");el.innerHTML=`<div class="sp-word"><span class="sp-yalla">${[..."Yalla"].map(ch=>`<i>${ch}</i>`).join("")}</span><span class="sp-wheel"></span></div>`;document.body.appendChild(el)}
+  el.dataset.on="1";el.querySelector(".sp-wheel").innerHTML=`<span class="sp-strip">${strip.map((c,i)=>`<span ${i===s1?'class="me" ':""}style="color:${c}">Guys</span>`).join("")}</span>`;
+  el.insertAdjacentHTML("beforeend",`<div class="sp-glow" style="--g:${mine}"></div>`);
   const done=()=>{if(!el.isConnected)return;el.classList.add("out");setTimeout(()=>el.remove(),420)};
   el.addEventListener("click",done);
   if(still||!el.animate){el.querySelector(".sp-strip").style.transform=`translateY(-${s1*1.15}em)`;el.classList.add("locked");setTimeout(done,700);return}
   // "Yalla" slides in crisply, letter by letter
   const word=el.querySelector(".sp-word"),ya=el.querySelector(".sp-yalla");
-  [...ya.children].forEach((ch,i)=>ch.animate([{transform:"translateX(110vw)"},{transform:"translateX(-.07em)",offset:.8},{transform:"none"}],{duration:520,delay:i*45,easing:"cubic-bezier(.2,.9,.25,1)",fill:"both"}));
+  [...ya.children].forEach((_,i)=>setTimeout(()=>{try{haptic()}catch{}},Math.max(0,400+i*45-(early?performance.now():0))));
+  if(!early)[...ya.children].forEach((ch,i)=>ch.animate([{transform:"translateX(110vw)"},{transform:"translateX(-.07em)",offset:.8},{transform:"none"}],{duration:520,delay:i*45,easing:"cubic-bezier(.2,.9,.25,1)",fill:"both"}));
   const wheel=el.querySelector(".sp-wheel"),st=el.querySelector(".sp-strip");
-  wheel.animate([{opacity:0},{opacity:1}],{duration:200,delay:380,fill:"both"});
+  const late=early&&performance.now()>650,d0=late?60:420;
+  wheel.animate([{opacity:0},{opacity:1}],{duration:200,delay:Math.max(0,d0-40),fill:"both"});
   // slot-machine drum: words squash and shrink as they roll away from the middle
   let tickAt=-1;const tk0=performance.now(),spans=[...st.children],drum=()=>{if(!el.isConnected)return;const top=st.getBoundingClientRect().top,rh=spans[0].offsetHeight,mid=innerHeight/2,Rd=innerHeight*.5;
-    const ci=Math.round((mid-top)/rh-.5);if(ci!==tickAt){if(tickAt>=0&&performance.now()-tk0>400&&!el.classList.contains("locked"))try{haptic()}catch{}tickAt=ci}
+    const ci=Math.round((mid-top)/rh-.5);if(ci!==tickAt){if(tickAt>=0&&performance.now()-tk0>d0-20&&!el.classList.contains("locked"))try{haptic()}catch{}tickAt=ci}
     for(let i=0;i<spans.length;i++){const d=top+rh*(i+.5)-mid;if(Math.abs(d)>Rd*1.7){spans[i].style.transform="scale(0)";continue}const th=Math.max(-1.5,Math.min(1.5,d/Rd)),cs=Math.cos(th);
       spans[i].style.transform=`translateY(${(Rd*Math.sin(th)-d).toFixed(1)}px) scale(${(.72+.28*cs).toFixed(3)},${Math.max(cs,.02).toFixed(3)})`;spans[i].style.filter=`brightness(${(.35+.65*cs).toFixed(2)})`}
     requestAnimationFrame(drum)};drum();
   const a0=s0*1.15,end=s1*1.15;
-  const spin=st.animate([{transform:`translateY(-${a0}em)`},{transform:`translateY(-${a0+(end-a0)*.9}em)`,offset:.72},{transform:`translateY(-${end+.18}em)`,offset:.9},{transform:`translateY(-${end}em)`}],{duration:1900,delay:420,easing:"cubic-bezier(.3,.05,.2,1)",fill:"both"});
+  const spin=st.animate([{transform:`translateY(-${a0}em)`},{transform:`translateY(-${a0+(end-a0)*.9}em)`,offset:.72},{transform:`translateY(-${end+.18}em)`,offset:.9},{transform:`translateY(-${end}em)`}],{duration:1900,delay:d0,easing:"cubic-bezier(.3,.05,.2,1)",fill:"both"});
   spin.onfinish=()=>{try{navigator.vibrate?.([18,40,30])}catch{}el.classList.add("locked");
     st.querySelector(".me").animate([{transform:"scale(1)"},{transform:"scale(1.3) rotate(-3deg)",offset:.3},{transform:"scale(.96) rotate(1deg)",offset:.62},{transform:"scale(1)"}],{duration:520,easing:"ease-out"});
     word.animate([{transform:"translateX(0)"},{transform:"translateX(-5px)"},{transform:"translateX(4px)"},{transform:"translateX(-2px)"},{transform:"translateX(0)"}],{duration:260});
