@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <title>Yalla Guys</title>
-<meta name="theme-color" content="#0B7A75">
+<meta name="theme-color" content="#0E1318">
+<meta name="color-scheme" content="dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Yalla Guys">
@@ -860,7 +861,7 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none}
 </style>
 </head>
 <body>
-<script>try{var _m=(JSON.parse(localStorage.getItem("yg-settings")||"{}")||{}).mode;if(_m==="dark"||_m==="light")document.documentElement.dataset.theme=_m}catch(e){}</script>
+<script>document.documentElement.dataset.theme="dark"</script>
 <div class="splash" id="splash0" aria-hidden="true"><div class="sp-word"><span class="sp-yalla"><i>Y</i><i>a</i><i>l</i><i>l</i><i>a</i></span><span class="sp-wheel"></span></div></div>
 <script>setTimeout(function(){var e=document.getElementById("splash0");if(e&&!e.dataset.on){e.remove();window.__splashed=true}},7000)</script>
 <div class="app">
@@ -904,7 +905,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-12.23";
+const APP_VERSION="2026-11-12.25";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1247,10 +1248,10 @@ const msgTime=t=>new Date(t).toLocaleTimeString([],{hour:"numeric",minute:"2-dig
 /* ---------- app state + render ---------- */
 const ACCENTS={teal:["#0B7A75","#3CC0B7"],coral:["#D2493F","#FF8A7A"],purple:["#6D4FC2","#A88BFF"],ocean:["#2F6FB5","#6EA8FF"],pink:["#C2307A","#FF7AB8"],lime:["#4F7A12","#A6D94A"],gold:["#A86A00","#F2C14E"]};
 const SET=Object.assign({mode:"system",accent:"teal",notifyOn:false,nMsgs:true,nPlans:true,nMoments:true,remind:[1440,60]},ls.get("yg-settings",{}));
-const darkNow=()=>SET.mode==="dark"||(SET.mode==="system"&&matchMedia("(prefers-color-scheme: dark)").matches);
+const darkNow=()=>true; // the app is dark only
 function applyTheme(){
   const r=document.documentElement,dk=darkNow(),c=(ACCENTS[SET.accent]||ACCENTS.teal)[dk?1:0];
-  if(SET.mode==="system")delete r.dataset.theme;else r.dataset.theme=SET.mode;
+  r.dataset.theme="dark";
   r.style.setProperty("--accent",c);r.style.setProperty("--accent-fg",dk?"#0B1014":"#FFFFFF");
   r.style.setProperty("--accent-soft",`color-mix(in srgb, ${c} ${dk?22:15}%, ${dk?"#0E1318":"#FFFFFF"})`);
   const m=$('meta[name="theme-color"]');if(m)m.content=dk?"#0E1318":c;
@@ -1745,13 +1746,15 @@ SHEETS.postMoment={
   render(s){const its=moItems(s.args),many=its.length>1;
     const card=(it,i)=>`<div class="moment"${many?` style="flex:0 0 82%;scroll-snap-align:center"`:""}><div class="ph">${it.video?`<video src="${esc(it.video.url||"")}" poster="${esc(it.video.poster)}" playsinline autoplay muted loop style="width:100%;height:100%;object-fit:cover"></video>`:`<img src="${esc(it.src)}" alt="Preview">`}${many?`<span class="pill" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.55);color:#fff">${i+1}/${its.length}</span>`:""}</div></div>`;
     return{title:many?`${its.length} new moments`:"New moment",body:`<div class="form">${many?`<div style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 -16px;padding:0 16px">${its.map(card).join("")}</div>`:card(its[0],0)}
-    <label class="f">Caption (optional)<input class="inp" id="moCap" maxlength="140" placeholder="What's happening?"></label></div>`,foot:`<button class="btn pri block" data-act="postMoment" id="moBtn">${many?`Share all ${its.length}`:"Share with the guys"}</button>`}}
+    <label class="f">Caption (optional)<input class="inp" id="moCap" maxlength="140" placeholder="What's happening?"></label>
+    <label class="check"><input type="checkbox" id="moTl" checked> 🕰️ Add to my timeline</label></div>`,foot:`<button class="btn pri block" data-act="postMoment" id="moBtn">${many?`Share all ${its.length}`:"Share with the guys"}</button>`}}
 };
 SHEETS.moment={live:true,
   render(s){const x=D.moments.find(m=>m.id===s.args.id);if(!x)return{title:"Moment",body:`<div class="empty">This moment was deleted.</div>`};
     const cs=D.mcomments.filter(c=>c.momentId===x.id).sort((a,b)=>a.at-b.at);
     const who=Object.entries(x.reacts||{});
     return{title:`${esc(nick(x.by))} · ${esc(x.day===TODAY()?"Today":fDate(x.day))}`,body:`${momentCard(x,true)}
+      ${x.by===ME?`<label class="check" style="margin-top:10px"><input type="checkbox" data-act="momentTl" data-id="${esc(x.id)}" ${x.tl===true?"checked":""}> 🕰️ Show on my timeline</label>`:""}
       ${who.length?`<div class="row" style="margin-top:10px">${who.map(([u,e])=>`<span class="row" style="gap:4px">${avatar(u,"xs")}<span style="font-size:13px">${e}</span></span>`).join("")}</div>`:""}
       <div class="sec"><h2>Comments</h2>${cs.map(c=>`<div class="note">${avatar(c.by,"xs")}<div style="flex:1;min-width:0"><div class="meta"><b style="color:var(--fg)">${esc(nick(c.by))}</b> · ${ago(c.at)}</div>${c.kind?mediaHtml("mcomments",c):""}${c.text?`<p>${esc(c.text)}</p>`:""}</div>${c.by===ME?`<button class="x" data-act="delComment" data-id="${esc(c.id)}" aria-label="Delete comment">✕</button>`:""}</div>`).join("")||`<div class="meta">No comments yet.</div>`}</div>`,
       foot:`${attachBtns("mc",x.id)}<textarea class="compose" id="mcIn-${esc(x.id)}" rows="1" placeholder="Add a comment"></textarea><button class="send" data-act="addComment" data-id="${esc(x.id)}" aria-label="Post comment">${ICON.send}</button>`}}
@@ -1767,7 +1770,6 @@ SHEETS.settings={live:true,
   render(){const perm="Notification" in window?Notification.permission:"unsupported";const ios=/iPhone|iPad/i.test(navigator.userAgent);
     return{title:"Settings",body:`<div class="form">
     <div class="sec" style="border:0;padding-top:0"><h2>Theme</h2>
-      <div class="seg">${[["system","Auto"],["light","Light"],["dark","Dark"]].map(([k,l])=>`<button data-act="setMode" data-k="${k}" aria-pressed="${SET.mode===k}">${l}</button>`).join("")}</div>
       <div class="swatches">${Object.entries(ACCENTS).map(([k,c])=>`<button class="swatch" data-act="setAccent" data-k="${k}" aria-label="${k}" aria-pressed="${SET.accent===k}" style="background:${c[darkNow()?1:0]}"></button>`).join("")}</div>
       <div class="hint">Only changes how the app looks on this phone.</div></div>
     <div class="sec"><h2>Notifications 🔔</h2>
@@ -1807,7 +1809,7 @@ const haptic=(()=>{let lbl=null,last=0;return()=>{const t=performance.now();if(t
 function timelineDays(u){
   const days={},add=(d,k,v)=>{if(!d)return;(days[d]=days[d]||{plans:[],media:[],reels:[],board:[]})[k].push(v)};
   const boardOf=p=>albumOpen(p)?[]:mediaOf(p.id).filter(m=>m.phase!=="memory"&&m.phase!=="ticket"&&(m.kind==="photo"||m.kind==="note"||m.kind==="color")).map(m=>({thumb:m.kind==="photo"?m.src:"",color:m.color||"",text:m.kind==="note"?m.text:m.kind==="color"?(m.caption||m.color):"",t:m.at,plan:p.id}));
-  if(u===ME)for(const b of D.busy.filter(x=>x.uid===ME)){const pics=D.mine.filter(m=>m.busyId===b.id&&m.kind==="photo");const tix=D.mine.filter(m=>m.busyId===b.id&&m.kind!=="photo");if(!pics.length&&!tix.length&&!myLabel(b))continue;
+  if(u===ME)for(const b of D.busy.filter(x=>x.uid===ME&&x.tl!==false)){const pics=D.mine.filter(m=>m.busyId===b.id&&m.kind==="photo");const tix=D.mine.filter(m=>m.busyId===b.id&&m.kind!=="photo");if(!pics.length&&!tix.length&&!myLabel(b))continue;
     add(b.date,"plans",{id:"busy:"+b.id,_busy:b.id,title:myLabel(b)||"Personal",emoji:"🔒",final:{date:b.date,start:b.start,end:b.end},status:b.date<TODAY()?"done":"set"});
     for(const m of pics)add(b.date,"media",{thumb:m.src,act:`data-act="viewSrc" data-key="mine:${esc(m.id)}"`,t:m.at,own:true,ev:"busy:"+b.id})}
   for(const p of visiblePlans()){const r=D.rsvps.find(x=>x.planId===p.id&&x.uid===u);if(!(p.by===u||(r&&r.going!=="out")))continue;
@@ -1816,6 +1818,8 @@ function timelineDays(u){
         for(const m of al)if(!byDay(p)||mDay(p,m)===dd)add(dd,"media",{ev:p.id,thumb:m.kind==="photo"?m.src:m.poster,video:m.kind==="video",act:m.kind==="photo"?`data-act="viewPhoto" data-id="${esc(m.id)}"`:`data-act="playVideo" data-key="media:${esc(m.id)}"`,t:m.at})}
 }
     else for(const sl of p.slots||[]){add(sl.date,"plans",{...p,_proposed:sl});for(const b of boardOf(p))add(sl.date,"board",b)}}
+  // moments the person chose to keep on their timeline
+  for(const x of D.moments.filter(m=>m.by===u&&m.tl===true)){const th=x.kind==="video"?x.poster:x.src;if(th)add(x.day,"media",{thumb:th,video:x.kind==="video",act:`data-act="openMoment" data-id="${esc(x.id)}"`,t:x.at,own:u===ME})}
   for(const d of Object.values(days))d.plans.sort((a,b)=>(a._busy?1:0)-(b._busy?1:0));
   return days;
 }
@@ -2283,6 +2287,7 @@ SHEETS.busyView={live:true,
       ${reels.length?reelsHtml(reels):""}
       <div class="sec" style="border:0;padding-top:0"><h2>⏰ Remind me</h2><div class="chips">${REM_OPTS.filter(([m])=>m<=1440).map(([m,l])=>`<button class="chip" data-act="busyRem" data-id="${esc(b.id)}" data-m="${m}" aria-pressed="${busyRemind(b.id).includes(m)}">${m?l+" before":l}</button>`).join("")}</div>
         <button class="btn sm pri" data-act="busyIcs" data-id="${esc(b.id)}" style="align-self:flex-start">📅 Add to phone calendar</button><div class="hint" style="margin:0">Phone-calendar reminders ring even when Yalla Guys is closed.</div></div>
+      <label class="check"><input type="checkbox" data-act="busyTl" data-id="${esc(b.id)}" ${b.tl!==false?"checked":""}> 🕰️ Show on my timeline</label>
       <div class="sec" style="border:0;padding-top:0"><h2>🔒 Your stuff</h2><div class="hint" style="margin:0">Only you can see these.</div>${myAttachHtml(b.id)}</div>
       <button class="btn danger" data-act="delBusy" data-id="${esc(b.id)}" data-confirm="Tap again to remove">Remove this block</button></div>`}}
 };
@@ -2826,11 +2831,12 @@ function badgeState(b,uid){let n=0;try{n=b.f(uid)||0}catch{}const lvl=b.tiers.fi
 function badgePatch(b,st,big){const t=st.lvl?TIER[b.tiers.length===1?2:st.lvl-1]:null;
   return`<span class="patch ${st.lvl?"":"locked"} ${big?"big":""} ${b.special&&st.lvl?"holo":""} ${b.bad?"bad":""}" style="--bc:${b.c};--tc:${t?t.c:"var(--line)"}"><span class="pe">${b.e}</span></span>`}
 function badgesHtml(uid){const all=BADGES.map(b=>({b,st:badgeState(b,uid)})).filter(x=>!x.b.special||x.st.lvl),got=all.filter(x=>x.st.lvl).sort((a,c)=>(c.b.special?9:c.st.lvl)-(a.b.special?9:a.st.lvl)),left=all.filter(x=>!x.st.lvl).sort((a,c)=>c.st.n/c.b.tiers[0]-a.st.n/a.b.tiers[0]);
-  const open=UI.badgesOpen===uid;const shown=open?left:left.slice(0,4);
+  const open=UI.badgesOpen===uid,CAP=8,gotShown=open?got:got.slice(0,CAP),leftShown=open?left:left.slice(0,Math.max(0,CAP-gotShown.length)),hidden=all.length-gotShown.length-leftShown.length;
   const cell=({b,st})=>`<button class="bcell" data-act="badge" data-id="${b.id}" data-u="${esc(uid)}">${badgePatch(b,st)}<b>${esc(b.t)}</b><span class="stars">${b.special?"✦ one of one ✦":b.tiers.length===1?(st.lvl?"★":"☆"):[0,1,2].map(i=>i<st.lvl?"★":"☆").join("")}</span>${!st.lvl?`<span class="bprog"><i style="width:${Math.min(100,Math.round(st.n/b.tiers[0]*100))}%"></i></span>`:""}</button>`;
   return`<div class="sec"><div class="between"><h2>🏅 Badges</h2><span class="meta"><b style="color:var(--fg)">${got.length}</b> of ${all.length} earned</span></div>
-    ${got.length?`<div class="bgrid">${got.map(cell).join("")}</div>`:`<div class="meta" style="margin-bottom:8px">No badges yet. Make a plan, post a moment or check in on Shame to earn the first one.</div>`}
-    ${left.length?`<div class="meta" style="margin:12px 0 6px;font-weight:700">Still to earn</div><div class="bgrid">${shown.map(cell).join("")}</div>${left.length>4?`<button class="btn sm block" data-act="badgesMore" data-u="${esc(uid)}" style="margin-top:8px">${open?"Show less":`Show all ${left.length}`}</button>`:""}`:""}</div>`}
+    ${got.length?`<div class="bgrid">${gotShown.map(cell).join("")}</div>`:`<div class="meta" style="margin-bottom:8px">No badges yet. Make a plan, post a moment or check in on Shame to earn the first one.</div>`}
+    ${leftShown.length?`<div class="meta" style="margin:12px 0 6px;font-weight:700">Still to earn</div><div class="bgrid">${leftShown.map(cell).join("")}</div>`:""}
+    ${open||hidden>0?`<button class="btn sm block" data-act="badgesMore" data-u="${esc(uid)}" style="margin-top:10px">${open?"Show less":`See more · ${hidden} more`}</button>`:""}</div>`}
 /* achievement pop-up: celebrate new badges and level-ups */
 const ACHQ=[];let achBusy=false,achT=null;
 function checkBadges(){if(!(MODE==="live"||MODE==="demo")||!Store.ready||!mem(ME))return;clearTimeout(achT);achT=setTimeout(()=>{
@@ -3367,22 +3373,22 @@ const SHPLAY={a:null,id:null,on(id){return!!(this.a&&this.id===id&&!this.a.pause
   paint(){const s=stack.find(k=>k.kind==="shelfItem");if(!s)return;const h=$(".shhero",s.el),b=$(".shplay",s.el),on=this.on(s.args.id);if(h)h.classList.toggle("still",!on);if(b){b.innerHTML=(on?SONG_ICON.pause:SONG_ICON.play)+`<span>${on?"Pause":"Play preview"}</span>`;b.setAttribute("aria-label",(on?"Pause":"Play")+" preview")}}};
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&SHPLAY.a){SHPLAY.a.pause();SHPLAY.paint()}});window.addEventListener("pagehide",()=>SHPLAY.stop());
 SHEETS.shelfAdd={
-  init(){return{kind:"book",cover:""}},
-  render(s){const st=s.state,[e,l,who]=SHELF_KINDS[st.kind];return{title:"Add stuff",body:`<div class="form">
-    <div class="seg">${Object.entries(SHELF_KINDS).map(([k,[em,lb]])=>`<button data-act="shKind" data-k="${k}" aria-pressed="${st.kind===k}">${em} ${lb}</button>`).join("")}</div>
+  init(a){const x=a.id?D.shelf.find(i=>i.id===a.id):null;return{kind:x?.kind||"book",cover:x?.cover||""}},
+  render(s){const st=s.state,[e,l,who]=SHELF_KINDS[st.kind],x=s.args.id?D.shelf.find(i=>i.id===s.args.id):null;return{title:x?`Edit ${l.toLowerCase()}`:"Add stuff",body:`<div class="form">
+    ${x?"":`<div class="seg">${Object.entries(SHELF_KINDS).map(([k,[em,lb]])=>`<button data-act="shKind" data-k="${k}" aria-pressed="${st.kind===k}">${em} ${lb}</button>`).join("")}</div>`}
     <div class="shaddtop"><button class="shcoverbtn" data-act="shCover" aria-label="${st.cover?"Change cover":"Add cover"}">${st.cover?shelfArt({kind:st.kind,cover:st.cover,id:"new"},1):`<span class="shart ${st.kind} big"><span class="shface"><span class="shnocover empty"><b>+</b><span>Add cover</span></span></span></span>`}</button>
-      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:10px"><label class="f">${l} title<input class="inp" id="shTitle" maxlength="80" placeholder="${st.kind==="song"?"e.g. Blinding Lights":st.kind==="book"?"e.g. The Alchemist":"e.g. Interstellar"}"></label>
-        <label class="f">${who} (optional)<input class="inp" id="shBy" maxlength="60"></label>${st.cover?`<button class="btn sm danger" data-act="shCoverDel" style="align-self:flex-start">Remove cover</button>`:""}</div></div>
-    ${st.kind==="song"?`<label class="f">Spotify link (optional)<input class="inp" id="shUrl" type="url" inputmode="url" maxlength="300" placeholder="https://open.spotify.com/track/…"><span class="meta" style="font-weight:400">Paste a song link and a 30-second preview plays when someone taps the record. Title and cover fill in by themselves if you leave them empty.</span></label>`:""}
-    <label class="f">Why should the group check it out?<textarea class="inp" id="shDesc" maxlength="600" rows="4" placeholder="A few words. You can paste links too."></textarea></label>
-    </div>`,foot:`<button class="btn pri block" data-act="shSave">Add it</button>`}}};
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:10px"><label class="f">${l} title<input class="inp" id="shTitle" maxlength="80" value="${esc(x?.title||"")}" placeholder="${st.kind==="song"?"e.g. Blinding Lights":st.kind==="book"?"e.g. The Alchemist":"e.g. Interstellar"}"></label>
+        <label class="f">${who} (optional)<input class="inp" id="shBy" maxlength="60" value="${esc(x?.who||"")}"></label>${st.cover?`<button class="btn sm danger" data-act="shCoverDel" style="align-self:flex-start">Remove cover</button>`:""}</div></div>
+    ${st.kind==="song"?`<label class="f">Spotify link (optional)<input class="inp" id="shUrl" type="url" inputmode="url" maxlength="300" value="${esc(x?.songUrl||"")}" placeholder="https://open.spotify.com/track/…"><span class="meta" style="font-weight:400">Paste a song link and a 30-second preview plays when someone taps the record. Title and cover fill in by themselves if you leave them empty.</span></label>`:""}
+    <label class="f">Why should the group check it out?<textarea class="inp" id="shDesc" maxlength="600" rows="4" placeholder="A few words. You can paste links too.">${esc(x?.desc||"")}</textarea></label>
+    </div>`,foot:`<button class="btn pri block" data-act="shSave">${x?"Save changes":"Add it"}</button>`}}};
 SHEETS.shelfItem={live:true,
   after(s,first){if(first){const x=D.shelf.find(i=>i.id===s.args.id);if(x?.kind==="song"&&x.songPreview)SHPLAY.start(x)}},
   destroy(){SHPLAY.stop()},
   init(a){const mine=D.sreviews.find(r=>r.itemId===a.id&&r.by===ME);return{rating:mine?.rating||0}},
   render(s){const x=D.shelf.find(i=>i.id===s.args.id);if(!x)return{title:"Stuff",body:`<div class="empty">This was removed.</div>`};
     const [e,l]=SHELF_KINDS[x.kind]||SHELF_KINDS.book,revs=shelfRevs(x.id),avg=shelfAvg(x.id),mine=revs.find(r=>r.by===ME),c=D.chats.find(h=>h.id===x.chatId),canDel=x.by===ME||c?.by===ME,st=s.state;
-    return{title:`${e} ${l}`,right:canDel?`<button class="btn sm danger" data-act="shDel" data-id="${esc(x.id)}" data-confirm="Remove?">Remove</button>`:"",
+    return{title:`${e} ${l}`,right:`${x.by===ME?`<button class="btn sm" data-act="shEdit" data-id="${esc(x.id)}">✏️ Edit</button>`:""}${canDel?`<button class="btn sm danger" data-act="shDel" data-id="${esc(x.id)}" data-confirm="Remove?">Remove</button>`:""}`,
       body:`<div class="shhero ${x.kind==="song"&&x.songPreview&&!SHPLAY.on(x.id)?"still":""}">${shelfArt(x,1)}
         <h1>${esc(x.title)}</h1>${x.who?`<div class="meta" style="font-size:14px">${esc(x.who)}</div>`:""}
         ${x.kind==="song"&&(x.songPreview||x.songUrl)?`<div class="row" style="gap:10px;justify-content:center">${x.songPreview?`<button class="shplay" data-act="shPlay" data-id="${esc(x.id)}" aria-label="${SHPLAY.on(x.id)?"Pause":"Play"} preview">${SHPLAY.on(x.id)?SONG_ICON.pause:SONG_ICON.play}<span>${SHPLAY.on(x.id)?"Pause":"Play preview"}</span></button>`:""}${x.songUrl?`<a class="btn sm" href="${esc(x.songUrl)}" target="_blank" rel="noopener">Open in Spotify ↗</a>`:""}</div>${x.songPreview?"":`<div class="meta">No preview is available for this song.</div>`}`:""}
@@ -3402,6 +3408,7 @@ SHEETS.busy={
     <div class="grid2"><label class="f">From<input class="inp" type="time" id="bzS" value="09:00"></label><label class="f">To<input class="inp" type="time" id="bzE" value="17:00"></label></div>
     <label class="check"><input type="checkbox" id="bzAll"> All day</label>
     <label class="f">What is it? (only you see this)<input class="inp" id="bzL" placeholder="e.g. Work shift, dentist, family dinner"></label>
+    <label class="check"><input type="checkbox" id="bzTl" checked> 🕰️ Add to my timeline<span class="meta" style="font-weight:400;margin-left:auto">only you see it there</span></label>
     <div class="f">🔒 Attach for yourself: photos, tickets, links or reels${myAttachHtml("",s.state.att||(s.state.att=[]))}</div>
     <div class="f">⏰ Remind me<div class="chips">${REM_OPTS.filter(([m])=>m<=1440).map(([m,l])=>`<button class="chip" data-act="bzRem" data-m="${m}" aria-pressed="${(s.state.rem||(s.state.rem=[60])).includes(m)}">${m?l+" before":l}</button>`).join("")}</div></div>
     <label class="f">Repeat weekly<select class="inp" id="bzR"><option value="1">Just once</option><option value="4">Every week for 4 weeks</option><option value="8">Every week for 8 weeks</option><option value="12">Every week for 12 weeks</option></select></label>
@@ -3712,13 +3719,15 @@ const ACT={
       if((f.type||"").startsWith("video/")){try{toast("Preparing video"+tag+"…");const v=await prepVideo(f,p=>toast(`Preparing video${tag}… ${Math.round(p*100)}%`));items.push({video:{kind:"video",blob:v.blob,poster:v.poster,dur:v.dur,url:URL.createObjectURL(v.blob)}})}catch(e){toast(e?.message||"Couldn't read that video.")}}
       else{try{const src=await storePhoto(f);if(src)items.push({src});else toast("Couldn't read a photo.")}catch{toast("Couldn't read a photo. Skipping it.")}}}
     if(items.length)openSheet("postMoment",{items})},
-  async postMoment(){const s=topS();$("#moBtn",s.el).disabled=true;const cap=val("moCap"),its=moItems(s.args);let done=0;
+  async postMoment(){const s=topS();$("#moBtn",s.el).disabled=true;const cap=val("moCap"),its=moItems(s.args),tl=!!$("#moTl",s.el)?.checked;let done=0;
     for(const[i,it]of its.entries()){const c=i===0?cap:"",t=now()+i;
-      if(it.video){try{const v=it.video,ref=await storeMedia(v.blob,p=>toast(`Uploading${its.length>1?` ${i+1}/${its.length}`:""}… ${Math.round(p*100)}%`));await Store.add("moments",{by:ME,at:t,day:TODAY(),kind:"video",...ref,poster:v.poster,dur:Math.round(v.dur),caption:c,reacts:{}})}catch(e){console.error(e);if(!done){$("#moBtn",s.el).disabled=false;return toast("Couldn't upload. Try again.")}continue}}
-      else await Store.add("moments",{by:ME,at:t,day:TODAY(),src:it.src,caption:c,reacts:{}});done++}
+      if(it.video){try{const v=it.video,ref=await storeMedia(v.blob,p=>toast(`Uploading${its.length>1?` ${i+1}/${its.length}`:""}… ${Math.round(p*100)}%`));await Store.add("moments",{by:ME,at:t,day:TODAY(),kind:"video",...ref,poster:v.poster,dur:Math.round(v.dur),caption:c,tl,reacts:{}})}catch(e){console.error(e);if(!done){$("#moBtn",s.el).disabled=false;return toast("Couldn't upload. Try again.")}continue}}
+      else await Store.add("moments",{by:ME,at:t,day:TODAY(),src:it.src,caption:c,tl,reacts:{}});done++}
     closeSheet();UI.tab="moments";render();toast(done>1?`Posted ${done} moments! Today's moments are unlocked 🔓`:"Posted! Today's moments are unlocked 🔓")},
   async react(d){const x=D.moments.find(m=>m.id===d.id);if(!x)return;const cur=(x.reacts||{})[ME];await Store.upd("moments",d.id,{["reacts."+ME]:cur===d.e?(MODE==="demo"?DEL:firebase.firestore.FieldValue.delete()):d.e})},
   openMoment(d){openSheet("moment",{id:d.id})},
+  async momentTl(d,el){const x=D.moments.find(m=>m.id===d.id);if(!x||x.by!==ME)return;const on=el?.checked??x.tl!==true;await Store.upd("moments",d.id,{tl:on});toast(on?"Added to your timeline":"Taken off your timeline")},
+  async busyTl(d,el){const b=D.busy.find(x=>x.id===d.id);if(!b)return;const on=el?.checked??b.tl===false;await Store.upd("busy",d.id,{tl:on});toast(on?"Added to your timeline":"Taken off your timeline")},
   async addComment(d){const el=$("#mcIn-"+CSS.escape(d.id));const t=(el?.value||"").trim();if(!t)return;el.value="";el.style.height="";await Store.add("mcomments",{momentId:d.id,by:ME,text:t.slice(0,500),at:now()})},
   async delComment(d){await Store.del("mcomments",d.id)},
   async saveMoment(d){const on=mySaved().includes(d.id);if(MODE==="demo")await Store.upd("members",ME,{saved:on?mySaved().filter(x=>x!==d.id):[...mySaved(),d.id]});else await Store.upd("members",ME,{saved:on?firebase.firestore.FieldValue.arrayRemove(d.id):firebase.firestore.FieldValue.arrayUnion(d.id)});toast(on?"Removed from memories":"Saved to your memories 🔖")},
@@ -3780,7 +3789,6 @@ const ACT={
   async inviteAll(){const s=topS();await Store.upd("plans",s.args.id,{invited:[]});closeSheet();toast("Open to the whole crew")},
   newPlanInChat(d){openSheet("edit",{chat:d.id})},
   settings(){openSheet("settings")},
-  setMode(d){SET.mode=d.k;saveSet()},
   setAccent(d){SET.accent=d.k;saveSet()},
   async notifOn(){if(!("Notification" in window))return toast(/iPhone|iPad/i.test(navigator.userAgent)?"On iPhone, add Yalla Guys to your Home Screen first, then open it from there.":"This browser doesn't support notifications.");
     const r=await Notification.requestPermission();SET.notifyOn=r==="granted";saveSet();toast(SET.notifyOn?"Notifications on 🔔":"Notifications are blocked. Allow them in your phone's settings for this app.");if(SET.notifyOn)notify("Yalla Guys","Notifications are working 🎉","test")},
@@ -3854,13 +3862,17 @@ const ACT={
   shelf(d){openSheet("shelf",{id:d.id})},
   shelfAdd(d){if(shelfOf(d.id).length>=SHELF_MAX)return toast(`Stuff is full (${SHELF_MAX}). Remove something first.`);openSheet("shelfAdd",{chat:d.id})},
   shelfItem(d){openSheet("shelfItem",{id:d.id})},
+  shEdit(d){const x=D.shelf.find(i=>i.id===d.id);if(!x||x.by!==ME)return;openSheet("shelfAdd",{id:x.id,chat:x.chatId})},
   shKind(d){const s=topS();s.state.kind=d.k;s.state.cover="";paintSheet(s)},
   shCover(){const s=topS();pickPhotos(async fs=>{if(!fs[0])return;try{s.state.cover=await coverPhoto(fs[0],s.state.kind);paintSheet(s)}catch{toast("Couldn't read that picture. Try another.")}},"#onePick")},
   shCoverDel(){const s=topS();s.state.cover="";paintSheet(s)},
   async shSave(){const s=topS();let t=val("shTitle"),who=val("shBy"),cover=s.state.cover||"";const url=s.state.kind==="song"?val("shUrl"):"",desc=val("shDesc");
-    if(!t&&!url)return toast("Give it a title first.");if(url&&!spotifyTrack(url))return toast("That doesn't look like a Spotify song link. It should contain open.spotify.com/track/");if(shelfOf(s.args.chat).length>=SHELF_MAX)return toast("Stuff is full.");if(s.busy)return;s.busy=true;
-    let sg={};if(url){toast("Finding the song…");try{const r=await resolveSong(url);if(r){sg={songUrl:r.songUrl||url,songPreview:r.songPreview||""};const[tt,ar]=(r.songTitle||"").split(" – ");if(!t&&tt&&tt!=="Spotify song")t=tt;if(!who&&ar)who=ar;if(!cover&&r.songArt)cover=r.songArt}}catch{}if(!sg.songUrl)sg={songUrl:url,songPreview:""}}
+    if(!t&&!url)return toast("Give it a title first.");if(url&&!spotifyTrack(url))return toast("That doesn't look like a Spotify song link. It should contain open.spotify.com/track/");const old=s.args.id?D.shelf.find(i=>i.id===s.args.id):null;if(s.args.id&&!old)return closeSheet();
+    if(!old&&shelfOf(s.args.chat).length>=SHELF_MAX)return toast("Stuff is full.");if(s.busy)return;s.busy=true;
+    let sg={};if(old&&s.state.kind==="song"){if(!url)sg={songUrl:"",songPreview:""};else if(spotifyTrack(url)===spotifyTrack(old.songUrl||""))sg={songUrl:old.songUrl,songPreview:old.songPreview||""}}
+    if(url&&!sg.songUrl){toast("Finding the song…");try{const r=await resolveSong(url);if(r){sg={songUrl:r.songUrl||url,songPreview:r.songPreview||""};const[tt,ar]=(r.songTitle||"").split(" – ");if(!t&&tt&&tt!=="Spotify song")t=tt;if(!who&&ar)who=ar;if(!cover&&r.songArt)cover=r.songArt}}catch{}if(!sg.songUrl)sg={songUrl:url,songPreview:""}}
     s.busy=false;if(!t)return toast("Couldn't read the song name. Type a title and try again.");
+    if(old){await Store.upd("shelf",old.id,{title:t.slice(0,80),who:who.slice(0,60),desc:desc.slice(0,600),cover,...sg});closeSheet();SHPLAY.stop();return toast("Saved")}
     await Store.add("shelf",{chatId:s.args.chat,kind:s.state.kind,title:t.slice(0,80),who:who.slice(0,60),desc:desc.slice(0,600),cover,...sg,by:ME,at:now()});closeSheet();toast(`${SHELF_KINDS[s.state.kind][0]} Added to Stuff`);try{haptic()}catch{}},
   stuffView(d){STUFF_VIEW=d.k==="phone"?"phone":"shelf";ls.set("yg-stuff-view",STUFF_VIEW);const s=stack.find(x=>x.kind==="shelf")||topS();if(s)paintSheet(s);try{haptic()}catch{}},
   shPlay(d){const x=D.shelf.find(i=>i.id===d.id);if(x)SHPLAY.toggle(x)},
@@ -4104,7 +4116,7 @@ const ACT={
   newBusy(d){openSheet("busy",{d:d.d})},
   async bzSave(){const date=val("bzD");if(!date)return toast("Pick a date.");const all=$("#bzAll").checked;const s=all?"":val("bzS"),e=all?"":val("bzE");const n=+val("bzR")||1;const label=val("bzL");
     const att=topS().state.att||[];
-    for(let i=0;i<n;i++){const d=pd(date);d.setDate(d.getDate()+7*i);const id=await Store.add("busy",{uid:ME,date:ymd(d),start:s,end:e,label:MODE==="demo"?label:"",at:now()});if(label&&MODE!=="demo")await Store.setLabel(id,label);
+    for(let i=0;i<n;i++){const d=pd(date);d.setDate(d.getDate()+7*i);const id=await Store.add("busy",{uid:ME,date:ymd(d),start:s,end:e,label:MODE==="demo"?label:"",tl:!!$("#bzTl")?.checked,at:now()});if(label&&MODE!=="demo")await Store.setLabel(id,label);
       if(i===0)for(const [k,m] of att.entries())await Store.add("mine",{...m,busyId:id,at:now()+k});
       const rem=topS().state.rem||[60];const all=ls.get("yg-remind-busy",{});all[id]=[...rem];ls.set("yg-remind-busy",all)}
     closeSheet();toast(n>1?`Blocked ${n} weeks`:"Time blocked")},
