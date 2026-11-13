@@ -777,7 +777,22 @@ body.has-fx::before{background:transparent}
 .apprate{position:absolute;left:0;top:-7px;font-style:normal;font-size:9.5px;font-weight:800;background:#0B0F14;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 60%,transparent);border-radius:999px;padding:0 5px;z-index:3}
 .addapp{display:grid;place-items:center;background:rgba(255,255,255,.1);border:2px dashed rgba(255,255,255,.5);color:#fff;font-size:24px;font-weight:300;box-shadow:none}.addapp::after{display:none}
 .phdots{display:flex;justify-content:center;gap:6px;margin-top:18px}.phdots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35)}.phdots i.on{background:#fff}
-.brandwrap{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+button.brand{border:0;background:none;color:var(--fg);padding:0;text-align:left;cursor:pointer}
+#drawer{position:fixed;inset:0;z-index:150}
+.dr-bg{all:unset;position:absolute;inset:0;background:rgba(3,5,8,.62);opacity:0;transition:opacity .25s ease}
+.dr-panel{position:absolute;top:0;bottom:0;left:0;width:min(84vw,330px);background:var(--surface);border-right:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));
+  box-shadow:12px 0 40px rgba(0,0,0,.5);transform:translateX(-102%);transition:transform .26s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 18px) 14px calc(env(safe-area-inset-bottom,0px) + 16px);overflow-y:auto}
+#drawer.on .dr-panel{transform:none}#drawer.on .dr-bg{opacity:1}
+.dr-panel.peek{transform:translateX(calc(-100% + 22px))}
+.dr-head{display:flex;align-items:center;justify-content:space-between;margin:0 4px 14px}.dr-head b{font-family:var(--f-display);font-size:22px}
+.dr-list{display:flex;flex-direction:column;gap:6px}
+.dr-crew{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;color:var(--fg);border-radius:14px;padding:8px;font:inherit;text-align:left;cursor:pointer}
+.dr-crew .grow{min-width:0}.dr-crew b{display:block;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dr-crew .meta{display:block;font-size:12.5px}
+.dr-crew.on{background:color-mix(in srgb,var(--accent) 16%,transparent)}.dr-crew.on .crewic{box-shadow:0 0 0 2px var(--accent)}
+.dr-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 10px var(--accent)}
+.dr-acts{display:flex;flex-direction:column;gap:4px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.dr-act{border:0;background:none;color:var(--fg);font:inherit;font-weight:600;text-align:left;padding:11px 10px;border-radius:12px;cursor:pointer}.dr-act:active{background:var(--surface2)}
+.dr-foot{margin:auto 6px 0;padding-top:16px;font-size:12.5px}
 .crew-btn{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px 3px 7px;font:inherit;font-size:12.5px;cursor:pointer}
 .crew-btn b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crew-btn i{font-style:normal;color:var(--muted);font-size:10px}
 .crewhero{display:flex;align-items:center;gap:14px;margin-bottom:12px}.crewhero b{display:block;font-family:var(--f-display);font-size:22px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crewhero .meta{display:block}
@@ -875,7 +890,7 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none}
 <script>setTimeout(function(){var e=document.getElementById("splash0");if(e&&!e.dataset.on){e.remove();window.__splashed=true}},7000)</script>
 <div class="app">
   <header class="top wrap">
-    <div class="brandwrap"><div class="brand">Yalla<span>Guys</span></div><button class="crew-btn" id="crewBtn" data-act="crews" hidden></button></div>
+    <button class="brand" id="crewBtn" data-act="drawer" aria-label="Your crews">Yalla<span>Guys</span></button>
     <button class="me-btn" data-act="person" data-id="" id="meBtn" hidden></button>
   </header>
   <main id="view" class="wrap"><div class="loading"><div class="spin"></div><div>Loading…</div></div></main>
@@ -883,6 +898,7 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none}
 <button class="fab" id="fab" data-act="newPlan" hidden><b>+</b> Make plan</button>
 <nav class="tabs" aria-label="Sections" hidden><div class="in" id="tabs"></div></nav>
 <div id="sheets"></div>
+<div id="drawer" hidden><div class="dr-bg" data-act="drawerClose"></div><aside class="dr-panel" role="dialog" aria-label="Your crews"></aside></div>
 <div id="toast" hidden></div>
 <button id="updBar" hidden data-act="doUpdate">✨ New version ready · Tap to update</button>
 <input type="file" id="filePick" accept="image/*" multiple class="vis-hidden" tabindex="-1" aria-hidden="true">
@@ -914,7 +930,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-13.03";
+const APP_VERSION="2026-11-13.05";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1098,6 +1114,7 @@ const Store={
     await Promise.all(crews.map(c=>FS.doc("crews/"+c).get().then(sn=>{if(sn.exists)CREWS[c]={id:c,...sn.data()}}).catch(()=>{})));
     const ok=crews.filter(c=>CREWS[c]);if(!ok.length){MODE="join";render();return}
     const last=ls.get("yg-crew-"+ME,null);Store.live(ok.includes(last)?last:ok[0])},
+  tipDrawer(){if(ls.get("yg-tip-drawer",0))return;ls.set("yg-tip-drawer",1);setTimeout(()=>{toast("👈 Swipe in from the left edge, or tap the logo, to see your crews");const d=$("#drawer"),p=$("#drawer .dr-panel");if(!d||DRAWER.open)return;paintDrawer();d.hidden=false;p.classList.add("peek");setTimeout(()=>{p.classList.remove("peek");if(!DRAWER.open)d.hidden=true},1400)},1800)},
   switchTo(c){if(c===CREW&&MODE==="live")return;while(stack.length)closeSheet();Store.stop();MODE="loading";render();Store.live(c);setTimeout(()=>toast(`${curCrew().emoji||"🔥"} ${curCrew().name}`),400)},
   stop(){IDB._db=null;unsubs.splice(0).forEach(f=>f());msgSubs.forEach(f=>f());msgSubs.clear();msgData.clear();COLS.forEach(c=>D[c]=[]);D.chats=[];D.msgs=[];D.priv={labels:{}};D.wishes=[];D.mine=[];Store.ready=false},
   live(crew){
@@ -1115,7 +1132,7 @@ const Store={
     unsubs.push(FS.doc("priv/"+ME).onSnapshot(s=>{D.priv=s.exists?{labels:{},...s.data()}:{labels:{}};schedule()},()=>{}));
     unsubs.push(FS.doc("members/"+ME).onSnapshot(s=>{if(s.exists)PROFILE=s.data();schedule()},()=>{}));
     unsubs.push(FS.doc("crews/"+CREW).onSnapshot(s=>{if(s.exists){CREWS[CREW]={id:CREW,...s.data()};schedule()}},()=>{}));
-    render();
+    render();Store.tipDrawer();
   },
   syncMsgSubs(){
     const ids=new Set(D.chats.map(c=>c.id));
@@ -1323,7 +1340,7 @@ function render(){
   const v=$("#view");
   if(MODE==="loading"){v.innerHTML=`<div class="loading"><div class="spin"></div><div>Loading your crew…</div></div>`;return}
   if(MODE==="auth"){keepInputs(v,()=>{v.innerHTML=authView()});return}
-  $("#crewBtn").hidden=!inApp;if(inApp){const c=curCrew();$("#crewBtn").innerHTML=`<span>${esc(c.emoji||"🔥")}</span><b>${esc(c.name||"Crew")}</b><i>▾</i>`}
+  if(inApp&&DRAWER.open)paintDrawer();
   if(MODE==="join"){keepInputs(v,()=>{v.innerHTML=joinView()});return}
   if(MODE==="migrate"){v.innerHTML=migrateView();return}
   const meDoc=mem(ME);
@@ -2918,12 +2935,17 @@ function badgesHtml(uid){const all=BADGES.map(b=>({b,st:badgeState(b,uid)})).fil
 /* achievement pop-up: celebrate new badges and level-ups */
 const ACHQ=[];let achBusy=false,achT=null;
 function checkBadges(){if(!(MODE==="live"||MODE==="demo")||!Store.ready||!mem(ME))return;clearTimeout(achT);achT=setTimeout(()=>{
-  const key="yg-badges-"+ME,seen=ls.get(key,null),now_={};
+  // remember the highest level ever celebrated, on this phone and on your account, so a badge never pops twice
+  // (levels can dip for a moment while chats and the calendar are still loading, or after switching crew)
+  const key="yg-badges-"+ME,now_={},loc=BSEEN||ls.get(key,null),acc=MODE==="live"?(PROFILE?.bseen||mem(ME)?.bseen||null):null;
+  let seen=null;if(loc||acc){seen={};for(const o of [loc,acc])for(const[k,v]of Object.entries(o||{}))seen[k]=Math.max(seen[k]||0,v||0)}
   for(const b of BADGES){const st=badgeState(b,ME);now_[b.id]=st.lvl}
   if(MODE==="live"){const bm={...(mem(ME)?.bmax||{})};let ch=false;for(const b of BADGES){if(b.special||b.bad)continue;const l=now_[b.id]||0;if(l>(bm[b.id]||0)){bm[b.id]=l;ch=true}}if(ch)Store.upd("members",ME,{bmax:bm})}
-  if(!seen){ls.set(key,now_);return}  // first run on this phone: remember silently
+  const save=nx=>{BSEEN=nx;ls.set(key,nx);if(MODE==="live"&&JSON.stringify(acc||{})!==JSON.stringify(nx))Store.upd("members",ME,{bseen:nx})};
+  if(!seen){save(now_);return}  // first run: remember silently
   for(const b of BADGES){const was=seen[b.id]||0,is=now_[b.id]||0;if(is>was)ACHQ.push({b,lvl:is,up:was>0})}
-  ls.set(key,{...seen,...now_});if(ACHQ.length)nextAch()},1200)}
+  const nx={...seen};for(const[k,v]of Object.entries(now_))nx[k]=Math.max(nx[k]||0,v);if(JSON.stringify(nx)!==JSON.stringify(seen)||!acc)save(nx);if(ACHQ.length)nextAch()},1200)}
+let BSEEN=null;
 function nextAch(){if(achBusy||!ACHQ.length)return;achBusy=true;const{b,lvl,up}=ACHQ.shift(),st=badgeState(b,ME);
   const tier=b.special?"One of one":b.tiers.length===1?"":TIER[lvl-1].n;
   const el=document.createElement("div");el.className="achpop"+(b.bad?" bad":"");el.style.setProperty("--bc",b.c);el.setAttribute("role","status");
@@ -3479,6 +3501,28 @@ SHEETS.shelfItem={live:true,
         <div class="shpick" role="radiogroup" aria-label="Your rating">${[1,2,3,4,5].map(i=>`<button data-act="shStar" data-v="${i}" role="radio" aria-checked="${st.rating===i}" aria-label="${i} star${i>1?"s":""}" class="${st.rating>=i?"on":""}">★</button>`).join("")}</div>
         <textarea class="inp" id="shRev-${esc(x.id)}" maxlength="500" rows="3" placeholder="What did you think? (optional)">${esc(mine?.text||"")}</textarea>
         <button class="btn pri" data-act="shRevSave" data-id="${esc(x.id)}">${mine?"Update review":"Post review"}</button></div></div>`}}};
+/* crews drawer: swipe in from the left edge (or tap the logo) */
+const DRAWER={open:false};
+function paintDrawer(){const el=$("#drawer .dr-panel");if(!el)return;const mine=MODE==="demo"?["demo"]:liveCrews();
+  el.innerHTML=`<div class="dr-head"><b>Your crews</b><button class="x" data-act="drawerClose" aria-label="Close">✕</button></div>
+    <div class="dr-list">${mine.map(k=>{const c=CREWS[k]||{};return`<button class="dr-crew ${k===CREW?"on":""}" data-act="drGo" data-k="${esc(k)}"><span class="crewic sm">${esc(c.emoji||"🔥")}</span><span class="grow"><b>${esc(c.name||"Crew")}</b><span class="meta">${k===CREW?`${D.members.length} ${D.members.length===1?"person":"people"} · here now`:"Tap to switch"}</span></span>${k===CREW?`<i class="dr-dot"></i>`:""}</button>`}).join("")}</div>
+    <div class="dr-acts"><button class="dr-act" data-act="drSettings">⚙️ Invite & crew settings</button><button class="dr-act" data-act="drNew" data-k="create">✨ Create a crew</button><button class="dr-act" data-act="drNew" data-k="join">🔑 Join a crew</button></div>
+    <p class="meta dr-foot">Your profile, badges, games, habits and personal calendar come with you to every crew.</p>`}
+function setDrawer(on,instant){const d=$("#drawer"),p=$("#drawer .dr-panel"),bg=$("#drawer .dr-bg");if(on&&!(MODE==="live"||MODE==="demo"))return;DRAWER.open=on;
+  if(on){paintDrawer();d.hidden=false;try{haptic()}catch{}}
+  p.style.transition=instant?"none":"";bg.style.transition=instant?"none":"";requestAnimationFrame(()=>{d.classList.toggle("on",on);p.style.transform="";bg.style.opacity=""});
+  if(!on)setTimeout(()=>{if(!DRAWER.open)d.hidden=true},260)}
+{let sx=null,sy=0,dx=0,mode=null;const W=()=>$("#drawer .dr-panel").offsetWidth||300;
+  document.addEventListener("touchstart",e=>{if(!(MODE==="live"||MODE==="demo")||e.touches.length>1)return;const t=e.touches[0];
+    if(DRAWER.open){if(e.target.closest("#drawer")){sx=t.clientX;sy=t.clientY;dx=0;mode="close"}return}
+    if(stack.length||t.clientX>28)return;sx=t.clientX;sy=t.clientY;dx=0;mode="open"},{passive:true});
+  document.addEventListener("touchmove",e=>{if(sx==null)return;const t=e.touches[0];dx=t.clientX-sx;const dy=t.clientY-sy;
+    if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dx)<12){sx=null;return}
+    const d=$("#drawer"),p=$("#drawer .dr-panel"),bg=$("#drawer .dr-bg"),w=W();
+    if(mode==="open"){if(d.hidden){paintDrawer();d.hidden=false}const x=Math.min(0,-w+Math.max(0,dx));p.style.transition=bg.style.transition="none";p.style.transform=`translateX(${x}px)`;bg.style.opacity=String(Math.max(0,(w+x)/w))}
+    else{const x=Math.min(0,dx);p.style.transition=bg.style.transition="none";p.style.transform=`translateX(${x}px)`;bg.style.opacity=String(Math.max(0,(w+x)/w))}},{passive:true});
+  document.addEventListener("touchend",()=>{if(sx==null)return;const m=mode;sx=null;const p=$("#drawer .dr-panel"),bg=$("#drawer .dr-bg");p.style.transition=bg.style.transition="";
+    if(m==="open")setDrawer(dx>60);else setDrawer(!(dx<-60))},{passive:true});}
 /* crews: switch, invite, create, join, manage */
 SHEETS.crews={live:true,
   render(){const c=curCrew(),admin=c.by===ME,mine=liveCrews();
@@ -3807,6 +3851,11 @@ const ACT={
   jnCemo(d){UI.join.cemo=d.v;render()},
   cnEmoji(d){const s=topS();s.state.cemo=d.v;paintSheet(s)},
   crews(){openSheet("crews")},
+  drawer(){setDrawer(!DRAWER.open)},
+  drawerClose(){setDrawer(false)},
+  drGo(d){setDrawer(false);if(d.k!==CREW)setTimeout(()=>Store.switchTo(d.k),180)},
+  drSettings(){setDrawer(false);openSheet("crews")},
+  drNew(d){setDrawer(false);ACT.crewNew(d)},
   crewGo(d){Store.switchTo(d.k)},
   crewNew(d){if(MODE==="demo")return toast("Demo mode has one crew. Connect Firebase to make more.");JOIN_ERR="";openSheet("crewNew",{k:d.k})},
   crewBack(){JOIN_ERR="";const k=liveCrews()[0];if(k)Store.live(k)},
