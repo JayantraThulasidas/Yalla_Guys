@@ -780,10 +780,11 @@ body.has-fx::before{background:transparent}
 button.brand{border:0;background:none;color:var(--fg);padding:0;text-align:left;cursor:pointer}
 #drawer{position:fixed;inset:0;z-index:150}
 .dr-bg{all:unset;position:absolute;inset:0;background:rgba(3,5,8,.62);opacity:0;transition:opacity .25s ease}
-.dr-panel{position:absolute;top:0;bottom:0;left:0;width:min(84vw,330px);background:var(--surface);border-right:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));
-  box-shadow:12px 0 40px rgba(0,0,0,.5);transform:translateX(-102%);transition:transform .26s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 18px) 14px calc(env(safe-area-inset-bottom,0px) + 16px);overflow-y:auto}
+.dr-panel{position:absolute;top:0;left:0;right:0;max-height:82dvh;background:var(--surface);border-bottom:1.5px solid color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:0 0 26px 26px;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);transform:translateY(-104%);transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px 14px;overflow-y:auto}
+.dr-panel::after{content:"";display:block;width:42px;height:5px;border-radius:3px;background:var(--line);margin:12px auto 0;flex:none}
 #drawer.on .dr-panel{transform:none}#drawer.on .dr-bg{opacity:1}
-.dr-panel.peek{transform:translateX(calc(-100% + 22px))}
+@media (min-width:600px){.dr-panel{left:50%;right:auto;width:560px;margin-left:-280px}}
 .dr-head{display:flex;align-items:center;justify-content:space-between;margin:0 4px 14px}.dr-head b{font-family:var(--f-display);font-size:22px}
 .dr-list{display:flex;flex-direction:column;gap:6px}
 .dr-crew{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;color:var(--fg);border-radius:14px;padding:8px;font:inherit;text-align:left;cursor:pointer}
@@ -792,7 +793,7 @@ button.brand{border:0;background:none;color:var(--fg);padding:0;text-align:left;
 .dr-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 10px var(--accent)}
 .dr-acts{display:flex;flex-direction:column;gap:4px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
 .dr-act{border:0;background:none;color:var(--fg);font:inherit;font-weight:600;text-align:left;padding:11px 10px;border-radius:12px;cursor:pointer}.dr-act:active{background:var(--surface2)}
-.dr-foot{margin:auto 6px 0;padding-top:16px;font-size:12.5px}
+.dr-foot{margin:4px 6px 0;padding-top:10px;font-size:12.5px}
 .crew-btn{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px 3px 7px;font:inherit;font-size:12.5px;cursor:pointer}
 .crew-btn b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crew-btn i{font-style:normal;color:var(--muted);font-size:10px}
 .crewhero{display:flex;align-items:center;gap:14px;margin-bottom:12px}.crewhero b{display:block;font-family:var(--f-display);font-size:22px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crewhero .meta{display:block}
@@ -930,7 +931,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-13.07";
+const APP_VERSION="2026-11-13.09";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1114,7 +1115,7 @@ const Store={
     await Promise.all(crews.map(c=>FS.doc("crews/"+c).get().then(sn=>{if(sn.exists)CREWS[c]={id:c,...sn.data()}}).catch(()=>{})));
     const ok=crews.filter(c=>CREWS[c]);if(!ok.length){MODE="join";render();return}
     const last=ls.get("yg-crew-"+ME,null);Store.live(ok.includes(last)?last:ok[0])},
-  tipDrawer(){if(ls.get("yg-tip-drawer",0))return;ls.set("yg-tip-drawer",1);setTimeout(()=>{toast("👈 Swipe back from the edge, or tap the logo, to see your crews");const d=$("#drawer"),p=$("#drawer .dr-panel");if(!d||DRAWER.open)return;paintDrawer();d.hidden=false;p.classList.add("peek");setTimeout(()=>{p.classList.remove("peek");if(!DRAWER.open)d.hidden=true},1400)},1800)},
+  tipDrawer(){if(ls.get("yg-tip-drawer",0))return;ls.set("yg-tip-drawer",1);setTimeout(()=>{toast("👆 Tap the Yalla Guys logo to see your crews");const d=$("#drawer"),p=$("#drawer .dr-panel");if(!d||DRAWER.open)return;return},1800)},
   switchTo(c){if(c===CREW&&MODE==="live")return;while(stack.length)closeSheet();Store.stop();MODE="loading";render();Store.live(c);setTimeout(()=>toast(`${curCrew().emoji||"🔥"} ${curCrew().name}`),400)},
   stop(){IDB._db=null;unsubs.splice(0).forEach(f=>f());msgSubs.forEach(f=>f());msgSubs.clear();msgData.clear();COLS.forEach(c=>D[c]=[]);D.chats=[];D.msgs=[];D.priv={labels:{}};D.wishes=[];D.mine=[];Store.ready=false},
   live(crew){
@@ -3508,7 +3509,7 @@ SHEETS.shelfItem={live:true,
         <div class="shpick" role="radiogroup" aria-label="Your rating">${[1,2,3,4,5].map(i=>`<button data-act="shStar" data-v="${i}" role="radio" aria-checked="${st.rating===i}" aria-label="${i} star${i>1?"s":""}" class="${st.rating>=i?"on":""}">★</button>`).join("")}</div>
         <textarea class="inp" id="shRev-${esc(x.id)}" maxlength="500" rows="3" placeholder="What did you think? (optional)">${esc(mine?.text||"")}</textarea>
         <button class="btn pri" data-act="shRevSave" data-id="${esc(x.id)}">${mine?"Update review":"Post review"}</button></div></div>`}}};
-/* crews drawer: swipe in from the left edge (or tap the logo) */
+/* crews list: drops down over the top of the screen (tap the logo, or swipe Back on the main screen) */
 const DRAWER={open:false};
 function paintDrawer(){const el=$("#drawer .dr-panel");if(!el)return;const mine=MODE==="demo"?["demo"]:liveCrews();
   el.innerHTML=`<div class="dr-head"><b>Your crews</b><button class="x" data-act="drawerClose" aria-label="Close">✕</button></div>
@@ -3517,19 +3518,8 @@ function paintDrawer(){const el=$("#drawer .dr-panel");if(!el)return;const mine=
     <p class="meta dr-foot">Your profile, badges, games, habits and personal calendar come with you to every crew.</p>`}
 function setDrawer(on,instant){const d=$("#drawer"),p=$("#drawer .dr-panel"),bg=$("#drawer .dr-bg");if(on&&!(MODE==="live"||MODE==="demo"))return;DRAWER.open=on;
   if(on){paintDrawer();d.hidden=false;try{haptic()}catch{}}
-  p.style.transition=instant?"none":"";bg.style.transition=instant?"none":"";requestAnimationFrame(()=>{d.classList.toggle("on",on);p.style.transform="";bg.style.opacity=""});
+  p.style.transition=instant?"none":"";bg.style.transition=instant?"none":"";requestAnimationFrame(()=>requestAnimationFrame(()=>d.classList.toggle("on",on)));
   if(!on)setTimeout(()=>{if(!DRAWER.open)d.hidden=true},260)}
-{let sx=null,sy=0,dx=0,mode=null;const W=()=>$("#drawer .dr-panel").offsetWidth||300;
-  document.addEventListener("touchstart",e=>{if(!(MODE==="live"||MODE==="demo")||e.touches.length>1)return;const t=e.touches[0];
-    if(DRAWER.open){if(e.target.closest("#drawer")){sx=t.clientX;sy=t.clientY;dx=0;mode="close"}return}
-    if(stack.length||t.clientX>28)return;sx=t.clientX;sy=t.clientY;dx=0;mode="open"},{passive:true});
-  document.addEventListener("touchmove",e=>{if(sx==null)return;const t=e.touches[0];dx=t.clientX-sx;const dy=t.clientY-sy;
-    if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dx)<12){sx=null;return}
-    const d=$("#drawer"),p=$("#drawer .dr-panel"),bg=$("#drawer .dr-bg"),w=W();
-    if(mode==="open"){if(d.hidden){paintDrawer();d.hidden=false}const x=Math.min(0,-w+Math.max(0,dx));p.style.transition=bg.style.transition="none";p.style.transform=`translateX(${x}px)`;bg.style.opacity=String(Math.max(0,(w+x)/w))}
-    else{const x=Math.min(0,dx);p.style.transition=bg.style.transition="none";p.style.transform=`translateX(${x}px)`;bg.style.opacity=String(Math.max(0,(w+x)/w))}},{passive:true});
-  document.addEventListener("touchend",()=>{if(sx==null)return;const m=mode;sx=null;const p=$("#drawer .dr-panel"),bg=$("#drawer .dr-bg");p.style.transition=bg.style.transition="";
-    if(m==="open")setDrawer(dx>60);else setDrawer(!(dx<-60))},{passive:true});}
 /* crews: switch, invite, create, join, manage */
 SHEETS.crews={live:true,
   render(){const c=curCrew(),admin=c.by===ME,mine=liveCrews();
@@ -4425,8 +4415,9 @@ document.addEventListener("keydown",ev=>{
 });
 /* opening animation: "Yalla" slides in, "Guys" spins through the theme colours and locks on yours */
 function runSplash(){if(window.__splashed)return;window.__splashed=true;
-  const dk=darkNow(),pick=c=>c[dk?1:0],mine=pick(ACCENTS[SET.accent]||ACCENTS.teal),all=Object.values(ACCENTS).map(pick).filter(c=>c!==mine);
-  const n=all.length,strip=[...all,...all,...all,...all,...all,mine,...all,...all],s0=n,s1=5*n,still=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const dk=darkNow(),pick=c=>c[dk?1:0],mine=pick(ACCENTS[SET.accent]||ACCENTS.teal),all=Object.values(ACCENTS).map(pick);
+  // every colour rolls past, yours included, and the wheel stops on yours
+  const n=all.length,strip=Array.from({length:8},()=>all).flat(),s0=n,s1=5*n+Math.max(0,all.indexOf(mine)),still=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   // the splash shell is already in the page so it paints the instant the app opens; here we add the wheel
   let el=document.getElementById("splash0");const early=!!el;
   if(!el){el=document.createElement("div");el.className="splash";el.setAttribute("aria-hidden","true");el.innerHTML=`<div class="sp-word"><span class="sp-yalla">${[..."Yalla"].map(ch=>`<i>${ch}</i>`).join("")}</span><span class="sp-wheel"></span></div>`;document.body.appendChild(el)}
