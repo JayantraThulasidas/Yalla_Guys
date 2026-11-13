@@ -777,6 +777,15 @@ body.has-fx::before{background:transparent}
 .apprate{position:absolute;left:0;top:-7px;font-style:normal;font-size:9.5px;font-weight:800;background:#0B0F14;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 60%,transparent);border-radius:999px;padding:0 5px;z-index:3}
 .addapp{display:grid;place-items:center;background:rgba(255,255,255,.1);border:2px dashed rgba(255,255,255,.5);color:#fff;font-size:24px;font-weight:300;box-shadow:none}.addapp::after{display:none}
 .phdots{display:flex;justify-content:center;gap:6px;margin-top:18px}.phdots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35)}.phdots i.on{background:#fff}
+.brandwrap{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.crew-btn{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px 3px 7px;font:inherit;font-size:12.5px;cursor:pointer}
+.crew-btn b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crew-btn i{font-style:normal;color:var(--muted);font-size:10px}
+.crewhero{display:flex;align-items:center;gap:14px;margin-bottom:12px}.crewhero b{display:block;font-family:var(--f-display);font-size:22px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crewhero .meta{display:block}
+.crewic{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:28px;background:var(--accent-soft);flex:none}.crewic.sm{width:38px;height:38px;border-radius:11px;font-size:20px}
+.codecard{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}.codecard>b{font-size:26px;letter-spacing:.06em;color:var(--accent);user-select:all;-webkit-user-select:all}
+.crewrow{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:14px;padding:8px 12px 8px 8px;font:inherit;text-align:left;cursor:pointer}.crewrow b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crewrow.on{border-color:var(--accent)}
+.hcrews{display:flex;flex-wrap:wrap;gap:6px;width:100%;order:9}.hcrews .chip{min-height:30px;padding:4px 10px;font-size:12px}.hcrews .chip.on{background:var(--accent-soft);border-color:var(--accent)}
 .podcard{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:12px 0 10px;margin:4px 0 14px;overflow:hidden}
 .podtabs{display:flex;gap:6px;margin:0 12px;background:var(--surface2);border-radius:999px;padding:4px}
 .podtabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:8px 6px;border-radius:999px;white-space:nowrap}
@@ -866,7 +875,7 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none}
 <script>setTimeout(function(){var e=document.getElementById("splash0");if(e&&!e.dataset.on){e.remove();window.__splashed=true}},7000)</script>
 <div class="app">
   <header class="top wrap">
-    <div class="brand">Yalla<span>Guys</span></div>
+    <div class="brandwrap"><div class="brand">Yalla<span>Guys</span></div><button class="crew-btn" id="crewBtn" data-act="crews" hidden></button></div>
     <button class="me-btn" data-act="person" data-id="" id="meBtn" hidden></button>
   </header>
   <main id="view" class="wrap"><div class="loading"><div class="spin"></div><div>Loading…</div></div></main>
@@ -905,7 +914,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-13.01";
+const APP_VERSION="2026-11-13.03";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1053,6 +1062,19 @@ async function deltaSync(path,key,apply,onErr){
 const COLS=["members","plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","offers","checkins","pokes","scores","shelf","sreviews"];
 const D={chats:[],msgs:[],priv:{labels:{}},wishes:[],mine:[]};COLS.forEach(c=>D[c]=[]);
 let ME=null,MODE="loading",FS=null,AUTH=null,JOIN_ERR="";
+/* ---------- crews: each friend group has its own plans, chats, money and stuff; your profile, badges,
+   games, habits and personal calendar come with you to every crew ---------- */
+const LEGACY_CREW="c-habibi812",LEGACY_CODE="Habibi812",OWNER_UID="VawnWAZOxmZPaLgcJdwHYavrqGp2";
+let CREW=null,PROFILE=null;const CREWS={};
+const FAN_COLS=["busy","scores","checkins"];           // copied into every crew you're in
+const PER_CREW_KEYS=["loc","shareLoc","locMode"];      // location is only shared with the crew you turn it on in
+const LEGACY_COLS=["plans","rsvps","media","notes","expenses","settles","busy","moments","mcomments","chunks","offers","checkins","pokes","scores","shelf","sreviews"];
+const myCrews=()=>MODE==="demo"?["demo"]:(PROFILE?.crews||[]);
+const liveCrews=()=>myCrews().filter(k=>CREWS[k]);
+const crewKey=code=>String(code||"").trim().toLowerCase().replace(/\s+/g,"");
+const cpath=(crew,c,id)=>`crews/${crew}/${c==="members"?"people":c}/${id}`;
+const curCrew=()=>CREWS[CREW]||{name:"Crew",emoji:"🔥"};
+const publicProfile=(pr,k)=>{const{crews,code,u,...rest}=pr||{};PER_CREW_KEYS.forEach(x=>delete rest[x]);if(rest.habits)rest.habits=rest.habits.filter(h=>!h.crews||h.crews.includes(k));return rest};
 const unsubs=[];const msgSubs=new Map();const msgData=new Map();
 const configured=()=>!!(window.FIREBASE_CONFIG&&FIREBASE_CONFIG.apiKey&&FIREBASE_CONFIG.projectId&&window.firebase);
 const Store={
@@ -1063,25 +1085,36 @@ const Store={
     AUTH.onAuthStateChanged(async u=>{
       Store.stop();
       if(!u){ME=null;MODE="auth";render();return}
-      ME=u.uid;MODE="loading";render();
-      let md=null;try{md=await FS.doc("members/"+u.uid).get()}catch(e){}
-      if(md&&md.exists)Store.live();else{MODE="join";render()}
+      ME=u.uid;MODE="loading";render();Store.boot();
     });
   },
+  async boot(){let md=null;try{md=await FS.doc("members/"+ME).get()}catch(e){}
+    PROFILE=md&&md.exists?md.data():null;let crews=PROFILE?.crews||[];UI.crewMsg="";
+    if(PROFILE&&!crews.length&&PROFILE.code){ // made an account on the first version of the app
+      let inLegacy=false;try{inLegacy=(await FS.doc(cpath(LEGACY_CREW,"members",ME)).get()).exists}catch(e){}
+      if(inLegacy){crews=[LEGACY_CREW];PROFILE.crews=crews;try{await FS.doc("members/"+ME).set({crews},{merge:true})}catch(e){}carryLegacyWishes()}
+      else if(ME===OWNER_UID){MODE="migrate";render();return}
+      else UI.crewMsg="Your crew is moving to the new version of Yalla Guys. Ask whoever made the crew to open the app once, then come back here.";}
+    await Promise.all(crews.map(c=>FS.doc("crews/"+c).get().then(sn=>{if(sn.exists)CREWS[c]={id:c,...sn.data()}}).catch(()=>{})));
+    const ok=crews.filter(c=>CREWS[c]);if(!ok.length){MODE="join";render();return}
+    const last=ls.get("yg-crew-"+ME,null);Store.live(ok.includes(last)?last:ok[0])},
+  switchTo(c){if(c===CREW&&MODE==="live")return;while(stack.length)closeSheet();Store.stop();MODE="loading";render();Store.live(c);setTimeout(()=>toast(`${curCrew().emoji||"🔥"} ${curCrew().name}`),400)},
   stop(){IDB._db=null;unsubs.splice(0).forEach(f=>f());msgSubs.forEach(f=>f());msgSubs.clear();msgData.clear();COLS.forEach(c=>D[c]=[]);D.chats=[];D.msgs=[];D.priv={labels:{}};D.wishes=[];D.mine=[];Store.ready=false},
-  live(){
-    MODE="live";const seen=new Set();
+  live(crew){
+    if(crew)CREW=crew;MODE="live";ls.set("yg-crew-"+ME,CREW);const seen=new Set(),base=c=>`crews/${CREW}/${c==="members"?"people":c}`;
     const done=c=>{seen.add(c);if(seen.size>=COLS.length+1)Store.ready=true;schedule()};
-    const fail=e=>{console.error(e);toast(e.code==="permission-denied"?"You don't have access. Check your crew code.":"Sync paused. Check your connection.")};
+    const fail=e=>{console.error(e);toast(e.code==="permission-denied"?"You don't have access to this crew any more.":"Sync paused. Check your connection.")};
     COLS.forEach(c=>{
-      if(DELTA.includes(c)){let first=true;deltaSync(c,c,map=>{D[c]=[...map].map(([id,v])=>({id,...v}));if(first){first=false;done(c)}else schedule()},fail).then(off=>{if(MODE==="live")unsubs.push(off);else off()}).catch(e=>{fail(e);done(c)})}
-      else unsubs.push(FS.collection(c).onSnapshot(s=>{D[c]=s.docs.map(d=>({id:d.id,...d.data()}));done(c)},fail))});
+      if(DELTA.includes(c)){let first=true;deltaSync(base(c),CREW+"|"+c,map=>{D[c]=[...map].map(([id,v])=>({id,...v}));if(first){first=false;done(c)}else schedule()},fail).then(off=>{if(MODE==="live")unsubs.push(off);else off()}).catch(e=>{fail(e);done(c)})}
+      else unsubs.push(FS.collection(base(c)).onSnapshot(s=>{D[c]=s.docs.map(d=>({id:d.id,...d.data()}));if(c==="members")Store.syncMsgSubs();done(c)},fail))});
     unsubs.push(FS.collection("chats").where("members","array-contains",ME).onSnapshot({includeMetadataChanges:true},s=>{D.chats=s.docs.map(d=>({id:d.id,...d.data()}));Store.pendingChats=new Set(s.docs.filter(d=>d.metadata.hasPendingWrites).map(d=>d.id));Store.syncMsgSubs();done("chats")},fail));
     {const parts={};const mergeW=()=>{const m=new Map();Object.values(parts).flat().forEach(w=>m.set(w.id,w));D.wishes=[...m.values()];schedule()};
-      [["all",FS.collection("wishes").where("vis","==","all")],["by",FS.collection("wishes").where("by","==",ME)],["inv",FS.collection("wishes").where("invited","array-contains",ME)]]
+      [["all",FS.collection(base("wishes")).where("vis","==","all")],["by",FS.collection(base("wishes")).where("by","==",ME)],["inv",FS.collection(base("wishes")).where("invited","array-contains",ME)]]
         .forEach(([k,q])=>unsubs.push(q.onSnapshot(sn=>{parts[k]=sn.docs.map(d=>({id:d.id,...d.data()}));mergeW()},()=>{})))}
     unsubs.push(FS.collection(`mine/${ME}/items`).onSnapshot(sn=>{D.mine=sn.docs.map(d=>({id:d.id,...d.data()}));schedule()},()=>{}));
     unsubs.push(FS.doc("priv/"+ME).onSnapshot(s=>{D.priv=s.exists?{labels:{},...s.data()}:{labels:{}};schedule()},()=>{}));
+    unsubs.push(FS.doc("members/"+ME).onSnapshot(s=>{if(s.exists)PROFILE=s.data();schedule()},()=>{}));
+    unsubs.push(FS.doc("crews/"+CREW).onSnapshot(s=>{if(s.exists){CREWS[CREW]={id:CREW,...s.data()};schedule()}},()=>{}));
     render();
   },
   syncMsgSubs(){
@@ -1097,23 +1130,38 @@ const Store={
       .then(f=>{off=f;if(dead)f()}).catch(()=>{if(!dead)retry()});
   },
 
-  path(c,id,obj){return c==="msgs"?`chats/${obj.chatId}/msgs/${id}`:c==="mine"?`mine/${ME}/items/${id}`:`${c}/${id}`},
+  path(c,id,obj){return c==="msgs"?`chats/${obj.chatId}/msgs/${id}`:c==="mine"?`mine/${ME}/items/${id}`:c==="chats"?`chats/${id}`:cpath(CREW,c,id)},
+  // run a write in every crew you're in; only a failure in the crew you're looking at counts
+  async fan(fn){await Promise.all(liveCrews().map(k=>Promise.resolve().then(()=>fn(k)).catch(e=>{if(k===CREW)throw e})))},
+  // your profile lives once on your account and is copied into each crew (location stays in the crew you're in)
+  async saveProfile(patch){const g={},local={};for(const[k,v]of Object.entries(patch))(PER_CREW_KEYS.includes(k)?local:g)[k]=v;
+    if(Object.keys(g).length)await FS.doc("members/"+ME).set({...g,u:now()},{merge:true});
+    await Store.fan(k=>{const o={...g};if(o.habits)o.habits=o.habits.filter(h=>!h.crews||h.crews.includes(k));if(k===CREW)Object.assign(o,local);if(!Object.keys(o).length)return;
+      return FS.doc(cpath(k,"members",ME)).set({...o,u:now()},{merge:true})})},
   async add(c,obj){const id=obj.id||rid();delete obj.id;await Store.set(c,id,obj);return id},
-  async set(c,id,obj){if(MODE==="demo")return Demo.set(c,id,obj);try{await FS.doc(Store.path(c,id,obj)).set({...obj,u:now()})}catch(e){Store.err(e)}},
+  async set(c,id,obj){if(MODE==="demo")return Demo.set(c,id,obj);if(c==="chats"&&!obj.dm&&!obj.crew)obj={...obj,crew:CREW};
+    try{if(c==="members"&&id===ME)await Store.saveProfile(obj);else if(FAN_COLS.includes(c))await Store.fan(k=>FS.doc(cpath(k,c,id)).set({...obj,u:now()}));else await FS.doc(Store.path(c,id,obj)).set({...obj,u:now()})}catch(e){Store.err(e)}},
   async updMsg(chatId,id,patch){if(MODE==="demo")return Demo.upd("msgs",id,patch);try{await FS.doc(`chats/${chatId}/msgs/${id}`).update({...patch,u:now()})}catch(e){Store.err(e)}},
-  async upd(c,id,patch){if(MODE==="demo")return Demo.upd(c,id,patch);try{await FS.doc(Store.path(c,id,{})).update({...patch,u:now()})}catch(e){Store.err(e)}},
-  async del(c,id){if(MODE==="demo")return Demo.del(c,id);try{if(DELTA.includes(c))await FS.doc(Store.path(c,id,{})).set({_del:true,u:now()});else await FS.doc(Store.path(c,id,{})).delete()}catch(e){Store.err(e)}},
+  async upd(c,id,patch){if(MODE==="demo")return Demo.upd(c,id,patch);
+    try{if(c==="members"&&id===ME)await Store.saveProfile(patch);else if(FAN_COLS.includes(c))await Store.fan(k=>k===CREW?FS.doc(cpath(k,c,id)).update({...patch,u:now()}):FS.doc(cpath(k,c,id)).update({...patch,u:now()}).catch(()=>{}));else await FS.doc(Store.path(c,id,{})).update({...patch,u:now()})}catch(e){Store.err(e)}},
+  async del(c,id){if(MODE==="demo")return Demo.del(c,id);try{const one=k=>DELTA.includes(c)?FS.doc(k?cpath(k,c,id):Store.path(c,id,{})).set({_del:true,u:now()}):FS.doc(k?cpath(k,c,id):Store.path(c,id,{})).delete();
+    if(FAN_COLS.includes(c))await Store.fan(k=>one(k));else await one(null)}catch(e){Store.err(e)}},
   async setLabel(busyId,label){if(MODE==="demo")return;try{await FS.doc("priv/"+ME).set({labels:{[busyId]:label}},{merge:true})}catch(e){}},
   async joinChat(cid){if(MODE==="demo"){const c=D.chats.find(x=>x.id===cid);if(c&&!c.members.includes(ME))Demo.upd("chats",cid,{members:[...c.members,ME]});return true}
     try{const snap=await FS.doc("chats/"+cid).get();if(!snap.exists)return false;if(!(snap.data().members||[]).includes(ME))await FS.doc("chats/"+cid).update({members:firebase.firestore.FieldValue.arrayUnion(ME)});return true}catch(e){return false}},
-  err(e){console.error(e);if(e?.code==="permission-denied")toast("Not allowed. Are you in the crew?");else if(e?.code==="resource-exhausted")toast("Free storage limit reached. Delete some photos.");else toast("Couldn't save. Check your connection and try again.")}
+  err(e){console.error(e);if(e?.code==="permission-denied")toast("Not allowed. Are you still in this crew?");else if(e?.code==="resource-exhausted")toast("Free storage limit reached. Delete some photos.");else toast("Couldn't save. Check your connection and try again.")}
 };
 const DEL={__del:true};
-{const raw={busy:[],rsvps:[]};for(const k of ["busy","rsvps"])Object.defineProperty(D,k,{configurable:true,enumerable:true,
-  get(){return D.members&&D.members.length?raw[k].filter(x=>D.members.some(m=>m.id===x.uid)):raw[k]},set(v){raw[k]=v||[]}});}
+{let raw=[];Object.defineProperty(D,"chats",{configurable:true,enumerable:true,get(){if(MODE!=="live"||!CREW)return raw;
+  return raw.filter(c=>c.dm?(c.members||[]).every(u=>u===ME||D.members.some(m=>m.id===u)):(c.crew||LEGACY_CREW)===CREW)},set(v){raw=v||[]}});}
+{const raw={busy:[],rsvps:[]},inCrew=k=>D.members&&D.members.length?raw[k].filter(x=>D.members.some(m=>m.id===x.uid)):raw[k];
+  for(const k of ["busy","rsvps"])Object.defineProperty(D,k,{configurable:true,enumerable:true,
+  // a plan you locked in with another crew shows here as Busy; in its own crew it's already the plan
+  get(){const a=inCrew(k);return k==="busy"&&CREW?a.filter(x=>x.from!==CREW):a},set(v){raw[k]=v||[]}});
+  Object.defineProperty(D,"busyAll",{configurable:true,get(){return inCrew("busy")}});}
 const Demo={
   key:"yallaguys-demo-v1",
-  start(){MODE="demo";ME=ls.get("yg-actas","me-demo");Store.ready=true;const s=ls.get(Demo.key,null);if(s&&s.members){[...COLS,"chats","msgs","wishes","mine"].forEach(c=>D[c]=s[c]||[])}else Demo.seed();if(!D.members.some(m=>m.habits))Demo.seedShame();if(!(D.scores||[]).length)Demo.seedGames();schedule()},
+  start(){MODE="demo";ME=ls.get("yg-actas","me-demo");CREW="demo";CREWS.demo={id:"demo",name:"Demo crew",code:"DEMO123",by:ME,emoji:"🔥"};Store.ready=true;const s=ls.get(Demo.key,null);if(s&&s.members){[...COLS,"chats","msgs","wishes","mine"].forEach(c=>D[c]=s[c]||[])}else Demo.seed();if(!D.members.some(m=>m.habits))Demo.seedShame();if(!(D.scores||[]).length)Demo.seedGames();schedule()},
   seedGames(){const ids=["word","est","deep"];for(const u of ["m-sara","m-omar","m-lina"])for(let d=6;d>=0;d--)for(const g of ids){if((u.length+d+g.length)%4===0)continue;const ds=shameDay(d),pts=[100,90,75,60,45,88,72,64,96,30][(u.charCodeAt(2)+d*3+g.length)%10];
     D.scores.push({id:`${g}_${ds}_${u}`,game:g,date:ds,uid:u,pts,label:g==="word"?`${W_PTS.indexOf(pts)+1||"X"}/6`:g==="deep"?`${pts*3}/300`:"3 questions",at:now()})}Demo.save()},
   seedShame(){const P=id=>({...HABIT_PRESETS.find(h=>h.id===id),show:true,since:shameDay(12)});
@@ -1172,7 +1220,7 @@ const Demo={
 };
 
 /* ---------- derived ---------- */
-const crewOwner=()=>[...D.members].sort((a,b)=>(a.joined||0)-(b.joined||0))[0]?.id;
+const crewOwner=()=>CREWS[CREW]?.by||[...D.members].sort((a,b)=>(a.joined||0)-(b.joined||0))[0]?.id;
 const mem=id=>D.members.find(m=>m.id===id);
 const nick=id=>id===ME?"You":(mem(id)?.nick||"Someone");
 const avatar=(id,cls="",style="")=>{const m=mem(id);
@@ -1275,7 +1323,9 @@ function render(){
   const v=$("#view");
   if(MODE==="loading"){v.innerHTML=`<div class="loading"><div class="spin"></div><div>Loading your crew…</div></div>`;return}
   if(MODE==="auth"){keepInputs(v,()=>{v.innerHTML=authView()});return}
+  $("#crewBtn").hidden=!inApp;if(inApp){const c=curCrew();$("#crewBtn").innerHTML=`<span>${esc(c.emoji||"🔥")}</span><b>${esc(c.name||"Crew")}</b><i>▾</i>`}
   if(MODE==="join"){keepInputs(v,()=>{v.innerHTML=joinView()});return}
+  if(MODE==="migrate"){v.innerHTML=migrateView();return}
   const meDoc=mem(ME);
   const mb=$("#meBtn");mb.hidden=!meDoc;mb.dataset.id=ME;if(meDoc)mb.innerHTML=`${avatar(ME)}<span>${esc(meDoc.nick)}</span>`;
   renderTabs();
@@ -1324,19 +1374,41 @@ function authView(){
   </form></div>`;
 }
 function joinView(){
-  const st=UI.join||(UI.join={emoji:EMOJIS[Math.floor(Math.random()*EMOJIS.length)],color:MEMBER_COLORS[Math.floor(Math.random()*MEMBER_COLORS.length)]});
-  return`<div class="auth"><div class="auth-hero"><div class="auth-logo">Yalla<span>Guys</span></div><p>Almost in. Set up your profile and enter the crew code you got from whoever invited you.</p></div>
+  const st=UI.join||(UI.join={emoji:EMOJIS[Math.floor(Math.random()*EMOJIS.length)],color:MEMBER_COLORS[Math.floor(Math.random()*MEMBER_COLORS.length)],tab:"join",cemo:"🔥"});const newbie=!PROFILE;
+  return`<div class="auth"><div class="auth-hero"><div class="auth-logo">Yalla<span>Guys</span></div><p>${newbie?"Set up your profile, then start a crew for your friends or join one with its code.":"Start a new crew or join one with its code."}</p></div>
   <div class="form">
-    <div style="display:grid;place-items:center"><span class="av" style="width:84px;height:84px;font-size:42px;background:${st.color}">${st.emoji}</span></div>
-    <label class="f">Name the guys will see<input class="inp" id="jnNick" maxlength="24" placeholder="e.g. Jay" autocomplete="nickname"></label>
+    ${UI.crewMsg?`<div class="card" style="border-color:var(--sun)">${esc(UI.crewMsg)}</div>`:""}
+    ${newbie?`<div style="display:grid;place-items:center"><span class="av" style="width:84px;height:84px;font-size:42px;background:${st.color}">${st.emoji}</span></div>
+    <label class="f">Name your friends will see<input class="inp" id="jnNick" maxlength="24" placeholder="e.g. Jay" autocomplete="nickname"></label>
     <div class="f">Avatar<div class="emo-pick">${EMOJIS.map(e=>`<button data-act="jnEmoji" data-v="${e}" aria-pressed="${st.emoji===e}">${e}</button>`).join("")}</div></div>
-    <div class="f">Colour<div class="row">${MEMBER_COLORS.map(c=>`<button data-act="jnColor" data-v="${c}" aria-label="Colour" style="width:40px;height:40px;border-radius:50%;border:${st.color===c?"3px solid var(--fg)":"2px solid var(--line)"};background:${c}"></button>`).join("")}</div></div>
-    <label class="f">Crew code<input class="inp" id="jnCode" autocapitalize="off" autocomplete="off" placeholder="Ask the group"></label>
-    <button class="btn pri block" data-act="jnSave" style="min-height:52px">Join the crew</button>
+    <div class="f">Colour<div class="row">${MEMBER_COLORS.map(c=>`<button data-act="jnColor" data-v="${c}" aria-label="Colour" style="width:40px;height:40px;border-radius:50%;border:${st.color===c?"3px solid var(--fg)":"2px solid var(--line)"};background:${c}"></button>`).join("")}</div></div>`:""}
+    <div class="seg"><button data-act="jnTab" data-k="join" aria-pressed="${st.tab==="join"}">🔑 Join a crew</button><button data-act="jnTab" data-k="create" aria-pressed="${st.tab==="create"}">✨ Create a crew</button></div>
+    ${st.tab==="join"?`<label class="f">Crew code<input class="inp" id="jnCode" autocapitalize="off" autocomplete="off" placeholder="Ask whoever made the crew"></label>
+    <button class="btn pri block" data-act="crewJoin" style="min-height:52px">Join the crew</button>`
+    :`<label class="f">Crew name<input class="inp" id="crName" maxlength="30" placeholder="e.g. Uni girls, Padel boys"></label>
+    <div class="f">Crew icon<div class="emo-pick">${CHAT_EMOJIS.map(e=>`<button data-act="jnCemo" data-v="${e}" aria-pressed="${st.cemo===e}">${e}</button>`).join("")}</div></div>
+    <label class="f">Make up a crew code<input class="inp" id="crCode" maxlength="24" autocapitalize="off" autocomplete="off" placeholder="e.g. PadelBoys24"><span class="meta" style="font-weight:400">4 to 24 letters or numbers. Anyone with this code can join, so share it only with the group.</span></label>
+    <button class="btn pri block" data-act="crewCreate" style="min-height:52px">Create the crew</button>`}
     <p class="meta" role="alert" style="margin:0;color:var(--danger)">${esc(JOIN_ERR)}</p>
-    <button class="btn ghost" data-act="logout">Log out</button>
+    ${MODE==="live"||liveCrews().length?`<button class="btn ghost" data-act="crewBack">Back to my crew</button>`:`<button class="btn ghost" data-act="logout">Log out</button>`}
   </div></div>`;
 }
+function migrateView(){return`<div class="auth"><div class="auth-hero"><div class="auth-logo">Yalla<span>Guys</span></div><p>Yalla Guys now supports more than one crew. Your crew needs to move over once, and you're the one who made it.</p></div>
+  <div class="form"><div class="card">This copies the crew's plans, chats, photos, money and everything else into the new setup. Nothing is deleted. It can take a minute if there are lots of photos. Keep the app open until it finishes.</div>
+  <div class="hint" style="margin:0">Before you start, make sure you've published the new Firebase rules.</div>
+  <button class="btn pri block" data-act="migrateGo" style="min-height:52px" ${UI.migBusy?"disabled":""}>${UI.migBusy?"Moving…":"Move my crew over"}</button>
+  ${UI.migMsg?`<p class="meta" role="status" style="margin:0;text-align:center">${esc(UI.migMsg)}</p>`:""}
+  <button class="btn ghost" data-act="logout">Log out</button></div></div>`}
+async function carryLegacyWishes(){try{const sn=await FS.collection("wishes").where("by","==",ME).get();for(const d of sn.docs)await FS.doc(cpath(LEGACY_CREW,"wishes",d.id)).set({...d.data(),u:now()})}catch(e){}}
+// when you join a crew, bring your recent calendar blocks, habit check-ins and game scores with you
+async function carryMyStuff(k){if(MODE!=="live"||!CREW||k===CREW)return;const ops=[],cut=d=>{const x=new Date();x.setDate(x.getDate()-d);return ymd(x)};
+  D.busy.filter(b=>b.uid===ME&&b.date>=cut(30)).forEach(b=>ops.push(["busy",b]));
+  D.scores.filter(x=>x.uid===ME&&x.date>=cut(30)).forEach(x=>ops.push(["scores",x]));
+  const hs=PROFILE?.habits||[];D.checkins.filter(c=>c.uid===ME&&c.date>=cut(60)).forEach(c=>{const v={};for(const[h,val]of Object.entries(c.v||{})){const hh=hs.find(x=>x.id===h);if(!hh?.crews||hh.crews.includes(k))v[h]=val}if(Object.keys(v).length)ops.push(["checkins",{...c,v}])});
+  for(let i=0;i<ops.length;i+=400){const b=FS.batch();ops.slice(i,i+400).forEach(([c,x])=>{const{id,...rest}=x;b.set(FS.doc(cpath(k,c,id)),{...rest,u:now()})});await b.commit().catch(()=>{})}}
+const newProfile=()=>PROFILE?null:{nick:val("jnNick").slice(0,24),emoji:UI.join?.emoji||EMOJIS[0],color:UI.join?.color||MEMBER_COLORS[0],joined:now()};
+async function enterCrew(cid,crewData){const was=CREW;CREWS[cid]={id:cid,...crewData};PROFILE={...(PROFILE||{}),crews:[...new Set([...(PROFILE?.crews||[]),cid])]};
+  if(was&&MODE==="live")await carryMyStuff(cid);JOIN_ERR="";UI.crewMsg="";Store.switchTo(cid)}
 const authMsg=e=>({"auth/email-already-in-use":"That email already has an account. Tap Log in.","auth/invalid-email":"That email doesn't look right.","auth/weak-password":"Use at least 6 characters.","auth/wrong-password":"Wrong email or password.","auth/invalid-credential":"Wrong email or password.","auth/user-not-found":"No account with that email. Tap Create account.","auth/too-many-requests":"Too many tries. Wait a minute and try again.","auth/network-request-failed":"No connection. Check your internet."})[e?.code]||"Something went wrong. Try again.";
 document.addEventListener("submit",async ev=>{
   if(ev.target.id!=="authForm")return;ev.preventDefault();
@@ -1425,7 +1497,8 @@ function agenda(ds,onlyMe){
       items.push({s:s.start||"00:00",h:`<button class="ev" data-act="openPlan" data-id="${esc(p.id)}" style="border-style:dashed"><span class="stripe" style="background:var(--sun)"></span><span class="tm">${fRange(s.start,s.end)}</span><span style="flex:1;min-width:0"><b>Proposed: ${esc(p.title)}</b><br><span class="meta">${v} vote${v===1?"":"s"} · tap to vote</span></span></button>`})}
   }
   for(const b of D.busy.filter(b=>b.date===ds&&(!onlyMe||b.uid===ME))){const mine=b.uid===ME,lab=mine?myLabel(b):"";
-    items.push({s:b.start||"00:00",h:`<div class="ev busy"><span class="stripe"></span><span class="tm">${fRange(b.start,b.end)}</span><span style="flex:1;min-width:0">${avatar(b.uid,"xs")} <b>${esc(nick(b.uid))}</b> ${mine?`· ${esc(lab||"Busy")}${lab?'<span class="meta"> (others see "Busy")</span>':""}`:"· Busy"}</span>${mine?`${D.mine.some(m=>m.busyId===b.id)?`<span class="meta">📎${D.mine.filter(m=>m.busyId===b.id).length}</span>`:""}<button class="btn sm" data-act="openBusy" data-id="${esc(b.id)}">Open</button>`:""}</div>`})}
+    const hit=mine?D.plans.find(p=>p.final&&goingWith(p,ME)&&covers(p.final,ds)&&(nDays(p.final)>1||overlap(span(b.start,b.end),span(p.final.start,p.final.end)))):null;
+    items.push({s:b.start||"00:00",h:`<div class="ev busy"><span class="stripe"></span><span class="tm">${fRange(b.start,b.end)}</span><span style="flex:1;min-width:0">${avatar(b.uid,"xs")} <b>${esc(nick(b.uid))}</b> ${mine?`· ${esc(lab||"Busy")}${lab?'<span class="meta"> (others see "Busy")</span>':""}`:"· Busy"}${hit?`<br><span class="pill warn">⚠️ Clashes with ${esc(hit.title)}</span>`:""}</span>${mine?`${D.mine.some(m=>m.busyId===b.id)?`<span class="meta">📎${D.mine.filter(m=>m.busyId===b.id).length}</span>`:""}<button class="btn sm" data-act="openBusy" data-id="${esc(b.id)}">Open</button>`:""}</div>`})}
   for(const m of bdaysOn(ds).filter(m=>!onlyMe||m.id===ME))items.push({s:"00:00",h:`<div class="ev"><span class="stripe" style="background:#FF7AB8"></span><span class="tm">All day</span><span style="flex:1;min-width:0">${avatar(m.id,"xs")} <b>🎂 ${esc(m.id===ME?"Your":m.nick+"'s")} birthday</b></span>${m.id===ME?"":`<button class="btn sm" data-act="dm" data-id="${esc(m.id)}">Wish 🎉</button>`}</div>`});
   items.sort((a,b)=>a.s.localeCompare(b.s));
   return items.length?`<div class="list" style="gap:8px">${items.map(i=>i.h).join("")}</div>`:`<div class="empty">Nothing on this day. Tap <b>Block my time</b> to mark yourself busy, so the guys see the clash before voting.</div>`;
@@ -2281,7 +2354,10 @@ function myAttachHtml(busyId,pending){
     <div class="att-row"><button class="btn sm" data-act="bzAttPhoto" data-id="${esc(busyId||"")}">📷 Photo</button><button class="btn sm" data-act="ticketAdd" data-scope="mine" data-id="${esc(busyId||"")}">🎟️ Ticket</button><button class="btn sm" data-act="bzAttLink" data-id="${esc(busyId||"")}">🔗 Link / reel</button></div>`;
 }
 SHEETS.busyView={live:true,
-  render(s){const b=D.busy.find(x=>x.id===s.args.id);if(!b)return{title:"Removed",body:""};const items=D.mine.filter(m=>m.busyId===b.id),reels=items.filter(m=>m.kind==="link"&&embedUrl(m.url));
+  render(s){const b=D.busy.find(x=>x.id===s.args.id);if(!b)return{title:"Removed",body:""};
+    if(b.auto)return{title:esc(myLabel(b)||"Plan in another crew"),body:`<div class="form"><div class="when"><div class="cal-ic"><div class="m">${pd(b.date).toLocaleDateString("en-GB",{month:"short"})}</div><div class="dd">${pd(b.date).getDate()}</div></div><div><div class="d">${fDate(b.date,{weekday:"long"})}</div><div>${fRange(b.start,b.end)} · this crew sees “Busy”</div></div></div>
+      <div class="card">📌 You're going to a plan in <b>${esc(CREWS[b.from]?.name||"another crew")}</b> at this time. This crew only sees that you're busy, not what the plan is. It updates by itself if the plan changes or you drop out.</div>
+      ${CREWS[b.from]?`<button class="btn" data-act="crewGo" data-k="${esc(b.from)}">Go to ${esc(CREWS[b.from].name)}</button>`:""}</div>`};const items=D.mine.filter(m=>m.busyId===b.id),reels=items.filter(m=>m.kind==="link"&&embedUrl(m.url));
     return{title:esc(myLabel(b)||"Busy"),body:`<div class="form">
       <div class="when"><div class="cal-ic"><div class="m">${pd(b.date).toLocaleDateString("en-GB",{month:"short"})}</div><div class="dd">${pd(b.date).getDate()}</div></div><div><div class="d">${fDate(b.date,{weekday:"long"})}</div><div>${fRange(b.start,b.end)} · friends see “Busy”</div></div></div>
       ${reels.length?reelsHtml(reels):""}
@@ -2717,12 +2793,12 @@ SHEETS.shamePerson={live:true,
       ${me&&habitsOf(ME).some(h=>h.id==="food")?`<div class="hint">Tap a day above on the main Shame page (Today / Yesterday) to edit.</div>`:""}</div>`}}
 };
 SHEETS.habitSetup={
-  init(){const cur=habitsOf(ME);const list=HABIT_PRESETS.map(p=>{const c=cur.find(h=>h.id===p.id);return c?{...p,...c,on:true}:{...p,show:true,on:false}});
+  init(){const cur=(MODE==="live"&&PROFILE?.habits?PROFILE.habits.filter(h=>h.id!=="steps"):null)||habitsOf(ME);const list=HABIT_PRESETS.map(p=>{const c=cur.find(h=>h.id===p.id);return c?{...p,...c,on:true}:{...p,show:true,on:false}});
     cur.filter(h=>!HABIT_PRESETS.some(p=>p.id===h.id)).forEach(h=>list.push({...h,on:true,custom:true}));return{list,nt:"check"}},
   render(s){const st=s.state;
     return{title:"My habits",body:`<div class="form"><p class="meta" style="margin:0">Pick what you track. 👁 = the crew sees it and you get shamed for missing it. Hidden ones are just for you (no shame, no pokes).</p>
       <div class="list" style="gap:8px">${st.list.map((h,i)=>`<div class="hset ${h.on?"on":""}"><button class="hset-main" data-act="hsTog" data-i="${i}"><span style="font-size:24px">${esc(h.emoji)}</span><span class="grow" style="text-align:left"><b>${esc(h.name)}</b><span class="meta" style="display:block">${h.type==="count"?`Goal ${(+h.goal).toLocaleString()} ${esc(h.unit||"")}`:h.type==="log"?"Write what you had / did":"Done or not"}</span></span><span class="hbox">${h.on?"✓":""}</span></button>
-        ${h.on?`<div class="row" style="flex-wrap:nowrap;gap:8px;margin-top:8px">${h.type==="count"?`<label class="meta" style="display:flex;align-items:center;gap:6px;flex:1">Goal<input class="inp" type="number" inputmode="numeric" data-hgoal="${i}" value="${esc(h.goal)}" style="width:100px"></label>`:`<span style="flex:1"></span>`}<button class="btn sm" data-act="hsShow" data-i="${i}">${h.show!==false?"👁 Shown":"🙈 Hidden"}</button>${h.custom?`<button class="btn sm danger" data-act="hsDel" data-i="${i}" data-confirm="Remove?">✕</button>`:""}</div>`:""}</div>`).join("")}</div>
+        ${h.on?`<div class="row" style="flex-wrap:nowrap;gap:8px;margin-top:8px">${h.type==="count"?`<label class="meta" style="display:flex;align-items:center;gap:6px;flex:1">Goal<input class="inp" type="number" inputmode="numeric" data-hgoal="${i}" value="${esc(h.goal)}" style="width:100px"></label>`:`<span style="flex:1"></span>`}<button class="btn sm" data-act="hsShow" data-i="${i}">${h.show!==false?"👁 Shown":"🙈 Hidden"}</button>${liveCrews().length>1?`<span class="hcrews">${liveCrews().map(k=>`<button class="chip ${(h.crews||liveCrews()).includes(k)?"on":""}" data-act="hsCrew" data-i="${i}" data-k="${esc(k)}" aria-pressed="${(h.crews||liveCrews()).includes(k)}">${esc(CREWS[k].emoji||"🔥")} ${esc(CREWS[k].name)}</button>`).join("")}</span>`:""}${h.custom?`<button class="btn sm danger" data-act="hsDel" data-i="${i}" data-confirm="Remove?">✕</button>`:""}</div>`:""}</div>`).join("")}</div>
       <div class="sec" style="margin:6px 0 0"><h2 style="font-size:15px">Add your own</h2>
         <div class="row" style="flex-wrap:nowrap"><input class="inp" id="hnE" placeholder="🎯" maxlength="8" style="width:64px;text-align:center;font-size:20px"><input class="inp" id="hnN" placeholder="e.g. Creatine, Stretch, Duolingo" maxlength="30" style="flex:1;min-width:0"></div>
         <div class="seg" style="margin-top:8px">${[["check","Done / not"],["count","Number + goal"],["log","Write a log"]].map(([k,l])=>`<button data-act="hsType" data-k="${k}" aria-pressed="${st.nt===k}">${l}</button>`).join("")}</div>
@@ -2732,7 +2808,8 @@ SHEETS.habitSetup={
 };
 async function saveCheckin(ds,hid,val){const id=`${ME}_${ds}`,c=ciOf(ME,ds),del=val===null||val===false||val===0||(Array.isArray(val)&&!val.length);try{haptic()}catch{}
   if(MODE==="demo"){if(c)return Demo.upd("checkins",id,{["v."+hid]:del?DEL:val});return Demo.set("checkins",id,{uid:ME,date:ds,v:del?{}:{[hid]:val},at:now()})}
-  try{await FS.doc("checkins/"+id).set({uid:ME,date:ds,at:c?.at||now(),u:now(),v:{[hid]:del?firebase.firestore.FieldValue.delete():val}},{merge:true})}catch(e){Store.err(e)}}
+  const h=(PROFILE?.habits||[]).find(x=>x.id===hid),ks=liveCrews().filter(k=>k===CREW||!h?.crews||h.crews.includes(k));
+  try{await Promise.all(ks.map(k=>FS.doc(cpath(k,"checkins",id)).set({uid:ME,date:ds,at:c?.at||now(),u:now(),v:{[hid]:del?firebase.firestore.FieldValue.delete():val}},{merge:true}).catch(e=>{if(k===CREW)throw e})))}catch(e){Store.err(e)}}
 let POKE_SEEN=null;
 function checkPokes(){if(!D.pokes)return;if(POKE_SEEN===null){POKE_SEEN=new Set(D.pokes.map(p=>p.id));return}
   for(const p of D.pokes){if(POKE_SEEN.has(p.id))continue;POKE_SEEN.add(p.id);if(p.to!==ME||p.date!==TODAY()||!mem(p.from))continue;
@@ -2827,7 +2904,8 @@ const BADGES=[
  {id:"couch",cat:"Hall of shame",e:"🛋️",t:"Couch potato",u:"gym days skipped",d:"The gym misses you",c:"#8C6D4F",bad:1,tiers:[3,10,30],f:u=>missedHabitDays(u,"gym")},
  {id:"junk",cat:"Hall of shame",e:"🍟",t:"Junk food royalty",u:"junk food slip-ups",d:"The fries won",c:"#F59F00",bad:1,tiers:[3,10,30],f:u=>missedHabitDays(u,"nojunk")},
 ];
-function badgeState(b,uid){let n=0;try{n=b.f(uid)||0}catch{}const lvl=b.tiers.filter(t=>n>=t).length,next=b.tiers[lvl];return{n,lvl,next,max:lvl>=b.tiers.length}}
+function badgeState(b,uid){let n=0;try{n=b.f(uid)||0}catch{}let lvl=b.tiers.filter(t=>n>=t).length;
+  if(!b.special&&!b.bad){const kept=Math.min(b.tiers.length,(mem(uid)?.bmax||{})[b.id]||0);if(kept>lvl)lvl=kept}const next=b.tiers[lvl];return{n,lvl,next,max:lvl>=b.tiers.length}}
 function badgePatch(b,st,big){const t=st.lvl?TIER[b.tiers.length===1?2:st.lvl-1]:null;
   return`<span class="patch ${st.lvl?"":"locked"} ${big?"big":""} ${b.special&&st.lvl?"holo":""} ${b.bad?"bad":""}" style="--bc:${b.c};--tc:${t?t.c:"var(--line)"}"><span class="pe">${b.e}</span></span>`}
 function badgesHtml(uid){const all=BADGES.map(b=>({b,st:badgeState(b,uid)})).filter(x=>!x.b.special||x.st.lvl),got=all.filter(x=>x.st.lvl).sort((a,c)=>(c.b.special?9:c.st.lvl)-(a.b.special?9:a.st.lvl)),left=all.filter(x=>!x.st.lvl).sort((a,c)=>c.st.n/c.b.tiers[0]-a.st.n/a.b.tiers[0]);
@@ -2842,6 +2920,7 @@ const ACHQ=[];let achBusy=false,achT=null;
 function checkBadges(){if(!(MODE==="live"||MODE==="demo")||!Store.ready||!mem(ME))return;clearTimeout(achT);achT=setTimeout(()=>{
   const key="yg-badges-"+ME,seen=ls.get(key,null),now_={};
   for(const b of BADGES){const st=badgeState(b,ME);now_[b.id]=st.lvl}
+  if(MODE==="live"){const bm={...(mem(ME)?.bmax||{})};let ch=false;for(const b of BADGES){if(b.special||b.bad)continue;const l=now_[b.id]||0;if(l>(bm[b.id]||0)){bm[b.id]=l;ch=true}}if(ch)Store.upd("members",ME,{bmax:bm})}
   if(!seen){ls.set(key,now_);return}  // first run on this phone: remember silently
   for(const b of BADGES){const was=seen[b.id]||0,is=now_[b.id]||0;if(is>was)ACHQ.push({b,lvl:is,up:was>0})}
   ls.set(key,{...seen,...now_});if(ACHQ.length)nextAch()},1200)}
@@ -3400,6 +3479,27 @@ SHEETS.shelfItem={live:true,
         <div class="shpick" role="radiogroup" aria-label="Your rating">${[1,2,3,4,5].map(i=>`<button data-act="shStar" data-v="${i}" role="radio" aria-checked="${st.rating===i}" aria-label="${i} star${i>1?"s":""}" class="${st.rating>=i?"on":""}">★</button>`).join("")}</div>
         <textarea class="inp" id="shRev-${esc(x.id)}" maxlength="500" rows="3" placeholder="What did you think? (optional)">${esc(mine?.text||"")}</textarea>
         <button class="btn pri" data-act="shRevSave" data-id="${esc(x.id)}">${mine?"Update review":"Post review"}</button></div></div>`}}};
+/* crews: switch, invite, create, join, manage */
+SHEETS.crews={live:true,
+  render(){const c=curCrew(),admin=c.by===ME,mine=liveCrews();
+    return{title:"Your crews",body:`<div class="crewhero"><span class="crewic">${esc(c.emoji||"🔥")}</span><div style="min-width:0"><b>${esc(c.name)}</b><span class="meta">${D.members.length} ${D.members.length===1?"person":"people"}${admin?" · you made this crew":""}</span></div></div>
+      <div class="card codecard"><span class="meta">Crew code</span><b class="num">${esc(c.code||"")}</b><div class="row" style="gap:8px;justify-content:center"><button class="btn sm" data-act="crewCopy">📋 Copy</button><button class="btn sm pri" data-act="crewShare">📤 Invite friends</button></div><span class="meta" style="font-weight:400">Anyone with this code can join. Share it only with the group.</span></div>
+      ${mine.length>1?`<div class="sec"><h2>Switch crew</h2><div class="list" style="gap:8px">${mine.map(k=>`<button class="crewrow ${k===CREW?"on":""}" data-act="crewGo" data-k="${esc(k)}"><span class="crewic sm">${esc(CREWS[k].emoji||"🔥")}</span><b>${esc(CREWS[k].name)}</b>${k===CREW?`<span class="pill set">Here now</span>`:`<span class="meta">›</span>`}</button>`).join("")}</div></div>`:""}
+      <div class="sec"><h2>Another friend group?</h2><div class="row" style="gap:8px"><button class="btn" data-act="crewNew" data-k="create">✨ Create a crew</button><button class="btn" data-act="crewNew" data-k="join">🔑 Join a crew</button></div>
+        <div class="hint" style="margin:6px 0 0">Your profile, badges, games, habits and personal calendar come with you to every crew. Plans, chats, moments, money and Stuff stay in their own crew.</div></div>
+      ${admin&&MODE==="live"?`<div class="sec"><h2>Crew settings</h2><div class="form">
+        <div class="emo-pick">${CHAT_EMOJIS.map(e=>`<button data-act="crewEmoji" data-v="${e}" aria-pressed="${c.emoji===e}">${e}</button>`).join("")}</div>
+        <label class="f">Crew name<span class="row" style="gap:8px"><input class="inp" id="crRen" maxlength="30" value="${esc(c.name||"")}" style="flex:1;min-width:0"><button class="btn" data-act="crewRename">Save</button></span></label>
+        <label class="f">New crew code<span class="row" style="gap:8px"><input class="inp" id="crRecode" maxlength="24" autocapitalize="off" autocomplete="off" placeholder="${esc(c.code||"")}" style="flex:1;min-width:0"><button class="btn" data-act="crewRecode">Change</button></span><span class="meta" style="font-weight:400">The old code stops working. People already in the crew stay in.</span></label>
+        <div class="hint" style="margin:0">To remove someone, open their profile and tap Remove from crew.</div></div></div>`:""}
+      ${!admin&&MODE==="live"?`<button class="btn danger block" data-act="crewLeave" data-confirm="Tap again to leave ${esc(c.name)}" style="margin-top:14px">Leave this crew</button>`:""}`}}};
+SHEETS.crewNew={render(s){return{title:s.args.k==="create"?"Create a crew":"Join a crew",body:`<div class="form">${s.args.k==="create"?`
+    <label class="f">Crew name<input class="inp" id="crName" maxlength="30" placeholder="e.g. Uni girls, Padel boys"></label>
+    <div class="f">Crew icon<div class="emo-pick">${CHAT_EMOJIS.map(e=>`<button data-act="cnEmoji" data-v="${e}" aria-pressed="${(s.state.cemo||"🔥")===e}">${e}</button>`).join("")}</div></div>
+    <label class="f">Make up a crew code<input class="inp" id="crCode" maxlength="24" autocapitalize="off" autocomplete="off" placeholder="e.g. PadelBoys24"><span class="meta" style="font-weight:400">4 to 24 letters or numbers. Anyone with this code can join.</span></label>`
+    :`<label class="f">Crew code<input class="inp" id="jnCode" autocapitalize="off" autocomplete="off" placeholder="Ask whoever made the crew"></label>`}
+    <p class="meta" role="alert" style="margin:0;color:var(--danger)">${esc(JOIN_ERR)}</p></div>`,
+    foot:`<button class="btn pri block" data-act="${s.args.k==="create"?"crewCreate":"crewJoin"}">${s.args.k==="create"?"Create the crew":"Join the crew"}</button>`}}};
 /* busy */
 SHEETS.busy={
   render(s){return{title:"Block my time",body:`<div class="form">
@@ -3500,7 +3600,7 @@ async function storeMedia(blob,onProg){
   if(blob.size<550000)return{src:await toDataURL(blob)};
   const buf=await blob.arrayBuffer(),n=Math.ceil(buf.byteLength/CHUNK),id=rid();
   for(let i=0;i<n;i++){const d=b64(buf.slice(i*CHUNK,(i+1)*CHUNK));
-    if(MODE==="demo")DEMO_CHUNKS.set(id+"_"+i,d);else await FS.doc(`chunks/${id}_${i}`).set({d,by:ME,at:now()});onProg?.((i+1)/n)}
+    if(MODE==="demo")DEMO_CHUNKS.set(id+"_"+i,d);else await FS.doc(cpath(CREW,"chunks",`${id}_${i}`)).set({d,by:ME,at:now()});onProg?.((i+1)/n)}
   BLOBS.set(id,URL.createObjectURL(blob));
   return{blob:{id,n,type,size:blob.size}};
 }
@@ -3508,7 +3608,7 @@ async function mediaURL(it){
   if(it.src)return it.src;const b=it.blob;if(!b)return"";if(BLOBS.has(b.id))return BLOBS.get(b.id);
   const parts=await Promise.all(Array.from({length:b.n},async(_,i)=>{const k=b.id+"_"+i;
     if(MODE==="demo"){const d=DEMO_CHUNKS.get(k);if(!d)throw new Error("gone");return unb64(d)}
-    const sn=await FS.doc("chunks/"+k).get();if(!sn.exists)throw new Error("missing");return unb64(sn.data().d)}));
+    const sn=await FS.doc(cpath(CREW,"chunks",k)).get();if(!sn.exists)throw new Error("missing");return unb64(sn.data().d)}));
   const u=URL.createObjectURL(new Blob(parts,{type:b.type}));BLOBS.set(b.id,u);return u;
 }
 function frameOf(v,max){const k=Math.min(1,max/Math.max(v.videoWidth,v.videoHeight)),c=document.createElement("canvas");c.width=Math.max(1,Math.round(v.videoWidth*k));c.height=Math.max(1,Math.round(v.videoHeight*k));c.getContext("2d").drawImage(v,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.6)}
@@ -3703,8 +3803,64 @@ const ACT={
   async forgot(){const em=val("auEmail");const err=$("#auErr");if(!em)return err.textContent="Type your email above first.";try{await AUTH.sendPasswordResetEmail(em);toast("Reset link sent. Check your email.")}catch(e){err.textContent=authMsg(e)}},
   async logout(){while(stack.length)closeSheet();IDB._db=null;if(AUTH)await AUTH.signOut();else toast("Demo mode has no account.")},
   jnEmoji(d){UI.join.emoji=d.v;render()},
+  jnTab(d){UI.join.tab=d.k;JOIN_ERR="";render()},
+  jnCemo(d){UI.join.cemo=d.v;render()},
+  cnEmoji(d){const s=topS();s.state.cemo=d.v;paintSheet(s)},
+  crews(){openSheet("crews")},
+  crewGo(d){Store.switchTo(d.k)},
+  crewNew(d){if(MODE==="demo")return toast("Demo mode has one crew. Connect Firebase to make more.");JOIN_ERR="";openSheet("crewNew",{k:d.k})},
+  crewBack(){JOIN_ERR="";const k=liveCrews()[0];if(k)Store.live(k)},
+  crewCopy(){const c=curCrew();try{navigator.clipboard.writeText(c.code);toast("Crew code copied")}catch{toast("Long-press the code to copy it")}},
+  async crewShare(){const c=curCrew(),t=`Join my crew "${c.name}" on Yalla Guys 🔥\n${location.origin+location.pathname}\nCrew code: ${c.code}`;
+    if(navigator.share){try{await navigator.share({text:t});return}catch{}}try{await navigator.clipboard.writeText(t);toast("Invite copied. Paste it in your group chat")}catch{toast("Crew code: "+c.code)}},
+  async crewCreate(){const sh=topS(),name=val("crName"),code=val("crCode"),err=t=>{JOIN_ERR=t;sh?paintSheet(sh):render()};
+    if(MODE==="demo")return toast("Demo mode has one crew. Connect Firebase to make more.");
+    if(!PROFILE&&!val("jnNick"))return err("Add your name first.");if(!name)return err("Give the crew a name.");
+    if(!/^[A-Za-z0-9_-]{4,24}$/.test(code))return err("Crew codes are 4 to 24 letters or numbers, no spaces.");
+    if(UI.crewBusy)return;UI.crewBusy=true;
+    try{const key=crewKey(code);if((await FS.doc("codes/"+key).get()).exists){UI.crewBusy=false;return err("That code is taken. Try another one.")}
+      const cid="c-"+rid(),emoji=(sh?sh.state.cemo:UI.join?.cemo)||"🔥",np=newProfile(),prof=np||PROFILE,FV=firebase.firestore.FieldValue,crew={name:name.slice(0,30),code,by:ME,at:now(),emoji};
+      const b=FS.batch();b.set(FS.doc("crews/"+cid),crew);b.set(FS.doc("codes/"+key),{crew:cid,by:ME,at:now()});
+      b.set(FS.doc(cpath(cid,"members",ME)),{...publicProfile(prof,cid),code:key,joined:now(),u:now()});
+      b.set(FS.doc("members/"+ME),{...(np||{}),crews:FV.arrayUnion(cid),u:now()},{merge:true});await b.commit();
+      if(np)PROFILE={...np};UI.crewBusy=false;await enterCrew(cid,crew);toast(`${emoji} ${crew.name} is ready. Invite your friends!`)}
+    catch(e){console.error(e);UI.crewBusy=false;err(e?.code==="permission-denied"?"The Firebase rules need updating before crews can be made.":"Couldn't create the crew. Check your connection.")}},
+  async crewJoin(){const sh=topS(),code=val("jnCode"),err=t=>{JOIN_ERR=t;sh?paintSheet(sh):render()};
+    if(MODE==="demo")return toast("Demo mode has one crew. Connect Firebase to make more.");
+    if(!PROFILE&&!val("jnNick"))return err("Add your name first.");if(!code)return err("Enter the crew code.");if(UI.crewBusy)return;UI.crewBusy=true;
+    try{const key=crewKey(code),sn=await FS.doc("codes/"+key).get();if(!sn.exists){UI.crewBusy=false;return err("No crew has that code. Check it with the group.")}
+      const cid=sn.data().crew;if(liveCrews().includes(cid)){UI.crewBusy=false;return Store.switchTo(cid)}
+      const np=newProfile(),prof=np||PROFILE,FV=firebase.firestore.FieldValue,b=FS.batch();
+      b.set(FS.doc(cpath(cid,"members",ME)),{...publicProfile(prof,cid),code:key,joined:now(),u:now()});
+      b.set(FS.doc("members/"+ME),{...(np||{}),crews:FV.arrayUnion(cid),u:now()},{merge:true});await b.commit();
+      if(np)PROFILE={...np};const cd=(await FS.doc("crews/"+cid).get()).data()||{name:"Crew"};UI.crewBusy=false;await enterCrew(cid,cd);toast(`Welcome to ${cd.name}!`)}
+    catch(e){console.error(e);UI.crewBusy=false;err(e?.code==="permission-denied"?"That crew code didn't work. Check it with the group.":"Couldn't join. Check your connection.")}},
+  async crewEmoji(d){await FS.doc("crews/"+CREW).update({emoji:d.v}).catch(Store.err);try{haptic()}catch{}},
+  async crewRename(){const n=val("crRen");if(!n)return toast("Give the crew a name.");document.activeElement?.blur?.();await FS.doc("crews/"+CREW).update({name:n.slice(0,30)}).then(()=>toast("Crew renamed")).catch(Store.err)},
+  async crewRecode(){const c=curCrew(),code=val("crRecode");if(!/^[A-Za-z0-9_-]{4,24}$/.test(code))return toast("Crew codes are 4 to 24 letters or numbers, no spaces.");
+    const key=crewKey(code),old=crewKey(c.code);if(key===old)return toast("That's already the code.");
+    try{if((await FS.doc("codes/"+key).get()).exists)return toast("That code is taken. Try another one.");const b=FS.batch();b.set(FS.doc("codes/"+key),{crew:CREW,by:ME,at:now()});b.delete(FS.doc("codes/"+old));b.update(FS.doc("crews/"+CREW),{code});await b.commit();
+      const el=$("#crRecode");if(el)el.value="";toast("New crew code: "+code)}catch(e){Store.err(e)}},
+  async crewLeave(){const k=CREW,name=curCrew().name;try{await FS.doc(cpath(k,"members",ME)).delete();await FS.doc("members/"+ME).set({crews:firebase.firestore.FieldValue.arrayRemove(k)},{merge:true})}catch(e){return Store.err(e)}
+    PROFILE.crews=(PROFILE.crews||[]).filter(x=>x!==k);delete CREWS[k];const next=liveCrews()[0];while(stack.length)closeSheet();Store.stop();
+    if(next)Store.live(next);else{MODE="join";render()}toast(`You left ${name}`)},
+  async migrateGo(){if(UI.migBusy)return;UI.migBusy=true;const say=t=>{UI.migMsg=t;render()};
+    try{const key=crewKey(LEGACY_CODE);say("Setting up the crew…");
+      const b=FS.batch();b.set(FS.doc("crews/"+LEGACY_CREW),{name:"Yalla Guys",code:LEGACY_CODE,by:ME,at:now(),emoji:"🔥"},{merge:true});b.set(FS.doc("codes/"+key),{crew:LEGACY_CREW,by:ME,at:now()});
+      b.set(FS.doc(cpath(LEGACY_CREW,"members",ME)),{...publicProfile(PROFILE,LEGACY_CREW),code:key,u:now()},{merge:true});await b.commit();
+      say("Moving everyone's profiles…");const ms=await FS.collection("members").get();
+      for(const d of ms.docs){const v=d.data();if(!v.code)continue;const{crews,...rest}=v;await FS.doc(cpath(LEGACY_CREW,"members",d.id)).set({...rest,code:key},{merge:true})}
+      const pool=async(items,fn)=>{let i=0;await Promise.all(Array.from({length:8},async()=>{while(i<items.length)await fn(items[i++])}))};
+      for(const col of LEGACY_COLS){const sn=await FS.collection(col).get(),docs=sn.docs.filter(d=>!d.data()._del);let n=0;
+        await pool(docs,async d=>{await FS.doc(cpath(LEGACY_CREW,col,d.id)).set(d.data());n++;if(n%20===0||n===docs.length)say(`Moving ${col}… ${n}/${docs.length}`)})}
+      say("Moving the wishlist…");const ws=new Map();for(const q of [FS.collection("wishes").where("vis","==","all"),FS.collection("wishes").where("by","==",ME),FS.collection("wishes").where("invited","array-contains",ME)])(await q.get()).docs.forEach(d=>ws.set(d.id,d.data()));
+      await pool([...ws],async([id,v])=>FS.doc(cpath(LEGACY_CREW,"wishes",id)).set(v));
+      await FS.doc("members/"+ME).set({crews:[LEGACY_CREW]},{merge:true});PROFILE.crews=[LEGACY_CREW];
+      CREWS[LEGACY_CREW]=(await FS.doc("crews/"+LEGACY_CREW).get()).data();CREWS[LEGACY_CREW].id=LEGACY_CREW;UI.migBusy=false;UI.migMsg="";
+      await IDB.wipe().catch(()=>{});Store.live(LEGACY_CREW);toast("🎉 Your crew moved over. Tell everyone to update the app.")}
+    catch(e){console.error(e);UI.migBusy=false;say(e?.code==="permission-denied"?"Not allowed yet. Publish the new Firebase rules, then try again.":"Something went wrong. Check your connection and tap again. It carries on where it stopped.")}},
   jnColor(d){UI.join.color=d.v;render()},
-  async jnSave(){const n=val("jnNick"),code=val("jnCode");if(!n){JOIN_ERR="Add your name.";return render()}if(!code){JOIN_ERR="Enter the crew code.";return render()}
+  async jnSaveOld(){const n=val("jnNick"),code=val("jnCode");if(!n){JOIN_ERR="Add your name.";return render()}if(!code){JOIN_ERR="Enter the crew code.";return render()}
     try{await FS.doc("members/"+ME).set({nick:n.slice(0,24),emoji:UI.join.emoji,color:UI.join.color,joined:now(),code});JOIN_ERR="";Store.live();toast("Welcome to the crew!")}
     catch(e){JOIN_ERR=e?.code==="permission-denied"?"That crew code is wrong. Check it with the group.":"Couldn't join. Check your connection.";render()}},
   profile(){openSheet("profile")},
@@ -3935,6 +4091,8 @@ const ACT={
   async poke(d){if(d.id===ME)return;const id=`${ME}_${d.id}_${d.h}_${TODAY()}`;if(D.pokes.some(p=>p.id===id))return toast(`You already poked ${nick(d.id)} about that today 😏`);
     await Store.set("pokes",id,{from:ME,to:d.id,hid:d.h,date:TODAY(),at:now()});try{haptic()}catch{}toast(`👉 Poked ${nick(d.id)}!`)},
   hsTog(d){const s=topS();keepGoals(s);const h=s.state.list[+d.i];h.on=!h.on;paintSheet(s)},
+  hsCrew(d){const s=topS();keepGoals(s);const h=s.state.list[+d.i],all=liveCrews(),cur=h.crews||all,on=cur.includes(d.k);
+    const nx=on?cur.filter(k=>k!==d.k):[...cur,d.k];if(!nx.length)return toast("Keep it in at least one crew, or untick the habit.");h.crews=all.every(k=>nx.includes(k))?undefined:nx;paintSheet(s)},
   hsShow(d){const s=topS();keepGoals(s);const h=s.state.list[+d.i];h.show=h.show===false;paintSheet(s)},
   hsDel(d){const s=topS();keepGoals(s);s.state.list.splice(+d.i,1);paintSheet(s)},
   hsType(d){const s=topS();keepGoals(s);s.state.nt=d.k;paintSheet(s)},
@@ -3952,7 +4110,7 @@ const ACT={
     btn.disabled=false;btn.textContent="⬇ Download PDF"},
   copyUid(){try{navigator.clipboard.writeText(ME);toast("Copied your user ID")}catch{toast("Long-press the ID to copy it")}},
   async kickMember(d){if(crewOwner()!==ME)return;const uid=d.id,m=mem(uid);toast("Removing…");
-    try{await FS.doc("members/"+uid).delete()}catch(e){return toast(e?.code==="permission-denied"?"Add your user ID to the Firebase rules first (see Settings).":"Couldn't remove them. Try again.")}
+    try{await FS.doc(cpath(CREW,"members",uid)).delete()}catch(e){return toast(e?.code==="permission-denied"?"Only the person who made the crew can remove people.":"Couldn't remove them. Try again.")}
     const raw=Object.getOwnPropertyDescriptor(D,"busy");
     for(const c of D.chats.filter(c=>(c.members||[]).includes(uid)))await FS.doc("chats/"+c.id).update({members:firebase.firestore.FieldValue.arrayRemove(uid),u:now()}).catch(()=>{});
     while(stack.length)closeSheet();toast(`${m?.nick||"They"} ${m?"was":"were"} removed from the crew`)},
@@ -3962,10 +4120,11 @@ const ACT={
     try{await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,pw))}catch(e){$("#delBtn",s.el).disabled=false;return toast(authMsg(e))}
     toast("Deleting your account…");const uid=u.uid;
     try{
-      for(const r of D.rsvps.filter(x=>x.uid===uid))await FS.doc("rsvps/"+r.id).set({_del:true,u:now()}).catch(()=>{});
-      for(const b of D.busy.filter(x=>x.uid===uid))await FS.doc("busy/"+b.id).set({_del:true,u:now()}).catch(()=>{});
+      for(const r of D.rsvps.filter(x=>x.uid===uid))await FS.doc(cpath(CREW,"rsvps",r.id)).set({_del:true,u:now()}).catch(()=>{});
+      for(const b of D.busy.filter(x=>x.uid===uid))for(const k of liveCrews())await FS.doc(cpath(k,"busy",b.id)).set({_del:true,u:now()}).catch(()=>{});
       for(const m of D.mine)await FS.doc(`mine/${uid}/items/${m.id}`).delete().catch(()=>{});
-      for(const w of D.wishes.filter(x=>x.by===uid))await FS.doc("wishes/"+w.id).delete().catch(()=>{});
+      for(const w of D.wishes.filter(x=>x.by===uid))await FS.doc(cpath(CREW,"wishes",w.id)).delete().catch(()=>{});
+      for(const k of liveCrews())await FS.doc(cpath(k,"members",uid)).delete().catch(()=>{});
       await FS.doc("priv/"+uid).delete().catch(()=>{});
       await FS.doc("members/"+uid).delete();
       Store.stop();await IDB.wipe();await u.delete();
@@ -3996,7 +4155,7 @@ const ACT={
   openTicket(d){openSheet("ticketView",{col:d.col,id:d.id})},
   tkCopy(){const s=topS(),t=(D[s.args.col]||[]).find(x=>x.id===s.args.id);try{navigator.clipboard.writeText(t.code);toast("Copied")}catch{toast("Long-press the code to copy it")}},
   async tkOpenFile(){const s=topS(),t=(D[s.args.col]||[]).find(x=>x.id===s.args.id);if(!t?.file)return;toast("Opening…");try{const u=await mediaURL(t.file);const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove()}catch{toast("Couldn't open the file.")}},
-  async tkDel(){const s=topS(),t=(D[s.args.col]||[]).find(x=>x.id===s.args.id);if(!t)return closeSheet();await Store.del(s.args.col,t.id);if(t.file?.blob&&MODE!=="demo")for(let i=0;i<t.file.blob.n;i++)FS.doc(`chunks/${t.file.blob.id}_${i}`).delete().catch(()=>{});closeSheet();toast("Ticket deleted")},
+  async tkDel(){const s=topS(),t=(D[s.args.col]||[]).find(x=>x.id===s.args.id);if(!t)return closeSheet();await Store.del(s.args.col,t.id);if(t.file?.blob&&MODE!=="demo")for(let i=0;i<t.file.blob.n;i++)FS.doc(cpath(CREW,"chunks",`${t.file.blob.id}_${i}`)).delete().catch(()=>{});closeSheet();toast("Ticket deleted")},
   wishType(d){UI.wishType=d.k;render()},
   wishAdd(){openSheet("wishAdd",{type:UI.wishType||"wish"})},
   wishEdit(d){openSheet("wishAdd",{id:d.id})},
@@ -4077,7 +4236,7 @@ const ACT={
   msgCopy(){const m=D.msgs.find(x=>x.id===topS().args.id);try{navigator.clipboard.writeText(m.text);toast("Copied")}catch{toast("Couldn't copy")}closeSheet()},
   async msgDelete(){const s=topS(),m=D.msgs.find(x=>x.id===s.args.id);if(!m)return closeSheet();
     await Store.updMsg(s.args.chat,m.id,{deleted:true,text:"",kind:"",src:"",poster:"",blob:null,edited:false});
-    if(m.blob&&MODE!=="demo")for(let i=0;i<m.blob.n;i++)FS.doc(`chunks/${m.blob.id}_${i}`).delete().catch(()=>{});
+    if(m.blob&&MODE!=="demo")for(let i=0;i<m.blob.n;i++)FS.doc(cpath(CREW,"chunks",`${m.blob.id}_${i}`)).delete().catch(()=>{});
     closeSheet();toast("Message deleted")},
   recSend(){stopVoice(true)},
   async playVoice(d){const it=itemByKey(d.key);if(!it)return;
@@ -4266,11 +4425,22 @@ async function notify(title,body,tag,data){
   if(!SET.notifyOn||!("Notification" in window)||Notification.permission!=="granted")return;
   try{const reg=await navigator.serviceWorker?.getRegistration();if(reg)await reg.showNotification(title,{body,tag,icon:"icon-192.png",badge:"badge-96.png",data});else new Notification(title,{body,tag})}catch{}
 }
+/* When you're going to a locked-in plan, your other crews see you as Busy then (they never see what the plan is). */
+let ABT=null,ABSIG="";
+function syncAutoBusy(){if(MODE!=="live"||!Store.ready||!CREW||liveCrews().length<2)return;clearTimeout(ABT);ABT=setTimeout(async()=>{try{
+  const want=new Map(),cn=curCrew().name,y=shameDay(1);
+  for(const p of D.plans){if(!p.final||!goingWith(p,ME))continue;const days=dayList(p.final.date,endOf(p.final));if(days[days.length-1]<y)continue;const multi=days.length>1;
+    days.forEach((d,i)=>want.set(`auto_${CREW}_${p.id}_${i}`,{uid:ME,date:d,start:multi?"":p.final.start||"",end:multi?"":p.final.end||"",label:"",auto:true,from:CREW,tl:false,_t:`📌 ${p.title} · ${cn}`}))}
+  const have=D.busyAll.filter(b=>b.uid===ME&&b.auto&&b.from===CREW);
+  const sig=JSON.stringify([...want].map(([k,v])=>[k,v.date,v.start,v.end,v._t]))+"|"+have.map(b=>b.id+b.date+b.start+b.end).join();if(sig===ABSIG)return;ABSIG=sig;
+  for(const[id,v]of want){const h=have.find(b=>b.id===id);if(!h||h.date!==v.date||h.start!==v.start||h.end!==v.end){const{_t,...doc}=v;await Store.set("busy",id,{...doc,at:now()})}if(myLabel({id})!==v._t)Store.setLabel(id,v._t)}
+  for(const h of have)if(!want.has(h.id))await Store.del("busy",h.id)}catch(e){console.warn(e)}},2500)}
 const SEEN={msgs:null,plans:null,moments:null,notes:null,media:null};
 function checkNotify(){
   if(!Store.ready||MODE==="loading"||MODE==="auth"||MODE==="join")return;
   try{checkPokes()}catch{}
   try{checkBadges()}catch{}
+  try{syncAutoBusy()}catch{}
   for(const c of allMyChats()){const t=lastOtherAt(c.id);if(t&&Math.max((c.dv||{})[ME]||0,(c.rd||{})[ME]||0)<t)chatStamp(c.id,"dv",t)}
   const first=SEEN.msgs===null;
   if(first){SEEN.msgs=new Set(D.msgs.map(m=>m.id));SEEN.plans=new Set(visiblePlans().map(p=>p.id));SEEN.moments=new Set(D.moments.map(m=>m.id));SEEN.notes=new Set(D.notes.map(n=>n.id));SEEN.media=new Set(D.media.map(m=>m.id));return}
