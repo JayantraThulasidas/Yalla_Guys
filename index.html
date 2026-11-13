@@ -930,7 +930,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-13.05";
+const APP_VERSION="2026-11-13.07";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1114,7 +1114,7 @@ const Store={
     await Promise.all(crews.map(c=>FS.doc("crews/"+c).get().then(sn=>{if(sn.exists)CREWS[c]={id:c,...sn.data()}}).catch(()=>{})));
     const ok=crews.filter(c=>CREWS[c]);if(!ok.length){MODE="join";render();return}
     const last=ls.get("yg-crew-"+ME,null);Store.live(ok.includes(last)?last:ok[0])},
-  tipDrawer(){if(ls.get("yg-tip-drawer",0))return;ls.set("yg-tip-drawer",1);setTimeout(()=>{toast("👈 Swipe in from the left edge, or tap the logo, to see your crews");const d=$("#drawer"),p=$("#drawer .dr-panel");if(!d||DRAWER.open)return;paintDrawer();d.hidden=false;p.classList.add("peek");setTimeout(()=>{p.classList.remove("peek");if(!DRAWER.open)d.hidden=true},1400)},1800)},
+  tipDrawer(){if(ls.get("yg-tip-drawer",0))return;ls.set("yg-tip-drawer",1);setTimeout(()=>{toast("👈 Swipe back from the edge, or tap the logo, to see your crews");const d=$("#drawer"),p=$("#drawer .dr-panel");if(!d||DRAWER.open)return;paintDrawer();d.hidden=false;p.classList.add("peek");setTimeout(()=>{p.classList.remove("peek");if(!DRAWER.open)d.hidden=true},1400)},1800)},
   switchTo(c){if(c===CREW&&MODE==="live")return;while(stack.length)closeSheet();Store.stop();MODE="loading";render();Store.live(c);setTimeout(()=>toast(`${curCrew().emoji||"🔥"} ${curCrew().name}`),400)},
   stop(){IDB._db=null;unsubs.splice(0).forEach(f=>f());msgSubs.forEach(f=>f());msgSubs.clear();msgData.clear();COLS.forEach(c=>D[c]=[]);D.chats=[];D.msgs=[];D.priv={labels:{}};D.wishes=[];D.mine=[];Store.ready=false},
   live(crew){
@@ -1744,7 +1744,13 @@ const SHEETS={};
 /* Back / edge-swipe: only Plans home lets the phone leave the app; anywhere else Back steps towards home.
    A history entry is added right after a tap that leaves home (Chrome only honours entries added during a tap). */
 const atHome=()=>!stack.length&&UI.tab==="plans"&&UI.planFilter==="active";
-function armBack(){if(!atHome()&&!history.state?.yg){try{history.pushState({yg:1},"")}catch{}}}
+// On the main screen too: there the phone's Back swipe opens the crews drawer instead of closing the app.
+// Steps kept for Back: one to get back to Plans, one ("g") that opens the crews drawer, one ("g2") that closes it.
+function armBack(){const push=v=>{try{history.pushState({yg:v},"")}catch{}},st=history.state?.yg;
+  if(!(MODE==="live"||MODE==="demo")){if(!atHome()&&!st)push(1);return}
+  // "g2" lets Back close the drawer again before the phone leaves the app
+  if(!st){push("g2");push("g")}else if(st==="g2")push("g");if(!atHome()&&history.state?.yg!==1)push(1)}
+document.addEventListener("click",()=>armBack(),true);
 function openSheet(kind,args={}){
   const el=document.createElement("div");el.className="sheet"+(["photo","player","img","camera"].includes(kind)?" lightbox":"");el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");
   el.innerHTML=`<div class="sheet-h wrap"><div class="in"></div></div><div class="sheet-b wrap"><div class="in top-in"></div><div class="in main-in"></div></div><div class="sheet-f wrap" hidden><div class="in"></div></div>`;
@@ -1759,7 +1765,8 @@ function closeSheet(viaPop){
   schedule();
 }
 window.addEventListener("popstate",()=>{
-  if(atHome()){try{history.back()}catch{}return}
+  if(typeof DRAWER!=="undefined"&&DRAWER.open){setDrawer(false);return}
+  if(atHome()){if(MODE==="live"||MODE==="demo"){setDrawer(true);return}try{history.back()}catch{}return}
   if(stack.length)closeSheet(true);
   else if(UI.tab!=="plans"){UI.tab="plans";render();window.scrollTo(0,0)}
   else if(UI.planFilter!=="active"){UI.planFilter="active";render();window.scrollTo(0,0)}
