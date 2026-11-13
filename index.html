@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Yalla Guys">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=11">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=12">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%230B7A75'/%3E%3Ctext x='50' y='70' font-size='58' text-anchor='middle' font-family='Arial' font-weight='900' fill='white'%3EY%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap">
@@ -938,7 +938,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-13.23";
+const APP_VERSION="2026-11-13.24";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1364,7 +1364,7 @@ const STANDALONE=matchMedia("(display-mode: standalone)").matches||navigator.sta
 function installCard(){
   if(STANDALONE||ls.get("yg-install-hide",false))return"";
   const ios=/iPhone|iPad|iPod/i.test(navigator.userAgent);
-  return`<div class="install"><img src="apple-touch-icon.png?v=11" alt=""><div style="flex:1;min-width:0"><b>Put Yalla Guys on your home screen</b><br>${ios?"In Safari tap <b>Share</b> (square with arrow) → <b>Add to Home Screen</b>.":"In Chrome tap <b>⋮</b> → <b>Add to Home screen</b> (or <b>Install app</b>)."} It then opens full screen with no browser bars.</div><button class="x" data-act="hideInstall" aria-label="Dismiss">✕</button></div>`;
+  return`<div class="install"><img src="apple-touch-icon.png?v=12" alt=""><div style="flex:1;min-width:0"><b>Put Yalla Guys on your home screen</b><br>${ios?"In Safari tap <b>Share</b> (square with arrow) → <b>Add to Home Screen</b>.":"In Chrome tap <b>⋮</b> → <b>Add to Home screen</b> (or <b>Install app</b>)."} It then opens full screen with no browser bars.</div><button class="x" data-act="hideInstall" aria-label="Dismiss">✕</button></div>`;
 }
 function banners(){
   return installCard()+(MODE==="demo"?`<div class="banner"><b>Demo mode.</b> Changes stay on this phone and the people shown are examples. Add your Firebase settings to the file to share it with the guys (see the setup steps).</div>`:"");
@@ -4516,7 +4516,7 @@ async function checkUpdate(){try{if(location.protocol!=="https:")return;const r=
 setTimeout(checkUpdate,4000);setInterval(checkUpdate,5*6e4);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate()});
 async function notify(title,body,tag,data){
   if(!SET.notifyOn||!("Notification" in window)||Notification.permission!=="granted")return;
-  try{const reg=await navigator.serviceWorker?.getRegistration();if(reg)await reg.showNotification(title,{body,tag,icon:"icon-192.png?v=11",badge:"badge-96.png",data});else new Notification(title,{body,tag})}catch{}
+  try{const reg=await navigator.serviceWorker?.getRegistration();if(reg)await reg.showNotification(title,{body,tag,icon:"icon-192.png?v=12",badge:"badge-96.png",data});else new Notification(title,{body,tag})}catch{}
 }
 /* When you're going to a locked-in plan, your other crews see you as Busy then (they never see what the plan is). */
 let ABT=null,ABSIG="";
