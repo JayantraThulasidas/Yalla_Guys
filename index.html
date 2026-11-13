@@ -793,6 +793,12 @@ button.brand{border:0;background:none;color:var(--fg);padding:0;text-align:left;
 .dr-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 10px var(--accent)}
 .dr-acts{display:flex;flex-direction:column;gap:4px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
 .dr-act{border:0;background:none;color:var(--fg);font:inherit;font-weight:600;text-align:left;padding:11px 10px;border-radius:12px;cursor:pointer}.dr-act:active{background:var(--surface2)}
+.crewshow{position:fixed;inset:0;z-index:180;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:opacity .35s ease;pointer-events:none}
+.crewshow.out{opacity:0}
+.cs-in{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 24px}
+.cs-ic{width:96px;height:96px;border-radius:28px;display:grid;place-items:center;font-size:52px;background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent),0 0 40px color-mix(in srgb,var(--accent) 55%,transparent)}
+.cs-name{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,9vw,44px);letter-spacing:-.02em;line-height:1.1;max-width:90vw;overflow-wrap:anywhere;text-shadow:0 0 30px color-mix(in srgb,var(--accent) 45%,transparent)}
+.cs-sub{color:var(--muted);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .dr-foot{margin:4px 6px 0;padding-top:10px;font-size:12.5px}
 .crew-btn{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px 3px 7px;font:inherit;font-size:12.5px;cursor:pointer}
 .crew-btn b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crew-btn i{font-style:normal;color:var(--muted);font-size:10px}
@@ -931,7 +937,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-13.09";
+const APP_VERSION="2026-11-13.11";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1116,14 +1122,15 @@ const Store={
     const ok=crews.filter(c=>CREWS[c]);if(!ok.length){MODE="join";render();return}
     const last=ls.get("yg-crew-"+ME,null);Store.live(ok.includes(last)?last:ok[0])},
   tipDrawer(){if(ls.get("yg-tip-drawer",0))return;ls.set("yg-tip-drawer",1);setTimeout(()=>{toast("👆 Tap the Yalla Guys logo to see your crews");const d=$("#drawer"),p=$("#drawer .dr-panel");if(!d||DRAWER.open)return;return},1800)},
-  switchTo(c){if(c===CREW&&MODE==="live")return;while(stack.length)closeSheet();Store.stop();MODE="loading";render();Store.live(c);setTimeout(()=>toast(`${curCrew().emoji||"🔥"} ${curCrew().name}`),400)},
-  stop(){IDB._db=null;unsubs.splice(0).forEach(f=>f());msgSubs.forEach(f=>f());msgSubs.clear();msgData.clear();COLS.forEach(c=>D[c]=[]);D.chats=[];D.msgs=[];D.priv={labels:{}};D.wishes=[];D.mine=[];Store.ready=false},
-  live(crew){
+  switchTo(c){if(c===CREW&&MODE==="live")return;while(stack.length)closeSheet();crewShow(CREWS[c]||{});Store.stop();MODE="loading";render();Store.live(c)},
+  gen:0,
+  stop(){Store.gen++;IDB._db=null;unsubs.splice(0).forEach(f=>f());msgSubs.forEach(f=>f());msgSubs.clear();msgData.clear();COLS.forEach(c=>D[c]=[]);D.chats=[];D.msgs=[];D.priv={labels:{}};D.wishes=[];D.mine=[];Store.ready=false},
+  live(crew){const g=Store.gen,cur=()=>g===Store.gen;
     if(crew)CREW=crew;MODE="live";ls.set("yg-crew-"+ME,CREW);const seen=new Set(),base=c=>`crews/${CREW}/${c==="members"?"people":c}`;
     const done=c=>{seen.add(c);if(seen.size>=COLS.length+1)Store.ready=true;schedule()};
     const fail=e=>{console.error(e);toast(e.code==="permission-denied"?"You don't have access to this crew any more.":"Sync paused. Check your connection.")};
     COLS.forEach(c=>{
-      if(DELTA.includes(c)){let first=true;deltaSync(base(c),CREW+"|"+c,map=>{D[c]=[...map].map(([id,v])=>({id,...v}));if(first){first=false;done(c)}else schedule()},fail).then(off=>{if(MODE==="live")unsubs.push(off);else off()}).catch(e=>{fail(e);done(c)})}
+      if(DELTA.includes(c)){let first=true;deltaSync(base(c),CREW+"|"+c,map=>{if(!cur())return;D[c]=[...map].map(([id,v])=>({id,...v}));if(first){first=false;done(c)}else schedule()},fail).then(off=>{if(MODE==="live"&&cur())unsubs.push(off);else off()}).catch(e=>{fail(e);done(c)})}
       else unsubs.push(FS.collection(base(c)).onSnapshot(s=>{D[c]=s.docs.map(d=>({id:d.id,...d.data()}));if(c==="members")Store.syncMsgSubs();done(c)},fail))});
     unsubs.push(FS.collection("chats").where("members","array-contains",ME).onSnapshot({includeMetadataChanges:true},s=>{D.chats=s.docs.map(d=>({id:d.id,...d.data()}));Store.pendingChats=new Set(s.docs.filter(d=>d.metadata.hasPendingWrites).map(d=>d.id));Store.syncMsgSubs();done("chats")},fail));
     {const parts={};const mergeW=()=>{const m=new Map();Object.values(parts).flat().forEach(w=>m.set(w.id,w));D.wishes=[...m.values()];schedule()};
@@ -1142,9 +1149,9 @@ const Store={
     for(const id of ids)if(!msgSubs.has(id)&&!Store.pendingChats?.has(id))Store.subMsgs(id,0);
   },
   subMsgs(id,tries){
-    let off=null,dead=false;msgSubs.set(id,()=>{dead=true;off&&off()});
+    let off=null,dead=false;const g=Store.gen;msgSubs.set(id,()=>{dead=true;off&&off()});
     const retry=()=>{msgSubs.delete(id);if(tries<6)setTimeout(()=>{if(D.chats.some(c=>c.id===id)&&!msgSubs.has(id))Store.subMsgs(id,tries+1)},1000*(tries+1))};
-    deltaSync(`chats/${id}/msgs`,"msgs:"+id,map=>{msgData.set(id,[...map].map(([mid,v])=>({id:mid,chatId:id,...v})));D.msgs=[...msgData.values()].flat();schedule()},e=>{if(!dead){off&&off();retry()}})
+    deltaSync(`chats/${id}/msgs`,"msgs:"+id,map=>{if(dead||g!==Store.gen)return;msgData.set(id,[...map].map(([mid,v])=>({id:mid,chatId:id,...v})));D.msgs=[...msgData.values()].flat();schedule()},e=>{if(!dead){off&&off();retry()}})
       .then(f=>{off=f;if(dead)f()}).catch(()=>{if(!dead)retry()});
   },
 
@@ -1744,14 +1751,9 @@ function afterView(){
 const SHEETS={};
 /* Back / edge-swipe: only Plans home lets the phone leave the app; anywhere else Back steps towards home.
    A history entry is added right after a tap that leaves home (Chrome only honours entries added during a tap). */
-const atHome=()=>!stack.length&&UI.tab==="plans"&&UI.planFilter==="active";
+const atHome=()=>!stack.length&&UI.tab==="plans"&&UI.planFilter==="active"&&!(typeof DRAWER!=="undefined"&&DRAWER.open);
 // On the main screen too: there the phone's Back swipe opens the crews drawer instead of closing the app.
-// Steps kept for Back: one to get back to Plans, one ("g") that opens the crews drawer, one ("g2") that closes it.
-function armBack(){const push=v=>{try{history.pushState({yg:v},"")}catch{}},st=history.state?.yg;
-  if(!(MODE==="live"||MODE==="demo")){if(!atHome()&&!st)push(1);return}
-  // "g2" lets Back close the drawer again before the phone leaves the app
-  if(!st){push("g2");push("g")}else if(st==="g2")push("g");if(!atHome()&&history.state?.yg!==1)push(1)}
-document.addEventListener("click",()=>armBack(),true);
+function armBack(){if(!atHome()&&!history.state?.yg){try{history.pushState({yg:1},"")}catch{}}}
 function openSheet(kind,args={}){
   const el=document.createElement("div");el.className="sheet"+(["photo","player","img","camera"].includes(kind)?" lightbox":"");el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");
   el.innerHTML=`<div class="sheet-h wrap"><div class="in"></div></div><div class="sheet-b wrap"><div class="in top-in"></div><div class="in main-in"></div></div><div class="sheet-f wrap" hidden><div class="in"></div></div>`;
@@ -1767,7 +1769,7 @@ function closeSheet(viaPop){
 }
 window.addEventListener("popstate",()=>{
   if(typeof DRAWER!=="undefined"&&DRAWER.open){setDrawer(false);return}
-  if(atHome()){if(MODE==="live"||MODE==="demo"){setDrawer(true);return}try{history.back()}catch{}return}
+  if(atHome()){try{history.back()}catch{}return}
   if(stack.length)closeSheet(true);
   else if(UI.tab!=="plans"){UI.tab="plans";render();window.scrollTo(0,0)}
   else if(UI.planFilter!=="active"){UI.planFilter="active";render();window.scrollTo(0,0)}
@@ -3509,7 +3511,7 @@ SHEETS.shelfItem={live:true,
         <div class="shpick" role="radiogroup" aria-label="Your rating">${[1,2,3,4,5].map(i=>`<button data-act="shStar" data-v="${i}" role="radio" aria-checked="${st.rating===i}" aria-label="${i} star${i>1?"s":""}" class="${st.rating>=i?"on":""}">★</button>`).join("")}</div>
         <textarea class="inp" id="shRev-${esc(x.id)}" maxlength="500" rows="3" placeholder="What did you think? (optional)">${esc(mine?.text||"")}</textarea>
         <button class="btn pri" data-act="shRevSave" data-id="${esc(x.id)}">${mine?"Update review":"Post review"}</button></div></div>`}}};
-/* crews list: drops down over the top of the screen (tap the logo, or swipe Back on the main screen) */
+/* crews list: drops down over the top of the screen when you tap the logo; Back closes it */
 const DRAWER={open:false};
 function paintDrawer(){const el=$("#drawer .dr-panel");if(!el)return;const mine=MODE==="demo"?["demo"]:liveCrews();
   el.innerHTML=`<div class="dr-head"><b>Your crews</b><button class="x" data-act="drawerClose" aria-label="Close">✕</button></div>
@@ -3520,6 +3522,22 @@ function setDrawer(on,instant){const d=$("#drawer"),p=$("#drawer .dr-panel"),bg=
   if(on){paintDrawer();d.hidden=false;try{haptic()}catch{}}
   p.style.transition=instant?"none":"";bg.style.transition=instant?"none":"";requestAnimationFrame(()=>requestAnimationFrame(()=>d.classList.toggle("on",on)));
   if(!on)setTimeout(()=>{if(!DRAWER.open)d.hidden=true},260)}
+/* the moment you switch crew: its icon and name pop in with a burst of sparkles in your theme colour */
+function crewShow(c){document.querySelector(".crewshow")?.remove();const acc=getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()||"#3CC0B7";
+  const el=document.createElement("div");el.className="crewshow";el.setAttribute("aria-live","polite");
+  el.innerHTML=`<div class="cs-in"><span class="cs-ic">${esc(c.emoji||"🔥")}</span><b class="cs-name">${esc(c.name||"Crew")}</b><span class="cs-sub">Switched crew</span></div>`;document.body.appendChild(el);
+  const still=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;try{navigator.vibrate?.([12,30,22])}catch{}
+  if(!still&&el.animate){const ic=el.querySelector(".cs-ic"),nm=el.querySelector(".cs-name"),sb=el.querySelector(".cs-sub");
+    ic.animate([{transform:"scale(.2) rotate(-25deg)",opacity:0},{transform:"scale(1.25) rotate(8deg)",opacity:1,offset:.6},{transform:"scale(1)"}],{duration:520,easing:"cubic-bezier(.2,.8,.2,1)",fill:"both"});
+    nm.animate([{transform:"translateY(18px) scale(.9)",opacity:0},{transform:"none",opacity:1}],{duration:420,delay:160,easing:"cubic-bezier(.2,.8,.2,1)",fill:"both"});
+    sb.animate([{opacity:0},{opacity:1}],{duration:300,delay:380,fill:"both"});
+    setTimeout(()=>{if(!el.isConnected)return;const r=ic.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,cols=[acc,"#FFFFFF","#FFD86B",acc];
+      const rg=document.createElement("b");rg.className="sp-ring";rg.style.cssText=`left:${cx}px;top:${cy}px;--g:${acc};position:fixed`;el.appendChild(rg);
+      rg.animate([{transform:"translate(-50%,-50%) scale(.2)",opacity:.9},{transform:"translate(-50%,-50%) scale(3.2)",opacity:0}],{duration:800,easing:"cubic-bezier(.2,.7,.3,1)",fill:"both"});
+      for(let i=0;i<26;i++){const sp=document.createElement("b"),a=Math.random()*Math.PI*2,d=(.2+Math.random()*.42)*Math.min(innerWidth,innerHeight),z=8+Math.random()*16;sp.className="sp-spark"+(i%4===3?" dot":"");
+        sp.style.cssText=`position:fixed;left:${cx}px;top:${cy}px;width:${z}px;height:${z}px;background:${cols[i%4]}`;el.appendChild(sp);
+        sp.animate([{transform:"translate(-50%,-50%) scale(0) rotate(0deg)",opacity:1},{transform:`translate(calc(-50% + ${Math.cos(a)*d*.7}px),calc(-50% + ${Math.sin(a)*d*.7}px)) scale(1.15) rotate(${90+Math.random()*120}deg)`,opacity:1,offset:.45},{transform:`translate(calc(-50% + ${Math.cos(a)*d}px),calc(-50% + ${Math.sin(a)*d+26}px)) scale(0) rotate(${240+Math.random()*120}deg)`,opacity:0}],{duration:850+Math.random()*450,easing:"cubic-bezier(.15,.7,.3,1)",fill:"both"})}},260)}
+  setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),380)},still?900:1650)}
 /* crews: switch, invite, create, join, manage */
 SHEETS.crews={live:true,
   render(){const c=curCrew(),admin=c.by===ME,mine=liveCrews();
