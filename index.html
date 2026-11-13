@@ -777,7 +777,7 @@ body.has-fx::before{background:transparent}
 .apprate{position:absolute;left:0;top:-7px;font-style:normal;font-size:9.5px;font-weight:800;background:#0B0F14;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 60%,transparent);border-radius:999px;padding:0 5px;z-index:3}
 .addapp{display:grid;place-items:center;background:rgba(255,255,255,.1);border:2px dashed rgba(255,255,255,.5);color:#fff;font-size:24px;font-weight:300;box-shadow:none}.addapp::after{display:none}
 .phdots{display:flex;justify-content:center;gap:6px;margin-top:18px}.phdots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35)}.phdots i.on{background:#fff}
-button.brand{border:0;background:none;color:var(--fg);padding:0;text-align:left;cursor:pointer}
+button.brand{flex:0 0 auto;margin-right:auto;border:0;background:none;color:var(--fg);padding:0;text-align:left;cursor:pointer}
 #drawer{position:fixed;inset:0;z-index:150}
 .dr-bg{all:unset;position:absolute;inset:0;background:rgba(3,5,8,.62);opacity:0;transition:opacity .25s ease}
 .dr-panel{position:absolute;top:0;left:0;right:0;max-height:82dvh;background:var(--surface);border-bottom:1.5px solid color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:0 0 26px 26px;
@@ -800,6 +800,40 @@ button.brand{border:0;background:none;color:var(--fg);padding:0;text-align:left;
 .cs-name{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,9vw,44px);letter-spacing:-.02em;line-height:1.1;max-width:90vw;overflow-wrap:anywhere;text-shadow:0 0 30px color-mix(in srgb,var(--accent) 45%,transparent)}
 .cs-sub{color:var(--muted);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .crewpill{background:var(--surface2);color:var(--fg);white-space:nowrap;max-width:42%;overflow:hidden;text-overflow:ellipsis}
+.tour{position:fixed;inset:0;z-index:300;pointer-events:none}
+.tour{animation:tourIn .35s ease both}@keyframes tourIn{from{opacity:0}}.tour.out{opacity:0;transition:opacity .25s}
+.tour-block{transition:background .3s}
+.tour-block{position:absolute;inset:0;pointer-events:auto}
+.tour-hole{position:absolute;box-shadow:0 0 0 200vmax rgba(3,6,10,.7);transition:left .45s cubic-bezier(.22,1,.36,1),top .45s cubic-bezier(.22,1,.36,1),width .45s cubic-bezier(.22,1,.36,1),height .45s cubic-bezier(.22,1,.36,1),border-radius .45s;pointer-events:none}
+.tour.center .tour-hole{left:50%!important;top:50%!important;width:0!important;height:0!important}
+.tour-ring{position:absolute;pointer-events:none;border:2px solid var(--accent);box-shadow:0 0 14px color-mix(in srgb,var(--accent) 70%,transparent);opacity:0;transition:left .45s cubic-bezier(.22,1,.36,1),top .45s cubic-bezier(.22,1,.36,1),width .45s cubic-bezier(.22,1,.36,1),height .45s cubic-bezier(.22,1,.36,1),opacity .3s}
+.tour:not(.center) .tour-ring{opacity:.55}.tour.tap:not(.center) .tour-ring{opacity:1;animation:tourPulse 1.3s ease-in-out infinite}
+@keyframes tourPulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 25%,transparent),0 0 20px var(--accent)}}
+.tour-hand{position:absolute;left:0;top:0;width:44px;height:44px;display:grid;place-items:center;font-size:32px;line-height:1;opacity:0;pointer-events:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6));transition:transform .45s cubic-bezier(.22,1,.36,1),opacity .25s}
+.tour.tap:not(.center) .tour-hand{opacity:1;animation:tourTap 1s ease-in-out infinite}
+@keyframes tourTap{50%{translate:0 7px}}@keyframes tourTapDown{50%{translate:0 -7px}}.tour.tap:not(.center) .tour-hand.down{animation-name:tourTapDown}
+.tour-tip{position:absolute;left:16px;right:16px;top:0;max-width:400px;margin:0 auto;pointer-events:auto;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:18px;padding:13px 15px 9px;box-shadow:0 14px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:4px;transition:transform .45s cubic-bezier(.22,1,.36,1);will-change:transform}
+.tour-tip.swap>*{animation:tourSwap .35s ease both}@keyframes tourSwap{from{opacity:0;translate:0 4px}}
+
+.tour-n{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.tour-t{font-family:var(--f-display);font-size:18px;line-height:1.2}.tour-d{margin:0;color:var(--muted);font-size:14.5px;line-height:1.45}.tour-d b{color:var(--fg)}
+.tour-btns{display:flex;justify-content:space-between;align-items:center;margin-top:2px;min-height:38px}.tour-skip{border:0;background:none;color:var(--muted);font:inherit;font-weight:600;font-size:13.5px;padding:8px 2px;cursor:pointer}
+.tour-next{min-width:96px}
+.tut{position:fixed;inset:0;z-index:190;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);animation:tutIn .3s ease both}
+.tut.out{animation:tutOut .28s ease both}@keyframes tutIn{from{opacity:0}}@keyframes tutOut{to{opacity:0}}
+.tut-sky{position:absolute;inset:0;pointer-events:none;background:radial-gradient(60% 40% at 20% 15%,color-mix(in srgb,var(--accent) 35%,transparent),transparent 70%),radial-gradient(55% 40% at 85% 85%,color-mix(in srgb,#7b4dff 35%,transparent),transparent 70%),radial-gradient(1px 1px at 20% 30%,#fff,transparent),radial-gradient(1px 1px at 70% 20%,#fff,transparent),radial-gradient(1.5px 1.5px at 40% 75%,#fff,transparent),radial-gradient(1px 1px at 85% 45%,#fff,transparent),radial-gradient(1px 1px at 12% 60%,#fff,transparent);opacity:.9}
+.tut-skip{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:16px;z-index:2;border:0;background:rgba(255,255,255,.08);color:var(--muted);font:inherit;font-weight:700;font-size:14px;padding:8px 14px;border-radius:999px;cursor:pointer}
+.tut-track{position:relative;flex:1;display:flex;transition:transform .38s cubic-bezier(.2,.8,.2,1);will-change:transform}
+.tut-slide{flex:0 0 100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 28px 20px;gap:14px}
+.tut-ic{width:132px;height:132px;border-radius:38px;display:grid;place-items:center;background:var(--accent-soft);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 70%,transparent),0 0 60px color-mix(in srgb,var(--accent) 45%,transparent);margin-bottom:10px}
+.tut-ic span{font-size:66px;line-height:1}
+.tut-slide h2{margin:0;font-family:var(--f-display);font-size:clamp(26px,7.5vw,34px);line-height:1.15;letter-spacing:-.01em}
+.tut-slide p{margin:0;max-width:34ch;color:var(--muted);font-size:16px;line-height:1.55}.tut-slide p b{color:var(--fg)}
+.tut-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:6px}.tut-chips span{font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.tut-foot{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 22px calc(env(safe-area-inset-bottom,0px) + 22px)}
+.tut-dots{display:flex;gap:7px}.tut-dots i{width:8px;height:8px;border-radius:99px;background:var(--line);transition:all .25s}.tut-dots i.on{width:24px;background:var(--accent)}
+.tut-next{min-width:132px;min-height:50px}
+@media (prefers-reduced-motion:reduce){.tut-track{transition:none}}
 .dr-foot{margin:4px 6px 0;padding-top:10px;font-size:12.5px}
 .crew-btn{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px 3px 7px;font:inherit;font-size:12.5px;cursor:pointer}
 .crew-btn b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crew-btn i{font-style:normal;color:var(--muted);font-size:10px}
@@ -938,7 +972,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-13.24";
+const APP_VERSION="2026-11-13.27";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1873,6 +1907,7 @@ SHEETS.settings={live:true,
     <div class="sec" style="border:0;padding-top:0"><h2>Theme</h2>
       <div class="swatches">${Object.entries(ACCENTS).map(([k,c])=>`<button class="swatch" data-act="setAccent" data-k="${k}" aria-label="${k}" aria-pressed="${SET.accent===k}" style="background:${c[darkNow()?1:0]}"></button>`).join("")}</div>
       <div class="hint">Only changes how the app looks on this phone.</div></div>
+    <div class="sec"><h2>Tour 📖</h2><button class="btn block" data-act="tutAgain">Take the app tour again</button></div>
     <div class="sec"><h2>Notifications 🔔</h2>
       ${SET.notifyOn&&perm==="granted"?`<div class="toggle"><span><b>Notifications are on</b><br><span class="meta">On this phone</span></span><button class="btn sm" data-act="notifOff">Turn off</button></div>
         <label class="toggle"><span>New messages</span><input type="checkbox" id="nMsgs" ${SET.nMsgs?"checked":""}></label>
@@ -3892,6 +3927,7 @@ const ACT={
   jnCemo(d){UI.join.cemo=d.v;render()},
   cnEmoji(d){const s=topS();s.state.cemo=d.v;paintSheet(s)},
   crews(){openSheet("crews")},
+  tutAgain(){closeAll();setTimeout(startTour,200)},
   drawer(){setDrawer(!DRAWER.open)},
   drawerClose(){setDrawer(false)},
   drGo(d){setDrawer(false);if(d.k!==CREW)setTimeout(()=>Store.switchTo(d.k),180)},
@@ -4469,7 +4505,7 @@ function runSplash(){if(window.__splashed)return;window.__splashed=true;
   if(!el){el=document.createElement("div");el.className="splash";el.setAttribute("aria-hidden","true");el.innerHTML=`<div class="sp-word"><span class="sp-yalla">${[..."Yalla"].map(ch=>`<i>${ch}</i>`).join("")}</span><span class="sp-wheel"></span></div>`;document.body.appendChild(el)}
   el.dataset.on="1";el.querySelector(".sp-wheel").innerHTML=`<span class="sp-strip">${strip.map((c,i)=>`<span ${i===s1?'class="me" ':""}style="color:${c}">Guys</span>`).join("")}</span>`;
   el.insertAdjacentHTML("beforeend",`<div class="sp-glow" style="--g:${mine}"></div>`);
-  const done=()=>{if(!el.isConnected)return;el.classList.add("out");setTimeout(()=>el.remove(),420)};
+  const done=()=>{if(!el.isConnected)return;el.classList.add("out");setTimeout(()=>{el.remove();try{maybeTutorial()}catch{}},420)};
   // tapping does not skip: a tap is what lets the phone start vibrating, so it answers with a little buzz instead
   el.addEventListener("pointerdown",()=>{try{haptic()}catch{}});
   if(still||!el.animate){el.querySelector(".sp-strip").style.transform=`translateY(-${s1*1.15}em)`;el.classList.add("locked");setTimeout(done,700);return}
@@ -4528,12 +4564,81 @@ function syncAutoBusy(){if(MODE!=="live"||!Store.ready||!CREW||liveCrews().lengt
   const sig=JSON.stringify([...want].map(([k,v])=>[k,v.date,v.start,v.end,v._t]))+"|"+have.map(b=>b.id+b.date+b.start+b.end).join();if(sig===ABSIG)return;ABSIG=sig;
   for(const[id,v]of want){const h=have.find(b=>b.id===id);if(!h||h.date!==v.date||h.start!==v.start||h.end!==v.end){const{_t,...doc}=v;await Store.set("busy",id,{...doc,at:now()})}if(myLabel({id})!==v._t)Store.setLabel(id,v._t)}
   for(const h of have)if(!want.has(h.id))await Store.del("busy",h.id)}catch(e){console.warn(e)}},2500)}
+/* ---------- the tour: walks new people through the real app. Glowing things must be tapped to carry on;
+   everything else just gets pointed at with a Next button. Shown once, and from Settings any time. ---------- */
+const goTab=k=>{if(UI.tab!==k){UI.tab=k;render()}};
+const closeAll=()=>{while(stack.length)closeSheet();try{setDrawer(false,true)}catch{}};
+const TOUR=[
+  {t:"Welcome to Yalla Guys 👋",d:"Let's take a quick tour of the app. When something glows, <b>tap it</b> to try it. Otherwise tap <b>Next</b>.",pre:()=>{closeAll();goTab("plans")}},
+  {sel:"#crewBtn",tap:1,t:"Your crew",d:"This is your crew's home. <b>Tap the logo.</b>"},
+  {sel:"#drawer .dr-panel",t:"Your crews",d:"Switch between friend groups, invite friends with your crew code, or start a new crew. Tap the logo any time to get here.",post:()=>setDrawer(false,true)},
+  {sel:".pchips",t:"Plans",d:"Coming-up plans, past memories, the wishlist and a map of everything.",pre:()=>{closeAll();goTab("plans")}},
+  {sel:"#fab",tap:1,t:"Make a plan",d:"<b>Tap + Make plan</b> to see how it works."},
+  {sel:"#sheets .sheet:last-child .sheet-b",t:"Suggest dates, everyone votes",d:"Name the plan and add a few dates. The crew votes, then you lock in the time that works. We'll close this for now.",post:closeAll},
+  {sel:'#tabs [data-k="moments"]',tap:1,t:"Moments",d:"<b>Tap Moments.</b>"},
+  {sel:".shoot",t:"Today's moment",d:"Post a photo each day to unlock everyone else's. Keep your favourites on your timeline."},
+  {sel:'#tabs [data-k="cal"]',tap:1,t:"Calendar",d:"<b>Tap Calendar.</b>"},
+  {sel:'[data-act="newBusy"]',t:"Block your time",d:"Mark when you're busy. Only you see what it's for, and plan polls show the clash."},
+  {sel:'#tabs [data-k="chat"]',tap:1,t:"Chats",d:"<b>Tap Chats.</b>"},
+  {sel:'[data-act="newChat"]',t:"Group chats",d:"Start a group chat. Inside a group, <b>🗂️ Stuff</b> lets you share books, movies, series and songs."},
+  {sel:'#tabs [data-k="shame"]',tap:1,t:"Shame",d:"<b>Tap Shame.</b>"},
+  {sel:'[data-act="habitSetup"]',t:"Habits",d:"Pick what you want to track, like gym or water. Miss a day and you land on the Wall of Shame."},
+  {sel:'#tabs [data-k="money"]',tap:1,t:"Money",d:"<b>Tap Money.</b>"},
+  {sel:'[data-act="newExpense"]',t:"Split costs",d:"Add who paid for what. The app works out who owes who."},
+  {sel:'#tabs [data-k="games"]',tap:1,t:"Games",d:"<b>Tap Games.</b>"},
+  {sel:".gcard",t:"Daily games",d:"New puzzles every day, with a leaderboard for your crew."},
+  {sel:"#meBtn",tap:1,t:"Your profile",d:"<b>Tap your name.</b>"},
+  {sel:"#sheets .sheet:last-child .prof-hero",t:"This is you",d:"Your photo, stickers, background and song. The badges you earn show further down."},
+  {sel:'#sheets .sheet:last-child [data-act="timeline"]',t:"Your timeline",d:"Everything you've done, day by day, across all your crews."},
+  {sel:'#sheets .sheet:last-child [data-act="settings"]',t:"Settings",d:"Change your theme colour, turn on notifications, or take this tour again.",post:()=>{closeAll();goTab("plans")}},
+  {t:"You're all set 🎉",d:"Go make your first plan. Yalla!"}];
+let TOURS=null;
+function startTour(){if(TOURS)return;closeAll();TOURS={i:-1};
+  const ov=document.createElement("div");ov.className="tour";
+  ov.innerHTML=`<div class="tour-block"></div><div class="tour-hole"></div><div class="tour-ring"></div><div class="tour-hand" aria-hidden="true">👆</div>
+    <div class="tour-tip" role="dialog" aria-live="polite"><span class="tour-n"></span><b class="tour-t"></b><p class="tour-d"></p><div class="tour-btns"><button class="tour-skip">Skip tour</button><button class="btn pri sm tour-next">Next</button></div></div>`;
+  document.body.appendChild(ov);TOURS.ov=ov;
+  ov.querySelector(".tour-skip").onclick=()=>endTour(false);ov.querySelector(".tour-next").onclick=()=>tourGo(TOURS.i+1);
+  document.addEventListener("click",tourClick,true);TOURS.tick=setInterval(tourPlace,200);addEventListener("resize",tourPlace);tourGo(0)}
+function tourGo(n){if(!TOURS)return;const prev=TOUR[TOURS.i];if(prev?.post&&n>TOURS.i)try{prev.post()}catch{}
+  if(n>=TOUR.length)return endTour(true);TOURS.i=n;const st=TOUR[n];try{st.pre?.()}catch{}
+  const ov=TOURS.ov;ov.querySelector(".tour-n").textContent=`${n+1} of ${TOUR.length}`;ov.querySelector(".tour-t").textContent=st.t;ov.querySelector(".tour-d").innerHTML=st.d;
+  ov.querySelector(".tour-next").textContent=n===TOUR.length-1?"Finish 🚀":"Next";ov.querySelector(".tour-skip").style.visibility=n===TOUR.length-1?"hidden":"visible";
+  ov.classList.toggle("tap",!!st.tap);TOURS.t0=Date.now();TOURS.scrolled=-1;const tip=ov.querySelector(".tour-tip");tip.classList.remove("swap");void tip.offsetWidth;tip.classList.add("swap");
+  try{haptic()}catch{}setTimeout(tourPlace,60)}
+function tourPlace(){if(!TOURS)return;const st=TOUR[TOURS.i],ov=TOURS.ov,el=st.sel?document.querySelector(st.sel):null,W=innerWidth,H=innerHeight;
+  const block=ov.querySelector(".tour-block"),hole=ov.querySelector(".tour-hole"),ring=ov.querySelector(".tour-ring"),hand=ov.querySelector(".tour-hand"),tip=ov.querySelector(".tour-tip"),nx=ov.querySelector(".tour-next");
+  const ok=el&&el.getClientRects().length,th=tip.offsetHeight||150;
+  if(!ok){if(st.sel&&Date.now()-TOURS.t0<1500)return;
+    ov.classList.add("center");block.style.clipPath="none";nx.style.display="";tip.style.transform=`translateY(${Math.round((H-th)/2)}px)`;return}
+  ov.classList.remove("center");nx.style.display=st.tap?"none":"";
+  const tb=el.closest("#tabs");if(tb&&TOURS.scrolled!==TOURS.i){const rr=el.getBoundingClientRect(),tr=tb.getBoundingClientRect();if(rr.right>tr.right-4||rr.left<tr.left+4)tb.scrollLeft+=rr.left+rr.width/2-(tr.left+tr.width/2)}
+  if(TOURS.scrolled!==TOURS.i){TOURS.scrolled=TOURS.i;if(!tb)try{el.scrollIntoView({block:"center",behavior:"smooth"})}catch{}}
+  const r=el.getBoundingClientRect(),pd=6,x=Math.max(4,r.left-pd),y=Math.max(4,r.top-pd),w=Math.min(W-8,r.width+pd*2),h=Math.min(H-8,r.height+pd*2),rad=Math.min(18,h/2);
+  const box=`left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:${rad}px`;hole.style.cssText=box;ring.style.cssText=box;
+  block.style.clipPath=st.tap?`polygon(evenodd,0 0,${W}px 0,${W}px ${H}px,0 ${H}px,0 0,${x}px ${y}px,${x}px ${y+h}px,${x+w}px ${y+h}px,${x+w}px ${y}px,${x}px ${y}px)`:"none";
+  // the target in the bottom half: hand above it pointing down, card above that. Top half: the other way round.
+  const low=r.top+r.height/2>H*.5,HS=44,cx=Math.min(W-30,Math.max(30,r.left+r.width/2));
+  hand.textContent=low?"👇":"👆";hand.classList.toggle("down",low);
+  hand.style.transform=`translate(${Math.round(cx-HS/2)}px,${Math.round(low?y-HS-2:y+h+2)}px)`;
+  const gap=st.tap?HS+10:14;let top=low?y-gap-th:y+h+gap;top=Math.max(12,Math.min(H-th-12,top));
+  tip.style.transform=`translateY(${Math.round(top)}px)`}
+function tourClick(e){if(!TOURS)return;if(e.target.closest(".tour-tip"))return;const st=TOUR[TOURS.i];if(!st?.tap)return;const el=st.sel&&document.querySelector(st.sel);
+  if(el&&el.contains(e.target)){const i=TOURS.i;setTimeout(()=>{if(TOURS&&TOURS.i===i)tourGo(i+1)},420)}}
+function endTour(done){if(!TOURS)return;clearInterval(TOURS.tick);removeEventListener("resize",tourPlace);document.removeEventListener("click",tourClick,true);
+  const ov=TOURS.ov;TOURS=null;ov.classList.add("out");setTimeout(()=>ov.remove(),250);closeAll();goTab("plans");
+  ls.set("yg-tut-"+ME,1);if(MODE==="live")Store.upd("members",ME,{tutDone:true});if(done)toast("🎉 Tour done. You can replay it any time in Settings")}
+const showTutorial=startTour;
+// first time in the app: wait for the launch animation to finish, then show it once
+function maybeTutorial(){if(!(MODE==="live"||MODE==="demo")||!Store.ready||navigator.webdriver)return;if(ls.get("yg-tut-"+ME,0)||PROFILE?.tutDone||mem(ME)?.tutDone)return;
+  if(document.querySelector(".splash,.crewshow,.tour")||stack.length||TOURS)return;ls.set("yg-tut-"+ME,1);setTimeout(startTour,500)}
 const SEEN={msgs:null,plans:null,moments:null,notes:null,media:null};
 function checkNotify(){
   if(!Store.ready||MODE==="loading"||MODE==="auth"||MODE==="join")return;
   try{checkPokes()}catch{}
   try{checkBadges()}catch{}
   try{syncAutoBusy()}catch{}
+  try{maybeTutorial()}catch{}
   for(const c of allMyChats()){const t=lastOtherAt(c.id);if(t&&Math.max((c.dv||{})[ME]||0,(c.rd||{})[ME]||0)<t)chatStamp(c.id,"dv",t)}
   const first=SEEN.msgs===null;
   if(first){SEEN.msgs=new Set(D.msgs.map(m=>m.id));SEEN.plans=new Set(visiblePlans().map(p=>p.id));SEEN.moments=new Set(D.moments.map(m=>m.id));SEEN.notes=new Set(D.notes.map(n=>n.id));SEEN.media=new Set(D.media.map(m=>m.id));return}
