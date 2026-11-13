@@ -571,7 +571,7 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .songsp{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);color:var(--fg);text-decoration:none;font-weight:800}
 .eq{display:none;gap:2px;height:12px;align-items:flex-end;margin-top:3px}.eq i{width:3px;background:#1DB954;border-radius:1px;animation:eq 0.9s ease-in-out infinite}
 .eq i:nth-child(2){animation-delay:.2s}.eq i:nth-child(3){animation-delay:.4s}.eq i:nth-child(4){animation-delay:.1s}
-.songcard.playing .eq{display:flex}@keyframes eq{0%,100%{height:3px}50%{height:12px}}
+.songcard.playing .eq,.songcard .eq.on{display:flex}@keyframes eq{0%,100%{height:3px}50%{height:12px}}
 canvas.bgfx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;display:block;opacity:.8}
 .fxprev canvas.bgfx,.fxbig canvas.bgfx{opacity:1}
 canvas.bgfx.fixed{position:fixed}
@@ -894,6 +894,9 @@ button.brand{flex:0 0 auto;margin-right:auto;border:0;background:none;color:var(
 .cpop-t{flex:1;min-width:0;display:flex;flex-direction:column}.cpop-t b{font-size:14px}.cpop-t span{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cpop-go{font-weight:800;font-size:13px;background:var(--accent);color:var(--accent-fg);padding:7px 12px;border-radius:999px;flex:none}
 .czoom{position:fixed;inset:0;z-index:260;border:0;padding:12px;background:rgba(0,0,0,.92);display:grid;place-items:center;cursor:zoom-out;animation:tutIn .2s ease both}.czoom img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px}
+.hn-emo{width:64px;flex:none;border:1px solid var(--line);background:var(--surface);border-radius:14px;font-size:26px;cursor:pointer}
+.hn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;margin-top:8px;padding:8px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.hn-grid button{border:0;background:none;font-size:24px;height:44px;border-radius:10px;cursor:pointer}.hn-grid button[aria-pressed="true"]{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
 .dr-foot{margin:4px 6px 0;padding-top:10px;font-size:12.5px}
 .crew-btn{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px 3px 7px;font:inherit;font-size:12.5px;cursor:pointer}
 .crew-btn b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crew-btn i{font-style:normal;color:var(--muted);font-size:10px}
@@ -1032,7 +1035,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-13.31";
+const APP_VERSION="2026-11-13.35";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2814,6 +2817,7 @@ const HABIT_PRESETS=[
   {id:"read",emoji:"📖",name:"Read",type:"check"},{id:"meditate",emoji:"🧘",name:"Meditate",type:"check"},
   {id:"skincare",emoji:"🧴",name:"Skincare",type:"check"},{id:"study",emoji:"📚",name:"Study",type:"check"}];
 const habitsOf=uid=>(mem(uid)?.habits||[]).filter(h=>h.id!=="steps");
+const HABIT_EMOJIS=["🎯","🏋️","🏃","🚴","🧘","🏊","⚽","🎾","🥊","💪","🚶","🧗","💧","🥗","🍎","🥩","☕","🚭","🍷","💊","😴","🛏️","📚","✍️","🧠","💻","🎹","🎸","🎨","📸","🗣️","🌍","🙏","🧴","🪥","🧹","🌱","🐶","💸","📵","⏰","☀️","❤️","🔥"];
 const shownHabits=uid=>habitsOf(uid).filter(h=>h.show!==false);
 const ciOf=(uid,ds)=>D.checkins.find(c=>c.uid===uid&&c.date===ds);
 const hVal=(uid,ds,hid)=>ciOf(uid,ds)?.v?.[hid];
@@ -2953,7 +2957,8 @@ SHEETS.habitSetup={
       <div class="list" style="gap:8px">${st.list.map((h,i)=>`<div class="hset ${h.on?"on":""}"><button class="hset-main" data-act="hsTog" data-i="${i}"><span style="font-size:24px">${esc(h.emoji)}</span><span class="grow" style="text-align:left"><b>${esc(h.name)}</b><span class="meta" style="display:block">${h.type==="count"?`Goal ${(+h.goal).toLocaleString()} ${esc(h.unit||"")}`:h.type==="log"?"Write what you had / did":"Done or not"}</span></span><span class="hbox">${h.on?"✓":""}</span></button>
         ${h.on?`<div class="row" style="flex-wrap:nowrap;gap:8px;margin-top:8px">${h.type==="count"?`<label class="meta" style="display:flex;align-items:center;gap:6px;flex:1">Goal<input class="inp" type="number" inputmode="numeric" data-hgoal="${i}" value="${esc(h.goal)}" style="width:100px"></label>`:`<span style="flex:1"></span>`}<button class="btn sm" data-act="hsShow" data-i="${i}">${h.show!==false?"👁 Shown":"🙈 Hidden"}</button>${liveCrews().length>1?`<span class="hcrews">${liveCrews().map(k=>`<button class="chip ${(h.crews||liveCrews()).includes(k)?"on":""}" data-act="hsCrew" data-i="${i}" data-k="${esc(k)}" aria-pressed="${(h.crews||liveCrews()).includes(k)}">${esc(CREWS[k].emoji||"🔥")} ${esc(CREWS[k].name)}</button>`).join("")}</span>`:""}${h.custom?`<button class="btn sm danger" data-act="hsDel" data-i="${i}" data-confirm="Remove?">✕</button>`:""}</div>`:""}</div>`).join("")}</div>
       <div class="sec" style="margin:6px 0 0"><h2 style="font-size:15px">Add your own</h2>
-        <div class="row" style="flex-wrap:nowrap"><input class="inp" id="hnE" placeholder="🎯" maxlength="8" style="width:64px;text-align:center;font-size:20px"><input class="inp" id="hnN" placeholder="e.g. Creatine, Stretch, Duolingo" maxlength="30" style="flex:1;min-width:0"></div>
+        <div class="row" style="flex-wrap:nowrap"><button class="hn-emo" data-act="hnEmoPick" aria-label="Pick an emoji">${esc(st.ne||"🎯")}</button><input type="hidden" id="hnE" value="${esc(st.ne||"🎯")}"><input class="inp" id="hnN" placeholder="e.g. Creatine, Stretch, Duolingo" maxlength="30" style="flex:1;min-width:0"></div>
+        ${st.emoOpen?`<div class="hn-grid">${HABIT_EMOJIS.map(e=>`<button data-act="hnEmo" data-v="${e}" aria-pressed="${(st.ne||"🎯")===e}">${e}</button>`).join("")}</div><label class="f" style="margin-top:6px">Or type any emoji<input class="inp" id="hnEType" maxlength="8" placeholder="Tap here and pick from your keyboard" style="font-size:18px"></label>`:""}
         <div class="seg" style="margin-top:8px">${[["check","Done / not"],["count","Number + goal"],["log","Write a log"]].map(([k,l])=>`<button data-act="hsType" data-k="${k}" aria-pressed="${st.nt===k}">${l}</button>`).join("")}</div>
         ${st.nt==="count"?`<div class="grid2" style="margin-top:8px"><label class="f">Daily goal<input class="inp" id="hnG" type="number" inputmode="numeric" placeholder="e.g. 5"></label><label class="f">Unit<input class="inp" id="hnU" placeholder="e.g. km, pages"></label></div>`:""}
         <button class="btn block" data-act="hsAdd" style="margin-top:8px">+ Add habit</button></div></div>`,
@@ -3325,14 +3330,15 @@ async function resolveSong(text){text=String(text||"").trim();if(!text)return nu
   return{songUrl:url||it.trackViewUrl||"",songTitle:`${it.trackName} – ${it.artistName}`,songArt:art||(it.artworkUrl100||"").replace("100x100","300x300"),songPreview:it.previewUrl||""}}
 const SONG={a:null,uid:null,muted:false,
   // the preview plays once; with "Play profile music" off it only plays when you tap ▶
-  load(uid){const m=mem(uid);this.stop();if(!m?.songPreview)return null;try{const a=new Audio(m.songPreview);a.volume=.55;a.loop=false;a.preload="auto";this.a=a;this.uid=uid;
+  load(uid){const m=mem(uid);this.stop();const src=m?.songPreview;if(!src)return null;try{const a=new Audio(src);a.volume=.55;a.loop=false;a.preload="auto";this.a=a;this.uid=uid;
     a.onpause=a.onplay=()=>this.paint();a.onended=()=>{try{a.currentTime=0}catch{}this.paint()};return a}catch{return null}},
   play(uid){const a=this.load(uid);if(!a||SET.profSongs===false||this.muted)return;a.play().then(()=>this.paint()).catch(()=>this.paint())},
   stop(){if(this.a){try{this.a.pause()}catch{}this.a=null}this.uid=null},
   paint(){const b=document.querySelector(".songcard .songbtn");if(b){const on=this.a&&!this.a.paused;b.innerHTML=on?SONG_ICON.pause:SONG_ICON.play;b.setAttribute("aria-label",on?"Pause":"Play");b.closest(".songcard").classList.toggle("playing",!!on)}}};
 const SONG_ICON={play:'<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.87l10.4-6.5a1 1 0 0 0 0-1.74L9.5 4.63A1 1 0 0 0 8 5.5z"/></svg>',
   pause:'<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1.2"/><rect x="13.5" y="5" width="4" height="14" rx="1.2"/></svg>'};
-function songCard(m){if(!m.song)return"";const sp=spotifyTrack(m.song),title=m.songTitle||(sp?"Spotify song":m.song);if(!sp&&!m.songPreview)return"";
+function songCard(m){
+  if(!m.song)return"";const sp=spotifyTrack(m.song),title=m.songTitle||(sp?"Spotify song":m.song);if(!sp&&!m.songPreview)return"";
   return`<div class="songcard"><span class="sart">${m.songArt?`<img src="${esc(m.songArt)}" alt="">`:"🎵"}</span><span class="grow" style="min-width:0"><span class="k">🎵 On repeat</span><b>${esc(title)}</b><span class="eq"><i></i><i></i><i></i><i></i></span></span>
     ${m.songPreview?`<button class="songbtn" data-act="songToggle" data-id="${esc(m.id)}" aria-label="Play">${SONG_ICON.play}</button>`:""}${m.songUrl||sp?`<a class="songsp" href="${esc(m.songUrl||m.song)}" target="_blank" rel="noopener" aria-label="Open in Spotify">↗</a>`:""}</div>`}
 SHEETS.person.init=a=>{SONG.play(a.id);return{}};
@@ -4415,6 +4421,8 @@ const ACT={
   hLogDel(d){const ds=UI.shameDay==="y"?shameDay(1):TODAY(),cur=[...(hVal(ME,ds,d.h)||[])];cur.splice(+d.i,1);saveCheckin(ds,d.h,cur.length?cur:null)},
   async poke(d){if(d.id===ME)return;const id=`${ME}_${d.id}_${d.h}_${TODAY()}`;if(D.pokes.some(p=>p.id===id))return toast(`You already poked ${nick(d.id)} about that today 😏`);
     await Store.set("pokes",id,{from:ME,to:d.id,hid:d.h,date:TODAY(),at:now()});try{haptic()}catch{}toast(`👉 Poked ${nick(d.id)}!`)},
+  hnEmoPick(){const s=topS();keepGoals(s);s.state.emoOpen=!s.state.emoOpen;paintSheet(s)},
+  hnEmo(d){const s=topS();keepGoals(s);s.state.ne=d.v;s.state.emoOpen=false;paintSheet(s);try{haptic()}catch{}},
   hsTog(d){const s=topS();keepGoals(s);const h=s.state.list[+d.i];h.on=!h.on;paintSheet(s)},
   hsCrew(d){const s=topS();keepGoals(s);const h=s.state.list[+d.i],all=liveCrews(),cur=h.crews||all,on=cur.includes(d.k);
     const nx=on?cur.filter(k=>k!==d.k):[...cur,d.k];if(!nx.length)return toast("Keep it in at least one crew, or untick the habit.");h.crews=all.every(k=>nx.includes(k))?undefined:nx;paintSheet(s)},
@@ -4422,8 +4430,9 @@ const ACT={
   hsDel(d){const s=topS();keepGoals(s);s.state.list.splice(+d.i,1);paintSheet(s)},
   hsType(d){const s=topS();keepGoals(s);s.state.nt=d.k;paintSheet(s)},
   hsAdd(){const s=topS();keepGoals(s);const name=val("hnN");if(!name)return toast("Give it a name.");const nt=s.state.nt;
-    const h={id:"c"+Math.random().toString(36).slice(2,8),emoji:[...(val("hnE")||"🎯")].slice(0,4).join(""),name:name.slice(0,30),type:nt,show:true,on:true,custom:true};
-    if(nt==="count"){h.goal=Math.max(1,+val("hnG")||1);h.unit=val("hnU").slice(0,12);h.step=h.goal>=1000?1000:h.goal>=100?10:1}s.state.list.push(h);paintSheet(s)},
+    const typed=val("hnEType"),h={id:"c"+Math.random().toString(36).slice(2,8),emoji:[...(typed||s.state.ne||"🎯")].slice(0,4).join(""),name:name.slice(0,30),type:nt,show:true,on:true,custom:true};
+    if(nt==="count"){h.goal=Math.max(1,+val("hnG")||1);h.unit=val("hnU").slice(0,12);h.step=h.goal>=1000?1000:h.goal>=100?10:1}s.state.list.push(h);s.state.ne="";s.state.emoOpen=false;
+    for(const id of ["hnN","hnEType","hnG","hnU"]){const el=$("#"+id,s.el);if(el)el.value=""}paintSheet(s);toast(`${h.emoji} ${h.name} added`)},
   async hsSave(){const s=topS();keepGoals(s);const old=habitsOf(ME);
     const hs=s.state.list.filter(h=>h.on).map(({on,custom,...h})=>{const o=old.find(x=>x.id===h.id);return{...h,since:o?.since||TODAY()}});
     const m=mem(ME);await Store.upd("members",ME,{habits:hs,...(m?.habitsSince||!hs.length?{}:{habitsSince:TODAY()})});closeSheet();UI.tab="shame";render();toast(hs.length?"Habits saved. No slacking 😤":"Habits cleared")},
