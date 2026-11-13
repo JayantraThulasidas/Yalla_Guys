@@ -804,15 +804,15 @@ button.brand{flex:0 0 auto;margin-right:auto;border:0;background:none;color:var(
 .tour{animation:tourIn .35s ease both}@keyframes tourIn{from{opacity:0}}.tour.out{opacity:0;transition:opacity .25s}
 .tour-block{transition:background .3s}
 .tour-block{position:absolute;inset:0;pointer-events:auto}
-.tour-hole{position:absolute;box-shadow:0 0 0 200vmax rgba(3,6,10,.7);transition:left .45s cubic-bezier(.22,1,.36,1),top .45s cubic-bezier(.22,1,.36,1),width .45s cubic-bezier(.22,1,.36,1),height .45s cubic-bezier(.22,1,.36,1),border-radius .45s;pointer-events:none}
-.tour.center .tour-hole{left:50%!important;top:50%!important;width:0!important;height:0!important}
-.tour-ring{position:absolute;pointer-events:none;border:2px solid var(--accent);box-shadow:0 0 14px color-mix(in srgb,var(--accent) 70%,transparent);opacity:0;transition:left .45s cubic-bezier(.22,1,.36,1),top .45s cubic-bezier(.22,1,.36,1),width .45s cubic-bezier(.22,1,.36,1),height .45s cubic-bezier(.22,1,.36,1),opacity .3s}
+.tour-hole{position:absolute;box-shadow:0 0 0 200vmax rgba(3,6,10,.7);pointer-events:none}
+
+.tour-ring{position:absolute;pointer-events:none;border:2px solid var(--accent);box-shadow:0 0 14px color-mix(in srgb,var(--accent) 70%,transparent);opacity:0;transition:opacity .3s}
 .tour:not(.center) .tour-ring{opacity:.55}.tour.tap:not(.center) .tour-ring{opacity:1;animation:tourPulse 1.3s ease-in-out infinite}
 @keyframes tourPulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 25%,transparent),0 0 20px var(--accent)}}
-.tour-hand{position:absolute;left:0;top:0;width:44px;height:44px;display:grid;place-items:center;font-size:32px;line-height:1;opacity:0;pointer-events:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6));transition:transform .45s cubic-bezier(.22,1,.36,1),opacity .25s}
+.tour-hand{position:absolute;left:0;top:0;width:44px;height:44px;display:grid;place-items:center;font-size:32px;line-height:1;opacity:0;pointer-events:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6));transition:opacity .25s}
 .tour.tap:not(.center) .tour-hand{opacity:1;animation:tourTap 1s ease-in-out infinite}
 @keyframes tourTap{50%{translate:0 7px}}@keyframes tourTapDown{50%{translate:0 -7px}}.tour.tap:not(.center) .tour-hand.down{animation-name:tourTapDown}
-.tour-tip{position:absolute;left:16px;right:16px;top:0;max-width:400px;margin:0 auto;pointer-events:auto;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:18px;padding:13px 15px 9px;box-shadow:0 14px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:4px;transition:transform .45s cubic-bezier(.22,1,.36,1);will-change:transform}
+.tour-tip{position:absolute;left:16px;right:16px;top:0;max-width:400px;margin:0 auto;pointer-events:auto;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:18px;padding:13px 15px 9px;box-shadow:0 14px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:4px;will-change:transform}
 .tour-tip.swap>*{animation:tourSwap .35s ease both}@keyframes tourSwap{from{opacity:0;translate:0 4px}}
 
 .tour-n{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
@@ -972,7 +972,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-13.27";
+const APP_VERSION="2026-11-13.28";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -4599,33 +4599,44 @@ function startTour(){if(TOURS)return;closeAll();TOURS={i:-1};
     <div class="tour-tip" role="dialog" aria-live="polite"><span class="tour-n"></span><b class="tour-t"></b><p class="tour-d"></p><div class="tour-btns"><button class="tour-skip">Skip tour</button><button class="btn pri sm tour-next">Next</button></div></div>`;
   document.body.appendChild(ov);TOURS.ov=ov;
   ov.querySelector(".tour-skip").onclick=()=>endTour(false);ov.querySelector(".tour-next").onclick=()=>tourGo(TOURS.i+1);
-  document.addEventListener("click",tourClick,true);TOURS.tick=setInterval(tourPlace,200);addEventListener("resize",tourPlace);tourGo(0)}
+  document.addEventListener("click",tourClick,true);const loop=()=>{if(!TOURS)return;tourPlace();TOURS.raf=requestAnimationFrame(loop)};TOURS.raf=requestAnimationFrame(loop);addEventListener("resize",tourPlace);tourGo(0)}
 function tourGo(n){if(!TOURS)return;const prev=TOUR[TOURS.i];if(prev?.post&&n>TOURS.i)try{prev.post()}catch{}
   if(n>=TOUR.length)return endTour(true);TOURS.i=n;const st=TOUR[n];try{st.pre?.()}catch{}
   const ov=TOURS.ov;ov.querySelector(".tour-n").textContent=`${n+1} of ${TOUR.length}`;ov.querySelector(".tour-t").textContent=st.t;ov.querySelector(".tour-d").innerHTML=st.d;
   ov.querySelector(".tour-next").textContent=n===TOUR.length-1?"Finish 🚀":"Next";ov.querySelector(".tour-skip").style.visibility=n===TOUR.length-1?"hidden":"visible";
-  ov.classList.toggle("tap",!!st.tap);TOURS.t0=Date.now();TOURS.scrolled=-1;const tip=ov.querySelector(".tour-tip");tip.classList.remove("swap");void tip.offsetWidth;tip.classList.add("swap");
+  ov.classList.toggle("tap",!!st.tap);TOURS.cur=TOURS.cur||{};TOURS.t0=Date.now();TOURS.scrolled=-1;const tip=ov.querySelector(".tour-tip");tip.classList.remove("swap");void tip.offsetWidth;tip.classList.add("swap");
   try{haptic()}catch{}setTimeout(tourPlace,60)}
+// runs every frame: finds where the target is right now and glides the spotlight, pointer and card towards it
+function tourRect(el){const r=el.getBoundingClientRect();
+  // tabs: hug the icon and label, not the whole button (which runs under the phone's home bar)
+  if(el.closest("#tabs")){let a=null;for(const k of el.children){const q=k.getBoundingClientRect();if(!q.width)continue;a=a?{l:Math.min(a.l,q.left),t:Math.min(a.t,q.top),r:Math.max(a.r,q.right),b:Math.max(a.b,q.bottom)}:{l:q.left,t:q.top,r:q.right,b:q.bottom}}
+    if(a)return{l:Math.min(a.l,r.left+6),t:a.t-4,r:Math.max(a.r,r.right-6),b:a.b+4}}
+  return{l:r.left,t:r.top,r:r.right,b:r.bottom}}
 function tourPlace(){if(!TOURS)return;const st=TOUR[TOURS.i],ov=TOURS.ov,el=st.sel?document.querySelector(st.sel):null,W=innerWidth,H=innerHeight;
   const block=ov.querySelector(".tour-block"),hole=ov.querySelector(".tour-hole"),ring=ov.querySelector(".tour-ring"),hand=ov.querySelector(".tour-hand"),tip=ov.querySelector(".tour-tip"),nx=ov.querySelector(".tour-next");
-  const ok=el&&el.getClientRects().length,th=tip.offsetHeight||150;
+  const ok=el&&el.getClientRects().length,th=tip.offsetHeight||150,cur=TOURS.cur;
+  const ease=(k,v)=>{if(cur[k]==null||Math.abs(cur[k]-v)<.5)cur[k]=v;else cur[k]+=(v-cur[k])*.3;return cur[k]};
   if(!ok){if(st.sel&&Date.now()-TOURS.t0<1500)return;
-    ov.classList.add("center");block.style.clipPath="none";nx.style.display="";tip.style.transform=`translateY(${Math.round((H-th)/2)}px)`;return}
+    ov.classList.add("center");block.style.clipPath="none";nx.style.display="";const cx=W/2,cy=H/2;
+    const X=ease("x",cx),Y=ease("y",cy),Wd=ease("w",0),Hd=ease("h",0);hole.style.cssText=`left:${X}px;top:${Y}px;width:${Wd}px;height:${Hd}px;border-radius:20px`;ring.style.cssText=hole.style.cssText;
+    tip.style.transform=`translateY(${ease("tip",(H-th)/2)}px)`;return}
   ov.classList.remove("center");nx.style.display=st.tap?"none":"";
-  const tb=el.closest("#tabs");if(tb&&TOURS.scrolled!==TOURS.i){const rr=el.getBoundingClientRect(),tr=tb.getBoundingClientRect();if(rr.right>tr.right-4||rr.left<tr.left+4)tb.scrollLeft+=rr.left+rr.width/2-(tr.left+tr.width/2)}
-  if(TOURS.scrolled!==TOURS.i){TOURS.scrolled=TOURS.i;if(!tb)try{el.scrollIntoView({block:"center",behavior:"smooth"})}catch{}}
-  const r=el.getBoundingClientRect(),pd=6,x=Math.max(4,r.left-pd),y=Math.max(4,r.top-pd),w=Math.min(W-8,r.width+pd*2),h=Math.min(H-8,r.height+pd*2),rad=Math.min(18,h/2);
-  const box=`left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:${rad}px`;hole.style.cssText=box;ring.style.cssText=box;
-  block.style.clipPath=st.tap?`polygon(evenodd,0 0,${W}px 0,${W}px ${H}px,0 ${H}px,0 0,${x}px ${y}px,${x}px ${y+h}px,${x+w}px ${y+h}px,${x+w}px ${y}px,${x}px ${y}px)`:"none";
-  // the target in the bottom half: hand above it pointing down, card above that. Top half: the other way round.
-  const low=r.top+r.height/2>H*.5,HS=44,cx=Math.min(W-30,Math.max(30,r.left+r.width/2));
-  hand.textContent=low?"👇":"👆";hand.classList.toggle("down",low);
-  hand.style.transform=`translate(${Math.round(cx-HS/2)}px,${Math.round(low?y-HS-2:y+h+2)}px)`;
-  const gap=st.tap?HS+10:14;let top=low?y-gap-th:y+h+gap;top=Math.max(12,Math.min(H-th-12,top));
-  tip.style.transform=`translateY(${Math.round(top)}px)`}
+  if(TOURS.scrolled!==TOURS.i){TOURS.scrolled=TOURS.i;const tb=el.closest("#tabs");
+    if(tb){const rr=el.getBoundingClientRect(),tr=tb.getBoundingClientRect();if(rr.right>tr.right-4||rr.left<tr.left+4)tb.scrollTo({left:tb.scrollLeft+rr.left+rr.width/2-(tr.left+tr.width/2),behavior:"smooth"})}
+    else try{const rr=el.getBoundingClientRect();if(rr.top<70||rr.bottom>H-90)el.scrollIntoView({block:"center",behavior:"smooth"})}catch{}}
+  const q=tourRect(el),pd=6;
+  let x=q.l-pd,y=q.t-pd,x2=q.r+pd,y2=q.b+pd;x=Math.max(4,x);y=Math.max(4,y);x2=Math.min(W-4,x2);y2=Math.min(H-4,y2);
+  const X=ease("x",x),Y=ease("y",y),Wd=ease("w",x2-x),Hd=ease("h",y2-y),rad=Math.min(18,Hd/2);
+  const box=`left:${X}px;top:${Y}px;width:${Wd}px;height:${Hd}px;border-radius:${rad}px`;hole.style.cssText=box;ring.style.cssText=box;
+  block.style.clipPath=st.tap?`polygon(evenodd,0 0,${W}px 0,${W}px ${H}px,0 ${H}px,0 0,${X}px ${Y}px,${X}px ${Y+Hd}px,${X+Wd}px ${Y+Hd}px,${X+Wd}px ${Y}px,${X}px ${Y}px)`:"none";
+  const low=y+(y2-y)/2>H*.5,HS=44,hx=Math.min(W-30,Math.max(30,(x+x2)/2));
+  if(hand.dataset.dir!==String(low)){hand.dataset.dir=String(low);hand.textContent=low?"👇":"👆";hand.classList.toggle("down",low)}
+  hand.style.transform=`translate(${ease("hx",hx-HS/2)}px,${ease("hy",low?Y-HS-2:Y+Hd+2)}px)`;
+  const gap=st.tap?HS+10:14;let top=low?y-gap-th:y2+gap;top=Math.max(12,Math.min(H-th-12,top));
+  tip.style.transform=`translateY(${ease("tip",top)}px)`}
 function tourClick(e){if(!TOURS)return;if(e.target.closest(".tour-tip"))return;const st=TOUR[TOURS.i];if(!st?.tap)return;const el=st.sel&&document.querySelector(st.sel);
   if(el&&el.contains(e.target)){const i=TOURS.i;setTimeout(()=>{if(TOURS&&TOURS.i===i)tourGo(i+1)},420)}}
-function endTour(done){if(!TOURS)return;clearInterval(TOURS.tick);removeEventListener("resize",tourPlace);document.removeEventListener("click",tourClick,true);
+function endTour(done){if(!TOURS)return;cancelAnimationFrame(TOURS.raf);removeEventListener("resize",tourPlace);document.removeEventListener("click",tourClick,true);
   const ov=TOURS.ov;TOURS=null;ov.classList.add("out");setTimeout(()=>ov.remove(),250);closeAll();goTab("plans");
   ls.set("yg-tut-"+ME,1);if(MODE==="live")Store.upd("members",ME,{tutDone:true});if(done)toast("🎉 Tour done. You can replay it any time in Settings")}
 const showTutorial=startTour;
