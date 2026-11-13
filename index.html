@@ -849,8 +849,8 @@ button.brand{flex:0 0 auto;margin-right:auto;border:0;background:none;color:var(
 .council-empty{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:40px 16px}.council-empty p{margin:0 0 6px}
 .ce-ic{font-size:56px;width:110px;height:110px;border-radius:32px;display:grid;place-items:center;background:var(--accent-soft);box-shadow:0 0 50px color-mix(in srgb,var(--accent) 35%,transparent);margin-bottom:6px}
 .chero{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:22px;background:radial-gradient(120% 90% at 0% 0%,color-mix(in srgb,var(--accent) 26%,transparent),transparent 60%),radial-gradient(90% 80% at 100% 100%,color-mix(in srgb,#7b4dff 22%,transparent),transparent 60%),var(--surface);border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));margin-bottom:14px}
-.chero h1{margin:0;font-family:var(--f-display);font-size:26px;line-height:1.15;overflow-wrap:anywhere}.chero p{margin:0;color:var(--muted);line-height:1.5;white-space:pre-wrap}
-.chero-pic{width:100%;max-height:300px;object-fit:cover;border-radius:16px}
+.chero h1{margin:0;font-family:var(--f-display);font-size:26px;line-height:1.15;overflow-wrap:anywhere}.chero p{margin:0;color:var(--muted);line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.chero-picbtn{border:0;padding:0;background:rgba(0,0,0,.25);border-radius:16px;overflow:hidden;cursor:zoom-in;display:block;width:100%}.chero-pic{display:block;width:100%;height:auto;max-height:75vh;object-fit:contain}
 .chero-stats{display:flex;align-items:center;gap:12px;margin-top:2px}
 .cring{--p:0;width:54px;height:54px;border-radius:50%;flex:none;display:grid;place-items:center;background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--surface2) 0);position:relative}
 .cring::before{content:"";position:absolute;inset:6px;border-radius:50%;background:var(--surface)}.cring b{position:relative;font-size:12.5px}
@@ -859,7 +859,7 @@ button.brand{flex:0 0 auto;margin-right:auto;border:0;background:none;color:var(
 .copt:active:not(:disabled){transform:scale(.98)}.copt:disabled{cursor:default}
 .copt.on{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent),0 10px 30px color-mix(in srgb,var(--accent) 20%,transparent)}
 .copt.lead{background:linear-gradient(150deg,color-mix(in srgb,#F2C14E 14%,var(--surface)),var(--surface) 60%)}
-.copt-pic{display:block;margin:-12px -14px 0;height:170px;background-size:cover;background-position:center}
+.copt-picw{position:relative;display:block;margin:-12px -14px 0;background:rgba(0,0,0,.25)}.copt-pic{display:block;width:100%;height:auto;max-height:60vh;object-fit:contain}.copt-zoom{position:absolute;right:8px;bottom:8px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.55);color:#fff;font-size:16px}
 .copt-txt{display:flex;flex-direction:column;gap:2px}.copt-txt b{font-size:17px}
 .copt-bar{display:block;height:10px;border-radius:99px;background:var(--surface2);overflow:hidden}.copt-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 55%,#fff));animation:cgrow .8s cubic-bezier(.2,.8,.2,1) both}
 .copt.lead .copt-bar i{background:linear-gradient(90deg,#F2C14E,#FFE08A)}
@@ -888,6 +888,12 @@ button.brand{flex:0 0 auto;margin-right:auto;border:0;background:none;color:var(
 .cn-person{display:inline-flex;align-items:center;gap:6px;padding:4px 12px 4px 4px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-size:14px;font-weight:600;cursor:pointer}
 .cn-person input{position:absolute;opacity:0;pointer-events:none}.cn-person.on{border-color:var(--accent);background:var(--accent-soft)}
 .chips .chip.on{background:var(--accent-soft);border-color:var(--accent)}
+.cpop{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:160;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;border-radius:18px;border:1px solid color-mix(in srgb,var(--accent) 55%,var(--line));background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--fg);font:inherit;text-align:left;cursor:pointer;box-shadow:0 14px 40px rgba(0,0,0,.5),0 0 24px color-mix(in srgb,var(--accent) 25%,transparent);animation:cpopIn .45s cubic-bezier(.2,.9,.25,1.2) both}
+.cpop.out{animation:cpopOut .35s ease both}@keyframes cpopIn{from{transform:translateY(-130%)}}@keyframes cpopOut{to{transform:translateY(-130%);opacity:0}}
+.cpop-ic{font-size:26px;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--accent-soft);flex:none}
+.cpop-t{flex:1;min-width:0;display:flex;flex-direction:column}.cpop-t b{font-size:14px}.cpop-t span{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cpop-go{font-weight:800;font-size:13px;background:var(--accent);color:var(--accent-fg);padding:7px 12px;border-radius:999px;flex:none}
+.czoom{position:fixed;inset:0;z-index:260;border:0;padding:12px;background:rgba(0,0,0,.92);display:grid;place-items:center;cursor:zoom-out;animation:tutIn .2s ease both}.czoom img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px}
 .dr-foot{margin:4px 6px 0;padding-top:10px;font-size:12.5px}
 .crew-btn{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px 3px 7px;font:inherit;font-size:12.5px;cursor:pointer}
 .crew-btn b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crew-btn i{font-style:normal;color:var(--muted);font-size:10px}
@@ -1026,7 +1032,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-13.29";
+const APP_VERSION="2026-11-13.31";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -3725,13 +3731,13 @@ SHEETS.councilNew={
   render(s){const st=s.state,yn=st.kind==="yn",groups=st.groups,sel=new Set(st.sel),everyone=(groups||[]).flatMap(g=>g.people.map(p=>p.id));
     const optHtml=st.opts.map((o,i)=>`<div class="cn-opt"><div class="cn-optn">${i+1}</div><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
         <input class="inp" id="cnOt-${o.k}" maxlength="60" placeholder="Option ${i+1}, e.g. ${["Sushi","Burgers","Shawarma","Pasta","Tacos","Pizza"][i%6]}">
-        <input class="inp" id="cnOd-${o.k}" maxlength="140" placeholder="A few words (optional)" style="font-size:14px">
+        <input class="inp" id="cnOd-${o.k}" maxlength="300" placeholder="A few words (optional)" style="font-size:14px">
         <div class="row" style="gap:8px">${o.pic?`<img class="cn-thumb" src="${esc(o.pic)}" alt=""><button class="btn sm" data-act="cnOptPicDel" data-k="${o.k}">Remove</button>`:`<button class="btn sm" data-act="cnOptPic" data-k="${o.k}">📷 Picture</button>`}${st.opts.length>2?`<button class="btn sm ghost" data-act="cnOptDel" data-k="${o.k}" style="margin-left:auto">✕ Remove option</button>`:""}</div></div></div>`).join("");
     const pick=u=>`<label class="cn-person ${sel.has(u.id)?"on":""}"><input type="checkbox" data-act="cnPick" data-u="${esc(u.id)}" ${sel.has(u.id)?"checked":""}><span class="av xs" style="background:${esc(u.c||"#7A8794")}">${esc(u.e||"🙂")}</span><span>${esc(u.n||"Friend")}</span></label>`;
     return{title:"🗳️ Ask the council",body:`<div class="form">
       <div class="seg"><button data-act="cnKind" data-k="yn" aria-pressed="${yn}">👍👎 Yes or no</button><button data-act="cnKind" data-k="opts" aria-pressed="${!yn}">🔢 Options</button></div>
       <label class="f">What do you need help with?<input class="inp" id="cnQ" maxlength="120" placeholder="${yn?"e.g. Should I text him back? 💀":"e.g. Where should we eat tonight?"}"></label>
-      <label class="f">Details (optional)<textarea class="inp" id="cnD" maxlength="400" rows="2" placeholder="Give the council some context"></textarea></label>
+      <label class="f">Details (optional)<textarea class="inp" id="cnD" maxlength="3000" rows="5" placeholder="Give the council the full story: who, what, the tea ☕"></textarea></label>
       <div class="f">Picture (optional)${st.pic?`<div class="row" style="gap:10px"><img class="cn-thumb big" src="${esc(st.pic)}" alt=""><button class="btn sm danger" data-act="cnPicDel">Remove</button></div>`:`<button class="btn" data-act="cnPic">📷 Add a picture</button>`}</div>
       ${yn?"":`<div class="f">Options<div class="list" style="gap:10px">${optHtml}</div>${st.opts.length<6?`<button class="btn block" data-act="cnOptAdd" style="margin-top:8px">+ Add option</button>`:""}</div>`}
       <div class="f">Who's on the council? <span class="meta" style="font-weight:400">${sel.size} picked</span>
@@ -3741,6 +3747,11 @@ SHEETS.councilNew={
       <div class="f">Voting closes<div class="chips">${[["1h","In 1 hour"],["1d","In 1 day"],["3d","In 3 days"],["0","No deadline"]].map(([k,l])=>`<button class="chip ${st.closes===k?"on":""}" data-act="cnCloses" data-k="${k}">${l}</button>`).join("")}</div></div>
       <label class="check"><input type="checkbox" id="cnAnon"> 🕶️ Secret ballot: show totals but not who voted for what</label>
     </div>`,foot:`<button class="btn pri block" data-act="cnSave">Ask the council 🗳️</button>`}}};
+SHEETS.councilEdit={render(s){const c=(D.councils||[]).find(x=>x.id===s.args.id);if(!c)return{title:"Edit",body:""};return{title:"✏️ Edit your question",body:`<div class="form">
+    <label class="f">Question<input class="inp" id="ceQ" maxlength="120" value="${esc(c.q)}"></label>
+    <label class="f">Details<textarea class="inp" id="ceD" maxlength="3000" rows="9">${esc(c.desc||"")}</textarea><span class="meta" style="font-weight:400">Add as much as you like. Everyone on the council sees the update.</span></label>
+    <div class="f">Picture${(s.state.pic??c.pic)?`<div class="row" style="gap:10px"><img class="cn-thumb big" src="${esc(s.state.pic??c.pic)}" alt=""><button class="btn sm" data-act="cePic">Change</button><button class="btn sm danger" data-act="cePicDel">Remove</button></div>`:`<button class="btn" data-act="cePic">📷 Add a picture</button>`}</div></div>`,
+    foot:`<button class="btn pri block" data-act="ceSave" data-id="${esc(c.id)}">Save changes</button>`}}};
 SHEETS.council={live:true,
   init(a){return{}},
   after(s,first){if(first&&MODE==="live"){s.off=FS.collection(`councils/${s.args.id}/msgs`).orderBy("at").limitToLast(200).onSnapshot(sn=>{s.msgs=sn.docs.map(d=>({id:d.id,...d.data()}));paintSheet(s)},()=>{})}
@@ -3752,15 +3763,15 @@ SHEETS.council={live:true,
     const lead=t.top?(c.opts||[]).filter(o=>(t.by[o.id]||[]).length===t.top):[];
     const opt=o=>{const vs=t.by[o.id]||[],pc=t.pct(o.id),on=mine===o.id,isLead=see&&t.top&&vs.length===t.top,label=yn?(o.id==="y"?"Yes":"No"):o.t;
       return`<button class="copt ${yn?"yn yn-"+o.id:""} ${on?"on":""} ${isLead?"lead":""} ${see?"see":""}" data-act="cVote" data-o="${esc(o.id)}" ${closed?"disabled":""}>
-        ${o.pic?`<span class="copt-pic" style="background-image:url('${esc(o.pic)}')"></span>`:""}
+        ${o.pic?`<span class="copt-picw"><img class="copt-pic" src="${esc(o.pic)}" alt=""><span class="copt-zoom" data-act="cZoom" role="button" aria-label="View picture">⤢</span></span>`:""}
         ${yn?`<span class="yn-e">${o.id==="y"?"👍":"👎"}</span>`:""}
         <span class="copt-txt"><b>${isLead?"👑 ":""}${esc(label)}</b>${o.d?`<span class="meta">${esc(o.d)}</span>`:""}</span>
         ${see?`<span class="copt-bar"><i style="width:${pc}%"></i></span><span class="copt-stat"><b>${pc}%</b><span class="meta">${vs.length} vote${vs.length===1?"":"s"}</span></span>${!c.anon&&vs.length?`<span class="copt-who">${cStack(c,vs,8)}</span>`:""}`:""}
         ${on?`<span class="copt-mine">Your vote ✓</span>`:""}</button>`};
     const ring=total?Math.round(t.n/total*100):0;
-    return{title:`🗳️ Council`,right:c.by===ME?`<button class="btn sm" data-act="cToggle" data-id="${esc(c.id)}">${closed?"Reopen":"Close vote"}</button><button class="btn sm danger" data-act="cDel" data-id="${esc(c.id)}" data-confirm="Delete?">Delete</button>`:"",
+    return{title:`🗳️ Council`,right:c.by===ME?`<button class="btn sm" data-act="cEdit" data-id="${esc(c.id)}" aria-label="Edit">✏️</button><button class="btn sm" data-act="cToggle" data-id="${esc(c.id)}">${closed?"Reopen":"Close vote"}</button><button class="btn sm danger" data-act="cDel" data-id="${esc(c.id)}" data-confirm="Delete?">Delete</button>`:"",
       body:`<div class="chero"><div class="row" style="gap:8px">${cav(c,c.by,"sm")}<span class="meta"><b style="color:var(--fg)">${esc(cName(c,c.by))}</b> ${c.by===ME?"asked":"asks"} · ${ago(c.at)}</span></div>
-          <h1>${esc(c.q)}</h1>${c.desc?`<p>${linkify(c.desc)}</p>`:""}${c.pic?`<img class="chero-pic" src="${esc(c.pic)}" alt="">`:""}
+          <h1>${esc(c.q)}</h1>${c.desc?`<p>${linkify(c.desc)}</p>`:""}${c.pic?`<button class="chero-picbtn" data-act="cZoom" aria-label="View picture"><img class="chero-pic" src="${esc(c.pic)}" alt=""></button>`:""}
           <div class="chero-stats"><span class="cring" style="--p:${ring}"><b>${t.n}/${total}</b></span><span style="display:flex;flex-direction:column;gap:2px"><b>${t.n} of ${total} voted</b><span class="meta">${closed?"Voting closed":esc(cLeft(c))}${c.anon?" · 🕶️ Secret ballot":""}</span></span></div></div>
         <div class="${yn?"copts-yn":"copts"}">${(c.opts||[]).map(opt).join("")}</div>
         ${!see?`<div class="cc-hidden" style="text-align:center;margin-top:10px">👀 Vote to see what everyone picked</div>`:mine&&!closed?`<div class="hint" style="text-align:center;margin-top:8px">Changed your mind? Tap another option.</div>`:""}
@@ -4077,9 +4088,15 @@ const ACT={
   cnEmoji(d){const s=topS();s.state.cemo=d.v;paintSheet(s)},
   councilNew(){openSheet("councilNew")},
   openCouncil(d){openSheet("council",{id:d.id})},
+  cEdit(d){openSheet("councilEdit",{id:d.id})},
+  cePic(){const s=topS();pickPhotos(async fs=>{if(!fs[0])return;try{s.state.pic=await cPic(fs[0],1080);paintSheet(s)}catch{toast("Couldn't read that picture.")}},"#onePick")},
+  cePicDel(){const s=topS();s.state.pic="";paintSheet(s)},
+  async ceSave(d){const s=topS(),q=val("ceQ");if(!q)return toast("The question can't be empty.");const patch={q:q.slice(0,120),desc:val("ceD").slice(0,3000)};if(s.state.pic!==undefined)patch.pic=s.state.pic;
+    document.activeElement?.blur?.();await Store.upd("councils",d.id,patch);closeSheet();toast("Updated")},
+  cZoom(d,el){const im=(el.closest(".copt-picw,.chero-picbtn")||el).querySelector("img");if(!im)return;const box=document.createElement("button");box.className="czoom";box.setAttribute("aria-label","Close picture");box.innerHTML=`<img src="${im.src}" alt="">`;box.onclick=()=>box.remove();document.body.appendChild(box)},
   cnKind(d){const s=topS();s.state.kind=d.k;paintSheet(s)},
   cnCloses(d){const s=topS();s.state.closes=d.k;paintSheet(s)},
-  cnPic(){const s=topS();pickPhotos(async fs=>{if(!fs[0])return;try{s.state.pic=await cPic(fs[0],720);paintSheet(s)}catch{toast("Couldn't read that picture.")}},"#onePick")},
+  cnPic(){const s=topS();pickPhotos(async fs=>{if(!fs[0])return;try{s.state.pic=await cPic(fs[0],1080);paintSheet(s)}catch{toast("Couldn't read that picture.")}},"#onePick")},
   cnPicDel(){const s=topS();s.state.pic="";paintSheet(s)},
   cnOptAdd(){const s=topS();if(s.state.opts.length>=6)return;s.state.opts.push({k:"o"+(++s.state.n),pic:""});paintSheet(s)},
   cnOptDel(d){const s=topS();s.state.opts=s.state.opts.filter(o=>o.k!==d.k);paintSheet(s)},
@@ -4090,12 +4107,12 @@ const ACT={
   cnAll(){const s=topS(),ids=(s.state.groups||[]).flatMap(g=>g.people.map(p=>p.id)),set=new Set(s.state.sel),all=ids.every(u=>set.has(u));s.state.sel=all?[]:ids;paintSheet(s)},
   async cnSave(){const s=topS(),st=s.state,q=val("cnQ");if(!q)return toast("What should the council vote on?");
     let opts;if(st.kind==="yn")opts=[{id:"y",t:"Yes"},{id:"n",t:"No"}];
-    else{opts=st.opts.map((o,i)=>({id:"o"+(i+1),t:val("cnOt-"+o.k).slice(0,60),d:val("cnOd-"+o.k).slice(0,140),pic:o.pic||""}));if(opts.some(o=>!o.t))return toast("Give every option a name.")}
+    else{opts=st.opts.map((o,i)=>({id:"o"+(i+1),t:val("cnOt-"+o.k).slice(0,60),d:val("cnOd-"+o.k).slice(0,300),pic:o.pic||""}));if(opts.some(o=>!o.t))return toast("Give every option a name.")}
     if(!st.sel.length)return toast("Pick at least one person for the council.");
     const ppl={},all=(st.groups||[]).flatMap(g=>g.people);for(const u of st.sel){const x=all.find(p=>p.id===u);if(x)ppl[u]={n:x.n||"",e:x.e||"🙂",c:x.c||"#7A8794"}}
     const me=PROFILE||mem(ME)||{};ppl[ME]={n:me.nick||"",e:me.emoji||"🙂",c:me.color||"#7A8794"};
     const cl={"1h":36e5,"1d":864e5,"3d":3*864e5}[st.closes]||0;if(s.busy)return;s.busy=true;
-    const id=await Store.add("councils",{by:ME,at:now(),q:q.slice(0,120),desc:val("cnD").slice(0,400),pic:st.pic||"",kind:st.kind,opts,members:[ME,...st.sel],people:ppl,anon:!!$("#cnAnon",s.el)?.checked,closes:cl?now()+cl:0,closed:false,votes:{}});
+    const id=await Store.add("councils",{by:ME,at:now(),q:q.slice(0,120),desc:val("cnD").slice(0,3000),pic:st.pic||"",kind:st.kind,opts,members:[ME,...st.sel],people:ppl,anon:!!$("#cnAnon",s.el)?.checked,closes:cl?now()+cl:0,closed:false,votes:{}});
     closeSheet();UI.tab="council";render();openSheet("council",{id});toast("🗳️ The council has been asked")},
   async cVote(d,el){const s=topS(),c=(D.councils||[]).find(x=>x.id===s.args.id);if(!c||cClosed(c))return;if(cMine(c)===d.o)return;const first=!cMine(c);
     try{cBurst(el);navigator.vibrate?.(first?[14,30,20]:12)}catch{}await Store.upd("councils",c.id,{["votes."+ME]:d.o})},
@@ -4734,6 +4751,22 @@ async function notify(title,body,tag,data){
   if(!SET.notifyOn||!("Notification" in window)||Notification.permission!=="granted")return;
   try{const reg=await navigator.serviceWorker?.getRegistration();if(reg)await reg.showNotification(title,{body,tag,icon:"icon-192.png?v=12",badge:"badge-96.png",data});else new Notification(title,{body,tag})}catch{}
 }
+/* New council votes always get a notification (no setting can switch these off), plus a pop-up inside the app.
+   What's been announced is remembered on this phone, so a vote opened while the app was closed is announced next time you open it. */
+function checkCouncils(){if(!(MODE==="live"||MODE==="demo")||!Store.ready||!ME)return;const key="yg-cn-seen-"+ME;let seen=ls.get(key,null);const cs=D.councils||[];
+  if(seen===null){ls.set(key,cs.map(c=>c.id));return}  // first run on this phone: don't announce old votes
+  seen=new Set(seen);let ch=false;
+  for(const c of cs){if(seen.has(c.id))continue;seen.add(c.id);ch=true;if(c.by===ME||cClosed(c))continue;
+    const who=cName(c,c.by),body=c.kind==="yn"?"Yes or no? Tap to vote 🗳️":`${(c.opts||[]).length} options. Tap to vote 🗳️`;
+    notifyAlways(`🗳️ ${who} asked the council`,`${c.q}\n${body}`,"council-"+c.id,{kind:"council",id:c.id});
+    if(!document.hidden&&!(topS()?.kind==="council"&&topS().args.id===c.id))councilPop(c)}
+  if(ch)ls.set(key,[...seen].slice(-300))}
+async function notifyAlways(title,body,tag,data){if(!("Notification" in window)||Notification.permission!=="granted")return;
+  let reg=null;try{reg=await navigator.serviceWorker?.getRegistration()}catch{}
+  try{if(reg)await reg.showNotification(title,{body,tag,icon:"icon-192.png?v=12",badge:"badge-96.png",data,renotify:true});else new Notification(title,{body,tag,icon:"icon-192.png?v=12"})}catch{}}
+function councilPop(c){document.querySelector(".cpop")?.remove();const el=document.createElement("button");el.className="cpop";el.innerHTML=`<span class="cpop-ic">🗳️</span><span class="cpop-t"><b>${esc(cName(c,c.by))} asked the council</b><span>${esc(c.q)}</span></span><span class="cpop-go">Vote</span>`;
+  el.onclick=()=>{el.remove();UI.tab="council";render();openSheet("council",{id:c.id})};document.body.appendChild(el);try{navigator.vibrate?.([16,40,16])}catch{}
+  setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),350)},7000)}
 /* When you're going to a locked-in plan, your other crews see you as Busy then (they never see what the plan is). */
 let ABT=null,ABSIG="";
 function syncAutoBusy(){if(MODE!=="live"||!Store.ready||!CREW||liveCrews().length<2)return;clearTimeout(ABT);ABT=setTimeout(async()=>{try{
@@ -4832,6 +4865,7 @@ function checkNotify(){
   try{checkBadges()}catch{}
   try{syncAutoBusy()}catch{}
   try{maybeTutorial()}catch{}
+  try{checkCouncils()}catch{}
   for(const c of allMyChats()){const t=lastOtherAt(c.id);if(t&&Math.max((c.dv||{})[ME]||0,(c.rd||{})[ME]||0)<t)chatStamp(c.id,"dv",t)}
   const first=SEEN.msgs===null;
   if(first){SEEN.msgs=new Set(D.msgs.map(m=>m.id));SEEN.plans=new Set(visiblePlans().map(p=>p.id));SEEN.moments=new Set(D.moments.map(m=>m.id));SEEN.notes=new Set(D.notes.map(n=>n.id));SEEN.media=new Set(D.media.map(m=>m.id));return}
@@ -4865,7 +4899,7 @@ function checkReminders(){
 const _render=render;render=function(){_render();try{checkNotify();syncVoice()}catch(e){console.error(e)}};
 setInterval(checkReminders,30000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkReminders()});
 document.addEventListener("visibilitychange",()=>{const s=topS();if(!document.hidden&&s?.kind==="chat")chatStamp(s.args.id,"rd",lastOtherAt(s.args.id))});
-navigator.serviceWorker?.addEventListener("message",e=>{const d=e.data?.open;if(!d)return;if(d.kind==="chat")openSheet("chat",{id:d.id});else if(d.kind==="plan")openSheet("plan",{id:d.id});else if(d.kind==="moment")openSheet("moment",{id:d.id});else if(d.kind==="shame"){while(stack.length)closeSheet();UI.tab="shame";render()}});
+navigator.serviceWorker?.addEventListener("message",e=>{const d=e.data?.open;if(!d)return;if(d.kind==="chat")openSheet("chat",{id:d.id});else if(d.kind==="plan")openSheet("plan",{id:d.id});else if(d.kind==="moment")openSheet("moment",{id:d.id});else if(d.kind==="council"){while(stack.length)closeSheet();UI.tab="council";render();openSheet("council",{id:d.id})}else if(d.kind==="shame"){while(stack.length)closeSheet();UI.tab="shame";render()}});
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 </script>
