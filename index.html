@@ -750,7 +750,7 @@ body.has-fx::before{background:transparent}
 .shadd{aspect-ratio:2/3;border:2px dashed color-mix(in srgb,var(--accent) 60%,transparent);border-radius:8px;display:grid;place-items:center;color:var(--accent);font-size:26px;font-weight:300}
 .shaddtop{display:flex;gap:14px;align-items:flex-start}.shcoverbtn{border:0;background:none;padding:0;cursor:pointer;flex:none}.shaddtop .shcoverbtn{width:104px}
 .shhero{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:6px 0 14px}.shhero .shart{width:150px}.shhero .shart.song{width:200px}.shhero .shart.series{width:150px;margin:20px 0 0 20px}.shaddtop .shart.series{margin:12px 0 0 12px}.shhero h1{margin:8px 0 0;font-family:var(--f-display);font-size:24px;line-height:1.15;overflow-wrap:anywhere}
-.shdesc{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+.shdesc{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;text-align:center;margin:0 auto 6px;max-width:36ch;font-size:15.5px}
 .shstars{display:inline-flex;gap:1px;font-size:13px;line-height:1}.shstars i{font-style:normal;color:var(--line)}.shstars i.on{color:#F2C14E}.shstars i.half{background:linear-gradient(90deg,#F2C14E 50%,var(--line) 50%);-webkit-background-clip:text;background-clip:text;color:transparent}.shstars.lg{font-size:20px}
 .shpick{display:flex;justify-content:center;gap:6px}.shpick button{border:0;background:none;font-size:34px;line-height:1;color:var(--line);cursor:pointer;padding:2px 4px;transition:transform .12s}.shpick button.on{color:#F2C14E}.shpick button:active{transform:scale(1.25)}
 .gav.pic{padding:0;overflow:hidden;background:none}.gav.pic img{width:100%;height:100%;object-fit:cover;display:block}
@@ -905,7 +905,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-12.25";
+const APP_VERSION="2026-11-13.01";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -3394,7 +3394,7 @@ SHEETS.shelfItem={live:true,
         ${x.kind==="song"&&(x.songPreview||x.songUrl)?`<div class="row" style="gap:10px;justify-content:center">${x.songPreview?`<button class="shplay" data-act="shPlay" data-id="${esc(x.id)}" aria-label="${SHPLAY.on(x.id)?"Pause":"Play"} preview">${SHPLAY.on(x.id)?SONG_ICON.pause:SONG_ICON.play}<span>${SHPLAY.on(x.id)?"Pause":"Play preview"}</span></button>`:""}${x.songUrl?`<a class="btn sm" href="${esc(x.songUrl)}" target="_blank" rel="noopener">Open in Spotify ↗</a>`:""}</div>${x.songPreview?"":`<div class="meta">No preview is available for this song.</div>`}`:""}
         <div class="row" style="gap:8px;justify-content:center">${starsHtml(avg,"lg")}<span class="meta">${avg?`${avg.toFixed(1)} · ${revs.filter(r=>r.rating>0).length} rating${revs.filter(r=>r.rating>0).length===1?"":"s"}`:"No ratings yet"}</span></div>
         <button class="prof-btn" data-act="person" data-id="${esc(x.by)}" style="gap:6px;font-size:13px">${avatar(x.by,"xs")}<span class="meta">Added by <b style="color:var(--fg)">${esc(x.by===ME?"you":nick(x.by))}</b> · ${ago(x.at)}</span></button></div>
-      ${x.desc?`<div class="card shdesc">${linkify(x.desc)}</div>`:""}
+      ${x.desc?`<p class="shdesc">${linkify(x.desc)}</p>`:""}
       <div class="sec"><h2>Reviews${revs.length?` · ${revs.length}`:""}</h2>${revs.length?revs.map(r=>`<div class="note">${avatar(r.by,"xs")}<div style="flex:1;min-width:0"><div class="meta"><b style="color:var(--fg)">${esc(nick(r.by))}</b> · ${ago(r.at)}</div>${r.rating?starsHtml(r.rating):""}${r.text?`<p style="white-space:pre-wrap">${linkify(r.text)}</p>`:""}</div>${r.by===ME?`<button class="x" data-act="shRevDel" data-id="${esc(r.id)}" data-confirm="Delete?" aria-label="Delete my review">✕</button>`:""}</div>`).join(""):`<div class="hint" style="margin:0">No reviews yet. Be the first.</div>`}</div>
       <div class="sec"><h2>${mine?"Your review":"Rate and review"}</h2><div class="card" style="display:flex;flex-direction:column;gap:10px">
         <div class="shpick" role="radiogroup" aria-label="Your rating">${[1,2,3,4,5].map(i=>`<button data-act="shStar" data-v="${i}" role="radio" aria-checked="${st.rating===i}" aria-label="${i} star${i>1?"s":""}" class="${st.rating>=i?"on":""}">★</button>`).join("")}</div>
