@@ -897,6 +897,20 @@ button.brand{flex:0 0 auto;margin-right:auto;border:0;background:none;color:var(
 .hn-emo{width:64px;flex:none;border:1px solid var(--line);background:var(--surface);border-radius:14px;font-size:26px;cursor:pointer}
 .hn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;margin-top:8px;padding:8px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
 .hn-grid button{border:0;background:none;font-size:24px;height:44px;border-radius:10px;cursor:pointer}.hn-grid button[aria-pressed="true"]{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.jstats{display:flex;gap:10px;margin-bottom:12px}.jstats span{flex:1;text-align:center;padding:10px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:13px;color:var(--muted)}.jstats b{display:block;font-size:22px;color:var(--fg);font-family:var(--f-display)}
+.jcal{padding:12px;border-radius:18px;background:var(--surface);border:1px solid var(--line);margin-bottom:14px}
+.jgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.jw{text-align:center;font-size:11px;font-weight:700;color:var(--muted)}
+.jday{position:relative;aspect-ratio:1;border:0;border-radius:10px;background:var(--surface2) center/cover;color:var(--fg);font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;overflow:hidden;padding:0}
+.jday b{font-size:13px;font-weight:700;position:relative}.jday i{font-style:normal;font-size:13px;line-height:1;position:relative}.jday i.m{position:absolute;right:2px;bottom:1px;font-size:11px}
+.jday[style*="background-image"] b{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.9)}.jday[style*="background-image"]::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.25)}
+.jday:disabled{opacity:.3;cursor:default}.jday.today{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--accent) 60%,transparent)}.jday.on{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent)}
+.jday.has:not([style*="background-image"]){background:var(--accent-soft)}
+.jentry{display:flex;flex-direction:column;gap:12px}
+.jmoods{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}.jmoods button{border:1px solid var(--line);background:var(--surface);border-radius:12px;font-size:21px;aspect-ratio:1;padding:0;cursor:pointer}.jmoods button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);transform:scale(1.08)}
+.jpics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.jpic{position:relative;aspect-ratio:3/4;border-radius:14px;overflow:hidden;background:var(--surface)}.jpic img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}.jpic .x{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:#fff}
+.jpic.add{border:2px dashed var(--line);color:var(--muted);font:inherit;font-size:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer}.jpic.add span{font-size:12px;font-weight:700}
+.jnote{line-height:1.55;min-height:150px}
 .dr-foot{margin:4px 6px 0;padding-top:10px;font-size:12.5px}
 .crew-btn{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px 3px 7px;font:inherit;font-size:12.5px;cursor:pointer}
 .crew-btn b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crew-btn i{font-style:normal;color:var(--muted);font-size:10px}
@@ -1035,7 +1049,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-13.35";
+const APP_VERSION="2026-11-14.01";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2228,7 +2242,7 @@ SHEETS.person={live:true,
     const bd=m.birthday?pd("2000-"+m.birthday).toLocaleDateString("en-GB",{day:"numeric",month:"long"}):"";
     const grid=list=>`<div class="media-grid">${list.map(x=>`<button data-act="openMoment" data-id="${esc(x.id)}" aria-label="Moment from ${esc(fDate(x.day))}"><img src="${esc(x.kind==="video"?x.poster:x.src)}" alt="" loading="lazy"><span style="position:absolute;left:6px;bottom:5px;color:#fff;font-size:11px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.6)">${esc(fDate(x.day,{day:"numeric",month:"short"}))}</span></button>`).join("")}</div>`;
     const sc=songCard(m),facts=[["🎂","Birthday",bd],["📍","Fav spot",m.spot],["🎵","On repeat",sc?"":m.song]].filter(f=>f[2]);
-    return{title:me?"My profile":esc(m.nick),right:me?`<button class="btn sm" data-act="settings" aria-label="Settings">⚙️</button><button class="btn sm" data-act="profile">Edit</button>`:"",body:`
+    return{title:me?"My profile":esc(m.nick),right:me?`<button class="btn sm" data-act="journal" aria-label="My journal">📔</button><button class="btn sm" data-act="settings" aria-label="Settings">⚙️</button><button class="btn sm" data-act="profile">Edit</button>`:"",body:`
       <div class="prof-hero">${stickerHalo(m.stickers||[],avatar(id))}<h1>${esc(m.nick)}</h1>${m.vibe?`<span class="vibe">${esc(m.vibe)}</span>`:""}${m.bio?`<p style="margin:0;max-width:34ch;color:var(--muted)">${esc(m.bio)}</p>`:me?`<button class="btn sm ghost" data-act="profile">+ Add a bio, photo and cute stuff</button>`:""}
         <div class="row" style="justify-content:center;margin-top:4px"><button class="btn" data-act="timeline" data-id="${esc(id)}">🕰️ Timeline</button>${me?"":`<button class="btn pri" data-act="dm" data-id="${esc(id)}">💬 Message</button>`}</div></div>
       ${!me&&MODE==="live"&&crewOwner()===ME?`<div style="display:flex;justify-content:center;margin-top:8px"><button class="btn sm danger" data-act="kickMember" data-id="${esc(id)}" data-confirm="Tap again to remove ${esc(m.nick)}">Remove from crew</button></div>`:""}
@@ -3786,6 +3800,30 @@ SHEETS.council={live:true,
           ${waiting.length&&!closed?`<div class="cwait"><span class="meta">Still to vote</span><div class="row" style="gap:6px;flex-wrap:wrap">${waiting.map(u=>`<span class="cw">${cav(c,u)}<span>${esc(cName(c,u))}</span></span>`).join("")}</div></div>`:""}`:""}
         <div class="sec"><h2>💬 Discussion${msgs.length?` · ${msgs.length}`:""}</h2>${msgs.length?`<div class="cchat">${msgs.map(m=>`<div class="cmsg ${m.by===ME?"me":""}">${m.by===ME?"":cav(c,m.by)}<div class="cbub">${m.by===ME?"":`<b>${esc(cName(c,m.by))}</b>`}<span>${linkify(m.text||"")}</span><em>${ago(m.at)}</em></div>${m.by===ME?`<button class="x" data-act="cMsgDel" data-id="${esc(m.id)}" aria-label="Delete">✕</button>`:""}</div>`).join("")}</div>`:`<div class="hint" style="margin:0">No comments yet. Make your case 👀</div>`}</div>`,
       foot:`<div style="display:flex;gap:6px;align-items:flex-end;flex:1"><textarea class="compose" id="cmIn-${esc(c.id)}" rows="1" placeholder="Say something…" enterkeyhint="send"></textarea><button class="send" data-act="cSend" data-id="${esc(c.id)}" aria-label="Send">${ICON.send}</button></div>`}}};
+/* ---------- daily journal: up to 3 photos and a note a day. Stored in your private space, so nobody else can see it. ---------- */
+const J_MOODS=["😄","🥰","😌","😐","😴","😢","😤","🤯"];
+const jOf=ds=>D.mine.find(m=>m.kind==="journal"&&m.date===ds);
+const jAll=()=>D.mine.filter(m=>m.kind==="journal");
+function jStreak(){let n=0;const d=new Date();if(!jOf(ymd(d)))d.setDate(d.getDate()-1);while(jOf(ymd(d))){n++;d.setDate(d.getDate()-1)}return n}
+SHEETS.journal={live:true,
+  init(a){return{day:a.day||TODAY(),month:(a.day||TODAY()).slice(0,7),draft:null}},
+  render(s){const st=s.state,ds=st.day,e=jOf(ds),dr=st.draft||(st.draft={pics:[...(e?.pics||[])],mood:e?.mood||"",of:ds}),today=TODAY();
+    if(dr.of!==ds){st.draft={pics:[...(e?.pics||[])],mood:e?.mood||"",of:ds};return SHEETS.journal.render(s)}
+    const [y,mo]=st.month.split("-").map(Number),first=new Date(y,mo-1,1),days=new Date(y,mo,0).getDate(),lead=(first.getDay()+6)%7,cells=[];
+    for(let i=0;i<lead;i++)cells.push(`<span></span>`);
+    for(let d=1;d<=days;d++){const k=`${st.month}-${pad(d)}`,x=jOf(k),fut=k>today;
+      cells.push(`<button class="jday ${k===ds?"on":""} ${k===today?"today":""} ${x?"has":""}" data-act="jDay" data-d="${k}" ${fut?"disabled":""} ${x?.pics?.[0]?`style="background-image:url('${esc(x.pics[0])}')"`:""}><b>${d}</b>${x&&!x.pics?.[0]?`<i>${esc(x.mood||"✍️")}</i>`:x?.mood?`<i class="m">${esc(x.mood)}</i>`:""}</button>`)}
+    const n=jAll().length,stk=jStreak(),canNext=st.month<today.slice(0,7);
+    return{title:"📔 My journal",right:`<span class="pill set">🔒 Only you</span>`,body:`
+      <div class="jstats"><span><b>${n}</b> ${n===1?"day":"days"} written</span><span><b>${stk}</b>🔥 day streak</span></div>
+      <div class="jcal"><div class="between" style="margin-bottom:8px"><button class="btn sm ghost" data-act="jMonth" data-k="-1" aria-label="Previous month">‹</button><b>${first.toLocaleDateString("en-GB",{month:"long",year:"numeric"})}</b><button class="btn sm ghost" data-act="jMonth" data-k="1" aria-label="Next month" ${canNext?"":"disabled"}>›</button></div>
+        <div class="jgrid">${["M","T","W","T","F","S","S"].map(w=>`<span class="jw">${w}</span>`).join("")}${cells.join("")}</div></div>
+      <div class="jentry"><div class="between"><h2 style="margin:0">${ds===today?"Today":esc(fDate(ds,{weekday:"long",day:"numeric",month:"long"}))}</h2>${e?`<span class="meta">Saved ${ago(e.u||e.at)}</span>`:""}</div>
+        <div class="jmoods">${J_MOODS.map(m=>`<button data-act="jMood" data-v="${m}" aria-pressed="${dr.mood===m}">${m}</button>`).join("")}</div>
+        <div class="jpics">${[0,1,2].map(i=>dr.pics[i]?`<div class="jpic"><img src="${esc(dr.pics[i])}" alt="" data-act="jZoom" data-i="${i}"><button class="x" data-act="jPicDel" data-i="${i}" aria-label="Remove photo">✕</button></div>`:`<button class="jpic add" data-act="jPic" aria-label="Add photo">📷<span>Add</span></button>`).join("")}</div>
+        <textarea class="inp jnote" id="jNote-${ds}" maxlength="5000" rows="7" placeholder="${ds===today?"How was today? What happened, how you felt, what you're grateful for…":"What happened this day?"}">${esc(e?.note||"")}</textarea>
+        ${e?`<button class="btn sm ghost danger" data-act="jDel" data-d="${ds}" data-confirm="Delete this day?" style="align-self:flex-start">Delete this day</button>`:""}</div>`,
+      foot:`<button class="btn pri block" data-act="jSave">${e?"Save changes":"Save today's entry"}</button>`}}};
 /* busy */
 SHEETS.busy={
   render(s){return{title:"Block my time",body:`<div class="form">
@@ -4129,7 +4167,16 @@ const ACT={
     else try{await FS.collection(`councils/${d.id}/msgs`).add({by:ME,text:t.slice(0,800),at:now()});FS.doc("councils/"+d.id).update({nmsg:firebase.firestore.FieldValue.increment(1),u:now()}).catch(()=>{})}catch(e){Store.err(e)}
     requestAnimationFrame(()=>{const b=$(".sheet-b",topS()?.el);if(b)b.scrollTop=b.scrollHeight})},
   async cMsgDel(d){const s=topS();if(MODE==="demo")return Store.del("cmsgs",d.id);try{await FS.doc(`councils/${s.args.id}/msgs/${d.id}`).delete()}catch(e){Store.err(e)}},
-  crews(){openSheet("crews")},
+  journal(){openSheet("journal")},
+  jDay(d){const s=topS();s.state.day=d.d;paintSheet(s)},
+  jMonth(d){const s=topS(),[y,m]=s.state.month.split("-").map(Number),x=new Date(y,m-1+(+d.k),1),k=ymd(x).slice(0,7);if(k>TODAY().slice(0,7))return;s.state.month=k;paintSheet(s)},
+  jMood(d){const s=topS();s.state.draft.mood=s.state.draft.mood===d.v?"":d.v;paintSheet(s);try{haptic()}catch{}},
+  jPic(){const s=topS(),dr=s.state.draft;if(dr.pics.length>=3)return toast("Up to 3 photos a day");pickPhotos(async fs=>{for(const f of fs.slice(0,3-dr.pics.length)){try{dr.pics.push(await cPic(f,900))}catch{}}paintSheet(s)},"#filePick")},
+  jPicDel(d){const s=topS();s.state.draft.pics.splice(+d.i,1);paintSheet(s)},
+  jZoom(d,el){const box=document.createElement("button");box.className="czoom";box.innerHTML=`<img src="${el.src}" alt="">`;box.onclick=()=>box.remove();document.body.appendChild(box)},
+  async jSave(){const s=topS(),ds=s.state.day,dr=s.state.draft,note=val("jNote-"+ds).slice(0,5000);if(!note&&!dr.pics.length&&!dr.mood)return toast("Write something or add a photo first.");
+    const e=jOf(ds);document.activeElement?.blur?.();await Store.set("mine","j_"+ds,{kind:"journal",date:ds,note,pics:dr.pics.slice(0,3),mood:dr.mood||"",at:e?.at||now()});s.state.draft=null;paintSheet(s);toast(e||ds!==TODAY()?"Saved 📔":"📔 Saved. See you tomorrow")},
+  async jDel(d){await Store.del("mine","j_"+d.d);const s=topS();s.state.draft=null;const el=$("#jNote-"+CSS.escape(d.d),s.el);if(el)el.value="";paintSheet(s);toast("Deleted")},
   tutAgain(){closeAll();setTimeout(startTour,200)},
   drawer(){setDrawer(!DRAWER.open)},
   drawerClose(){setDrawer(false)},
