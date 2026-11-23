@@ -358,6 +358,12 @@ input,textarea,.bub,.note p,p{-webkit-user-select:text;user-select:text}
 .tslot.on .pin{width:52px;height:52px;box-shadow:0 6px 16px rgba(0,0,0,.3)}
 .tslot.on .pin>span{font-size:24px}
 .tslot.on .pin.dot{width:14px;height:14px;box-shadow:none;margin-bottom:20px;background:var(--muted)}
+.tlpg{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);display:flex;align-items:center;gap:5px;z-index:3;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.tlpg b{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);transition:all .2s}.tlpg b.on{width:16px;border-radius:4px;background:var(--accent)}
+.tlpg i{font-style:normal;color:#fff;font-weight:800;font-size:16px;line-height:1;padding:0 4px;cursor:pointer}.tlpg i.off{opacity:.25;pointer-events:none}.tlpg em{font-style:normal;font-size:11px;font-weight:700;color:rgba(255,255,255,.75);margin-left:2px}
+.tl-stick{position:sticky;top:-1px;z-index:6;margin:0 -16px;padding:4px 16px 10px;background:linear-gradient(var(--bg) 88%,color-mix(in srgb,var(--bg) 0%,transparent));}
+.sheet .tl-stick{background:linear-gradient(var(--bg) 90%,transparent)}
+#tlDetail{position:relative;z-index:1;min-height:60vh}
 .tl-fan{position:absolute;left:50%;top:6px;transform:translateX(-50%);width:230px;height:170px;z-index:2;border:0;background:none;padding:0;display:block}
 .tl-fan .fp{position:absolute;left:50%;top:10px;width:92px;height:118px;margin-left:-46px;border-radius:12px;background:var(--surface2) center/cover;border:3px solid #fff;box-shadow:0 8px 20px rgba(0,0,0,.35);transform:translateX(var(--x)) rotate(var(--r));animation:fanUp .35s cubic-bezier(.2,.9,.3,1.3) both}
 .tl-fan .fp.txt{display:flex;align-items:center;justify-content:center;padding:8px;text-align:center;color:#1F2328;font-weight:700;font-size:12px;line-height:1.25;overflow:hidden;border-color:rgba(255,255,255,.9)}
@@ -1052,7 +1058,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-23.01";
+const APP_VERSION="2026-11-23.02";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2078,8 +2084,8 @@ SHEETS.timeline={
     ${me?`<div class="seg" style="margin-bottom:8px"><button data-act="tlScope" data-k="you" aria-pressed="${!grp}">🧍 Your timeline</button><button data-act="tlScope" data-k="group" aria-pressed="${grp}">👥 Group timeline</button></div>
     <p class="meta" id="tlNote" style="margin:0 0 8px;text-align:center">${grp?`Every plan in ${esc(curCrew().name)} you were invited to, whether you went or not.`:many?"Your plans, memories and blocks from all your crews.":"Your plans, memories and blocks."}</p>`:""}
     <div class="seg"><button data-act="tlMode" data-k="day" aria-pressed="${s.state.mode==="day"}">Daily</button><button data-act="tlMode" data-k="month" aria-pressed="${s.state.mode==="month"}">Monthly</button></div>
-    <div class="tl-wrap"><div class="tl-line"></div><div class="tl-strip" id="tlStrip"></div><button class="tl-fan" id="tlFan" data-act="tlOpen" aria-label="Open this memory"></button><div class="tl-needle"></div></div>
-    <div class="row" style="justify-content:center;gap:6px"><button class="btn sm" data-act="tlJump" data-k="past">⏮ Oldest</button><button class="btn sm pri" data-act="tlJump" data-k="today">Today</button><button class="btn sm" data-act="tlJump" data-k="future">Latest ⏭</button></div>
+    <div class="tl-stick"><div class="tl-wrap"><div class="tl-line"></div><div class="tl-strip" id="tlStrip"></div><button class="tl-fan" id="tlFan" data-act="tlOpen" aria-label="Open this memory"></button><div class="tl-needle"></div></div>
+    <div class="row" style="justify-content:center;gap:6px"><button class="btn sm" data-act="tlJump" data-k="past">⏮ Oldest</button><button class="btn sm pri" data-act="tlJump" data-k="today">Today</button><button class="btn sm" data-act="tlJump" data-k="future">Latest ⏭</button></div></div>
     <div id="tlDetail"></div>`}},
   after(s,first){if(!first)return;buildTimeline(s);tlLoadOthers(s)},
   destroy(s){s.ro?.disconnect();s.dead=true;TLM.stop()}
@@ -2138,9 +2144,12 @@ function tlFan(s,i){
   if(fp){plans=[fp];a={...a0,media:a0.media.filter(m=>m.ev===fp.id),board:(a0.board||[]).filter(b=>b.plan===fp.id)}}
   const upcoming=x.k>=(s.month?TODAY().slice(0,7):TODAY()),planMedia=a.media.filter(m=>!m.own),ownMedia=a.media.filter(m=>m.own),board=a.board||[];
   const src=upcoming?(planMedia.length?planMedia:board.length?board:ownMedia):(a.media.length?a.media:board),fromBoard=src===board&&board.length>0;
-  const pics=[...src].sort((p,q)=>q.t-p.t).slice(0,3),pos=[[-14,-62],[0,0],[14,62]],use=pics.length===1?[pos[1]]:pics.length===2?[pos[0],pos[2]]:pos;
+  // more than 3 photos: swipe the fan (or tap ‹ ›) to flip through them 3 at a time
+  const allp=[...src].sort((p,q)=>q.t-p.t),fk=x.k+"|"+(s.focus||"");if(s.fanKey!==fk){s.fanKey=fk;s.fanPage=0}
+  const pages=Math.max(1,Math.ceil(allp.length/3));s.fanPage=Math.min(Math.max(0,s.fanPage||0),pages-1);s.fanPages=pages;
+  const pics=allp.slice(s.fanPage*3,s.fanPage*3+3),pos=[[-14,-62],[0,0],[14,62]],use=pics.length===1?[pos[1]]:pics.length===2?[pos[0],pos[2]]:pos;
   fan.innerHTML=pics.map((m,k)=>`<span class="fp ${m.video?"v":""} ${m.thumb?"":"txt"}" style="${m.thumb?`background-image:url('${esc(m.thumb)}');`:`background:${esc(m.color||"#FFE58F")};`}--r:${use[k][0]}deg;--x:${use[k][1]}px;animation-delay:${k*45}ms">${m.thumb?"":`<span>${esc(m.text||"")}</span>`}</span>`).join("")+
-    (plans.length||pics.length?`<span class="nm">${plans[0]?esc((plans[0].emoji||"")+" "+plans[0].title)+(plans.length>1?` +${plans.length-1}`:""):`${a.media.length} memor${a.media.length===1?"y":"ies"}`}${fromBoard?`<br><span style="font-weight:600;font-size:11px;color:var(--muted)">🎨 Mood board · tap to open</span>`:""}</span>`:"");
+    (pages>1?`<span class="tlpg"><i data-act="tlPage" data-k="-1" class="${s.fanPage?"":"off"}" aria-label="Previous photos">‹</i>${Array.from({length:pages},(_,k)=>`<b class="${k===s.fanPage?"on":""}"></b>`).join("")}<i data-act="tlPage" data-k="1" class="${s.fanPage<pages-1?"":"off"}" aria-label="More photos">›</i><em>${allp.length}</em></span>`:"")+(plans.length||pics.length?`<span class="nm">${plans[0]?esc((plans[0].emoji||"")+" "+plans[0].title)+(plans.length>1?` +${plans.length-1}`:""):`${a.media.length} memor${a.media.length===1?"y":"ies"}`}${fromBoard?`<br><span style="font-weight:600;font-size:11px;color:var(--muted)">🎨 Mood board · tap to open</span>`:""}</span>`:"");
   fan.style.pointerEvents=plans.length||pics.length?"auto":"none";s.fanTarget={plan:plans[0]||null,media:a.media,board:!!fromBoard};
   const seen=new Set(),all=[];for(const m of [...src,...a.media,...board]){const k=(m.thumb||"")+"|"+(m.text||"")+"|"+(m.color||"");if(seen.has(k))continue;seen.add(k);all.push(m)}
   s.fanAll=all;s.fanLabel=plans[0]?(plans[0].emoji||"")+" "+plans[0].title+(plans.length>1?` +${plans.length-1}`:""):`${a.media.length} memor${a.media.length===1?"y":"ies"}`;s.fanDay=x.k;
@@ -3393,6 +3402,10 @@ SHEETS.person.destroy=()=>SONG.stop();
 {let lp=null;const fanOf=e=>e.target.closest?.("#tlFan");
   document.addEventListener("touchstart",e=>{const f=fanOf(e);if(!f)return;clearTimeout(lp);lp=setTimeout(()=>{const s=topS();if(s?.kind!=="timeline")return;s.lpAt=Date.now();try{haptic()}catch{}ACT.tlOpen()},480)},{passive:true});
   ["touchend","touchmove","touchcancel"].forEach(t=>document.addEventListener(t,()=>clearTimeout(lp),{passive:true}));
+  // swipe the photo fan sideways to see the next 3
+  let fx=null,fy=0;document.addEventListener("touchstart",e=>{if(!fanOf(e))return;fx=e.touches[0].clientX;fy=e.touches[0].clientY},{passive:true});
+  document.addEventListener("touchend",e=>{if(fx==null)return;const dx=e.changedTouches[0].clientX-fx,dy=e.changedTouches[0].clientY-fy;fx=null;if(Math.abs(dx)<40||Math.abs(dx)<Math.abs(dy))return;
+    const s=topS();if(s?.kind!=="timeline"||(s.fanPages||1)<2)return;clearTimeout(lp);ACT.tlPage({k:dx<0?1:-1})},{passive:true});
   document.addEventListener("contextmenu",e=>{if(!fanOf(e))return;e.preventDefault();const s=topS();if(s)s.lpAt=Date.now();ACT.tlOpen()})}
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&e.target?.id?.startsWith("cmIn-")){e.preventDefault();ACT.cSend({id:e.target.id.slice(5)})}});
 document.addEventListener("keydown",e=>{const s=topS();if(s?.kind!=="gWord"||e.metaKey||e.ctrlKey||e.altKey)return;const k=e.key;
@@ -4394,7 +4407,8 @@ const ACT={
     $$(".tl-ev",s.el).forEach(b=>b.classList.toggle("sel",b.dataset.ev===s.focus));tlFan(s,s.state.idx);try{haptic()}catch{}},
   tlScope(d){const s=topS();s.state.scope=d.k;ls.set("yg-tlscope",d.k);paintSheet(s);s.ro?.disconnect();buildTimeline(s);tlLoadOthers(s)},
   tlRemote(d){const c=CREWS[d.k];if(!c)return toast("That's from a crew you're no longer in.");Store.switchTo(d.k)},
-  tlOpen(){$(".tlspread",topS()?.el)?.remove();const s=topS(),t=s?.fanTarget;if(!t)return;if(t.plan?._busy)return openSheet("busyView",{id:t.plan._busy});if(t.plan?._crew)return ACT.tlRemote({k:t.plan._crew});if(t.plan){if(albumOpen(t.plan))ACT.openAlbum({id:t.plan.id});else if(t.board)openSheet("board",{id:t.plan.id});else openSheet("plan",{id:t.plan.id});return}
+  tlPage(d){const s=topS();if(!s||s.kind!=="timeline")return;s.swipeAt=Date.now();const n=(s.fanPage||0)+(+d.k);if(n<0||n>=(s.fanPages||1))return;s.fanPage=n;tlFan(s,s.state.idx);try{haptic()}catch{}},
+  tlOpen(){$(".tlspread",topS()?.el)?.remove();const s=topS(),t=s?.fanTarget;if(!t)return;if(Date.now()-(s.swipeAt||0)<450)return;if(t.plan?._busy)return openSheet("busyView",{id:t.plan._busy});if(t.plan?._crew)return ACT.tlRemote({k:t.plan._crew});if(t.plan){if(albumOpen(t.plan))ACT.openAlbum({id:t.plan.id});else if(t.board)openSheet("board",{id:t.plan.id});else openSheet("plan",{id:t.plan.id});return}
     const m=t.media[0];if(!m)return;const mm=/data-act="(\w+)" data-(id|key)="([^"]+)"/.exec(m.act);if(mm)ACT[mm[1]]?.({[mm[2]]:mm[3]})},
   tlJump(d){const s=topS();if(!s.slots)return;const cur=s.month?TODAY().slice(0,7):TODAY();const i=d.k==="past"?0:d.k==="future"?s.slots.length-1:Math.max(0,s.slots.findIndex(x=>x.k===cur));s.go(i)},
   async rideRole(d){const p=planById(d.id);const r=myRsvp(d.id);
