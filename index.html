@@ -911,6 +911,9 @@ button.brand{flex:0 0 auto;margin-right:auto;border:0;background:none;color:var(
 .jpic{position:relative;aspect-ratio:3/4;border-radius:14px;overflow:hidden;background:var(--surface)}.jpic img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}.jpic .x{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:#fff}
 .jpic.add{border:2px dashed var(--line);color:var(--muted);font:inherit;font-size:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer}.jpic.add span{font-size:12px;font-weight:700}
 .jnote{line-height:1.55;min-height:150px}
+.tl-addsong{width:100%;margin-top:10px;border:1.5px dashed var(--line);background:none;color:var(--muted);font:inherit;font-weight:700;font-size:14px;padding:10px;border-radius:14px;cursor:pointer}
+.tlsong{margin-top:10px}.tlsong .x{flex:none}
+.tl-note{position:absolute;bottom:6px;right:8px;font-style:normal;font-size:11px;z-index:2}.tslot{position:relative}
 .dr-foot{margin:4px 6px 0;padding-top:10px;font-size:12.5px}
 .crew-btn{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px 3px 7px;font:inherit;font-size:12.5px;cursor:pointer}
 .crew-btn b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crew-btn i{font-style:normal;color:var(--muted);font-size:10px}
@@ -1049,7 +1052,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-14.01";
+const APP_VERSION="2026-11-23.01";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2045,10 +2048,33 @@ function timelineDays(u,opt={}){
   for(const d of Object.values(days))d.plans.sort((a,b)=>(a._busy?1:0)-(b._busy?1:0));
   return days;
 }
+/* ---------- a song for each day on your timeline: it plays (a 30-second preview) as you scroll onto that day ----------
+   Saved in your private space, so only you hear them. */
+const daySong=k=>{if(k.length===7){const all=D.mine.filter(m=>m.kind==="daysong"&&m.date.startsWith(k)).sort((a,b)=>b.date.localeCompare(a.date));return all[0]||null}return D.mine.find(m=>m.kind==="daysong"&&m.date===k)||null};
+const TLM={a:null,id:null,t:null,fade:null,muted:()=>!!ls.get("yg-tl-mute",false),
+  cue(k){clearTimeout(this.t);this.t=setTimeout(()=>{const sg=daySong(k);if(!sg?.prev||this.muted()){this.out();return}if(this.id===sg.id&&this.a&&!this.a.paused)return;this.play(sg)},380)},
+  play(sg){this.out(true);try{SONG.stop()}catch{}const a=new Audio(sg.prev);a.volume=0;a.loop=true;this.a=a;this.id=sg.id;a.play().catch(()=>{});this.ramp(a,.6);this.paint()},
+  ramp(a,to,done){clearInterval(a._f);a._f=setInterval(()=>{const v=a.volume+(to>a.volume?.06:-.08);a.volume=Math.max(0,Math.min(1,to>a.volume?Math.min(v,to):Math.max(v,to)));if(Math.abs(a.volume-to)<.01){clearInterval(a._f);done?.()}},45)},
+  out(quick){const a=this.a;this.a=null;this.id=null;if(a){if(quick){this.ramp(a,0,()=>a.pause())}else this.ramp(a,0,()=>a.pause())}this.paint()},
+  stop(){clearTimeout(this.t);const a=this.a;this.a=null;this.id=null;if(a){clearInterval(a._f);try{a.pause()}catch{}}this.paint()},
+  paint(){const b=document.querySelector(".tlsong .songbtn");if(b){const on=this.a&&!this.a.paused&&b.dataset.id===this.id;b.innerHTML=on?SONG_ICON.pause:SONG_ICON.play;b.closest(".tlsong").classList.toggle("playing",!!on)}
+    const m=document.querySelector(".tl-mute");if(m)m.textContent=this.muted()?"🔇":"🔊"}};
+document.addEventListener("visibilitychange",()=>{if(document.hidden)TLM.stop()});
+function tlSongHtml(s,k){if(s.args.id!==ME)return"";const sg=daySong(k),month=k.length===7;
+  if(!sg)return month?"":`<button class="tl-addsong" data-act="daySong" data-d="${esc(k)}">🎵 Add a song for this day</button>`;
+  return`<div class="tlsong songcard"><span class="sart">${sg.art?`<img src="${esc(sg.art)}" alt="">`:"🎵"}</span><span class="grow" style="min-width:0"><span class="k">🎵 ${month?`Song from ${esc(fDate(sg.date,{day:"numeric",month:"short"}))}`:"Song of the day"}</span><b>${esc(sg.t)}</b><span class="eq"><i></i><i></i><i></i><i></i></span></span>
+    ${sg.prev?`<button class="songbtn" data-act="tlSongToggle" data-id="${esc(sg.id)}" aria-label="Play">${SONG_ICON.play}</button>`:""}${month?"":`<button class="x" data-act="daySong" data-d="${esc(k)}" aria-label="Change song">✏️</button>`}</div>`}
+SHEETS.daySong={init(a){const sg=daySong(a.d);return{res:sg?{songTitle:sg.t,songArt:sg.art,songPreview:sg.prev,songUrl:sg.url}:null}},
+  render(s){const r=s.state.res,sg=daySong(s.args.d);return{title:"🎵 Song for "+(s.args.d===TODAY()?"today":esc(fDate(s.args.d,{day:"numeric",month:"short"}))),body:`<div class="form">
+    <label class="f">Spotify link, or Song – Artist<span class="row" style="gap:8px;flex-wrap:nowrap"><input class="inp" id="dsQ" maxlength="300" placeholder="e.g. Espresso – Sabrina Carpenter" style="flex:1;min-width:0"><button class="btn" data-act="dsFind">Find</button></span></label>
+    ${s.state.busy?`<div class="loading" style="padding:10px"><div class="spin"></div></div>`:r?`<div class="songcard"><span class="sart">${r.songArt?`<img src="${esc(r.songArt)}" alt="">`:"🎵"}</span><span class="grow" style="min-width:0"><span class="k">${r.songPreview?"Preview ready":"No preview for this one"}</span><b>${esc(r.songTitle)}</b></span>${r.songPreview?`<button class="songbtn" data-act="dsPreview" aria-label="Play">${SONG_ICON.play}</button>`:""}</div>`:""}
+    <div class="hint" style="margin:0">It plays when you scroll to this day on your timeline. Only you hear it.</div>
+    ${sg?`<button class="btn danger" data-act="dsDel" data-d="${esc(s.args.d)}">Remove the song</button>`:""}</div>`,foot:`<button class="btn pri block" data-act="dsSave" ${r?"":"disabled"}>Save</button>`}},
+  destroy(s){s.pa?.pause()}};
 SHEETS.timeline={
   init(a){return{mode:ls.get("yg-tlmode","day"),scope:a.id===ME?ls.get("yg-tlscope","you"):"you",idx:-1}},
   render(s){const m=mem(s.args.id),me=s.args.id===ME,grp=me&&s.state.scope==="group",many=MODE==="live"&&liveCrews().length>1;
-    return{title:`🕰️ ${me?(grp?`${esc(curCrew().name)} timeline`:"Your timeline"):esc(m?.nick||"")+"'s timeline"}`,body:`
+    return{title:`🕰️ ${me?(grp?`${esc(curCrew().name)} timeline`:"Your timeline"):esc(m?.nick||"")+"'s timeline"}`,right:me?`<button class="btn sm tl-mute" data-act="tlMute" aria-label="Day songs on or off">${TLM.muted()?"🔇":"🔊"}</button>`:"",body:`
     ${me?`<div class="seg" style="margin-bottom:8px"><button data-act="tlScope" data-k="you" aria-pressed="${!grp}">🧍 Your timeline</button><button data-act="tlScope" data-k="group" aria-pressed="${grp}">👥 Group timeline</button></div>
     <p class="meta" id="tlNote" style="margin:0 0 8px;text-align:center">${grp?`Every plan in ${esc(curCrew().name)} you were invited to, whether you went or not.`:many?"Your plans, memories and blocks from all your crews.":"Your plans, memories and blocks."}</p>`:""}
     <div class="seg"><button data-act="tlMode" data-k="day" aria-pressed="${s.state.mode==="day"}">Daily</button><button data-act="tlMode" data-k="month" aria-pressed="${s.state.mode==="month"}">Monthly</button></div>
@@ -2056,7 +2082,7 @@ SHEETS.timeline={
     <div class="row" style="justify-content:center;gap:6px"><button class="btn sm" data-act="tlJump" data-k="past">⏮ Oldest</button><button class="btn sm pri" data-act="tlJump" data-k="today">Today</button><button class="btn sm" data-act="tlJump" data-k="future">Latest ⏭</button></div>
     <div id="tlDetail"></div>`}},
   after(s,first){if(!first)return;buildTimeline(s);tlLoadOthers(s)},
-  destroy(s){s.ro?.disconnect();s.dead=true}
+  destroy(s){s.ro?.disconnect();s.dead=true;TLM.stop()}
 };
 /* "Your timeline" also shows plans and memories from your other crews (fetched when you open it) */
 const XTL={};
@@ -2076,6 +2102,7 @@ function timelineFor(u,scope){if(u!==ME)return timelineDays(u);if(scope==="group
 function tlLoadOthers(s){if(s.args.id!==ME||s.state.scope==="group"||MODE!=="live"||liveCrews().length<2)return;const fresh=liveCrews().filter(k=>k!==CREW).every(k=>XTL[k]&&now()-XTL[k].at<3*6e4);if(fresh)return;
   const n=$("#tlNote",s.el);if(n)n.textContent="Loading your other crews…";
   loadOtherCrews().then(()=>{if(s.dead||s.state.scope==="group")return;const i=s.state.idx;s.ro?.disconnect();buildTimeline(s);const nn=$("#tlNote",s.el);if(nn)nn.textContent="Your plans, memories and blocks from all your crews.";if(i>=0)requestAnimationFrame(()=>s.go?.(i))}).catch(()=>{})}
+function tlRefresh(){const s=stack.find(x=>x.kind==="timeline");if(!s?.slots)return;const i=s.state.idx;s.ro?.disconnect();buildTimeline(s);requestAnimationFrame(()=>{s.go?.(i);setTimeout(()=>{tlDetail(s,i);TLM.cue(s.slots[i].k)},120)})}
 function buildTimeline(s){
   const days=timelineFor(s.args.id,s.state.scope),month=s.state.mode==="month",today=TODAY(),keys=Object.keys(days).sort();
   const slots=[];
@@ -2091,7 +2118,7 @@ function buildTimeline(s){
     const d=month?null:pd(x.k);
     const lab=month?`<span class="dl">${pd(x.k+"-01").toLocaleDateString("en-GB",{month:"short"})}</span><span class="dn" style="font-size:18px">${x.k.slice(0,4)}</span>`:`<span class="dl">${isT?"Today":d.toLocaleDateString("en-GB",{weekday:"short"})}</span><span class="dn">${d.getDate()}</span>`;
     const icon=a.plans[0]?esc(a.plans[0].emoji||"📍"):a.media.length?"📸":"";
-    return`<button class="tslot ${month?"m":""} ${isT?"today":""} ${fut?"fut":""} ${n?"has":""}" data-i="${i}" data-act="tlGo"><span class="pin ${n?"":"dot"}">${n?`<span>${icon}</span>`:""}</span><span class="ln"></span>${lab}</button>`}).join("");
+    return`<button class="tslot ${month?"m":""} ${isT?"today":""} ${fut?"fut":""} ${n?"has":""}" data-i="${i}" data-act="tlGo">${s.args.id===ME&&daySong(x.k)?`<i class="tl-note">🎵</i>`:""}<span class="pin ${n?"":"dot"}">${n?`<span>${icon}</span>`:""}</span><span class="ln"></span>${lab}</button>`}).join("");
   s.slots=slots;s.month=month;
   const sw=()=>strip.firstElementChild?.offsetWidth||76;
   const padIt=()=>{const p=Math.max(0,(strip.clientWidth-sw())/2);strip.style.paddingLeft=strip.style.paddingRight=p+"px"};padIt();
@@ -2099,7 +2126,7 @@ function buildTimeline(s){
   const ti=Math.max(0,slots.findIndex(x=>x.k===curKey));
   s.state.idx=-1;
   const onScroll=()=>{const i=Math.max(0,Math.min(slots.length-1,Math.round(strip.scrollLeft/sw())));if(i!==s.state.idx){if(s.state.idx>=0)haptic();s.state.idx=i;s.focus=null;
-      $$(".tslot.on",strip).forEach(e=>e.classList.remove("on"));strip.children[i]?.classList.add("on");clearTimeout(s.dt);s.dt=setTimeout(()=>{tlDetail(s,i);tlFan(s,i)},70)}};
+      $$(".tslot.on",strip).forEach(e=>e.classList.remove("on"));strip.children[i]?.classList.add("on");clearTimeout(s.dt);s.dt=setTimeout(()=>{tlDetail(s,i);tlFan(s,i);if(s.args.id===ME)TLM.cue(slots[i].k)},70)}};
   let raf=0;strip.addEventListener("scroll",()=>{if(!raf)raf=requestAnimationFrame(()=>{raf=0;onScroll()})},{passive:true});
   strip.addEventListener("wheel",e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){strip.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
   requestAnimationFrame(()=>{strip.scrollLeft=ti*sw();onScroll()});
@@ -2124,7 +2151,7 @@ function tlDetail(s,i){
   if(s.month){const d=pd(x.k+"-01");title=d.toLocaleDateString("en-GB",{month:"long",year:"numeric"});const cur=today.slice(0,7);rel=x.k===cur?"This month":x.k>cur?"Coming up":"Looking back"}
   else{title=fDate(x.k,{weekday:"long",day:"numeric",month:"long",year:pd(x.k).getFullYear()===new Date().getFullYear()?undefined:"numeric"});const diff=Math.round((pd(x.k)-pd(today))/864e5);rel=diff===0?"Today":diff===1?"Tomorrow":diff===-1?"Yesterday":diff>0?`In ${diff} days`:`${-diff} days ago`}
   const plans=[...new Map(a.plans.map(p=>[p.id,p])).values()];
-  el.innerHTML=`<div class="tl-head"><h2>${esc(title)}</h2><span class="pill ${x.k>=(s.month?today.slice(0,7):today)?"set":"done"}">${esc(rel)}</span></div>
+  el.innerHTML=`<div class="tl-head"><h2>${esc(title)}</h2><span class="pill ${x.k>=(s.month?today.slice(0,7):today)?"set":"done"}">${esc(rel)}</span></div>${tlSongHtml(s,x.k)}
     ${plans.length?`<div class="list tl-evs" style="gap:8px;margin-top:10px">${plans.map(p=>p._busy?`<button class="ev busy tl-ev" data-act="tlFocus" data-ev="${esc(p.id)}" data-open="busy" data-id="${esc(p._busy)}"><span class="stripe"></span><span style="flex:1;min-width:0"><b>🔒 ${esc(p.title)}</b><br><span class="meta">${fRange(p.final.start,p.final.end)} · only you see this</span></span><span class="meta">›</span></button>`:`<button class="ev tl-ev" data-act="tlFocus" data-ev="${esc(p.id)}" data-open="${p._crew?"remote":"plan"}" data-id="${esc(p.id)}" ${p._crew?`data-k="${esc(p._crew)}"`:""}><span class="stripe" style="background:${p._proposed?"var(--sun)":hue(p.id)}"></span><span style="flex:1;min-width:0"><b>${esc(p.emoji||"")} ${esc(p.title)}</b><br><span class="meta">${p._proposed?"Proposed date · vote":p.final?`${s.month?fDate(p.final.date)+" · ":""}${fRange(p.final.start,p.final.end)}`:""}</span></span>${p._crew?`<span class="pill crewpill">${esc(CREWS[p._crew]?.emoji||"🔥")} ${esc(CREWS[p._crew]?.name||"Other crew")}</span>`:statusPill(p)}</button>`).join("")}</div>${plans.length>1?`<div class="hint" style="text-align:center;margin-top:8px">Tap an event to see its pics up top · hold to open it</div>`:`<div class="hint" style="text-align:center;margin-top:8px">Hold to open</div>`}`:""}
     ${!plans.length?`<div class="empty" style="margin-top:10px">${x.k>=(s.month?today.slice(0,7):today)&&!a.media.length?"Nothing planned yet. Make a plan!":(a.media.length?`📸 ${a.media.length} memor${a.media.length===1?"y":"ies"} · tap the photos above to open`:"Nothing saved from this "+(s.month?"month":"day")+".")}</div>`:""}`;
 }
@@ -4168,6 +4195,15 @@ const ACT={
     requestAnimationFrame(()=>{const b=$(".sheet-b",topS()?.el);if(b)b.scrollTop=b.scrollHeight})},
   async cMsgDel(d){const s=topS();if(MODE==="demo")return Store.del("cmsgs",d.id);try{await FS.doc(`councils/${s.args.id}/msgs/${d.id}`).delete()}catch(e){Store.err(e)}},
   journal(){openSheet("journal")},
+  daySong(d){openSheet("daySong",{d:d.d})},
+  tlMute(){const m=!TLM.muted();ls.set("yg-tl-mute",m);if(m)TLM.out();else{const s=stack.find(x=>x.kind==="timeline");if(s?.slots&&s.state.idx>=0)TLM.cue(s.slots[s.state.idx].k)}TLM.paint();toast(m?"🔇 Day songs off":"🔊 Day songs on")},
+  tlSongToggle(d){const sg=D.mine.find(m=>m.id===d.id);if(!sg)return;if(TLM.id===sg.id&&TLM.a){if(TLM.a.paused){TLM.a.play().catch(()=>{});TLM.ramp(TLM.a,.6)}else TLM.a.pause();TLM.paint();return}TLM.play(sg)},
+  async dsFind(){const s=topS(),q=val("dsQ");if(!q)return toast("Paste a Spotify link or type Song – Artist");s.state.busy=true;paintSheet(s);
+    let r=null;try{r=await resolveSong(q)}catch{}s.state.busy=false;s.state.res=r&&(r.songTitle||r.songPreview)?r:null;paintSheet(s);if(!s.state.res)toast("Couldn't find that song. Try Song – Artist")},
+  dsPreview(){const s=topS(),r=s.state.res;if(!r?.songPreview)return;if(s.pa&&!s.pa.paused){s.pa.pause();return}TLM.stop();s.pa=new Audio(r.songPreview);s.pa.volume=.6;s.pa.play().catch(()=>{})},
+  async dsSave(){const s=topS(),r=s.state.res,d=s.args.d;if(!r)return;s.pa?.pause();
+    await Store.set("mine","s_"+d,{kind:"daysong",date:d,t:(r.songTitle||"Song").slice(0,120),art:r.songArt||"",prev:r.songPreview||"",url:r.songUrl||"",at:now()});closeSheet();tlRefresh();toast("🎵 Saved. It plays when you scroll to this day")},
+  async dsDel(d){await Store.del("mine","s_"+d.d);closeSheet();TLM.stop();tlRefresh();toast("Song removed")},
   jDay(d){const s=topS();s.state.day=d.d;paintSheet(s)},
   jMonth(d){const s=topS(),[y,m]=s.state.month.split("-").map(Number),x=new Date(y,m-1+(+d.k),1),k=ymd(x).slice(0,7);if(k>TODAY().slice(0,7))return;s.state.month=k;paintSheet(s)},
   jMood(d){const s=topS();s.state.draft.mood=s.state.draft.mood===d.v?"":d.v;paintSheet(s);try{haptic()}catch{}},
