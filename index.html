@@ -924,6 +924,7 @@ button.brand{flex:0 0 auto;margin-right:auto;border:0;background:none;color:var(
 .tl-addsong{width:100%;margin-top:10px;border:1.5px dashed var(--line);background:none;color:var(--muted);font:inherit;font-weight:700;font-size:14px;padding:10px;border-radius:14px;cursor:pointer}
 .tlsong{margin-top:10px}.tlsong .x{flex:none}
 .tl-note{position:absolute;bottom:6px;right:8px;font-style:normal;font-size:11px;z-index:2}.tslot{position:relative}
+.att-tile.vid{position:relative}.att-vp{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;pointer-events:none}
 .dr-foot{margin:4px 6px 0;padding-top:10px;font-size:12.5px}
 .crew-btn{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px 3px 7px;font:inherit;font-size:12.5px;cursor:pointer}
 .crew-btn b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crew-btn i{font-style:normal;color:var(--muted);font-size:10px}
@@ -1034,6 +1035,7 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none}
 <div id="toast" hidden></div>
 <button id="updBar" hidden data-act="doUpdate">✨ New version ready · Tap to update</button>
 <input type="file" id="filePick" accept="image/*" multiple class="vis-hidden" tabindex="-1" aria-hidden="true">
+<input type="file" id="videoPick" accept="video/*" class="vis-hidden" tabindex="-1" aria-hidden="true">
 <input type="file" id="camPick" accept="image/*" capture="environment" class="vis-hidden" tabindex="-1" aria-hidden="true">
 <div id="recbar" hidden><span class="dot"></span><b>Recording</b><span id="recT" class="num">0:00</span><span style="flex:1"></span><button class="btn sm" data-act="recCancel">Cancel</button><button class="btn sm pri" data-act="recSend">Send 🎤</button></div>
 <input type="file" id="mediaPick" accept="image/*,video/*" multiple class="vis-hidden" tabindex="-1" aria-hidden="true">
@@ -1062,7 +1064,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-23.04";
+const APP_VERSION="2026-11-23.05";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2045,7 +2047,8 @@ function timelineDays(u,opt={}){
   const boardOf=p=>albumOpen(p)?[]:mediaOf(p.id).filter(m=>m.phase!=="memory"&&m.phase!=="ticket"&&(m.kind==="photo"||m.kind==="note"||m.kind==="color")).map(m=>({thumb:m.kind==="photo"?m.src:"",color:m.color||"",text:m.kind==="note"?m.text:m.kind==="color"?(m.caption||m.color):"",t:m.at,plan:p.id}));
   if(u===ME&&!opt.group&&!opt.remote)for(const b of D.busy.filter(x=>x.uid===ME&&x.tl!==false)){const pics=D.mine.filter(m=>m.busyId===b.id&&m.kind==="photo");const tix=D.mine.filter(m=>m.busyId===b.id&&m.kind!=="photo");if(!pics.length&&!tix.length&&!myLabel(b))continue;
     add(b.date,"plans",{id:"busy:"+b.id,_busy:b.id,title:myLabel(b)||"Personal",emoji:"🔒",final:{date:b.date,start:b.start,end:b.end},status:b.date<TODAY()?"done":"set"});
-    for(const m of pics)add(b.date,"media",{thumb:m.src,act:`data-act="viewSrc" data-key="mine:${esc(m.id)}"`,t:m.at,own:true,ev:"busy:"+b.id})}
+    for(const m of pics)add(b.date,"media",{thumb:m.src,act:`data-act="viewSrc" data-key="mine:${esc(m.id)}"`,t:m.at,own:true,ev:"busy:"+b.id});
+    for(const m of D.mine.filter(m=>m.busyId===b.id&&m.kind==="video"&&m.poster))add(b.date,"media",{thumb:m.poster,video:true,act:`data-act="playVideo" data-key="mine:${esc(m.id)}"`,t:m.at,own:true,ev:"busy:"+b.id})}
   for(const p of visiblePlans()){const r=D.rsvps.find(x=>x.planId===p.id&&x.uid===u);if(!opt.group&&!(p.by===u||(r&&r.going!=="out")))continue;
     if(p.final){const span=dayList(p.final.date,endOf(p.final)),bd=boardOf(p),al=albumOf(p.id).filter(m=>m.kind==="photo"||(m.kind==="video"&&m.poster));
       for(const dd of span){add(dd,"plans",p);for(const b of bd)add(dd,"board",b);
@@ -2555,13 +2558,13 @@ SHEETS.ticketView={live:true,
 /* ---------- personal attachments on "Block my time" (private) ---------- */
 function myAttachHtml(busyId,pending){
   const items=pending||D.mine.filter(m=>m.busyId===busyId).sort((a,b)=>a.at-b.at);
-  const pics=items.map((m,i)=>({m,i})).filter(x=>x.m.kind==="photo");
-  const tiles=pics.length?`<div class="att-tiles ${pics.length===1?"one":pics.length===2||pics.length===4?"two":""}">${pics.map(({m,i})=>`<div class="att-tile">${pending?`<img src="${esc(m.src)}" alt="Photo">`:`<button class="tile-open" data-act="viewSrc" data-key="mine:${esc(m.id)}" aria-label="Open photo"><img src="${esc(m.src)}" alt="Photo" loading="lazy"></button>`}<button class="tile-x" data-act="${pending?"bzAttDel":"mineDel"}" data-id="${pending?i:esc(m.id)}" data-confirm="🗑️ Remove?" aria-label="Remove photo">✕</button></div>`).join("")}</div>`:"";
+  const pics=items.map((m,i)=>({m,i})).filter(x=>x.m.kind==="photo"||x.m.kind==="video");
+  const tiles=pics.length?`<div class="att-tiles ${pics.length===1?"one":pics.length===2||pics.length===4?"two":""}">${pics.map(({m,i})=>`<div class="att-tile ${m.kind==="video"?"vid":""}">${m.kind==="video"?(pending?`<img src="${esc(m.poster)}" alt="Video"><span class="att-vp">▶ ${fDur(m.dur)}</span>`:`<button class="tile-open" data-act="playVideo" data-key="mine:${esc(m.id)}" aria-label="Play video"><img src="${esc(m.poster)}" alt="Video" loading="lazy"><span class="att-vp">▶ ${fDur(m.dur)}</span></button>`):pending?`<img src="${esc(m.src)}" alt="Photo">`:`<button class="tile-open" data-act="viewSrc" data-key="mine:${esc(m.id)}" aria-label="Open photo"><img src="${esc(m.src)}" alt="Photo" loading="lazy"></button>`}<button class="tile-x" data-act="${pending?"bzAttDel":"mineDel"}" data-id="${pending?i:esc(m.id)}" data-confirm="🗑️ Remove?" aria-label="Remove photo">✕</button></div>`).join("")}</div>`:"";
   return`${tiles}<div class="att-list">${items.map((m,i)=>{const del=`<button class="x" data-act="${pending?"bzAttDel":"mineDel"}" data-id="${pending?i:esc(m.id)}" aria-label="Remove">✕</button>`;
-    if(m.kind==="photo")return"";
+    if(m.kind==="photo"||m.kind==="video")return"";
     if(m.kind==="ticket")return`<div class="row" style="flex-wrap:nowrap">${pending?`<div class="ticket"><span class="tk-ic">${esc(m.icon||"🎟️")}</span><span style="flex:1;min-width:0"><b>${esc(m.title||"Ticket")}</b>${m.code?`<div class="tk-code">${esc(m.code)}</div>`:""}</span></div>`:ticketRow(m,"mine")}${del}</div>`;
     return`<div class="item"><span style="font-size:20px">${embedUrl(m.url)?"▶":"🔗"}</span><a class="grow t" href="${esc(m.url)}" target="_blank" rel="noopener" style="color:var(--fg);font-size:13px">${esc(m.caption||hostOf(m.url))}</a>${del}</div>`}).join("")}</div>
-    <div class="att-row"><button class="btn sm" data-act="bzAttPhoto" data-id="${esc(busyId||"")}">📷 Photo</button><button class="btn sm" data-act="ticketAdd" data-scope="mine" data-id="${esc(busyId||"")}">🎟️ Ticket</button><button class="btn sm" data-act="bzAttLink" data-id="${esc(busyId||"")}">🔗 Link / reel</button></div>`;
+    <div class="att-row"><button class="btn sm" data-act="bzAttPhoto" data-id="${esc(busyId||"")}">📷 Photo</button><button class="btn sm" data-act="bzAttVideo" data-id="${esc(busyId||"")}">🎬 Video</button><button class="btn sm" data-act="ticketAdd" data-scope="mine" data-id="${esc(busyId||"")}">🎟️ Ticket</button><button class="btn sm" data-act="bzAttLink" data-id="${esc(busyId||"")}">🔗 Link / reel</button></div>`;
 }
 SHEETS.busyView={live:true,
   render(s){const b=D.busy.find(x=>x.id===s.args.id);if(!b)return{title:"Removed",body:""};
@@ -3945,7 +3948,7 @@ async function addPhotos(planId,files,phase){
 let pickCb=null;
 $("#filePick").addEventListener("change",e=>{const fs=[...e.target.files];e.target.value="";if(pickCb)pickCb(fs);pickCb=null});
 function pickPhotos(cb,el="#filePick"){pickCb=cb;$(el).click()}
-["#camPick","#onePick","#mediaPick"].forEach(s=>$(s).addEventListener("change",e=>{const fs=[...e.target.files];e.target.value="";if(pickCb)pickCb(fs);pickCb=null}));
+["#camPick","#onePick","#mediaPick","#videoPick"].forEach(s=>$(s).addEventListener("change",e=>{const fs=[...e.target.files];e.target.value="";if(pickCb)pickCb(fs);pickCb=null}));
 async function squarePhoto(file,size){const img=await loadImg(file);const m=Math.min(img.naturalWidth,img.naturalHeight);const c=document.createElement("canvas");c.width=c.height=size;c.getContext("2d").drawImage(img,(img.naturalWidth-m)/2,(img.naturalHeight-m)/2,m,m,0,0,size,size);return toDataURL(await new Promise(r=>c.toBlob(r,"image/jpeg",.8)))}
 function embedUrl(u){
   let m=String(u||"").match(/instagram\.com\/(?:[\w.]+\/)?(reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);if(m)return`https://www.instagram.com/${m[1].toLowerCase()==="p"?"p":"reel"}/${m[2]}/embed`;
@@ -3967,30 +3970,33 @@ const b64=buf=>{let o="";const b=new Uint8Array(buf);for(let i=0;i<b.length;i+=0
 const unb64=t=>{const bin=atob(t),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u};
 const CHUNK=600000;
 function ensureAC(){try{if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume()}catch{}return AC}
-async function storeMedia(blob,onProg){
+// priv: pieces go in your private space (mine/{you}/chunks) so only you can load them
+const chunkDoc=(b,k)=>b.priv?FS.doc(`mine/${b.priv}/chunks/${k}`):FS.doc(cpath(CREW,"chunks",k));
+async function storeMedia(blob,onProg,priv){
   const type=blob.type||"application/octet-stream";
   if(blob.size<550000)return{src:await toDataURL(blob)};
-  const buf=await blob.arrayBuffer(),n=Math.ceil(buf.byteLength/CHUNK),id=rid();
+  const buf=await blob.arrayBuffer(),n=Math.ceil(buf.byteLength/CHUNK),id=rid(),meta={id,n,type,size:blob.size,...(priv?{priv:ME}:{})};
   for(let i=0;i<n;i++){const d=b64(buf.slice(i*CHUNK,(i+1)*CHUNK));
-    if(MODE==="demo")DEMO_CHUNKS.set(id+"_"+i,d);else await FS.doc(cpath(CREW,"chunks",`${id}_${i}`)).set({d,by:ME,at:now()});onProg?.((i+1)/n)}
+    if(MODE==="demo")DEMO_CHUNKS.set(id+"_"+i,d);else await chunkDoc(meta,`${id}_${i}`).set({d,by:ME,at:now()});onProg?.((i+1)/n)}
   BLOBS.set(id,URL.createObjectURL(blob));
-  return{blob:{id,n,type,size:blob.size}};
+  return{blob:meta};
 }
+async function dropChunks(it){const b=it?.blob;if(!b?.priv||MODE==="demo")return;for(let i=0;i<b.n;i++){try{await chunkDoc(b,`${b.id}_${i}`).delete()}catch{}}}
 async function mediaURL(it){
   if(it.src)return it.src;const b=it.blob;if(!b)return"";if(BLOBS.has(b.id))return BLOBS.get(b.id);
   const parts=await Promise.all(Array.from({length:b.n},async(_,i)=>{const k=b.id+"_"+i;
     if(MODE==="demo"){const d=DEMO_CHUNKS.get(k);if(!d)throw new Error("gone");return unb64(d)}
-    const sn=await FS.doc(cpath(CREW,"chunks",k)).get();if(!sn.exists)throw new Error("missing");return unb64(sn.data().d)}));
+    const sn=await chunkDoc(b,k).get();if(!sn.exists)throw new Error("missing");return unb64(sn.data().d)}));
   const u=URL.createObjectURL(new Blob(parts,{type:b.type}));BLOBS.set(b.id,u);return u;
 }
 function frameOf(v,max){const k=Math.min(1,max/Math.max(v.videoWidth,v.videoHeight)),c=document.createElement("canvas");c.width=Math.max(1,Math.round(v.videoWidth*k));c.height=Math.max(1,Math.round(v.videoHeight*k));c.getContext("2d").drawImage(v,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.6)}
 const seekTo=(v,t)=>new Promise(r=>{v.onseeked=()=>r();v.currentTime=t});
-async function prepVideo(file,onProg){
+async function prepVideo(file,onProg,maxS=20){
   const url=URL.createObjectURL(file),v=document.createElement("video");v.muted=true;v.playsInline=true;v.setAttribute("playsinline","");v.preload="auto";v.src=url;
   await new Promise((r,j)=>{v.onloadeddata=r;v.onerror=()=>j(new Error("This video can't be read on this phone."))});
-  const dur=v.duration;if(!isFinite(dur)||dur>21)throw new Error("Videos can be up to 20 seconds. Trim it in your gallery first.");
+  const dur=v.duration;if(!isFinite(dur)||dur>maxS+1)throw new Error(`Videos can be up to ${maxS} seconds. Trim it in your gallery first.`);
   await seekTo(v,Math.min(.4,dur/3));const poster=frameOf(v,480);
-  if(file.size<=12e6){URL.revokeObjectURL(url);return{blob:file,poster,dur}}
+  if(file.size<=(maxS<=10?5e6:12e6)){URL.revokeObjectURL(url);return{blob:file,poster,dur}}
   const mime=pickMime(["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4","video/webm;codecs=vp8,opus","video/webm"]);
   if(!mime||!HTMLCanvasElement.prototype.captureStream)throw new Error("This phone can't shrink videos. Pick a clip under 12 MB.");
   const k=Math.min(1,640/Math.max(v.videoWidth,v.videoHeight)),c=document.createElement("canvas");c.width=Math.round(v.videoWidth*k/2)*2;c.height=Math.round(v.videoHeight*k/2)*2;const g=c.getContext("2d");
@@ -4576,8 +4582,15 @@ const ACT={
   openBusy(d){openSheet("busyView",{id:d.id})},
   bzAttPhoto(d){const s=topS();pickPhotos(async fs=>{for(const f of fs){const src=await storePhoto(f);if(!src)continue;const m={kind:"photo",src};if(d.id)await Store.add("mine",{...m,busyId:d.id,at:now()});else{s.state.att.push(m);paintSheet(s)}}},"#filePick")},
   bzAttLink(d){openSheet("linkAdd",{busyId:d.id})},
+  bzAttVideo(d){const s=topS();pickPhotos(async fs=>{const f=fs[0];if(!f)return;
+    if(!((f.type||"").startsWith("video/")||/\.(mov|mp4|m4v|webm|3gp)$/i.test(f.name||"")))return toast("Pick a video");
+    if(BUSY)return toast("Still sending the last one…");BUSY=true;
+    try{toast("Preparing video… keep the app open");const v=await prepVideo(f,p=>toast(`Preparing video… ${Math.round(p*100)}%`),10);
+      const ref=await storeMedia(v.blob,p=>toast(`Uploading video… ${Math.round(p*100)}%`),true),m={kind:"video",...ref,poster:v.poster,dur:Math.round(v.dur)};
+      if(d.id)await Store.add("mine",{...m,busyId:d.id,at:now()});else{s.state.att.push(m);paintSheet(s)}toast("🎬 Video added")}
+    catch(e){toast(e?.message||"Couldn't add that video")}finally{BUSY=false}},"#videoPick")},
   bzAttDel(d){const s=topS();s.state.att.splice(+d.id,1);paintSheet(s)},
-  async mineDel(d){await Store.del("mine",d.id);toast("Removed")},
+  async mineDel(d){const it=D.mine.find(m=>m.id===d.id);await Store.del("mine",d.id);dropChunks(it);toast("Removed")},
   async linkSave(){const s=topS(),u=val("lkUrl");if(!validUrl(u))return toast("Paste a full link that starts with https://");const m={kind:"link",url:u,caption:val("lkCap")};
     closeSheet();if(s.args.busyId)await Store.add("mine",{...m,busyId:s.args.busyId,at:now()});else{const b=stack.find(x=>x.kind==="busy");if(b){b.state.att.push(m);paintSheet(b)}}toast("Added")},
   ticketAdd(d){openSheet("ticketAdd",{scope:d.scope,id:d.id})},
