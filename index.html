@@ -925,6 +925,25 @@ button.brand{flex:0 0 auto;margin-right:auto;border:0;background:none;color:var(
 .tlsong{margin-top:10px}.tlsong .x{flex:none}
 .tl-note{position:absolute;bottom:6px;right:8px;font-style:normal;font-size:11px;z-index:2}.tslot{position:relative}
 .att-tile.vid{position:relative}.att-vp{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;pointer-events:none}
+.it-days{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}.it-days::-webkit-scrollbar{display:none}.it-days .chip{flex:none}
+.it-card{margin-top:10px;padding:14px;border-radius:18px;background:var(--surface);border:1px solid var(--line)}
+.it-title{font-family:var(--f-display);font-weight:800;font-size:17px;margin-bottom:8px;color:var(--accent)}
+.it-list{position:relative;display:flex;flex-direction:column}
+.it-row{display:flex;gap:10px;align-items:flex-start;padding:6px 0;position:relative;font-size:14px;line-height:1.4}
+.it-row .it-t{flex:0 0 52px;text-align:right;font-size:12px;font-weight:800;color:var(--muted);padding-top:2px;font-variant-numeric:tabular-nums}
+.it-row.timed .it-t{color:var(--fg)}
+.it-row .it-x{flex:1;min-width:0;overflow-wrap:anywhere;padding-left:12px;border-left:2px solid var(--line)}
+.it-row.timed .it-x::before{content:"";position:absolute;left:58px;top:11px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.it-row.sub .it-x{color:var(--muted);font-size:13px}.it-row.sub .it-x::before{content:"• ";color:var(--accent)}
+.it-row.past{opacity:.5}.it-row.now .it-x{color:var(--fg);font-weight:700}.it-row.now .it-x::before{box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 35%,transparent)}
+.it-stay{display:flex;gap:10px;margin-top:12px;padding:12px;border-radius:14px;background:var(--surface2);font-size:13px}.it-stay>div{display:flex;flex-direction:column;gap:3px}
+.it-stay-ic{font-size:22px}.it-stay-l{color:var(--accent);text-decoration:none}
+.it-tl{display:block;width:100%;text-align:left;margin-top:10px;padding:12px 14px;border-radius:16px;background:var(--surface);border:1px solid var(--line);color:var(--fg);font:inherit;cursor:pointer}
+.it-tl .it-title{font-size:15px;margin:6px 0 4px}
+.it-places{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);display:flex;flex-direction:column;gap:8px}
+.it-pl{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.it-pc{display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 5px;border-radius:999px;background:var(--surface2);font-size:13px;font-weight:600}
+.it-pc i{font-style:normal;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--on-accent,#06201E);font-size:11px;font-weight:800}.it-ar{color:var(--muted);font-size:12px}
+.daytag{flex:none;align-self:center;border:1px dashed var(--line);background:none;color:var(--muted);font:inherit;font-size:11px;font-weight:800;padding:4px 8px;border-radius:999px;cursor:pointer;margin-right:4px}.daytag.on{border-style:solid;border-color:var(--accent);color:var(--accent)}
 .dr-foot{margin:4px 6px 0;padding-top:10px;font-size:12.5px}
 .crew-btn{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px 3px 7px;font:inherit;font-size:12.5px;cursor:pointer}
 .crew-btn b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crew-btn i{font-style:normal;color:var(--muted);font-size:10px}
@@ -1064,7 +1083,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-23.05";
+const APP_VERSION="2026-11-24.02";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2167,8 +2186,10 @@ function tlDetail(s,i){
   if(s.month){const d=pd(x.k+"-01");title=d.toLocaleDateString("en-GB",{month:"long",year:"numeric"});const cur=today.slice(0,7);rel=x.k===cur?"This month":x.k>cur?"Coming up":"Looking back"}
   else{title=fDate(x.k,{weekday:"long",day:"numeric",month:"long",year:pd(x.k).getFullYear()===new Date().getFullYear()?undefined:"numeric"});const diff=Math.round((pd(x.k)-pd(today))/864e5);rel=diff===0?"Today":diff===1?"Tomorrow":diff===-1?"Yesterday":diff>0?`In ${diff} days`:`${-diff} days ago`}
   const plans=[...new Map(a.plans.map(p=>[p.id,p])).values()];
+  const itins=s.month?"":plans.filter(p=>!p._busy&&!p._crew&&p.final&&isTrip(p)&&(itinOf(p,x.k)||dayStops(p,x.k).length)).map(p=>{const k=tripDays(p).indexOf(x.k)+1;return`<button class="it-tl" data-act="tlItin" data-id="${esc(p.id)}" data-d="${esc(x.k)}"><div class="between"><span class="meta"><b style="color:var(--fg)">🗺️ Day ${k} of ${tripDays(p).length}</b> · ${esc(p.title)}</span><span class="meta">›</span></div>${itinDayHtml(p,x.k,{compact:true})}</button>`}).join("");
   el.innerHTML=`<div class="tl-head"><h2>${esc(title)}</h2><span class="pill ${x.k>=(s.month?today.slice(0,7):today)?"set":"done"}">${esc(rel)}</span></div>${tlSongHtml(s,x.k)}
     ${plans.length?`<div class="list tl-evs" style="gap:8px;margin-top:10px">${plans.map(p=>p._busy?`<button class="ev busy tl-ev" data-act="tlFocus" data-ev="${esc(p.id)}" data-open="busy" data-id="${esc(p._busy)}"><span class="stripe"></span><span style="flex:1;min-width:0"><b>🔒 ${esc(p.title)}</b><br><span class="meta">${fRange(p.final.start,p.final.end)} · only you see this</span></span><span class="meta">›</span></button>`:`<button class="ev tl-ev" data-act="tlFocus" data-ev="${esc(p.id)}" data-open="${p._crew?"remote":"plan"}" data-id="${esc(p.id)}" ${p._crew?`data-k="${esc(p._crew)}"`:""}><span class="stripe" style="background:${p._proposed?"var(--sun)":hue(p.id)}"></span><span style="flex:1;min-width:0"><b>${esc(p.emoji||"")} ${esc(p.title)}</b><br><span class="meta">${p._proposed?"Proposed date · vote":p.final?`${s.month?fDate(p.final.date)+" · ":""}${fRange(p.final.start,p.final.end)}`:""}</span></span>${p._crew?`<span class="pill crewpill">${esc(CREWS[p._crew]?.emoji||"🔥")} ${esc(CREWS[p._crew]?.name||"Other crew")}</span>`:statusPill(p)}</button>`).join("")}</div>${plans.length>1?`<div class="hint" style="text-align:center;margin-top:8px">Tap an event to see its pics up top · hold to open it</div>`:`<div class="hint" style="text-align:center;margin-top:8px">Hold to open</div>`}`:""}
+    ${itins}
     ${!plans.length?`<div class="empty" style="margin-top:10px">${x.k>=(s.month?today.slice(0,7):today)&&!a.media.length?"Nothing planned yet. Make a plan!":(a.media.length?`📸 ${a.media.length} memor${a.media.length===1?"y":"ies"} · tap the photos above to open`:"Nothing saved from this "+(s.month?"month":"day")+".")}</div>`:""}`;
 }
 SHEETS.linkAdd={render(){return{title:"Add a link or reel",body:`<div class="form"><label class="f">Link<input class="inp" id="lkUrl" type="url" inputmode="url" placeholder="Instagram reel, TikTok, website…"></label><label class="f">Caption (optional)<input class="inp" id="lkCap"></label><div class="hint">🔒 Only you can see this.</div></div>`,foot:`<button class="btn pri block" data-act="linkSave">Add</button>`}}};
@@ -2228,7 +2249,7 @@ SHEETS.album={live:true,
   render(s){const p=planById(s.args.id);if(!p)return{title:"Album",body:""};const all=albumOf(p.id).filter(m=>m.kind==="photo"||m.kind==="video");
     const daily=byDay(p),sel=daily?albumDaySel(p):null,items=daily?all.filter(m=>mDay(p,m)===sel):all;
     const tripUI=isTrip(p)?`<div class="seg" style="margin:0"><button data-act="albumMode" data-id="${esc(p.id)}" data-k="bulk" aria-pressed="${!daily}">🧳 Whole trip</button><button data-act="albumMode" data-id="${esc(p.id)}" data-k="daily" aria-pressed="${daily}">🗓️ By day</button></div>
-      ${daily?`<div class="chips daychips">${tripDays(p).map((d,i)=>{const n=all.filter(m=>mDay(p,m)===d).length;return`<button class="chip" data-act="albumDay" data-id="${esc(p.id)}" data-d="${d}" aria-pressed="${d===sel}"><b>Day ${i+1}</b>&nbsp;${esc(fDate(d,{weekday:"short",day:"numeric"}))}${n?` <span class="dcount">${n}</span>`:""}</button>`}).join("")}</div>
+      ${daily?`<div class="chips daychips">${tripDays(p).map((d,i)=>{const n=all.filter(m=>mDay(p,m)===d).length;return`<button class="chip" data-act="albumDay" data-id="${esc(p.id)}" data-d="${d}" aria-pressed="${d===sel}" ${d>TODAY()?"disabled":""}><b>Day ${i+1}</b>&nbsp;${esc(fDate(d,{weekday:"short",day:"numeric"}))}${n?` <span class="dcount">${n}</span>`:""}</button>`}).join("")}</div>
         <div class="hint" style="margin:-4px 0 0">New pics go on <b style="color:var(--fg)">${esc(fDate(sel,{weekday:"long",day:"numeric",month:"short"}))}</b>. Each day shows its own pics on the timeline.</div>`
       :`<div class="hint" style="margin:-4px 0 0">One set of pics for the whole trip, shown on every day of it in the timeline.</div>`}`:"";
     return{title:`📸 ${esc(p.title)}`,right:`<button class="btn sm pri" data-act="albumAll">⬇ All</button>`,
@@ -2298,6 +2319,58 @@ SHEETS.person={live:true,
       ${me&&MODE==="demo"?`<div class="sec"><h2>Test as a dummy friend</h2><p class="hint" style="margin:0">Switch who you are to see the app from a friend's side: vote, react, reply to DMs. Demo only.</p><select class="inp" id="actAs">${D.members.map(x=>`<option value="${esc(x.id)}" ${x.id===ME?"selected":""}>${esc(x.nick)}</option>`).join("")}</select><button class="btn" data-act="addDummy">+ Add another dummy friend</button><button class="btn danger" data-act="resetDemo" data-confirm="Tap again to wipe demo data">Reset demo data</button></div>`:""}`}}
 };
 /* plan detail */
+/* ---------- trip itinerary: a plan for each day of a multi-day trip ----------
+   Saved on the plan as itin["YYYY-MM-DD"] = {title, text, stay}. Each line of text is one step;
+   a line starting with a time ("12:45 PM Arrival…") gets a time stamp, a line starting with • or - is a sub-point. */
+const itinOf=(p,d)=>(p?.itin||{})[d]||null;
+/* places by day: a stop can carry day:"YYYY-MM-DD" so each trip day gets its own map and route */
+const dayStops=(p,d)=>(p?.stops||[]).filter(x=>x.day===d);
+const hasDayStops=p=>(p?.stops||[]).some(x=>x.day);
+const routeSel=p=>{if(!p?.final||!isTrip(p)||!hasDayStops(p))return"all";const ds=tripDays(p),v=(UI.routeDay||{})[p.id];if(v==="all"||ds.includes(v))return v;return ds.includes(TODAY())&&dayStops(p,TODAY()).length?TODAY():"all"};
+const routeStops=p=>{const sel=routeSel(p);return sel==="all"?(p.stops||[]):dayStops(p,sel)};
+function placesHtml(p,d,compact){const st=dayStops(p,d);if(!st.length)return"";
+  return`<div class="it-places">${compact?"":`<div class="between"><b style="font-size:13px">📍 Places</b>${st.some(x=>x.lat!=null)?`<a class="btn sm" href="${esc(gmapsUrl(st))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Open in Maps</a>`:""}</div>`}
+    <div class="it-pl">${st.map((x,i)=>`<span class="it-pc"><i>${i+1}</i>${esc(x.name||"Pin")}</span>`).join(`<span class="it-ar">→</span>`)}</div></div>`}
+const hasItin=p=>Object.values(p?.itin||{}).some(x=>x&&(x.title||x.text||x.stay));
+function itinTime(line){const m=line.match(/^\s*(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm|a\.m\.|p\.m\.)?\s*(?:[-–—|:]\s*)?(.*)$/i);if(!m||(!m[2]&&!m[3]))return null;
+  let h=+m[1];const mi=+(m[2]||0),ap=(m[3]||"").toLowerCase().replace(/\./g,"");if(h>23||mi>59)return null;if(ap==="pm"&&h<12)h+=12;if(ap==="am"&&h===12)h=0;return{t:`${pad(h)}:${pad(mi)}`,x:m[4].trim()}}
+function itinRows(text){const rows=[];for(const raw of String(text||"").split(/\n/)){const l=raw.trim();if(!l)continue;
+    if(/^[•·\-*▪◦]\s*/.test(l)){rows.push({sub:true,x:l.replace(/^[•·\-*▪◦]\s*/,"")});continue}
+    const tm=itinTime(l);rows.push(tm?{t:tm.t,x:tm.x}:{x:l})}return rows}
+function stayHtml(stay){if(!stay)return"";const lines=stay.split(/\n/).map(x=>x.trim()).filter(Boolean);
+  return`<div class="it-stay"><span class="it-stay-ic">🏨</span><div style="flex:1;min-width:0">${lines.map(l=>{const ph=l.match(/^(phone|tel|telephone)\s*:\s*(.+)$/i),ad=l.match(/^address\s*:\s*(.+)$/i),ho=l.match(/^(hotel|stay|accommodation)\s*:\s*(.+)$/i);
+    if(ph)return`<a class="it-stay-l" href="tel:${esc(ph[2].replace(/[^\d+]/g,""))}">📞 ${esc(ph[2])}</a>`;
+    if(ad)return`<a class="it-stay-l" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ad[1])}" target="_blank" rel="noopener">📍 ${esc(ad[1])}</a>`;
+    if(ho)return`<b>${esc(ho[2])}</b>`;return`<span>${linkify(l)}</span>`}).join("")}</div></div>`}
+// one day of the itinerary. "live" marks the step happening now when it's today.
+function itinDayHtml(p,d,opt={}){const it=itinOf(p,d),rows=itinRows(it?.text),isToday=d===TODAY();
+  if(!it||(!it.title&&!rows.length&&!it.stay))return dayStops(p,d).length?placesHtml(p,d,opt.compact):opt.compact?"":`<div class="empty" style="padding:14px">Nothing planned for this day yet.</div>`;
+  let nowI=-1;if(isToday){const hm=new Date().toTimeString().slice(0,5);rows.forEach((r,i)=>{if(r.t&&r.t<=hm)nowI=i})}
+  const list=(opt.compact?rows.filter(r=>!r.sub).slice(0,6):rows);
+  return`${it.title?`<div class="it-title">${esc(it.title)}</div>`:""}<div class="it-list">${list.map(r=>{const i=rows.indexOf(r);return`<div class="it-row ${r.sub?"sub":""} ${r.t?"timed":""} ${i===nowI?"now":""} ${isToday&&r.t&&nowI>i?"past":""}"><span class="it-t">${r.t?esc(fTime(r.t)):r.sub?"":"•"}</span><span class="it-x">${linkify(r.x)}${i===nowI?` <span class="pill set">Now</span>`:""}</span></div>`}).join("")}${opt.compact&&rows.filter(r=>!r.sub).length>6?`<div class="meta" style="padding-left:62px">+ more in the plan</div>`:""}</div>${placesHtml(p,d,opt.compact)}${opt.compact?"":stayHtml(it.stay)}`}
+const itinSel=p=>{const ds=tripDays(p),v=(UI.itinDay||{})[p.id];return ds.includes(v)?v:(ds.includes(TODAY())?TODAY():ds[0])};
+function itinHtml(p){if(!p.final||!isTrip(p))return"";const ds=tripDays(p),sel=itinSel(p),i=ds.indexOf(sel);
+  return`<div class="sec"><div class="between"><h2>🗺️ Itinerary</h2><button class="btn sm" data-act="itinPaste" data-id="${esc(p.id)}">📋 Paste all</button></div>
+    <div class="chips daychips it-days">${ds.map((d,k)=>`<button class="chip" data-act="itinDay" data-id="${esc(p.id)}" data-d="${d}" aria-pressed="${d===sel}"><b>Day ${k+1}</b>&nbsp;${esc(fDate(d,{weekday:"short",day:"numeric"}))}${itinOf(p,d)?.text||itinOf(p,d)?.title||dayStops(p,d).length?` <span class="dcount">✓</span>`:""}${d===TODAY()?` <span class="pill set" style="padding:1px 6px">Today</span>`:""}</button>`).join("")}</div>
+    <div class="it-card"><div class="between" style="margin-bottom:6px"><span class="meta"><b style="color:var(--fg)">Day ${i+1}</b> · ${esc(fDate(sel,{weekday:"long",day:"numeric",month:"long"}))}</span><span class="row" style="gap:6px"><button class="btn sm" data-act="dayPlace" data-id="${esc(p.id)}" data-d="${sel}" aria-label="Add a place for this day">📍 +</button><button class="btn sm" data-act="itinEdit" data-id="${esc(p.id)}" data-d="${sel}">✏️ ${itinOf(p,sel)?"Edit":"Add"}</button></span></div>${itinDayHtml(p,sel)}</div></div>`}
+SHEETS.itinEdit={render(s){const p=planById(s.args.id),d=s.args.d,it=itinOf(p,d)||{},k=tripDays(p).indexOf(d)+1;
+  return{title:`🗺️ Day ${k} · ${esc(fDate(d,{weekday:"short",day:"numeric",month:"short"}))}`,body:`<div class="form">
+    <label class="f">Title for the day<input class="inp" id="itT" maxlength="120" value="${esc(it.title||"")}" placeholder="e.g. Arrival in Brussels · City orientation"></label>
+    <label class="f">The plan, one step per line<textarea class="inp" id="itX" rows="12" maxlength="6000" placeholder="12:45 PM Arrival at Brussels Airport&#10;1:45 PM Meet the tour manager, coach to Brussels&#10;See the Grand Place, Manneken Pis and Atomium&#10;• Try Belgian waffles and fries&#10;7:00 PM Drive to the hotel">${esc(it.text||"")}</textarea><span class="meta" style="font-weight:400">Start a line with a time to pin it to that time. Start with • or - for a sub-point.</span></label>
+    <label class="f">Where you're staying (optional)<textarea class="inp" id="itS" rows="3" maxlength="600" placeholder="Hotel: Holiday Inn Brussels Airport&#10;Address: Berkenlaan 6A, 1831 Brussel&#10;Phone: +32 2 586 31 20">${esc(it.stay||"")}</textarea></label>
+    ${itinOf(p,d)?`<button class="btn danger" data-act="itinClear" data-id="${esc(p.id)}" data-d="${d}" data-confirm="Clear this day?">Clear this day</button>`:""}</div>`,foot:`<button class="btn pri block" data-act="itinSave">Save day ${k}</button>`}}};
+// paste a whole itinerary: "Day 1: …" lines start each day; Hotel / Address / Phone lines go under "Where you're staying"
+function itinParse(text,days){const out={};let cur=null;
+  for(const raw of String(text||"").split(/\n/)){const l=raw.trim();if(!l)continue;
+    const dm=l.match(/^day\s*(\d{1,2})\b\s*[:.\-–—|]?\s*(.*)$/i);if(dm){const n=+dm[1]-1;cur=days[n]||null;if(cur)out[cur]={title:dm[2].trim(),text:"",stay:""};continue}
+    if(/^\d{1,2}[-\/ ](\w{3,9}|\d{1,2})[-\/ ]\d{2,4}$/.test(l))continue;
+    if(!cur){cur=days[0];out[cur]=out[cur]||{title:"",text:"",stay:""}}
+    if(/^(hotel|address|phone|tel|accommodation)\s*:/i.test(l))out[cur].stay+=(out[cur].stay?"\n":"")+l;else out[cur].text+=(out[cur].text?"\n":"")+l}
+  return out}
+SHEETS.itinPaste={render(s){const p=planById(s.args.id),n=tripDays(p).length;return{title:"📋 Paste the itinerary",body:`<div class="form">
+  <div class="hint" style="margin:0">Paste the whole thing from your travel agent's PDF or email. Lines like <b style="color:var(--fg)">Day 1: Arrival in Brussels</b> start each day (this trip has ${n} days). Hotel, Address and Phone lines go under where you're staying.</div>
+  <textarea class="inp" id="itAll" rows="16" maxlength="30000" placeholder="Day 1: Arrival in Brussels | City orientation&#10;12:45 PM Arrival at Brussels Airport&#10;1:45 PM Meet &amp; greet by the tour manager&#10;Hotel: Holiday Inn Brussels Airport&#10;&#10;Day 2: Bruges excursion&#10;10:00 AM Pickup at the hotel…"></textarea>
+  <div class="hint" style="margin:0">Days you already filled in get replaced only if the paste has them.</div></div>`,foot:`<button class="btn pri block" data-act="itinImport">Add to the trip</button>`}}};
 SHEETS.plan={live:true,
   render(s){
     const p=planById(s.args.id);if(!p)return{title:"Plan removed",body:`<div class="empty">This plan was deleted.</div>`};
@@ -2321,7 +2394,8 @@ SHEETS.plan={live:true,
         <div class="between"><div class="row">${voters.length?avStack(voters,"xs",8):""}${cf.map(c=>`<span class="pill warn">${esc(nick(c.uid))} busy</span>`).join("")}</div><button class="btn sm ghost" data-act="lock" data-id="${esc(p.id)}" data-slot="${esc(sl.id)}">Lock in</button></div></div>`}).join("")||`<div class="meta">No dates suggested yet.</div>`}
       <details><summary class="btn sm" style="list-style:none;display:inline-flex">+ Suggest a time</summary><div class="grid2" style="margin-top:10px"><label class="f">Start date<input class="inp" type="date" id="slD"></label><label class="f">Until (multi-day)<input class="inp" type="date" id="slD2"></label></div><div class="grid3" style="grid-template-columns:1fr 1fr;margin-top:8px"><label class="f">From<input class="inp" type="time" id="slS"></label><label class="f">To<input class="inp" type="time" id="slE"></label></div><button class="btn pri block" style="margin-top:8px" data-act="addSlot" data-id="${esc(p.id)}">Add this time</button></details>`;
     }
-    const stops=p.stops||[],pts=stops.filter(x=>x.lat!=null),route=routeFor(stops);
+    const rsel=routeSel(p),stops=routeStops(p),pts=stops.filter(x=>x.lat!=null),route=routeFor(stops);
+    const rDays=p.final&&isTrip(p)?tripDays(p):[];
     let legs="",tk=0,tm=0,li=0;
     stops.forEach((x,i)=>{const nx=stops[i+1];let eta="";if(nx&&x.lat!=null&&nx.lat!=null){const l=route?route.legs[li]:legEst(x,nx);li++;if(l){tk+=l.km;tm+=l.min;eta=`<div class="eta">${route?"":"~"}${l.km.toFixed(1)} km · ${route?"":"about "}${fMin(l.min)} drive</div>`}}
       legs+=`<div class="leg"><span class="n" style="background:${hue(p.id)}">${i+1}</span><div style="flex:1;min-width:0;padding-top:2px"><b>${esc(x.name||"Dropped pin")}</b>${x.addr?`<div class="meta">${esc(x.addr)}</div>`:""}${x.link?` <a class="meta" href="${esc(x.link)}" target="_blank" rel="noopener">original link</a>`:""}</div></div>${eta}`});
@@ -2341,6 +2415,7 @@ SHEETS.plan={live:true,
       ${playlistHtml(p)}`,body:`
       ${albumOpen(p)?albumHtml(p,mems,tile):""}
       <div class="sec" style="margin-top:12px"><h2>When</h2>${when}${p.final&&!albumOpen(p)?`<div class="hint">📸 The plan album opens on ${esc(fDate(p.final.date,{weekday:"long",day:"numeric",month:"short"}))}. Everyone can add their pics from the day.</div>`:""}</div>
+      ${itinHtml(p)}
       ${(p.invited||[]).length?`<div class="sec"><div class="between"><h2>Invited</h2><button class="btn sm" data-act="invite" data-id="${esc(p.id)}">+ Invite</button></div><div class="row">${p.invited.map(u=>`<span class="row" style="gap:4px">${avatar(u,"xs")}<span style="font-size:13px">${esc(nick(u))}</span></span>`).join("")}</div>${p.chatId&&D.chats.find(c=>c.id===p.chatId)?`<div class="hint">From group chat: ${esc(D.chats.find(c=>c.id===p.chatId).name||"")}</div>`:""}</div>`:`<div class="sec"><div class="between"><h2>Invited</h2><button class="btn sm" data-act="invite" data-id="${esc(p.id)}">Only some people?</button></div><div class="hint" style="margin:0">Whole crew</div></div>`}
       ${p.final&&p.final.date>=TODAY()?`<div class="sec"><h2>⏰ Remind me</h2><div class="chips">${REM_OPTS.map(([m,l])=>`<button class="chip" data-act="remindToggle" data-id="${esc(p.id)}" data-m="${m}" aria-pressed="${remindFor(p.id).includes(m)}">${m?l+" before":l}</button>`).join("")}</div>
         <div class="row"><button class="btn sm pri" data-act="icsDl" data-id="${esc(p.id)}">📅 Add to phone calendar</button><a class="btn sm" href="${esc(gcalUrl(p))}" target="_blank" rel="noopener">Google Calendar</a></div>
@@ -2350,7 +2425,9 @@ SHEETS.plan={live:true,
         <button class="btn" data-act="planChat" data-id="${esc(p.id)}">💬 Plan chat</button></div>
       ${ridesHtml(p,s)}
       <div class="sec"><div class="between"><h2>Route</h2>${pts.length?`<a class="btn sm" href="${esc(gmapsUrl(stops))}" target="_blank" rel="noopener">Open in Google Maps</a>`:""}</div>
-        ${stops.length?`${pts.length?`<div class="mini-map" id="mm-plan"></div>`:""}<div>${legs}</div>${pts.length>1?`<div class="item"><span class="grow"><b>Total drive</b><br><span class="meta">${route?"Road route without traffic. Google Maps shows live traffic.":"Rough estimate while the road route loads"}</span></span><span class="amt">${route?"":"~"}${tk.toFixed(0)} km · ${fMin(tm)}</span></div>`:""}`:`<div class="meta">No places yet. Tap Edit to add stops.</div>`}</div>
+        ${rDays.length?`<div class="chips daychips it-days"><button class="chip" data-act="routeDay" data-id="${esc(p.id)}" data-d="all" aria-pressed="${rsel==="all"}"><b>Whole trip</b></button>${rDays.map((d,k)=>{const n=dayStops(p,d).length;return`<button class="chip" data-act="routeDay" data-id="${esc(p.id)}" data-d="${d}" aria-pressed="${d===rsel}"><b>Day ${k+1}</b>&nbsp;${esc(fDate(d,{weekday:"short",day:"numeric"}))}${n?` <span class="dcount">${n}</span>`:""}</button>`}).join("")}</div>
+          ${rsel==="all"?"":`<button class="btn sm" data-act="dayPlace" data-id="${esc(p.id)}" data-d="${rsel}" style="align-self:flex-start">📍 Add a place to Day ${rDays.indexOf(rsel)+1}</button>`}`:""}
+        ${rsel!=="all"&&!stops.length?`<div class="meta">No places for this day yet.</div>`:stops.length?`${pts.length?`<div class="mini-map" id="mm-plan"></div>`:""}<div>${legs}</div>${pts.length>1?`<div class="item"><span class="grow"><b>Total drive</b><br><span class="meta">${route?"Road route without traffic. Google Maps shows live traffic.":"Rough estimate while the road route loads"}</span></span><span class="amt">${route?"":"~"}${tk.toFixed(0)} km · ${fMin(tm)}</span></div>`:""}`:`<div class="meta">No places yet. Tap Edit to add stops.</div>`}</div>
       ${offerNearHtml(p)}
       ${ticketsHtml(p)}
       <div class="sec"><div class="between"><h2>Mood board</h2><span class="row" style="gap:6px"><button class="btn sm" data-act="openBoard" data-id="${esc(p.id)}">⤢ Open</button><button class="btn sm pri" data-act="addMedia" data-id="${esc(p.id)}" data-ph="idea">+ Add</button></span></div><p class="hint" style="margin:0">Photos, notes, colours and links that set the vibe. Anyone can add.</p>
@@ -2368,7 +2445,7 @@ SHEETS.plan={live:true,
         <div class="row" style="flex-wrap:nowrap;align-items:flex-end;gap:2px">${attachBtns("note",p.id)}<textarea class="compose" id="noteIn-${esc(p.id)}" rows="1" placeholder="${s.state.replyTo?"Write a reply…":"Add a comment…"}"></textarea><button class="send" data-act="addNote" data-id="${esc(p.id)}" aria-label="Post comment">${ICON.send}</button></div></div>
       <div class="sec"><div class="danger-zone">${st!=="done"?`<button class="btn sm" data-act="markDone" data-id="${esc(p.id)}">Mark as done</button>`:`<button class="btn sm" data-act="unDone" data-id="${esc(p.id)}">Move back to upcoming</button>`}<button class="btn sm danger" data-act="delPlan" data-id="${esc(p.id)}" data-confirm="Tap again to delete">Delete plan</button></div></div>`};
   },
-  after(s){const p=planById(s.args.id);if(!p)return;miniMap(s,"plan",$("#mm-plan",s.el),p.stops||[],hue(p.id));
+  after(s){const p=planById(s.args.id);if(!p)return;miniMap(s,"plan",$("#mm-plan",s.el),routeStops(p),hue(p.id));
     const me=myRsvp(p.id);if(me?.ride?.role==="driver"){const{pts}=driverRoute(p,me,rideInfo(p));miniMap(s,"ride",$("#mm-ride",s.el),pts,hue(p.id))}}
 };
 const hostOf=u=>{try{return new URL(u).hostname.replace(/^www\./,"")}catch{return"Link"}};
@@ -2613,8 +2690,9 @@ SHEETS.wishAdd={
 };
 /* plan editor */
 SHEETS.edit={
-  init(a){const p=a.id?planById(a.id):null;const cp=x=>JSON.parse(JSON.stringify(x||[]));const pre=a.pre||{};return{past:p?.status==="done"&&!!p?.final,emoji:p?.emoji||pre.emoji||PLAN_EMOJIS[0],stops:cp(p?.stops||pre.stops),slots:cp(p?.slots),est:cp(p?.est),files:[],links:[...(pre.links||[])],q:"",res:[],msg:"",loading:false,invited:a.chat?[...(D.chats.find(c=>c.id===a.chat)?.members||[])]:pre.invited?[...pre.invited]:cp(p?.invited),chatId:a.chat||p?.chatId||""}},
+  init(a){const p=a.id?planById(a.id):null;const cp=x=>JSON.parse(JSON.stringify(x||[]));const pre=a.pre||{};return{stopDay:a.day||"",past:p?.status==="done"&&!!p?.final,emoji:p?.emoji||pre.emoji||PLAN_EMOJIS[0],stops:cp(p?.stops||pre.stops),slots:cp(p?.slots),est:cp(p?.est),files:[],links:[...(pre.links||[])],q:"",res:[],msg:"",loading:false,invited:a.chat?[...(D.chats.find(c=>c.id===a.chat)?.members||[])]:pre.invited?[...pre.invited]:cp(p?.invited),chatId:a.chat||p?.chatId||""}},
   render(s){const p=s.args.id?planById(s.args.id):null,st=s.state,hasPts=st.stops.some(x=>x.lat!=null);
+    const eDays=p?.final&&isTrip(p)?tripDays(p):[],dLab=d=>{const k=eDays.indexOf(d);return k<0?"":`Day ${k+1}`};
     return{title:p?"Edit plan":"Make a plan",body:`<div class="form">
       <div class="emo-pick">${(PLAN_EMOJIS.includes(st.emoji)?PLAN_EMOJIS:[st.emoji,...PLAN_EMOJIS]).map(e=>`<button data-act="edEmoji" data-v="${esc(e)}" aria-pressed="${st.emoji===e}">${esc(e)}</button>`).join("")}</div>
       <label class="f" style="margin-top:6px">Or type any emoji<input class="inp" id="edEmoCustom" maxlength="8" placeholder="Tap here and pick from your keyboard 🙂" style="font-size:18px"></label>
@@ -2622,7 +2700,8 @@ SHEETS.edit={
       <label class="f">Details<textarea class="inp" id="edDesc" placeholder="Vibe, what to bring, dress code, who's driving…">${esc(p?.desc||s.args.pre?.desc||"")}</textarea></label>
       <div class="sec"><h2>Places</h2><p class="hint" style="margin:0">Search any place or paste a Google Maps, Apple Maps or Waze link; it pins itself. Add more than one stop for a route with drive times.</p>
         ${hasPts?`<div class="mini-map" id="mm-edit" style="height:180px"></div>`:""}
-        ${st.stops.map((x,i)=>`<div class="item"><span class="leg"><span class="n" style="background:var(--accent)">${i+1}</span></span><span class="grow"><span class="t">${esc(x.name||"Dropped pin")}</span>${x.addr?`<br><span class="meta">${esc(x.addr)}</span>`:""}</span>${i>0?`<button class="x" data-act="stopUp" data-i="${i}" aria-label="Move up">↑</button>`:""}<button class="x" data-act="stopDel" data-i="${i}" aria-label="Remove stop">✕</button></div>`).join("")}
+        ${eDays.length?`<div class="f" style="margin-top:4px">New places go on<div class="chips daychips it-days"><button class="chip" data-act="edStopDay" data-d="" aria-pressed="${!st.stopDay}"><b>Whole trip</b></button>${eDays.map((d,k)=>`<button class="chip" data-act="edStopDay" data-d="${d}" aria-pressed="${st.stopDay===d}"><b>Day ${k+1}</b>&nbsp;${esc(fDate(d,{weekday:"short",day:"numeric"}))}</button>`).join("")}</div><span class="meta" style="font-weight:400">Tap a place's day tag to move it to another day.</span></div>`:""}
+        ${st.stops.map((x,i)=>`<div class="item"><span class="leg"><span class="n" style="background:var(--accent)">${i+1}</span></span>${eDays.length?`<button class="daytag ${x.day&&eDays.includes(x.day)?"on":""}" data-act="stopDayCycle" data-i="${i}">${esc(dLab(x.day)||"All")}</button>`:""}<span class="grow"><span class="t">${esc(x.name||"Dropped pin")}</span>${x.addr?`<br><span class="meta">${esc(x.addr)}</span>`:""}</span>${i>0?`<button class="x" data-act="stopUp" data-i="${i}" aria-label="Move up">↑</button>`:""}<button class="x" data-act="stopDel" data-i="${i}" aria-label="Remove stop">✕</button></div>`).join("")}
         ${(()=>{const near=offersForStops(st.stops).filter(x=>!st.stops.some(z=>z.name===x.o.name)).slice(0,4);return near.length?`<div class="offer-near"><b>🏷️ Entertainer offers near your stops</b>${near.map(x=>`<div class="between"><span style="min-width:0"><b>${esc(catOf(x.o.cat)[1])} ${esc(x.o.name)}</b><br><span class="meta">${esc(x.o.offer||"")} · ${fmtKm(x.d)} away</span></span><button class="btn sm" data-act="edOfferStop" data-id="${esc(x.o.id)}">+ Add</button></div>`).join("")}</div>`:""})()}
         <input class="inp" id="edQ" type="search" enterkeyhint="search" placeholder="🔎 Search a place or paste a maps link" autocomplete="off" autocorrect="off">
         <div id="edSugg">${edSugg(st)}</div>
@@ -2658,7 +2737,7 @@ function edSugg(st){
 }
 function paintSugg(s){const b=$("#edSugg",s.el);if(b)b.innerHTML=edSugg(s.state)}
 function addStop(s,stop,msg){
-  s.state.stops.push(stop);s.state.res=[];s.state.msg=msg||"";s.state.loading=false;
+  if(s.state.stopDay&&!stop.day)stop.day=s.state.stopDay;s.state.stops.push(stop);s.state.res=[];s.state.msg=msg||"";s.state.loading=false;
   const q=$("#edQ",s.el);if(q)q.value="";q?.blur();
   paintSheet(s);toast("📍 Pinned "+(stop.name||"spot"));
 }
@@ -4034,9 +4113,9 @@ async function postItem(ctx,id,payload){
 const ALBUM_MAX=5;
 const tripDays=p=>p?.final?dayList(p.final.date,endOf(p.final)):[];
 const isTrip=p=>tripDays(p).length>1;
-const byDay=p=>isTrip(p)&&p.albumMode==="daily";
+const byDay=p=>isTrip(p)&&p.albumMode!=="bulk";
 const mDay=(p,m)=>{const ds=tripDays(p);if(m.day&&ds.includes(m.day))return m.day;const d=ymd(new Date(m.at));return ds.includes(d)?d:ds[0]};
-const albumDaySel=p=>{const ds=tripDays(p),v=(UI.albumDay||{})[p.id];return ds.includes(v)?v:(ds.includes(TODAY())?TODAY():ds[0])};
+const albumDaySel=p=>{const ds=tripDays(p),t=TODAY(),v=(UI.albumDay||{})[p.id];return ds.includes(v)&&v<=t?v:(ds.includes(t)?t:ds[0])};
 // 5 per person per plan, or 5 per person per day when the album is sorted by day
 const albumLeft=pid=>{const p=planById(pid),sel=byDay(p)?albumDaySel(p):null;
   return ALBUM_MAX-D.media.filter(m=>m.planId===pid&&m.phase==="memory"&&m.by===ME&&(m.kind==="photo"||m.kind==="video")&&(!sel||mDay(p,m)===sel)).length};
@@ -4352,6 +4431,10 @@ const ACT={
     if(s.args.forLoc){const ls_=stack[stack.length-2];const pt={name:val("pickName")||"Dropped pin",...s.state.pt};closeSheet();if(ls_?.kind==="loc")setTimeout(()=>setLoc(ls_,pt),0);return}
     const ed=stack.find(x=>x.kind==="edit");const stop={name:val("pickName")||"Dropped pin",...s.state.pt};closeSheet();if(ed)setTimeout(()=>addStop(ed,stop),0)},
   stopUp(d){const a=topS().state.stops,i=+d.i;[a[i-1],a[i]]=[a[i],a[i-1]];paintSheet(topS())},
+  edStopDay(d){const s=topS();s.state.stopDay=d.d;paintSheet(s);try{haptic()}catch{}},
+  stopDayCycle(d){const s=topS(),p=planById(s.args.id),ds=p?.final&&isTrip(p)?tripDays(p):[],x=s.state.stops[+d.i];if(!x||!ds.length)return;const opts=["",...ds],k=opts.indexOf(x.day||"");x.day=opts[(k+1)%opts.length];if(!x.day)delete x.day;paintSheet(s);try{haptic()}catch{}},
+  routeDay(d){UI.routeDay=UI.routeDay||{};UI.routeDay[d.id]=d.d;const s=topS();if(s)paintSheet(s);try{haptic()}catch{}},
+  dayPlace(d){UI.routeDay=UI.routeDay||{};UI.routeDay[d.id]=d.d;openSheet("edit",{id:d.id,day:d.d});setTimeout(()=>{const q=$("#edQ",topS()?.el);q?.scrollIntoView({block:"center"});q?.focus()},350)},
   stopDel(d){topS().state.stops.splice(+d.i,1);paintSheet(topS())},
   slotAdd(){const s=topS(),date=val("edD"),e2=val("edD2");if(!date)return toast("Pick a date first.");if(e2&&e2<date)return toast("The end date is before the start.");const sl={id:rid(),date,start:val("edS"),end:val("edE"),by:ME};if(e2&&e2>date)sl.endDate=e2;s.state.slots.push(sl);paintSheet(s);["edD","edD2","edS","edE"].forEach(i=>{const x=$("#"+i,s.el);if(x)x.value=""})},
   slotDel(d){topS().state.slots.splice(+d.i,1);paintSheet(topS())},
@@ -4402,6 +4485,7 @@ const ACT={
   async delPlan(d){await Store.del("plans",d.id);for(const c of["rsvps","media","notes"])for(const x of D[c].filter(x=>x.planId===d.id))await Store.del(c,x.id);closeSheet();toast("Plan deleted")},
   timeline(d){openSheet("timeline",{id:d.id})},
   tlMode(d){const s=topS();s.state.mode=d.k;ls.set("yg-tlmode",d.k);paintSheet(s);s.ro?.disconnect();buildTimeline(s)},
+  tlItin(d){UI.itinDay=UI.itinDay||{};UI.itinDay[d.id]=d.d;openSheet("plan",{id:d.id})},
   tlGo(d){const s=topS();if(+d.i===s.state.idx)return ACT.tlOpen();s.go?.(+d.i)},
   tlSpread(){const s=topS();if(!s||s.kind!=="timeline")return;if(Date.now()-(s.lpAt||0)<600)return;const all=(s.fanAll||[]);if(!all.length)return ACT.tlOpen();
     $(".tlspread",s.el)?.remove();const max=12,list=all.slice(0,max),more=all.length-list.length,n=list.length+(more?1:0);
@@ -4483,6 +4567,17 @@ const ACT={
 
   async albumMode(d){const p=planById(d.id);if(!p)return;await Store.upd("plans",p.id,{albumMode:d.k});toast(d.k==="daily"?"🗓️ Pics are sorted by day now":"🧳 One album for the whole trip")},
   async photoDay(d){await Store.upd("media",d.id,{day:d.d});toast("Moved to "+fDate(d.d,{weekday:"long",day:"numeric",month:"short"}))},
+  itinDay(d){UI.itinDay=UI.itinDay||{};UI.itinDay[d.id]=d.d;const s=topS();if(s)paintSheet(s);try{haptic()}catch{}},
+  itinEdit(d){openSheet("itinEdit",{id:d.id,d:d.d})},
+  itinPaste(d){openSheet("itinPaste",{id:d.id})},
+  async itinSave(){const s=topS(),p=planById(s.args.id);if(!p)return;const v={title:val("itT").slice(0,120),text:val("itX").slice(0,6000),stay:val("itS").slice(0,600)};
+    if(!v.title&&!v.text&&!v.stay)return ACT.itinClear({id:p.id,d:s.args.d});
+    await Store.upd("plans",p.id,{["itin."+s.args.d]:v});closeSheet();toast("🗺️ Day saved")},
+  async itinClear(d){await Store.upd("plans",d.id,{["itin."+d.d]:MODE==="demo"?DEL:firebase.firestore.FieldValue.delete()});if(topS()?.kind==="itinEdit")closeSheet();toast("Day cleared")},
+  async itinImport(){const s=topS(),p=planById(s.args.id);if(!p)return;const days=tripDays(p),got=itinParse(val("itAll"),days),ks=Object.keys(got);
+    if(!ks.length)return toast("Paste the itinerary first");
+    const up={};for(const k of ks)up["itin."+k]={title:got[k].title.slice(0,120),text:got[k].text.slice(0,6000),stay:got[k].stay.slice(0,600)};
+    await Store.upd("plans",p.id,up);closeSheet();UI.itinDay=UI.itinDay||{};UI.itinDay[p.id]=ks.sort()[0];toast(`🗺️ Added ${ks.length} day${ks.length===1?"":"s"}`)},
   albumDay(d){UI.albumDay=UI.albumDay||{};UI.albumDay[d.id]=d.d;const s=topS();if(s)paintSheet(s)},
   playGame(d){const k={word:"gWord",est:"gEst",deep:"gDeep"}[d.g];if(k)openSheet(k)},
   gRange(d){UI.gRange=d.k;render()},
