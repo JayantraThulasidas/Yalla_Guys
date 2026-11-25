@@ -944,6 +944,8 @@ button.brand{flex:0 0 auto;margin-right:auto;border:0;background:none;color:var(
 .it-pl{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.it-pc{display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 5px;border-radius:999px;background:var(--surface2);font-size:13px;font-weight:600}
 .it-pc i{font-style:normal;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--on-accent,#06201E);font-size:11px;font-weight:800}.it-ar{color:var(--muted);font-size:12px}
 .daytag{flex:none;align-self:center;border:1px dashed var(--line);background:none;color:var(--muted);font:inherit;font-size:11px;font-weight:800;padding:4px 8px;border-radius:999px;cursor:pointer;margin-right:4px}.daytag.on{border-style:solid;border-color:var(--accent);color:var(--accent)}
+.leg-day{margin:12px 0 6px;font-size:12.5px;font-weight:800;color:var(--accent);letter-spacing:.02em}.leg-day:first-child{margin-top:4px}
+.daypick{margin:-2px 0 8px;padding:8px 16px;background:var(--surface2);border-radius:14px}
 .dr-foot{margin:4px 6px 0;padding-top:10px;font-size:12.5px}
 .crew-btn{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px 3px 7px;font:inherit;font-size:12.5px;cursor:pointer}
 .crew-btn b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crew-btn i{font-style:normal;color:var(--muted);font-size:10px}
@@ -1083,7 +1085,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-24.02";
+const APP_VERSION="2026-11-25.03";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2324,10 +2326,12 @@ SHEETS.person={live:true,
    a line starting with a time ("12:45 PM Arrival…") gets a time stamp, a line starting with • or - is a sub-point. */
 const itinOf=(p,d)=>(p?.itin||{})[d]||null;
 /* places by day: a stop can carry day:"YYYY-MM-DD" so each trip day gets its own map and route */
+const stopKey=x=>`${x.name||""}|${x.lat??""}|${x.lng??""}`;
 const dayStops=(p,d)=>(p?.stops||[]).filter(x=>x.day===d);
 const hasDayStops=p=>(p?.stops||[]).some(x=>x.day);
 const routeSel=p=>{if(!p?.final||!isTrip(p)||!hasDayStops(p))return"all";const ds=tripDays(p),v=(UI.routeDay||{})[p.id];if(v==="all"||ds.includes(v))return v;return ds.includes(TODAY())&&dayStops(p,TODAY()).length?TODAY():"all"};
-const routeStops=p=>{const sel=routeSel(p);return sel==="all"?(p.stops||[]):dayStops(p,sel)};
+const routeStops=p=>{const sel=routeSel(p);if(sel!=="all")return dayStops(p,sel);const st=p.stops||[];if(!p.final||!isTrip(p)||!hasDayStops(p))return st;
+  const ds=tripDays(p),rank=x=>x.day&&ds.includes(x.day)?ds.indexOf(x.day)+1:0;return st.map((x,i)=>({x,i})).sort((a,b)=>rank(a.x)-rank(b.x)||a.i-b.i).map(o=>o.x)};
 function placesHtml(p,d,compact){const st=dayStops(p,d);if(!st.length)return"";
   return`<div class="it-places">${compact?"":`<div class="between"><b style="font-size:13px">📍 Places</b>${st.some(x=>x.lat!=null)?`<a class="btn sm" href="${esc(gmapsUrl(st))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Open in Maps</a>`:""}</div>`}
     <div class="it-pl">${st.map((x,i)=>`<span class="it-pc"><i>${i+1}</i>${esc(x.name||"Pin")}</span>`).join(`<span class="it-ar">→</span>`)}</div></div>`}
@@ -2398,6 +2402,7 @@ SHEETS.plan={live:true,
     const rDays=p.final&&isTrip(p)?tripDays(p):[];
     let legs="",tk=0,tm=0,li=0;
     stops.forEach((x,i)=>{const nx=stops[i+1];let eta="";if(nx&&x.lat!=null&&nx.lat!=null){const l=route?route.legs[li]:legEst(x,nx);li++;if(l){tk+=l.km;tm+=l.min;eta=`<div class="eta">${route?"":"~"}${l.km.toFixed(1)} km · ${route?"":"about "}${fMin(l.min)} drive</div>`}}
+      if(rsel==="all"&&rDays.length&&hasDayStops(p)&&(i===0||(stops[i-1].day||"")!==(x.day||""))){const k=rDays.indexOf(x.day);legs+=`<div class="leg-day">${k<0?"🧳 Any day":`🗓️ Day ${k+1} · ${esc(fDate(x.day,{weekday:"short",day:"numeric",month:"short"}))}`}</div>`}
       legs+=`<div class="leg"><span class="n" style="background:${hue(p.id)}">${i+1}</span><div style="flex:1;min-width:0;padding-top:2px"><b>${esc(x.name||"Dropped pin")}</b>${x.addr?`<div class="meta">${esc(x.addr)}</div>`:""}${x.link?` <a class="meta" href="${esc(x.link)}" target="_blank" rel="noopener">original link</a>`:""}</div></div>${eta}`});
     const rsvpBtns=[["in","I'm in"],["maybe","Maybe"],["out","Can't"]].map(([k,l])=>`<button data-act="rsvp" data-id="${esc(p.id)}" data-k="${k}" aria-pressed="${mine?.going===k}">${l}</button>`).join("");
     const grp=k=>rs.filter(r=>r.going===k).map(r=>r.uid);
@@ -2690,18 +2695,20 @@ SHEETS.wishAdd={
 };
 /* plan editor */
 SHEETS.edit={
-  init(a){const p=a.id?planById(a.id):null;const cp=x=>JSON.parse(JSON.stringify(x||[]));const pre=a.pre||{};return{stopDay:a.day||"",past:p?.status==="done"&&!!p?.final,emoji:p?.emoji||pre.emoji||PLAN_EMOJIS[0],stops:cp(p?.stops||pre.stops),slots:cp(p?.slots),est:cp(p?.est),files:[],links:[...(pre.links||[])],q:"",res:[],msg:"",loading:false,invited:a.chat?[...(D.chats.find(c=>c.id===a.chat)?.members||[])]:pre.invited?[...pre.invited]:cp(p?.invited),chatId:a.chat||p?.chatId||""}},
+  init(a){const p=a.id?planById(a.id):null;const cp=x=>JSON.parse(JSON.stringify(x||[]));const pre=a.pre||{};return{stops0:(p?.stops||[]).map(stopKey),stopDay:a.day||"",past:p?.status==="done"&&!!p?.final,emoji:p?.emoji||pre.emoji||PLAN_EMOJIS[0],stops:cp(p?.stops||pre.stops),slots:cp(p?.slots),est:cp(p?.est),files:[],links:[...(pre.links||[])],q:"",res:[],msg:"",loading:false,invited:a.chat?[...(D.chats.find(c=>c.id===a.chat)?.members||[])]:pre.invited?[...pre.invited]:cp(p?.invited),chatId:a.chat||p?.chatId||""}},
   render(s){const p=s.args.id?planById(s.args.id):null,st=s.state,hasPts=st.stops.some(x=>x.lat!=null);
     const eDays=p?.final&&isTrip(p)?tripDays(p):[],dLab=d=>{const k=eDays.indexOf(d);return k<0?"":`Day ${k+1}`};
+    const view=eDays.includes(st.stopDay)?st.stopDay:"",shown=edShown(st,eDays);
     return{title:p?"Edit plan":"Make a plan",body:`<div class="form">
       <div class="emo-pick">${(PLAN_EMOJIS.includes(st.emoji)?PLAN_EMOJIS:[st.emoji,...PLAN_EMOJIS]).map(e=>`<button data-act="edEmoji" data-v="${esc(e)}" aria-pressed="${st.emoji===e}">${esc(e)}</button>`).join("")}</div>
       <label class="f" style="margin-top:6px">Or type any emoji<input class="inp" id="edEmoCustom" maxlength="8" placeholder="Tap here and pick from your keyboard 🙂" style="font-size:18px"></label>
       <label class="f">What's the plan?<input class="inp" id="edTitle" maxlength="60" value="${esc(p?.title||s.args.pre?.title||"")}" placeholder="e.g. Desert camping at Al Qudra"></label>
       <label class="f">Details<textarea class="inp" id="edDesc" placeholder="Vibe, what to bring, dress code, who's driving…">${esc(p?.desc||s.args.pre?.desc||"")}</textarea></label>
       <div class="sec"><h2>Places</h2><p class="hint" style="margin:0">Search any place or paste a Google Maps, Apple Maps or Waze link; it pins itself. Add more than one stop for a route with drive times.</p>
-        ${hasPts?`<div class="mini-map" id="mm-edit" style="height:180px"></div>`:""}
-        ${eDays.length?`<div class="f" style="margin-top:4px">New places go on<div class="chips daychips it-days"><button class="chip" data-act="edStopDay" data-d="" aria-pressed="${!st.stopDay}"><b>Whole trip</b></button>${eDays.map((d,k)=>`<button class="chip" data-act="edStopDay" data-d="${d}" aria-pressed="${st.stopDay===d}"><b>Day ${k+1}</b>&nbsp;${esc(fDate(d,{weekday:"short",day:"numeric"}))}</button>`).join("")}</div><span class="meta" style="font-weight:400">Tap a place's day tag to move it to another day.</span></div>`:""}
-        ${st.stops.map((x,i)=>`<div class="item"><span class="leg"><span class="n" style="background:var(--accent)">${i+1}</span></span>${eDays.length?`<button class="daytag ${x.day&&eDays.includes(x.day)?"on":""}" data-act="stopDayCycle" data-i="${i}">${esc(dLab(x.day)||"All")}</button>`:""}<span class="grow"><span class="t">${esc(x.name||"Dropped pin")}</span>${x.addr?`<br><span class="meta">${esc(x.addr)}</span>`:""}</span>${i>0?`<button class="x" data-act="stopUp" data-i="${i}" aria-label="Move up">↑</button>`:""}<button class="x" data-act="stopDel" data-i="${i}" aria-label="Remove stop">✕</button></div>`).join("")}
+        ${eDays.length?`<div class="f" style="margin-top:4px">Show places for<div class="chips daychips it-days"><button class="chip" data-act="edStopDay" data-d="" aria-pressed="${!view}"><b>Whole trip</b></button>${eDays.map((d,k)=>{const n=st.stops.filter(x=>x.day===d).length;return`<button class="chip" data-act="edStopDay" data-d="${d}" aria-pressed="${view===d}"><b>Day ${k+1}</b>&nbsp;${esc(fDate(d,{weekday:"short",day:"numeric"}))}${n?` <span class="dcount">${n}</span>`:""}</button>`}).join("")}</div><span class="meta" style="font-weight:400">${view?`Only ${dLab(view)}'s places. New places you add go on ${dLab(view)}.`:"Every place on the trip. New places here aren't tied to a day."}</span></div>`:""}
+        ${shown.some(o=>o.x.lat!=null)?`<div class="mini-map" id="mm-edit" style="height:180px"></div>`:""}
+        ${view&&!shown.length?`<div class="meta" style="padding:4px 2px">No places for ${dLab(view)} yet. Search below to add one.</div>`:""}
+        ${shown.map(({x,i},n)=>`<div class="item"><span class="leg"><span class="n" style="background:var(--accent)">${n+1}</span></span>${eDays.length?`<button class="daytag ${x.day&&eDays.includes(x.day)?"on":""}" data-act="stopDayOpen" data-i="${i}" aria-expanded="${st.dayFor===i}">${esc(dLab(x.day)||"Any day")} ▾</button>`:""}<span class="grow"><span class="t">${esc(x.name||"Dropped pin")}</span>${x.addr?`<br><span class="meta">${esc(x.addr)}</span>`:""}</span>${n>0?`<button class="x" data-act="stopUp" data-i="${i}" data-j="${shown[n-1].i}" aria-label="Move up">↑</button>`:""}<button class="x" data-act="stopDel" data-i="${i}" aria-label="Remove stop">✕</button></div>${eDays.length&&st.dayFor===i?`<div class="chips daychips it-days daypick"><button class="chip" data-act="stopDaySet" data-i="${i}" data-d="" aria-pressed="${!x.day}"><b>Any day</b></button>${eDays.map((d,k)=>`<button class="chip" data-act="stopDaySet" data-i="${i}" data-d="${d}" aria-pressed="${x.day===d}"><b>Day ${k+1}</b>&nbsp;${esc(fDate(d,{weekday:"short",day:"numeric"}))}</button>`).join("")}</div>`:""}`).join("")}
         ${(()=>{const near=offersForStops(st.stops).filter(x=>!st.stops.some(z=>z.name===x.o.name)).slice(0,4);return near.length?`<div class="offer-near"><b>🏷️ Entertainer offers near your stops</b>${near.map(x=>`<div class="between"><span style="min-width:0"><b>${esc(catOf(x.o.cat)[1])} ${esc(x.o.name)}</b><br><span class="meta">${esc(x.o.offer||"")} · ${fmtKm(x.d)} away</span></span><button class="btn sm" data-act="edOfferStop" data-id="${esc(x.o.id)}">+ Add</button></div>`).join("")}</div>`:""})()}
         <input class="inp" id="edQ" type="search" enterkeyhint="search" placeholder="🔎 Search a place or paste a maps link" autocomplete="off" autocorrect="off">
         <div id="edSugg">${edSugg(st)}</div>
@@ -2726,8 +2733,9 @@ SHEETS.edit={
         <button class="btn" data-act="linkAdd">+ Add link</button>
         <button class="btn" data-act="edPhotos">📷 Add photos${st.files.length?` (${st.files.length} picked)`:""}</button></div>`}
       </div>`,foot:`<button class="btn pri block" data-act="edSave" id="edSaveBtn">${p?"Save changes":"Post plan"}</button>`}},
-  after(s){miniMap(s,"edit",$("#mm-edit",s.el),s.state.stops,"#0B7A75")}
+  after(s){const p=s.args.id?planById(s.args.id):null;miniMap(s,"edit",$("#mm-edit",s.el),edShown(s.state,p?.final&&isTrip(p)?tripDays(p):[]).map(o=>o.x),"#0B7A75")}
 };
+function edShown(st,eDays){const v=eDays.includes(st.stopDay)?st.stopDay:"";return st.stops.map((x,i)=>({x,i})).filter(o=>!v||o.x.day===v)}
 function edSugg(st){
   let h="";
   if(st.msg)h+=`<div class="banner" style="margin:0 0 8px">${st.msg}</div>`;
@@ -4430,9 +4438,10 @@ const ACT={
   pickSave(){const s=topS();if(!s.state.pt)return toast("Tap the map to drop a pin first.");
     if(s.args.forLoc){const ls_=stack[stack.length-2];const pt={name:val("pickName")||"Dropped pin",...s.state.pt};closeSheet();if(ls_?.kind==="loc")setTimeout(()=>setLoc(ls_,pt),0);return}
     const ed=stack.find(x=>x.kind==="edit");const stop={name:val("pickName")||"Dropped pin",...s.state.pt};closeSheet();if(ed)setTimeout(()=>addStop(ed,stop),0)},
-  stopUp(d){const a=topS().state.stops,i=+d.i;[a[i-1],a[i]]=[a[i],a[i-1]];paintSheet(topS())},
-  edStopDay(d){const s=topS();s.state.stopDay=d.d;paintSheet(s);try{haptic()}catch{}},
-  stopDayCycle(d){const s=topS(),p=planById(s.args.id),ds=p?.final&&isTrip(p)?tripDays(p):[],x=s.state.stops[+d.i];if(!x||!ds.length)return;const opts=["",...ds],k=opts.indexOf(x.day||"");x.day=opts[(k+1)%opts.length];if(!x.day)delete x.day;paintSheet(s);try{haptic()}catch{}},
+  stopUp(d){const a=topS().state.stops,i=+d.i,j=d.j!=null?+d.j:i-1;[a[j],a[i]]=[a[i],a[j]];paintSheet(topS())},
+  edStopDay(d){const s=topS();s.state.stopDay=d.d;s.state.dayFor=-1;const mm=s.mms?.edit;if(mm)mm.fitted=false;paintSheet(s);try{haptic()}catch{}},
+  stopDayOpen(d){const s=topS(),i=+d.i;s.state.dayFor=s.state.dayFor===i?-1:i;paintSheet(s)},
+  stopDaySet(d){const s=topS(),x=s.state.stops[+d.i];if(!x)return;if(d.d)x.day=d.d;else delete x.day;s.state.dayFor=-1;paintSheet(s);try{haptic()}catch{}toast(d.d?`📍 ${x.name||"Place"} moved to Day ${tripDays(planById(s.args.id)).indexOf(d.d)+1}`:`📍 ${x.name||"Place"} is for any day`)},
   routeDay(d){UI.routeDay=UI.routeDay||{};UI.routeDay[d.id]=d.d;const s=topS();if(s)paintSheet(s);try{haptic()}catch{}},
   dayPlace(d){UI.routeDay=UI.routeDay||{};UI.routeDay[d.id]=d.d;openSheet("edit",{id:d.id,day:d.d});setTimeout(()=>{const q=$("#edQ",topS()?.el);q?.scrollIntoView({block:"center"});q?.focus()},350)},
   stopDel(d){topS().state.stops.splice(+d.i,1);paintSheet(topS())},
@@ -4450,7 +4459,10 @@ const ACT={
     const base={title,emoji:st.emoji,desc:val("edDesc"),stops:st.stops,slots:st.slots,est:st.est,invited,chatId:st.chatId||""};
     if(st.past){const sl=[...st.slots].sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start))[0];if(!sl)return $("#edSaveBtn",s.el).disabled=false,toast("Pick the date it happened.");
       base.final={date:sl.date,start:sl.start||"",end:sl.end||"",...(sl.endDate?{endDate:sl.endDate}:{})};base.status="done";base.slots=[sl]}
-    if(s.args.id){await Store.upd("plans",s.args.id,base);closeSheet();toast("Plan updated");return}
+    // keep places someone added while this was open (or that hadn't synced yet when it opened)
+    if(s.args.id){const cur=planById(s.args.id)?.stops||[],had=new Set(st.stops0||[]),mine=new Set(st.stops.map(stopKey));
+      const extra=cur.filter(x=>!had.has(stopKey(x))&&!mine.has(stopKey(x)));if(extra.length)base.stops=[...st.stops,...extra];
+      await Store.upd("plans",s.args.id,base);closeSheet();toast("Plan updated");return}
     const id=rid();await Store.set("plans",id,{status:"poll",final:null,...base,by:ME,at:now()});
     if(s.args.wish)await Store.upd("wishes",s.args.wish,{pushedPlanId:id});
     if(st.chatId&&D.chats.some(c=>c.id===st.chatId))await Store.add("msgs",{chatId:st.chatId,by:ME,kind:"plan",planId:id,text:`📌 New plan: ${title}`,at:now()});
