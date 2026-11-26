@@ -946,6 +946,10 @@ button.brand{flex:0 0 auto;margin-right:auto;border:0;background:none;color:var(
 .daytag{flex:none;align-self:center;border:1px dashed var(--line);background:none;color:var(--muted);font:inherit;font-size:11px;font-weight:800;padding:4px 8px;border-radius:999px;cursor:pointer;margin-right:4px}.daytag.on{border-style:solid;border-color:var(--accent);color:var(--accent)}
 .leg-day{margin:12px 0 6px;font-size:12.5px;font-weight:800;color:var(--accent);letter-spacing:.02em}.leg-day:first-child{margin-top:4px}
 .daypick{margin:-2px 0 8px;padding:8px 16px;background:var(--surface2);border-radius:14px}
+.bz-rep button{font-size:13px}
+.bz-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.bz-dow button{aspect-ratio:1;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font:inherit;font-weight:800;font-size:15px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.bz-dow button span{font-size:9px;font-weight:700;margin-top:2px;opacity:.8}.bz-dow button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#06201E)}
+.bz-count{padding:12px;border-radius:14px;background:var(--surface);border:1px solid var(--line);text-align:center;font-size:13px;color:var(--muted)}.bz-count b{font-size:18px;color:var(--fg)}
 .dr-foot{margin:4px 6px 0;padding-top:10px;font-size:12.5px}
 .crew-btn{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px 3px 7px;font:inherit;font-size:12.5px;cursor:pointer}
 .crew-btn b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crew-btn i{font-style:normal;color:var(--muted);font-size:10px}
@@ -1085,7 +1089,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-25.03";
+const APP_VERSION="2026-11-26.02";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2649,7 +2653,7 @@ function myAttachHtml(busyId,pending){
     <div class="att-row"><button class="btn sm" data-act="bzAttPhoto" data-id="${esc(busyId||"")}">📷 Photo</button><button class="btn sm" data-act="bzAttVideo" data-id="${esc(busyId||"")}">🎬 Video</button><button class="btn sm" data-act="ticketAdd" data-scope="mine" data-id="${esc(busyId||"")}">🎟️ Ticket</button><button class="btn sm" data-act="bzAttLink" data-id="${esc(busyId||"")}">🔗 Link / reel</button></div>`;
 }
 SHEETS.busyView={live:true,
-  render(s){const b=D.busy.find(x=>x.id===s.args.id);if(!b)return{title:"Removed",body:""};
+  render(s){const b=D.busy.find(x=>x.id===s.args.id);if(!b){setTimeout(()=>{if(stack.includes(s)&&topS()===s)closeSheet()},0);return{title:"",body:""}}
     if(b.auto)return{title:esc(myLabel(b)||"Plan in another crew"),body:`<div class="form"><div class="when"><div class="cal-ic"><div class="m">${pd(b.date).toLocaleDateString("en-GB",{month:"short"})}</div><div class="dd">${pd(b.date).getDate()}</div></div><div><div class="d">${fDate(b.date,{weekday:"long"})}</div><div>${fRange(b.start,b.end)} · this crew sees “Busy”</div></div></div>
       <div class="card">📌 You're going to a plan in <b>${esc(CREWS[b.from]?.name||"another crew")}</b> at this time. This crew only sees that you're busy, not what the plan is. It updates by itself if the plan changes or you drop out.</div>
       ${CREWS[b.from]?`<button class="btn" data-act="crewGo" data-k="${esc(b.from)}">Go to ${esc(CREWS[b.from].name)}</button>`:""}</div>`};const items=D.mine.filter(m=>m.busyId===b.id),reels=items.filter(m=>m.kind==="link"&&embedUrl(m.url));
@@ -2660,7 +2664,9 @@ SHEETS.busyView={live:true,
         <button class="btn sm pri" data-act="busyIcs" data-id="${esc(b.id)}" style="align-self:flex-start">📅 Add to phone calendar</button><div class="hint" style="margin:0">Phone-calendar reminders ring even when Yalla Guys is closed.</div></div>
       <label class="check"><input type="checkbox" data-act="busyTl" data-id="${esc(b.id)}" ${b.tl!==false?"checked":""}> 🕰️ Show on my timeline</label>
       <div class="sec" style="border:0;padding-top:0"><h2>🔒 Your stuff</h2><div class="hint" style="margin:0">Only you can see these.</div>${myAttachHtml(b.id)}</div>
-      <button class="btn danger" data-act="delBusy" data-id="${esc(b.id)}" data-confirm="Tap again to remove">Remove this block</button></div>`}}
+      ${b.ser?`<div class="hint" style="margin:0">🔁 Part of a repeat · ${D.busy.filter(x=>x.ser===b.ser).length} days</div>`:""}
+      <button class="btn danger" data-act="delBusy" data-id="${esc(b.id)}" data-confirm="Tap again to remove">Remove ${b.ser?"just this day":"this block"}</button>
+      ${b.ser?`<button class="btn danger ghost" data-act="delBusySeries" data-id="${esc(b.id)}" data-confirm="Remove this and all later ones?">Remove this and all later repeats (${D.busy.filter(x=>x.ser===b.ser&&x.date>=b.date).length})</button>`:""}</div>`}}
 };
 /* ---------- wishlist & to-do ---------- */
 const VIS={all:"🌍 Everyone",private:"🔒 Only me",invite:"👥 Invited"};
@@ -3963,6 +3969,20 @@ SHEETS.journal={live:true,
         ${e?`<button class="btn sm ghost danger" data-act="jDel" data-d="${ds}" data-confirm="Delete this day?" style="align-self:flex-start">Delete this day</button>`:""}</div>`,
       foot:`<button class="btn pri block" data-act="jSave">${e?"Save changes":"Save today's entry"}</button>`}}};
 /* busy */
+/* ---------- block my time: quick labels and repeats (daily, weekdays, weekly, or picked days) ---------- */
+const BZ_QUICK=[["work","💼","Work"],["school","🎓","School"],["uni","📚","Uni"],["gym","🏋️","Gym"],["appt","🩺","Appointment"]];
+const BZ_DOW=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const dowOf=ds=>(pd(ds).getDay()+6)%7; // 0 = Monday
+function bzDates(st,start){const rep=st.rep||"once";if(rep==="once"||!start)return start?[start]:[];
+  const until=st.until&&st.until>=start?st.until:start,days=rep==="daily"?[0,1,2,3,4,5,6]:rep==="weekly"?[dowOf(start)]:(st.dow||[]),out=[];
+  const d=pd(start),e=pd(until);for(let i=0;d<=e&&i<400;i++){const k=ymd(d);if(days.includes(dowOf(k)))out.push(k);d.setDate(d.getDate()+1)}return out.slice(0,200)}
+function bzRepeatHtml(s){const st=s.state,rep=st.rep||"once",start=$("#bzD",s.el)?.value||s.args.d||TODAY();
+  if(!st.until){const u=pd(start);u.setDate(u.getDate()+27);st.until=ymd(u)}
+  const n=bzDates(st,start).length;
+  return`<div class="f">🔁 Repeat<div class="seg bz-rep">${[["once","Once"],["daily","Daily"],["days","Pick days"],["weekly","Weekly"]].map(([k,l])=>`<button data-act="bzRep" data-k="${k}" aria-pressed="${rep===k}">${l}</button>`).join("")}</div>
+    ${rep==="days"?`<div class="bz-dow">${BZ_DOW.map((w,i)=>`<button data-act="bzDow" data-i="${i}" aria-pressed="${(st.dow||[]).includes(i)}">${w[0]}<span>${w}</span></button>`).join("")}</div>`:""}
+    ${rep==="once"?"":`<div class="grid2" style="align-items:end"><label class="f">Until<input class="inp" type="date" id="bzU" value="${esc(st.until)}" min="${esc(start)}"></label><div class="bz-count"><b>${n}</b> block${n===1?"":"s"}${n>=200?" (max)":""}</div></div>
+      <div class="hint" style="margin:0">${rep==="daily"?"Every day":rep==="weekly"?"Every "+BZ_DOW[dowOf(start)]:(st.dow||[]).length?(st.dow||[]).slice().sort().map(i=>BZ_DOW[i]).join(", "):"Pick the days above"} from ${esc(fDate(start,{day:"numeric",month:"short"}))} to ${esc(fDate(st.until,{day:"numeric",month:"short"}))}. You can remove the whole repeat later from any of them.</div>`}</div>`}
 SHEETS.busy={
   render(s){return{title:"Block my time",body:`<div class="form">
     <p class="meta" style="margin:0">The guys see you as <b>Busy</b> at this time, and plan polls flag the clash. What it is stays private to you.</p>
@@ -3970,10 +3990,12 @@ SHEETS.busy={
     <div class="grid2"><label class="f">From<input class="inp" type="time" id="bzS" value="09:00"></label><label class="f">To<input class="inp" type="time" id="bzE" value="17:00"></label></div>
     <label class="check"><input type="checkbox" id="bzAll"> All day</label>
     <label class="f">What is it? (only you see this)<input class="inp" id="bzL" placeholder="e.g. Work shift, dentist, family dinner"></label>
-    <label class="check"><input type="checkbox" id="bzTl" checked> 🕰️ Add to my timeline<span class="meta" style="font-weight:400;margin-left:auto">only you see it there</span></label>
+    <div class="chips bz-quick" style="margin-top:-6px">${BZ_QUICK.map(([k,e,l])=>`<button class="chip" data-act="bzQuick" data-k="${k}" aria-pressed="${s.state.quick===k}">${e} ${l}</button>`).join("")}</div>
+    ${bzRepeatHtml(s)}
+    <label class="check"><input type="checkbox" id="bzTl" ${s.state.tl===false?"":"checked"} data-act="bzTlTog"> 🕰️ Add to my timeline<span class="meta" style="font-weight:400;margin-left:auto">only you see it there</span></label>
+    ${s.state.rep&&s.state.rep!=="once"?`<div class="hint" style="margin:-6px 0 0">${s.state.tl===false?"Repeats stay off your timeline. On any day, open that block and tick “Show on my timeline” to add just that day.":"Every repeat goes on your timeline. Untick to keep them off and add single days later."}</div>`:""}
     <div class="f">🔒 Attach for yourself: photos, tickets, links or reels${myAttachHtml("",s.state.att||(s.state.att=[]))}</div>
     <div class="f">⏰ Remind me<div class="chips">${REM_OPTS.filter(([m])=>m<=1440).map(([m,l])=>`<button class="chip" data-act="bzRem" data-m="${m}" aria-pressed="${(s.state.rem||(s.state.rem=[60])).includes(m)}">${m?l+" before":l}</button>`).join("")}</div></div>
-    <label class="f">Repeat weekly<select class="inp" id="bzR"><option value="1">Just once</option><option value="4">Every week for 4 weeks</option><option value="8">Every week for 8 weeks</option><option value="12">Every week for 12 weeks</option></select></label>
     </div>`,foot:`<button class="btn pri block" data-act="bzSave">Save</button>`}}
 };
 /* expense */
@@ -4546,6 +4568,14 @@ const ACT={
   calAll(){UI.calPeople=(UI.calPeople||[]).length===D.members.length?[]:D.members.map(m=>m.id);render()},
   calPerson(d){const a=UI.calPeople||[],i=a.indexOf(d.id);if(i>=0)a.splice(i,1);else a.push(d.id);UI.calPeople=a;render()},
   planFromFree(d){openSheet("edit",{pre:{invited:[...new Set([ME,...(UI.calPeople||[])])]}});setTimeout(()=>{const s=topS();const di=$("#edD",s.el),si=$("#edS",s.el);if(di)di.value=d.d;if(si)si.value=d.s},80)},
+  bzQuick(d){const s=topS(),q=BZ_QUICK.find(x=>x[0]===d.k);if(!q)return;const l=$("#bzL",s.el);s.state.quick=s.state.quick===d.k?"":d.k;
+    if(s.state.quick){if(l)l.value=q[2];if(d.k==="work"||d.k==="school"||d.k==="uni"){s.state.rep="days";s.state.dow=[0,1,2,3,4];s.state.tl=false;const t=$("#bzTl",s.el);if(t)t.checked=false;const a=$("#bzS",s.el),b=$("#bzE",s.el);if(a&&!a.value)a.value=d.k==="work"?"09:00":"08:00"}}
+    paintSheet(s);try{haptic()}catch{}},
+  bzRep(d){const s=topS();s.state.rep=d.k;if(d.k==="days"&&!(s.state.dow||[]).length)s.state.dow=[0,1,2,3,4];paintSheet(s)},
+  bzDow(d){const s=topS(),a=s.state.dow||(s.state.dow=[]),i=+d.i,k=a.indexOf(i);if(k>=0)a.splice(k,1);else a.push(i);paintSheet(s);try{haptic()}catch{}},
+  bzTlTog(d,el){const s=topS();s.state.tl=!!el.checked},
+  async delBusySeries(d){const b=D.busy.find(x=>x.id===d.id);if(!b?.ser)return;const list=D.busy.filter(x=>x.uid===ME&&x.ser===b.ser&&x.date>=b.date);closeSheet();toast(`Removing ${list.length}…`);
+    for(let i=0;i<list.length;i+=10)await Promise.all(list.slice(i,i+10).map(x=>Store.del("busy",x.id)));toast(`Removed ${list.length} block${list.length===1?"":"s"}`)},
   bzRem(d){const s=topS(),a=s.state.rem||(s.state.rem=[60]),m=+d.m,i=a.indexOf(m);if(i>=0)a.splice(i,1);else a.push(m);paintSheet(s)},
   busyRem(d){const all=ls.get("yg-remind-busy",{}),a=all[d.id]||[],m=+d.m,i=a.indexOf(m);if(i>=0)a.splice(i,1);else a.push(m);all[d.id]=a;ls.set("yg-remind-busy",all);paintSheet(topS());if(!SET.notifyOn)toast("Turn on notifications in ⚙️ Settings, or add it to your phone calendar")},
   busyIcs(d){const b=D.busy.find(x=>x.id===d.id);if(!b)return;const p=busyAsPlan(b),txt=icsFor(p,busyRemind(b.id).length?busyRemind(b.id):[60]);const a=document.createElement("a");a.href=/iPhone|iPad/i.test(navigator.userAgent)?"data:text/calendar;charset=utf-8,"+encodeURIComponent(txt):URL.createObjectURL(new Blob([txt],{type:"text/calendar"}));a.download=(p.title.replace(/[^\w]+/g,"-")||"plan")+".ics";document.body.appendChild(a);a.click();a.remove()},
@@ -4832,13 +4862,16 @@ const ACT={
   calNav(d){const[y,m]=UI.calMonth.split("-").map(Number);const n=new Date(y,m-1+(+d.n),1);UI.calMonth=`${n.getFullYear()}-${pad(n.getMonth()+1)}`;render()},
   calDay(d){UI.calDay=d.d;if(d.d.slice(0,7)!==UI.calMonth)UI.calMonth=d.d.slice(0,7);render()},
   newBusy(d){openSheet("busy",{d:d.d})},
-  async bzSave(){const date=val("bzD");if(!date)return toast("Pick a date.");const all=$("#bzAll").checked;const s=all?"":val("bzS"),e=all?"":val("bzE");const n=+val("bzR")||1;const label=val("bzL");
-    const att=topS().state.att||[];
-    for(let i=0;i<n;i++){const d=pd(date);d.setDate(d.getDate()+7*i);const id=await Store.add("busy",{uid:ME,date:ymd(d),start:s,end:e,label:MODE==="demo"?label:"",tl:!!$("#bzTl")?.checked,at:now()});if(label&&MODE!=="demo")await Store.setLabel(id,label);
-      if(i===0)for(const [k,m] of att.entries())await Store.add("mine",{...m,busyId:id,at:now()+k});
-      const rem=topS().state.rem||[60];const all=ls.get("yg-remind-busy",{});all[id]=[...rem];ls.set("yg-remind-busy",all)}
-    closeSheet();toast(n>1?`Blocked ${n} weeks`:"Time blocked")},
-  async delBusy(d){await Store.del("busy",d.id)},
+  async bzSave(){const date=val("bzD");if(!date)return toast("Pick a date.");const all=$("#bzAll").checked;const s=all?"":val("bzS"),e=all?"":val("bzE");const label=val("bzL");
+    const sh=topS(),st=sh.state;if($("#bzU",sh.el))st.until=val("bzU");const dates=bzDates(st,date);if(!dates.length)return toast("Pick at least one day to repeat on.");
+    const att=st.att||[],rem=[...(st.rem||[60])],tl=!!$("#bzTl",sh.el)?.checked,ser=dates.length>1?rid():"",ids=[];
+    $(".sheet-foot .btn,[data-act=bzSave]",sh.el)?.setAttribute("disabled","");if(dates.length>3)toast(`Blocking ${dates.length} days…`);
+    for(let i=0;i<dates.length;i+=10)ids.push(...await Promise.all(dates.slice(i,i+10).map(ds=>Store.add("busy",{uid:ME,date:ds,start:s,end:e,label:MODE==="demo"?label:"",tl,...(ser?{ser,rep:st.rep}:{}),at:now()}))));
+    if(label&&MODE!=="demo"){try{await FS.doc("priv/"+ME).set({labels:Object.fromEntries(ids.map(id=>[id,label]))},{merge:true})}catch{}}
+    for(const [k,m] of att.entries())await Store.add("mine",{...m,busyId:ids[0],at:now()+k});
+    const allR=ls.get("yg-remind-busy",{});ids.forEach(id=>allR[id]=[...rem]);ls.set("yg-remind-busy",allR);
+    closeSheet();toast(ids.length>1?`🔁 Blocked ${ids.length} days`:"Time blocked")},
+  async delBusy(d){if(topS()?.kind==="busyView")closeSheet();await Store.del("busy",d.id);toast("Removed")},
   mapFilter(d){UI.mapFilter=d.k;render()},
   newChat(){openSheet("newChat")},
   ncEmoji(d){const s=topS();s.state.emoji=d.v;s.state.icon="";paintSheet(s)},
@@ -4903,6 +4936,7 @@ document.addEventListener("change",ev=>{
   if(el.dataset.wish){Store.upd("wishes",el.dataset.wish,{done:el.checked})}
   if(el.id==="pastMonthSel"){UI.pastMonth=el.value;UI.pastDay="";if(MAPS.main)MAPS.main.sig="";render()}
   if(el.id==="pastDaySel"){UI.pastDay=el.value;if(MAPS.main)MAPS.main.sig="";render()}
+  if(el.id==="bzU"||el.id==="bzD"){const s=topS();if(s?.kind==="busy"){if(el.id==="bzU")s.state.until=el.value;el.blur();paintSheet(s)}}
   if(el.id==="edPast"){const s=topS();if(s?.kind==="edit"){s.state.past=el.checked;paintSheet(s)}}
   if(el.id==="shareLoc"){(async()=>{if(el.checked){if(!navigator.geolocation){el.checked=false;return toast("Location isn't available on this phone.")}
       navigator.geolocation.getCurrentPosition(async p=>{MYPOS={lat:p.coords.latitude,lng:p.coords.longitude};await Store.upd("members",ME,{shareLoc:true,locMode:mem(ME)?.locMode||"exact"});lastLocPos=null;lastLocWrite=0;setTimeout(()=>{writeLoc(MYPOS);syncLocWatch()},300);toast("📡 Sharing your location with the crew")},
