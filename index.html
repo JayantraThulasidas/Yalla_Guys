@@ -950,6 +950,20 @@ button.brand{flex:0 0 auto;margin-right:auto;border:0;background:none;color:var(
 .bz-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.bz-dow button{aspect-ratio:1;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font:inherit;font-weight:800;font-size:15px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
 .bz-dow button span{font-size:9px;font-weight:700;margin-top:2px;opacity:.8}.bz-dow button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#06201E)}
 .bz-count{padding:12px;border-radius:14px;background:var(--surface);border:1px solid var(--line);text-align:center;font-size:13px;color:var(--muted)}.bz-count b{font-size:18px;color:var(--fg)}
+.rw-ov{position:fixed;inset:0;z-index:9000;background:#000;display:grid;place-items:center;touch-action:none;user-select:none;-webkit-user-select:none}
+.rw-ov canvas{height:100dvh;width:auto;max-width:100vw;max-height:100dvh;aspect-ratio:9/16;object-fit:contain;display:block}
+.rw-x{position:absolute;top:calc(env(safe-area-inset-top) + 34px);right:14px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(0,0,0,.35);color:#fff;font-size:20px;cursor:pointer;backdrop-filter:blur(8px)}
+.rw-acts{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 22px);transform:translateX(-50%);display:flex;gap:8px;animation:pop-in .3s both}
+.rw-acts button{border:0;border-radius:999px;padding:12px 16px;font:inherit;font-weight:800;font-size:15px;background:#fff;color:#111;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.rw-acts button[data-rw="again"]{width:46px;padding:12px 0}
+.rw-rec{position:absolute;top:calc(env(safe-area-inset-top) + 40px);left:50%;transform:translateX(-50%);background:rgba(220,30,60,.9);color:#fff;font-weight:800;font-size:13px;padding:8px 14px;border-radius:999px;white-space:nowrap}
+.rw-hero{position:relative;overflow:hidden;border-radius:24px;padding:22px 18px 16px;text-align:center;color:#fff;background:radial-gradient(circle at 20% 20%,color-mix(in srgb,var(--accent) 70%,transparent),transparent 60%),radial-gradient(circle at 85% 80%,#7B2CBF,transparent 60%),#0B0A18;display:flex;flex-direction:column;gap:2px}
+.rw-k{font-size:12px;font-weight:800;letter-spacing:.3em;opacity:.8}.rw-hero>b{font-family:var(--f-display);font-size:46px;line-height:1.05;letter-spacing:-.02em}.rw-hero>span:not(.rw-k){opacity:.8;font-weight:600}
+.rw-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}.rw-stats span{background:rgba(255,255,255,.1);border-radius:14px;padding:8px 2px;font-size:11.5px;font-weight:700;opacity:.9}.rw-stats b{display:block;font-family:var(--f-display);font-size:22px}
+.rw-songs{display:flex;flex-direction:column;gap:6px}
+.rw-song{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:14px;padding:6px 10px 6px 6px;font:inherit;text-align:left;cursor:pointer}
+.rw-song .sart{width:42px;height:42px;border-radius:10px;overflow:hidden;display:grid;place-items:center;background:var(--surface2);flex:none;font-size:18px}.rw-song .sart img{width:100%;height:100%;object-fit:cover}
+.rw-song b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rw-song[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
 .dr-foot{margin:4px 6px 0;padding-top:10px;font-size:12.5px}
 .crew-btn{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:3px 10px 3px 7px;font:inherit;font-size:12.5px;cursor:pointer}
 .crew-btn b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crew-btn i{font-style:normal;color:var(--muted);font-size:10px}
@@ -1089,7 +1103,7 @@ window.FIREBASE_CONFIG = {
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.1/leaflet-maplibre-gl.js"></script>
 <script>
 "use strict";
-const APP_VERSION="2026-11-26.02";
+const APP_VERSION="2026-11-26.03";
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -2312,7 +2326,7 @@ SHEETS.person={live:true,
     const bd=m.birthday?pd("2000-"+m.birthday).toLocaleDateString("en-GB",{day:"numeric",month:"long"}):"";
     const grid=list=>`<div class="media-grid">${list.map(x=>`<button data-act="openMoment" data-id="${esc(x.id)}" aria-label="Moment from ${esc(fDate(x.day))}"><img src="${esc(x.kind==="video"?x.poster:x.src)}" alt="" loading="lazy"><span style="position:absolute;left:6px;bottom:5px;color:#fff;font-size:11px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.6)">${esc(fDate(x.day,{day:"numeric",month:"short"}))}</span></button>`).join("")}</div>`;
     const sc=songCard(m),facts=[["🎂","Birthday",bd],["📍","Fav spot",m.spot],["🎵","On repeat",sc?"":m.song]].filter(f=>f[2]);
-    return{title:me?"My profile":esc(m.nick),right:me?`<button class="btn sm" data-act="journal" aria-label="My journal">📔</button><button class="btn sm" data-act="settings" aria-label="Settings">⚙️</button><button class="btn sm" data-act="profile">Edit</button>`:"",body:`
+    return{title:me?"My profile":esc(m.nick),right:me?`<button class="btn sm" data-act="rewind" aria-label="Rewind">⏪</button><button class="btn sm" data-act="journal" aria-label="My journal">📔</button><button class="btn sm" data-act="settings" aria-label="Settings">⚙️</button><button class="btn sm" data-act="profile">Edit</button>`:"",body:`
       <div class="prof-hero">${stickerHalo(m.stickers||[],avatar(id))}<h1>${esc(m.nick)}</h1>${m.vibe?`<span class="vibe">${esc(m.vibe)}</span>`:""}${m.bio?`<p style="margin:0;max-width:34ch;color:var(--muted)">${esc(m.bio)}</p>`:me?`<button class="btn sm ghost" data-act="profile">+ Add a bio, photo and cute stuff</button>`:""}
         <div class="row" style="justify-content:center;margin-top:4px"><button class="btn" data-act="timeline" data-id="${esc(id)}">🕰️ Timeline</button>${me?"":`<button class="btn pri" data-act="dm" data-id="${esc(id)}">💬 Message</button>`}</div></div>
       ${!me&&MODE==="live"&&crewOwner()===ME?`<div style="display:flex;justify-content:center;margin-top:8px"><button class="btn sm danger" data-act="kickMember" data-id="${esc(id)}" data-confirm="Tap again to remove ${esc(m.nick)}">Remove from crew</button></div>`:""}
@@ -3944,6 +3958,219 @@ SHEETS.council={live:true,
           ${waiting.length&&!closed?`<div class="cwait"><span class="meta">Still to vote</span><div class="row" style="gap:6px;flex-wrap:wrap">${waiting.map(u=>`<span class="cw">${cav(c,u)}<span>${esc(cName(c,u))}</span></span>`).join("")}</div></div>`:""}`:""}
         <div class="sec"><h2>💬 Discussion${msgs.length?` · ${msgs.length}`:""}</h2>${msgs.length?`<div class="cchat">${msgs.map(m=>`<div class="cmsg ${m.by===ME?"me":""}">${m.by===ME?"":cav(c,m.by)}<div class="cbub">${m.by===ME?"":`<b>${esc(cName(c,m.by))}</b>`}<span>${linkify(m.text||"")}</span><em>${ago(m.at)}</em></div>${m.by===ME?`<button class="x" data-act="cMsgDel" data-id="${esc(m.id)}" aria-label="Delete">✕</button>`:""}</div>`).join("")}</div>`:`<div class="hint" style="margin:0">No comments yet. Make your case 👀</div>`}</div>`,
       foot:`<div style="display:flex;gap:6px;align-items:flex-end;flex:1"><textarea class="compose" id="cmIn-${esc(c.id)}" rows="1" placeholder="Say something…" enterkeyhint="send"></textarea><button class="send" data-act="cSend" data-id="${esc(c.id)}" aria-label="Send">${ICON.send}</button></div>`}}};
+/* ---------- Rewind: a story-style recap of your week, month or year ----------
+   Everything is drawn on one 1080×1920 canvas, so what you watch is exactly what gets saved as a video. */
+const RW_W=1080,RW_H=1920;
+const RW_PAL=[["#FF5FA2","#5B16B8"],["#00D2B4","#0B2E6F"],["#FFB800","#C81D4E"],["#5B8CFF","#7B2CBF"],["#2EE59D","#0B5E4F"],["#FF7A45","#6A1B9A"],["#F72585","#3A0CA3"]];
+const rwE=t=>{t=Math.max(0,Math.min(1,t));return 1-Math.pow(1-t,3)};
+const rwB=t=>{t=Math.max(0,Math.min(1,t));const c=1.70158;return 1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2)};
+const rwS=(t,a,b)=>Math.max(0,Math.min(1,(t-a)/(b-a)));
+const RW_FONT=(sz,w=800)=>`${w} ${sz}px "Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif`;
+const RW_EMO=sz=>`${sz}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+function rwMonday(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
+function rwPeriods(kind){const t=new Date(),sm={day:"numeric",month:"short"};
+  if(kind==="week")return[0,1,2,3].map(i=>{const m=rwMonday(t);m.setDate(m.getDate()-7*i);const e=new Date(m);e.setDate(e.getDate()+6);const f=ymd(m),to=ymd(e);
+    return{k:f,from:f,to,label:i===0?"This week":i===1?"Last week":fDate(f,sm),big:i===0?"This week":i===1?"Last week":"Week of "+fDate(f,sm),sub:`${fDate(f,sm)} – ${fDate(to,sm)}`,unit:"week"}});
+  if(kind==="month")return Array.from({length:12},(_,i)=>{const m=new Date(t.getFullYear(),t.getMonth()-i,1),k=ymd(m).slice(0,7),e=new Date(m.getFullYear(),m.getMonth()+1,0);
+    return{k,from:k+"-01",to:ymd(e),label:m.toLocaleDateString("en-GB",{month:"short"})+(m.getFullYear()!==t.getFullYear()?" ’"+String(m.getFullYear()).slice(2):""),big:m.toLocaleDateString("en-GB",{month:"long"}),sub:String(m.getFullYear()),unit:"month"}});
+  return[0,1,2].map(i=>{const y=t.getFullYear()-i;return{k:""+y,from:y+"-01-01",to:y+"-12-31",label:""+y,big:""+y,sub:i===0?"Your year so far":"Your year",unit:"year"}})}
+function rwData(per){const{from,to}=per,days=timelineDays(ME),ks=Object.keys(days).filter(k=>k>=from&&k<=to).sort();
+  const plans=new Map(),photos=[],seen=new Set(),blocks=new Set();
+  for(const k of ks){const d=days[k];
+    for(const p of d.plans){if(p._proposed)continue;if(p._busy){blocks.add(p._busy);continue}if(!plans.has(p.id))plans.set(p.id,{p,days:[]});plans.get(p.id).days.push(k)}
+    for(const m of d.media){if(!m.thumb||seen.has(m.thumb))continue;seen.add(m.thumb);photos.push({src:m.thumb,day:k,ev:m.ev||"",t:m.t||0})}}
+  const pl=[...plans.values()].sort((a,b)=>a.days[0].localeCompare(b.days[0]));
+  const places=new Map();let km=0;
+  for(const{p,days:ds}of pl){const st=(p.stops||[]).filter(x=>!x.day||ds.includes(x.day));
+    for(const x of st){const key=(x.name||"").trim().toLowerCase();if(key&&!places.has(key))places.set(key,{...x})}
+    const pts=st.filter(x=>x.lat!=null);for(let i=1;i<pts.length;i++){try{km+=legEst(pts[i-1],pts[i]).km}catch{}}}
+  const ppl={};for(const{p}of pl)for(const u of goingOf(p.id))if(u!==ME)ppl[u]=(ppl[u]||0)+1;
+  const byPlan={};photos.forEach(x=>{if(x.ev)byPlan[x.ev]=(byPlan[x.ev]||0)+1});
+  const top=pl.map(o=>({...o,n:byPlan[o.p.id]||0})).sort((a,b)=>b.n-a.n||b.days.length-a.days.length)[0]||null;
+  const byDay={};photos.forEach(x=>byDay[x.day]=(byDay[x.day]||0)+1);
+  const js=D.mine.filter(m=>m.kind==="journal"&&m.date>=from&&m.date<=to),moods={};js.forEach(j=>{if(j.mood)moods[j.mood]=(moods[j.mood]||0)+1});
+  return{per,plans:pl,photos,places:[...places.values()],km:Math.round(km),people:Object.entries(ppl).sort((a,b)=>b[1]-a[1]).slice(0,3),top,
+    bestDay:Object.entries(byDay).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))[0]||null,journal:js.length,topMood:Object.entries(moods).sort((a,b)=>b[1]-a[1])[0]||null,
+    songs:D.mine.filter(m=>m.kind==="daysong"&&m.date>=from&&m.date<=to&&m.prev).sort((a,b)=>a.date.localeCompare(b.date)),
+    moments:D.moments.filter(m=>m.by===ME&&m.day>=from&&m.day<=to).length,blocks:blocks.size}}
+/* drawing helpers */
+function rwLines(g,s,max){const out=[];for(const para of String(s).split("\n")){let cur="";for(const w of para.split(" ")){const tr=cur?cur+" "+w:w;if(g.measureText(tr).width>max&&cur){out.push(cur);cur=w}else cur=tr}out.push(cur)}return out}
+function rwText(g,s,x,y,sz,o={}){const{w=800,c="#fff",al="center",a=1,max=900,lh=1.08,fit=false,ls=0}=o;g.save();g.globalAlpha*=a;g.font=RW_FONT(sz,w);
+  if(fit){while(sz>40&&g.measureText(s).width>max){sz-=6;g.font=RW_FONT(sz,w)}}
+  if(ls){try{g.letterSpacing=ls+"px"}catch{}}
+  g.fillStyle=c;g.textAlign=al;g.textBaseline="alphabetic";const L=fit?[String(s)]:rwLines(g,s,max);L.forEach((l,i)=>g.fillText(l,x,y+i*sz*lh));g.restore();return L.length*sz*lh}
+function rwEmoji(g,e,x,y,sz,a=1,rot=0){g.save();g.globalAlpha*=a;g.translate(x,y);g.rotate(rot);g.font=RW_EMO(sz);g.fillStyle="#fff";g.textAlign="center";g.textBaseline="middle";g.fillText(e,0,0);g.restore()}
+function rwBg(g,pal,T,seed){const[a,b]=pal;g.fillStyle="#07060F";g.fillRect(0,0,RW_W,RW_H);
+  const gr=g.createLinearGradient(0,0,RW_W*.3,RW_H);gr.addColorStop(0,b+"EE");gr.addColorStop(1,"#07060F");g.fillStyle=gr;g.fillRect(0,0,RW_W,RW_H);
+  g.save();g.globalCompositeOperation="lighter";
+  for(let i=0;i<3;i++){const x=RW_W*(.5+.45*Math.sin(T*.33+i*2.1+seed)),y=RW_H*(.5+.4*Math.cos(T*.27+i*1.7+seed*1.3)),r=560+140*Math.sin(T*.5+i),col=i===1?b:a;
+    const rg=g.createRadialGradient(x,y,0,x,y,r);rg.addColorStop(0,col+"88");rg.addColorStop(1,col+"00");g.fillStyle=rg;g.fillRect(0,0,RW_W,RW_H)}g.restore();
+  g.save();g.fillStyle="#fff";for(let i=0;i<80;i++){const sx=(Math.sin(i*91.7+seed*7)*.5+.5)*RW_W,sy=((Math.sin(i*47.3+seed*3)*.5+.5)*RW_H+T*(6+i%5*4))%RW_H,tw=.35+.65*Math.abs(Math.sin(T*1.4+i));
+    g.globalAlpha=tw*.75;g.beginPath();g.arc(sx,sy,i%11===0?3.2:1.7,0,7);g.fill()}g.restore()}
+function rwPhoto(g,img,x,y,w,h,{rot=0,a=1,frame=true,zoom=1,r=22}={}){if(!img)return;g.save();g.globalAlpha*=a;g.translate(x,y);g.rotate(rot);
+  if(frame){g.shadowColor="rgba(0,0,0,.45)";g.shadowBlur=40;g.shadowOffsetY=16;g.fillStyle="#FBF7F0";rrect(g,-w/2-18,-h/2-18,w+36,h+70,14);g.fill();g.shadowColor="transparent"}
+  g.save();rrect(g,-w/2,-h/2,w,h,frame?6:r);g.clip();const zw=w*zoom,zh=h*zoom;drawCover(g,img,-zw/2,-zh/2,zw,zh);g.restore();g.restore()}
+function rwAvatar(g,u,x,y,R,img){const m=mem(u);g.save();g.beginPath();g.arc(x,y,R,0,7);g.fillStyle=m?.color||"#7A8794";g.fill();g.clip();
+  if(img)drawCover(g,img,x-R,y-R,R*2,R*2);else{g.font=RW_EMO(R*1.05);g.textAlign="center";g.textBaseline="middle";g.fillText(m?.emoji||"🙂",x,y+R*.06)}g.restore();
+  g.save();g.lineWidth=8;g.strokeStyle="rgba(255,255,255,.9)";g.beginPath();g.arc(x,y,R,0,7);g.stroke();g.restore()}
+function rwPill(g,s,x,y,sz,bg="rgba(255,255,255,.16)",c="#fff"){g.save();g.font=RW_FONT(sz,800);const w=g.measureText(s).width+sz*1.4,h=sz*1.9;g.fillStyle=bg;rrect(g,x-w/2,y-h/2,w,h,h/2);g.fill();g.fillStyle=c;g.textAlign="center";g.textBaseline="middle";g.fillText(s,x,y+sz*.05);g.restore()}
+function rwSparkle(g,x,y,s,a){g.save();g.globalAlpha*=a;g.translate(x,y);g.fillStyle="#fff";g.beginPath();for(let i=0;i<4;i++){g.rotate(Math.PI/2);g.moveTo(0,0);g.quadraticCurveTo(s*.12,s*.12,0,s);g.quadraticCurveTo(-s*.12,s*.12,0,0)}g.fill();g.restore()}
+/* the slides */
+function rwSlides(d){const per=d.per,S=[],IM=src=>RW.img.get(src),shots=d.photos.slice().sort((a,b)=>a.day.localeCompare(b.day)||a.t-b.t),pick=(n)=>{if(shots.length<=n)return shots;const out=[];for(let i=0;i<n;i++)out.push(shots[Math.floor(i*shots.length/n)]);return out};
+  const me=mem(ME),acc=(getComputedStyle(document.documentElement).getPropertyValue("--accent")||"").trim(),pal=i=>{const p=RW_PAL[(i+RW.seed)%RW_PAL.length];return i===0&&/^#[0-9a-f]{6}$/i.test(acc)?[acc,p[1]]:p};
+  let pi=0;const add=(dur,draw)=>{const P=pal(pi++),seed=pi*1.7;S.push({dur,draw:(g,el,T)=>{rwBg(g,P,T,seed);draw(g,el,T,P)}})};
+  // 1 · intro
+  const ring=pick(8);
+  add(4.6,(g,el,T,P)=>{const n=ring.length;
+    ring.forEach((x,i)=>{const ang=T*.18+i/n*Math.PI*2,rx=440,ry=620,px=RW_W/2+Math.cos(ang)*rx,py=RW_H/2+Math.sin(ang)*ry;rwPhoto(g,IM(x.src),px,py,210,260,{rot:Math.sin(ang)*.2,a:.55*rwE(rwS(el,.2+i*.08,1+i*.08))})});
+    rwText(g,"⏪  R E W I N D",RW_W/2,640,46,{w:800,c:P[0],a:rwE(rwS(el,0,.6))});
+    const big=per.big;g.save();g.font=RW_FONT(250,800);let sz=250;while(sz>90&&g.measureText(big).width>960){sz-=10;g.font=RW_FONT(sz,800)}
+    const ws=[...big].map(ch=>g.measureText(ch).width),tot=ws.reduce((a,b)=>a+b,0);let x=RW_W/2-tot/2;g.textBaseline="alphabetic";
+    [...big].forEach((ch,i)=>{const k=rwB(rwS(el,.35+i*.06,.95+i*.06));g.globalAlpha=Math.min(1,k);g.fillStyle="#fff";g.shadowColor=P[0];g.shadowBlur=40;g.fillText(ch,x,1000+(1-k)*160);x+=ws[i]});g.restore();
+    rwText(g,per.sub,RW_W/2,1110,56,{w:700,c:"rgba(255,255,255,.85)",a:rwE(rwS(el,1.2,1.8))});
+    rwPill(g,`${me?.emoji||"🙂"}  ${me?.nick||"You"}`,RW_W/2,1560,40,"rgba(255,255,255,.14)");
+    for(let i=0;i<6;i++)rwSparkle(g,RW_W/2+Math.cos(i*1.05+T)*480,1000+Math.sin(i*1.3+T*.8)*260,26+10*Math.sin(T*2+i),.6*rwS(el,1,1.6))});
+  // 2 · plans
+  const emos=d.plans.map(o=>o.p.emoji||"📍").slice(0,12);
+  add(5,(g,el,T,P)=>{if(!d.plans.length){rwEmoji(g,"😴",RW_W/2,760,260,rwE(rwS(el,0,.6)),Math.sin(T)*.08);rwText(g,"A quiet one",RW_W/2,1100,120,{a:rwE(rwS(el,.3,.9))});rwText(g,"No plans this time. Rest is a plan too.",RW_W/2,1230,52,{w:600,c:"rgba(255,255,255,.8)",a:rwE(rwS(el,.7,1.3))});return}
+    rwText(g,`This ${per.unit} you made`,RW_W/2,560,62,{w:700,a:rwE(rwS(el,0,.5))});
+    const n=Math.round(d.plans.length*rwE(rwS(el,.4,1.8)));g.save();g.shadowColor=P[0];g.shadowBlur=60;rwText(g,String(n),RW_W/2,1020,460,{w:800});g.restore();
+    rwText(g,d.plans.length===1?"plan happen":"plans happen",RW_W/2,1150,80,{a:rwE(rwS(el,1.4,2))});
+    emos.forEach((e,i)=>{const k=rwB(rwS(el,1.8+i*.12,2.3+i*.12)),cols=Math.min(6,emos.length),row=Math.floor(i/6),col=i%6,rowN=Math.min(6,emos.length-row*6);rwEmoji(g,e,RW_W/2+(col-(rowN-1)/2)*140,1360+row*150,96*k,k,Math.sin(T*2+i)*.12)});
+    if(d.blocks)rwText(g,`+ ${d.blocks} personal thing${d.blocks===1?"":"s"} on your calendar`,RW_W/2,1760,40,{w:600,c:"rgba(255,255,255,.7)",a:rwE(rwS(el,2.6,3.2))})});
+  // 3 · photo wall
+  if(d.photos.length){const wall=pick(9),spots=[[-300,-380,-.12],[20,-430,.07],[300,-340,-.05],[-320,-20,.09],[0,30,-.04],[310,-10,.1],[-280,360,-.06],[30,400,.08],[310,340,-.09]];
+    add(6,(g,el,T,P)=>{rwText(g,"📸",RW_W/2,250,90);rwText(g,`${d.photos.length} memor${d.photos.length===1?"y":"ies"} saved`,RW_W/2,380,82,{a:rwE(rwS(el,0,.5))});
+      const z=1+el*.012;g.save();g.translate(RW_W/2,1130);g.scale(z,z);
+      wall.forEach((x,i)=>{const s=spots[wall.length===1?4:i]||spots[4],k=rwE(rwS(el,.3+i*.22,1+i*.22)),w=wall.length<=3?380:270,h=w*1.22;rwPhoto(g,IM(x.src),s[0]*(wall.length<=3?.0:1)+(wall.length<=3?(i-(wall.length-1)/2)*330:0),s[1]*(wall.length<=3?.2:1)+(1-k)*1200,w,h,{rot:s[2]+(1-k)*.6,a:k})});
+      g.restore()})}
+  // 4 · plan of the period
+  const tp=d.top&&d.top.p,tps=tp?shots.filter(x=>x.ev===tp.id):[];
+  if(tp){add(5.6,(g,el,T,P)=>{const hero=tps[0]&&IM(tps[0].src);
+      if(hero){g.save();g.globalAlpha=rwE(rwS(el,0,.8));const z=1.18-el*.03;drawCover(g,hero,RW_W/2-RW_W*z/2,RW_H/2-RW_H*z/2,RW_W*z,RW_H*z);g.restore();const sh=g.createLinearGradient(0,RW_H*.35,0,RW_H);sh.addColorStop(0,"rgba(0,0,0,0)");sh.addColorStop(1,"rgba(0,0,0,.88)");g.fillStyle=sh;g.fillRect(0,0,RW_W,RW_H)}
+      rwPill(g,`🏆 Plan of the ${per.unit}`,RW_W/2,hero?1300:640,40,P[0]+"DD");
+      rwEmoji(g,tp.emoji||"📍",hero?880:RW_W/2,hero?260:900,hero?150:300,rwB(rwS(el,.3,1)),Math.sin(T*1.5)*.15);
+      rwText(g,tp.title||"",RW_W/2,hero?1450:1180,96,{max:940,a:rwE(rwS(el,.5,1.1))});
+      const bits=[d.top.days.length>1?`${d.top.days.length} days`:fDate(d.top.days[0],{weekday:"short",day:"numeric",month:"short"}),d.top.n?`${d.top.n} photos`:"",goingOf(tp.id).length>1?`${goingOf(tp.id).length} of you`:""].filter(Boolean).join("  ·  ");
+      rwText(g,bits,RW_W/2,hero?1700:1400,46,{w:600,c:"rgba(255,255,255,.85)",a:rwE(rwS(el,1,1.6))})})}
+  // 5 · places, drawn as a constellation
+  const pts=d.places.filter(x=>x.lat!=null);
+  if(d.places.length){add(6.4,(g,el,T,P)=>{rwText(g,"📍",RW_W/2,250,90);rwText(g,`${d.places.length} place${d.places.length===1?"":"s"}`,RW_W/2,390,110,{a:rwE(rwS(el,0,.5))});
+      const box={x:110,y:560,w:860,h:900};let proj=[];
+      if(pts.length){const xs=pts.map(p=>+p.lng),ys=pts.map(p=>-p.lat),mnx=Math.min(...xs),mxx=Math.max(...xs),mny=Math.min(...ys),mxy=Math.max(...ys),dx=Math.max(mxx-mnx,1e-4),dy=Math.max(mxy-mny,1e-4),sc=Math.min(box.w/dx,box.h/dy);
+        proj=pts.map((p,i)=>pts.length===1?{x:RW_W/2,y:box.y+box.h/2,p}:{x:box.x+box.w/2+((+p.lng)-(mnx+mxx)/2)*sc,y:box.y+box.h/2+((-p.lat)-(mny+mxy)/2)*sc,p})}
+      const prog=rwS(el,.6,4.2)*Math.max(1,proj.length-1),labs=[];
+      g.save();g.strokeStyle="rgba(255,255,255,.75)";g.lineWidth=5;g.setLineDash([2,14]);g.lineCap="round";g.beginPath();
+      for(let i=1;i<proj.length;i++){const f=Math.max(0,Math.min(1,prog-(i-1)));if(f<=0)break;const a=proj[i-1],b=proj[i];g.moveTo(a.x,a.y);g.lineTo(a.x+(b.x-a.x)*f,a.y+(b.y-a.y)*f)}g.stroke();g.restore();
+      proj.forEach((q,i)=>{const k=rwB(rwS(el,.4+i*(3.6/Math.max(1,proj.length)),.9+i*(3.6/Math.max(1,proj.length))));if(k<=0)return;
+        const gl=g.createRadialGradient(q.x,q.y,0,q.x,q.y,70*k);gl.addColorStop(0,P[0]+"CC");gl.addColorStop(1,P[0]+"00");g.fillStyle=gl;g.beginPath();g.arc(q.x,q.y,70*k,0,7);g.fill();
+        rwSparkle(g,q.x,q.y,(26+6*Math.sin(T*3+i))*k,1);
+        if(i<10){g.save();g.globalAlpha=Math.min(1,k);g.font=RW_FONT(32,700);g.fillStyle="#fff";const rt=q.x>RW_W*.62;g.textAlign=rt?"right":"left";g.textBaseline="middle";const lab=(q.p.name||"").slice(0,26),lw=g.measureText(lab).width,lx=q.x+(rt?-44-lw:44);
+          let ly=q.y;for(let t=0;t<8&&labs.some(r=>lx<r.x+r.w&&lx+lw>r.x&&Math.abs(ly-r.y)<40);t++)ly+=t%2?-44*(t+1):44*(t+1);labs.push({x:lx,w:lw,y:ly});
+          if(ly!==q.y){g.strokeStyle="rgba(255,255,255,.35)";g.lineWidth=2;g.beginPath();g.moveTo(q.x+(rt?-20:20),q.y);g.lineTo(q.x+(rt?-40:40),ly);g.stroke()}
+          g.shadowColor="rgba(0,0,0,.8)";g.shadowBlur=10;g.fillText(lab,q.x+(rt?-44:44),ly);g.restore()}});
+      if(!pts.length)d.places.slice(0,7).forEach((p,i)=>rwText(g,p.name||"",RW_W/2,700+i*110,58,{a:rwE(rwS(el,.4+i*.25,1+i*.25))}));
+      if(d.km>=1)rwPill(g,`🛣️ about ${d.km.toLocaleString()} km on the road`,RW_W/2,1640,46,"rgba(0,0,0,.35)")})}
+  // 6 · your people
+  if(d.people.length){add(5.2,(g,el,T,P)=>{rwText(g,"Your ride or dies",RW_W/2,460,90,{a:rwE(rwS(el,0,.5))});
+      const lay=d.people.length===1?[[RW_W/2,960,230]]:d.people.length===2?[[330,960,200],[750,960,200]]:[[RW_W/2,800,190],[260,1300,150],[820,1300,150]];
+      d.people.forEach(([u,n],i)=>{const[x,y,R]=lay[i],k=rwB(rwS(el,.4+i*.35,1.1+i*.35));if(k<=0)return;const bob=Math.sin(T*2+i)*10;
+        g.save();g.translate(x,y+bob);g.scale(k,k);rwAvatar(g,u,0,0,R,RW.img.get("av:"+u));g.restore();
+        if(i===0)rwEmoji(g,"👑",x,y-R-40+bob,90,Math.min(1,k),-.15);
+        rwText(g,nick(u),x,y+R+80,i===0?64:52,{a:Math.min(1,k),max:i===0?700:420});rwText(g,`${n} plan${n===1?"":"s"} together`,x,y+R+140,i===0?40:34,{w:600,c:"rgba(255,255,255,.75)",a:Math.min(1,k)})});
+      for(let i=0;i<14;i++){const ang=i/14*7+T*.4;rwSparkle(g,RW_W/2+Math.cos(ang)*460,1000+Math.sin(ang*1.3)*520,18,.5*rwS(el,1,1.6))}})}
+  // 7 · best day
+  if(d.bestDay&&d.bestDay[1]>=2){const bd=d.bestDay[0],bps=shots.filter(x=>x.day===bd).slice(0,8);
+    add(5.4,(g,el,T,P)=>{rwText(g,"Your best day",RW_W/2,380,64,{w:700,c:"rgba(255,255,255,.85)",a:rwE(rwS(el,0,.5))});
+      rwText(g,fDate(bd,{weekday:"long"}),RW_W/2,540,120,{fit:true,max:960,a:rwE(rwS(el,.2,.8))});rwText(g,fDate(bd,{day:"numeric",month:"long"}),RW_W/2,640,60,{w:600,a:rwE(rwS(el,.4,1))});
+      // a film strip sliding across
+      const fw=420,fh=560,gap=40,tot=bps.length*(fw+gap),off=RW_W/2-fw/2-((el/5.4)*(Math.max(0,tot-fw-gap)));
+      g.save();g.fillStyle="#111";g.fillRect(0,820,RW_W,fh+120);g.fillStyle="#fff";for(let x=((off%60)+60)%60-60;x<RW_W;x+=60){g.globalAlpha=.85;rrect(g,x+18,836,24,26,5);g.fill();rrect(g,x+18,820+fh+78,24,26,5);g.fill()}g.restore();
+      bps.forEach((x,i)=>rwPhoto(g,IM(x.src),off+i*(fw+gap)+fw/2,820+60+fh/2,fw,fh,{frame:false,r:8,a:rwE(rwS(el,.3+i*.1,.8+i*.1))}));
+      rwPill(g,`📸 ${d.bestDay[1]} photos that day`,RW_W/2,1640,44,P[0]+"DD")})}
+  // 8 · mood
+  if(d.topMood){const[e,n]=d.topMood;add(4.6,(g,el,T,P)=>{for(let i=0;i<26;i++){const x=(Math.sin(i*12.9)*.5+.5)*RW_W,y=((Math.sin(i*7.7)*.5+.5)*RW_H+el*(180+i%5*60))%(RW_H+200)-100;rwEmoji(g,e,x,y,50+i%4*24,.35,Math.sin(T+i))}
+      rwText(g,"You mostly felt",RW_W/2,620,70,{w:700,a:rwE(rwS(el,0,.5))});rwEmoji(g,e,RW_W/2,960,340,rwB(rwS(el,.3,1)),Math.sin(T*2)*.1);
+      rwText(g,`${n} day${n===1?"":"s"} out of ${d.journal} in your journal`,RW_W/2,1320,50,{w:600,c:"rgba(255,255,255,.85)",a:rwE(rwS(el,1,1.6))})})}
+  // 9 · the summary card
+  add(6.5,(g,el,T,P)=>rwCard(g,d,el,T,P));
+  return S}
+function rwCard(g,d,el,T,P){const per=d.per,k=rwB(rwS(el,0,.9)),me=mem(ME);
+  g.save();g.translate(RW_W/2,RW_H/2+(1-k)*300);g.globalAlpha=Math.min(1,k);
+  const w=900,h=1500;g.shadowColor="rgba(0,0,0,.5)";g.shadowBlur=60;g.fillStyle="rgba(14,12,28,.78)";rrect(g,-w/2,-h/2,w,h,56);g.fill();g.shadowColor="transparent";
+  g.strokeStyle="rgba(255,255,255,.18)";g.lineWidth=3;rrect(g,-w/2,-h/2,w,h,56);g.stroke();
+  const hg=g.createLinearGradient(-w/2,0,w/2,0);hg.addColorStop(0,P[0]);hg.addColorStop(1,P[1]);g.fillStyle=hg;rrect(g,-w/2,-h/2,w,300,56);g.fill();g.fillRect(-w/2,-h/2+240,w,60);
+  rwText(g,"MY REWIND",0,-h/2+95,38,{w:800,c:"rgba(255,255,255,.85)"});rwText(g,per.big,0,-h/2+215,112,{fit:true,max:800});
+  const shots=d.photos.slice(0,3);shots.forEach((x,i)=>rwPhoto(g,RW.img.get(x.src),(i-(shots.length-1)/2)*250,-h/2+460,190,230,{rot:(i-1)*.08}));
+  const stats=[[d.plans.length,d.plans.length===1?"plan":"plans","🎉"],[d.photos.length,d.photos.length===1?"memory":"memories","📸"],[d.places.length,d.places.length===1?"place":"places","📍"],d.km>=1?[d.km,"km travelled","🛣️"]:[d.people.length,d.people.length===1?"friend":"friends","🫂"]];
+  const y0=shots.length?-h/2+720:-h/2+420;
+  stats.forEach(([n,l,e],i)=>{const cx=(i%2?1:-1)*215,cy=y0+Math.floor(i/2)*230,c=rwE(rwS(el,.6+i*.15,1.4+i*.15));g.fillStyle="rgba(255,255,255,.07)";rrect(g,cx-195,cy-90,390,200,30);g.fill();
+    rwEmoji(g,e,cx-130,cy-25,56);rwText(g,Math.round(n*c).toLocaleString(),cx+40,cy+20,90,{al:"center"});rwText(g,l,cx,cy+80,34,{w:600,c:"rgba(255,255,255,.75)"})});
+  const yb=y0+480;if(d.people[0]){rwAvatar(g,d.people[0][0],-w/2+120,yb,46,RW.img.get("av:"+d.people[0][0]));rwText(g,`Most time with ${nick(d.people[0][0])}`,-w/2+190,yb+14,40,{al:"left",max:620})}
+  if(d.top)rwText(g,`🏆 ${(d.top.p.emoji||"")} ${d.top.p.title}`.slice(0,40),-w/2+70,yb+120,38,{al:"left",w:700,max:780});
+  rwText(g,`${me?.emoji||""} ${me?.nick||""}`.trim()+"  ·  Yalla Guys",0,h/2-42,34,{w:700,c:"rgba(255,255,255,.6)"});
+  g.restore();
+  for(let i=0;i<8;i++)rwSparkle(g,RW_W/2+Math.cos(i*.8+T*.6)*520,RW_H/2+Math.sin(i*1.1+T*.5)*780,22,.6*rwS(el,.8,1.4))}
+/* the player */
+const RW={seed:0,img:new Map(),ov:null,slides:[],i:0,el:0,T:0,raf:0,paused:false,rec:null,audio:null,song:null,data:null};
+function rwBars(g){const n=RW.slides.length,gap=10,w=(RW_W-80-gap*(n-1))/n;for(let i=0;i<n;i++){const f=i<RW.i?1:i>RW.i?0:Math.min(1,RW.el/RW.slides[i].dur);g.fillStyle="rgba(255,255,255,.3)";rrect(g,40+i*(w+gap),46,w,9,5);g.fill();if(f>0){g.fillStyle="#fff";rrect(g,40+i*(w+gap),46,w*f,9,5);g.fill()}}}
+function rwFrame(g){const s=RW.slides[RW.i];s.draw(g,RW.el,RW.T);rwBars(g)}
+async function rwStart(data,song){RW.data=data;RW.song=song;RW.seed=Math.floor(Math.random()*RW_PAL.length);
+  const srcs=new Set();data.photos.forEach(x=>srcs.add(x.src));
+  await Promise.all([...srcs].map(s=>loadI(s).then(i=>RW.img.set(s,i)).catch(()=>{})));
+  await Promise.all([ME,...data.people.map(p=>p[0])].map(u=>{const ph=mem(u)?.photo;return ph?loadI(ph).then(i=>RW.img.set("av:"+u,i)).catch(()=>{}):null}));
+  try{await document.fonts?.load(RW_FONT(100,800))}catch{}
+  RW.slides=rwSlides(data);RW.i=0;RW.el=0;RW.T=0;RW.paused=false;
+  const ov=document.createElement("div");ov.className="rw-ov";ov.innerHTML=`<canvas width="${RW_W}" height="${RW_H}"></canvas><button class="rw-x" aria-label="Close">✕</button>
+    <div class="rw-acts" hidden><button data-rw="video">⬇ Save video</button><button data-rw="card">🖼️ Save card</button><button data-rw="again" aria-label="Watch again">↺</button></div><div class="rw-rec" hidden></div>`;
+  document.body.appendChild(ov);RW.ov=ov;const cv=ov.querySelector("canvas"),g=cv.getContext("2d");
+  ov.querySelector(".rw-x").onclick=rwClose;
+  ov.querySelector(".rw-acts").onclick=e=>{const b=e.target.closest("[data-rw]");if(!b)return;e.stopPropagation();if(b.dataset.rw==="video")rwRecord();else if(b.dataset.rw==="card")rwSaveCard();else{RW.i=0;RW.el=0;rwMusic(true);rwActs()}};
+  let down=0,held=null;
+  cv.addEventListener("pointerdown",()=>{if(RW.rec)return;down=Date.now();held=setTimeout(()=>{RW.paused=true;RW.audio?.pause()},220)});
+  cv.addEventListener("pointerup",e=>{if(RW.rec)return;clearTimeout(held);if(RW.paused){RW.paused=false;RW.audio?.play().catch(()=>{});return}
+    const r=cv.getBoundingClientRect(),left=e.clientX-r.left<r.width/3;if(left){if(RW.el<1&&RW.i>0)RW.i--;RW.el=0}else{if(RW.i<RW.slides.length-1){RW.i++;RW.el=0}else RW.el=RW.slides[RW.i].dur}try{haptic()}catch{}rwActs()});
+  rwMusic(true);let last=performance.now();
+  const loop=now=>{RW.raf=requestAnimationFrame(loop);const dt=Math.min(.1,(now-last)/1000);last=now;if(!RW.paused){RW.T+=dt;RW.el+=dt;const s=RW.slides[RW.i];
+      if(RW.el>=s.dur){if(RW.i<RW.slides.length-1){RW.i++;RW.el=0}else RW.el=s.dur;if(RW.rec&&RW.i===RW.slides.length-1&&RW.el>=s.dur)rwRecDone();rwActs()}}
+    rwFrame(g);if(RW.rec){const tot=RW.slides.reduce((a,s)=>a+s.dur,0),done=RW.slides.slice(0,RW.i).reduce((a,s)=>a+s.dur,0)+RW.el;RW.ov.querySelector(".rw-rec").textContent=`● Recording ${fDur(done)} / ${fDur(tot)} · keep the screen on`}};
+  RW.raf=requestAnimationFrame(loop);rwActs()}
+function rwActs(){const a=RW.ov?.querySelector(".rw-acts");if(a)a.hidden=!!RW.rec||RW.i<RW.slides.length-1}
+function rwMusic(on){try{RW.audio?.pause()}catch{}RW.audio=null;if(!on||!RW.song?.prev)return;try{SONG.stop()}catch{}try{TLM.stop()}catch{}
+  const a=new Audio(RW.song.prev);a.loop=true;a.volume=.8;RW.audio=a;a.play().catch(()=>{})}
+function rwClose(){cancelAnimationFrame(RW.raf);try{RW.rec?.r.stop()}catch{}RW.rec=null;rwMusic(false);RW.ov?.remove();RW.ov=null;RW.img.clear()}
+async function rwShare(blob,name){const f=new File([blob],name,{type:blob.type});
+  try{if(navigator.canShare?.({files:[f]})){await navigator.share({files:[f],title:"My rewind"});return}}catch(e){if(e?.name==="AbortError")return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);toast("⬇ Saved to your downloads")}
+function rwSaveCard(){const c=document.createElement("canvas");c.width=RW_W;c.height=RW_H;const g=c.getContext("2d");const s=RW.slides[RW.slides.length-1];s.draw(g,99,RW.T);
+  c.toBlob(b=>b&&rwShare(b,`rewind-${RW.data.per.k}.png`),"image/png")}
+async function rwRecord(){const cv=RW.ov?.querySelector("canvas");if(!cv||RW.rec)return;
+  const mime=pickMime(["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"]);
+  if(!mime||!cv.captureStream)return toast("This phone can't make videos. Save the card instead, or screen-record it.");
+  const stream=cv.captureStream(30);let src=null,note="";
+  if(RW.song?.prev){try{const ac=ensureAC(),buf=await(await fetch(RW.song.prev)).arrayBuffer(),ab=await ac.decodeAudioData(buf),dest=ac.createMediaStreamDestination();
+      src=ac.createBufferSource();src.buffer=ab;src.loop=true;const gn=ac.createGain();gn.gain.value=.85;src.connect(gn);gn.connect(dest);gn.connect(ac.destination);dest.stream.getAudioTracks().forEach(t=>stream.addTrack(t))}catch(e){src=null;note=" (the song couldn't be added, so add it in Instagram)"}}
+  rwMusic(false);const parts=[],r=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6e6,audioBitsPerSecond:128000});r.ondataavailable=e=>e.data.size&&parts.push(e.data);
+  RW.rec={r,parts,src,mime,note};RW.i=0;RW.el=0;RW.paused=false;const rc=RW.ov.querySelector(".rw-rec");rc.hidden=false;rwActs();
+  r.start(500);try{src?.start()}catch{}}
+function rwRecDone(){const R=RW.rec;if(!R||R.stopping)return;R.stopping=true;setTimeout(()=>{R.r.onstop=()=>{try{R.src?.stop()}catch{}const blob=new Blob(R.parts,{type:R.mime.split(";")[0]}),ext=R.mime.includes("mp4")?"mp4":"webm";
+    RW.rec=null;if(RW.ov){RW.ov.querySelector(".rw-rec").hidden=true;rwActs()}rwShare(blob,`rewind-${RW.data.per.k}.${ext}`);toast("🎬 Your rewind video is ready"+R.note)};R.r.stop()},700)}
+SHEETS.rewind={live:true,
+  init(){return{kind:"month",k:null,song:undefined,busy:false,res:null}},
+  render(s){const st=s.state,pers=rwPeriods(st.kind),per=pers.find(x=>x.k===st.k)||pers[st.kind==="month"&&new Date().getDate()<8?1:0];st.k=per.k;const d=rwData(per);
+    const me=mem(ME),cands=[...d.songs.map(x=>({t:x.t,art:x.art,prev:x.prev,from:"🎵 Your song for "+fDate(x.date,{day:"numeric",month:"short"})})),...(me?.songPreview?[{t:me.song||"Your profile song",art:me.songArt||"",prev:me.songPreview,from:"👤 Your profile song"}]:[])].filter((x,i,a)=>a.findIndex(y=>y.prev===x.prev)===i).slice(0,6);
+    if(st.song===undefined)st.song=cands[0]||null;const songs=st.song&&!cands.some(c=>c.prev===st.song.prev)?[st.song,...cands]:cands;st._songs=songs;st._per=per;
+    return{title:"⏪ Rewind",body:`<div class="form">
+      <div class="rw-hero"><span class="rw-k">⏪ REWIND</span><b>${esc(per.big)}</b><span>${esc(per.sub)}</span>
+        <div class="rw-stats"><span><b>${d.plans.length}</b>plans</span><span><b>${d.photos.length}</b>memories</span><span><b>${d.places.length}</b>places</span><span><b>${d.people.length}</b>friends</span></div></div>
+      <div class="seg">${[["week","Week"],["month","Month"],["year","Year"]].map(([k,l])=>`<button data-act="rwKind" data-k="${k}" aria-pressed="${st.kind===k}">${l}</button>`).join("")}</div>
+      <div class="chips it-days">${pers.map(x=>`<button class="chip" data-act="rwPer" data-k="${esc(x.k)}" aria-pressed="${x.k===per.k}">${esc(x.label)}</button>`).join("")}</div>
+      <div class="f">🎶 Music<div class="rw-songs">${songs.map((x,i)=>`<button class="rw-song" data-act="rwSong" data-i="${i}" aria-pressed="${st.song?.prev===x.prev}"><span class="sart">${x.art?`<img src="${esc(x.art)}" alt="">`:"🎵"}</span><span class="grow" style="min-width:0"><b>${esc(x.t)}</b><span class="meta">${esc(x.from||"Picked by you")}</span></span></button>`).join("")}
+        <button class="rw-song" data-act="rwSong" data-i="-1" aria-pressed="${!st.song}"><span class="sart">🔇</span><span class="grow"><b>No music</b></span></button></div>
+        <span class="row" style="gap:8px;flex-wrap:nowrap;margin-top:6px"><input class="inp" id="rwQ" maxlength="300" placeholder="Spotify link, or Song – Artist" style="flex:1;min-width:0"><button class="btn" data-act="rwFind">${st.busy?"…":"Find"}</button></span></div>
+      <div class="hint" style="margin:0">Plays like a story: tap right for next, left to go back, hold to pause. At the end, save it as a video for Instagram, or save the summary card.</div></div>`,
+      foot:`<button class="btn pri block" data-act="rwPlay" style="min-height:56px;font-size:17px">▶ Play my rewind</button>`}},
+};
 /* ---------- daily journal: up to 3 photos and a note a day. Stored in your private space, so nobody else can see it. ---------- */
 const J_MOODS=["😄","🥰","😌","😐","😴","😢","😤","🤯"];
 const jOf=ds=>D.mine.find(m=>m.kind==="journal"&&m.date===ds);
@@ -4331,6 +4558,13 @@ const ACT={
     requestAnimationFrame(()=>{const b=$(".sheet-b",topS()?.el);if(b)b.scrollTop=b.scrollHeight})},
   async cMsgDel(d){const s=topS();if(MODE==="demo")return Store.del("cmsgs",d.id);try{await FS.doc(`councils/${s.args.id}/msgs/${d.id}`).delete()}catch(e){Store.err(e)}},
   journal(){openSheet("journal")},
+  rewind(){openSheet("rewind")},
+  rwKind(d){const s=topS();s.state.kind=d.k;s.state.k=null;paintSheet(s);try{haptic()}catch{}},
+  rwPer(d){const s=topS();s.state.k=d.k;paintSheet(s);try{haptic()}catch{}},
+  rwSong(d){const s=topS(),i=+d.i;s.state.song=i<0?null:(s.state._songs||[])[i]||null;paintSheet(s);try{haptic()}catch{}},
+  async rwFind(){const s=topS(),q=val("rwQ");if(!q)return toast("Paste a Spotify link or type Song – Artist");s.state.busy=true;paintSheet(s);let r=null;try{r=await resolveSong(q)}catch{}s.state.busy=false;
+    if(!r?.songPreview){paintSheet(s);return toast("Couldn't find a preview for that one. Try Song – Artist")}s.state.song={t:r.songTitle||q,art:r.songArt||"",prev:r.songPreview,from:"Picked by you"};const el=$("#rwQ",s.el);if(el)el.value="";paintSheet(s);toast("🎶 Song set")},
+  async rwPlay(){const s=topS(),per=s.state._per;if(!per)return;toast("⏪ Rewinding…");try{await rwStart(rwData(per),s.state.song)}catch(e){console.error(e);toast("Couldn't make the rewind. Try again.")}},
   daySong(d){openSheet("daySong",{d:d.d})},
   tlMute(){const m=!TLM.muted();ls.set("yg-tl-mute",m);if(m)TLM.out();else{const s=stack.find(x=>x.kind==="timeline");if(s?.slots&&s.state.idx>=0)TLM.cue(s.slots[s.state.idx].k)}TLM.paint();toast(m?"🔇 Day songs off":"🔊 Day songs on")},
   tlSongToggle(d){const sg=D.mine.find(m=>m.id===d.id);if(!sg)return;if(TLM.id===sg.id&&TLM.a){if(TLM.a.paused){TLM.a.play().catch(()=>{});TLM.ramp(TLM.a,.6)}else TLM.a.pause();TLM.paint();return}TLM.play(sg)},
